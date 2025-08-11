@@ -74,8 +74,27 @@
       return { x: nx / len, y: ny / len, z: nz / len };
     }
 
+    // Starry background for STL canvas
+    const stars = Array.from({ length: 140 }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.5 + 0.5,
+      t: Math.random() * Math.PI * 2,
+    }));
+
     function draw() {
-      sctx.clearRect(0, 0, W, H);
+      // Space background
+      sctx.fillStyle = '#0b0e13';
+      sctx.fillRect(0, 0, W, H);
+      for (const s of stars) {
+        const a = 0.6 + 0.4 * Math.sin(s.t);
+        s.t += 0.02;
+        sctx.fillStyle = `rgba(255,255,255,${a})`;
+        sctx.beginPath();
+        sctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        sctx.fill();
+      }
+
       if (autoRotate) angleY += 0.01;
       const light = { x: 0.2, y: -0.6, z: 1 };
       const polys = [];
@@ -85,8 +104,8 @@
         const pc = project(t[2]);
         const n = normal(t[0], t[1], t[2]);
         const brightness = Math.max(0, n.x * light.x + n.y * light.y + n.z * light.z);
-        const hue = 200 + brightness * 100;
-        polys.push({ z: (pa.z + pb.z + pc.z) / 3, p: [pa, pb, pc], color: `hsl(${hue}, 70%, ${30 + brightness * 40}%)` });
+        const lightness = 30 + brightness * 70; // white shading
+        polys.push({ z: (pa.z + pb.z + pc.z) / 3, p: [pa, pb, pc], color: `hsl(0, 0%, ${lightness}%)` });
       }
       polys.sort((a, b) => a.z - b.z);
       for (const poly of polys) {
