@@ -267,6 +267,7 @@
     for (let i = 0; i < 9; i++) {
       const btn = document.createElement('button');
       btn.textContent = board[i];
+      if (board[i]) btn.classList.add(board[i]);
       btn.addEventListener('click', () => place(i));
       boardEl.appendChild(btn);
     }
@@ -393,6 +394,113 @@
       setTimeout(() => chip.remove(), 1500);
     } catch {}
   });
+
+  // Memory Match
+  const memoryGrid = document.getElementById('memoryGrid');
+  const memoryStatus = document.getElementById('memoryStatus');
+  const btnMemoryReset = document.getElementById('btnMemoryReset');
+  let memoryTiles = [];
+  let memoryRevealed = [];
+  function initMemory() {
+    const emojis = ['🍎','🍊','🍋','🍉','🍇','🍓','🍒','🍑'];
+    const deck = [...emojis, ...emojis];
+    deck.sort(() => Math.random() - 0.5);
+    memoryTiles = deck.map((e, i) => ({ id: i, emoji: e, matched: false, revealed: false }));
+    renderMemory();
+    memoryStatus.textContent = 'Find all pairs';
+  }
+  function renderMemory() {
+    if (!memoryGrid) return;
+    memoryGrid.innerHTML = '';
+    for (const t of memoryTiles) {
+      const d = document.createElement('div');
+      d.className = 'card-tile';
+      if (t.revealed) d.classList.add('revealed');
+      if (t.matched) d.classList.add('matched');
+      d.textContent = t.revealed || t.matched ? t.emoji : '❔';
+      d.addEventListener('click', () => flipTile(t.id));
+      memoryGrid.appendChild(d);
+    }
+  }
+  function flipTile(id) {
+    const t = memoryTiles.find(x => x.id === id);
+    if (!t || t.matched || t.revealed) return;
+    t.revealed = true;
+    memoryRevealed.push(t);
+    renderMemory();
+    if (memoryRevealed.length === 2) {
+      const [a, b] = memoryRevealed;
+      if (a.emoji === b.emoji) {
+        a.matched = b.matched = true;
+        memoryStatus.textContent = 'Good match!';
+      } else {
+        memoryStatus.textContent = 'Try again';
+        setTimeout(() => { a.revealed = b.revealed = false; renderMemory(); }, 700);
+      }
+      memoryRevealed = [];
+      if (memoryTiles.every(x => x.matched)) memoryStatus.textContent = 'All pairs found!';
+    }
+  }
+  btnMemoryReset?.addEventListener('click', initMemory);
+  if (memoryGrid) initMemory();
+
+  // Snake
+  const snakeCanvas = document.getElementById('snakeCanvas');
+  if (snakeCanvas) {
+    const sctx2 = snakeCanvas.getContext('2d');
+    const cols = 24, rows = 16; // grid
+    const cell = Math.floor(Math.min(snakeCanvas.width / cols, snakeCanvas.height / rows));
+    let snake = [{ x: 12, y: 8 }];
+    let dir = { x: 1, y: 0 };
+    let food = { x: Math.floor(Math.random()*cols), y: Math.floor(Math.random()*rows) };
+    let alive = true;
+    function drawSnake() {
+      sctx2.clearRect(0,0,snakeCanvas.width,snakeCanvas.height);
+      // background grid glow
+      for (let y=0;y<rows;y++){
+        for (let x=0;x<cols;x++){
+          sctx2.fillStyle = 'rgba(255,255,255,0.03)';
+          sctx2.fillRect(x*cell, y*cell, cell-1, cell-1);
+        }
+      }
+      // food
+      const grad = sctx2.createRadialGradient(food.x*cell+cell/2, food.y*cell+cell/2, 2, food.x*cell+cell/2, food.y*cell+cell/2, cell);
+      grad.addColorStop(0,'#ffd93d'); grad.addColorStop(1,'rgba(255,217,61,0)');
+      sctx2.fillStyle = grad; sctx2.beginPath(); sctx2.arc(food.x*cell+cell/2, food.y*cell+cell/2, cell/2, 0, Math.PI*2); sctx2.fill();
+      // snake
+      for (let i=0;i<snake.length;i++){
+        const seg = snake[i];
+        sctx2.fillStyle = i===0 ? '#6bcbef' : 'rgba(107,203,239,0.8)';
+        sctx2.fillRect(seg.x*cell, seg.y*cell, cell-1, cell-1);
+      }
+    }
+    function step() {
+      if (!alive) return;
+      const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+      if (head.x<0||head.y<0||head.x>=cols||head.y>=rows||snake.some(s=>s.x===head.x&&s.y===head.y)) { alive=false; return; }
+      snake.unshift(head);
+      if (head.x===food.x && head.y===food.y) {
+        food = { x: Math.floor(Math.random()*cols), y: Math.floor(Math.random()*rows) };
+      } else {
+        snake.pop();
+      }
+      drawSnake();
+    }
+    setInterval(step, 140);
+    document.querySelectorAll('.dir').forEach(b=>{
+      b.addEventListener('click',()=>{
+        const dx = parseInt(b.getAttribute('data-dx'),10);
+        const dy = parseInt(b.getAttribute('data-dy'),10);
+        // prevent reversing directly
+        if (snake.length>1 && snake[1].x === snake[0].x+dx && snake[1].y === snake[0].y+dy) return;
+        dir = { x: dx, y: dy };
+      });
+    });
+    document.getElementById('btnSnakeReset')?.addEventListener('click',()=>{
+      snake=[{x:12,y:8}]; dir={x:1,y:0}; alive=true; drawSnake();
+    });
+    drawSnake();
+  }
 
   // Visuals screen
   const visualsCanvas = document.getElementById('visualsCanvas');

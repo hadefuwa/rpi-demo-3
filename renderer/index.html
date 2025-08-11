@@ -33,6 +33,14 @@
               <span class="icon">❌⭕</span>
               <span class="label">Tic‑Tac‑Toe</span>
             </button>
+            <button class="card fancy" data-target="screen-memory">
+              <span class="icon">🧩</span>
+              <span class="label">Memory Match</span>
+            </button>
+            <button class="card fancy" data-target="screen-snake">
+              <span class="icon">🐍</span>
+              <span class="label">Snake</span>
+            </button>
             <button class="card fancy" data-target="screen-scroll">
               <span class="icon">↕️</span>
               <span class="label">Scroll Test</span>
@@ -101,6 +109,35 @@
           <div class="toolbar center">
             <div id="status" class="chip">Your move</div>
             <button id="btnReset" class="chip">Reset</button>
+          </div>
+        </section>
+
+        <section id="screen-memory" class="screen">
+          <div class="panel">
+            <h2>Memory Match</h2>
+            <div id="memoryGrid" class="memory-grid"></div>
+            <div class="toolbar center">
+              <div id="memoryStatus" class="chip">Find all pairs</div>
+              <button id="btnMemoryReset" class="chip">Reset</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="screen-snake" class="screen">
+          <div class="panel">
+            <h2>Snake</h2>
+            <canvas id="snakeCanvas" width="480" height="320"></canvas>
+            <div class="toolbar center">
+              <button class="chip dir" data-dx="0" data-dy="-1">▲</button>
+            </div>
+            <div class="toolbar center">
+              <button class="chip dir" data-dx="-1" data-dy="0">◀</button>
+              <button class="chip dir" data-dx="1" data-dy="0">▶</button>
+            </div>
+            <div class="toolbar center">
+              <button class="chip dir" data-dx="0" data-dy="1">▼</button>
+              <button id="btnSnakeReset" class="chip">Reset</button>
+            </div>
           </div>
         </section>
 
