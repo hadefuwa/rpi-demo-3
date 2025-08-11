@@ -4,6 +4,13 @@ const fs = require('fs');
 const os = require('os');
 const { execSync } = require('child_process');
 
+// Runtime flags for better compatibility on Raspberry Pi / mixed environments
+// - Disable GPU to avoid GBM/dma_buf issues on some Pi configurations
+// - Prefer software GL (SwiftShader) as a safe fallback
+// - Hint Ozone/Chromium to use X11 when a DISPLAY is available
+app.disableHardwareAcceleration();
+app.commandLine.appendSwitch('use-gl', 'swiftshader');
+app.commandLine.appendSwitch('ozone-platform-hint', 'x11');
 // Enable Chromium touch events for better touchscreen behavior
 app.commandLine.appendSwitch('touch-events', 'enabled');
 
