@@ -64,9 +64,8 @@
 
   function getPos(e) {
     const rect = canvas.getBoundingClientRect();
-    const client = e.touches ? e.touches[0] : e;
-    const x = client.clientX - rect.left;
-    const y = client.clientY - rect.top;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
     return {
       x: Math.max(0, Math.min(rect.width, x)),
       y: Math.max(0, Math.min(rect.height, y))
@@ -101,15 +100,12 @@
 
   // Resize canvas to fill available space and match pixel ratio
   function resizeCanvasToDisplaySize() {
-    const dpr = window.devicePixelRatio || 1;
-    const displayWidth = canvas.clientWidth;
-    const displayHeight = canvas.clientHeight;
-    const neededWidth = Math.floor(displayWidth * dpr);
-    const neededHeight = Math.floor(displayHeight * dpr);
-    if (canvas.width !== neededWidth || canvas.height !== neededHeight) {
-      canvas.width = neededWidth;
-      canvas.height = neededHeight;
-      ctx.scale(dpr, dpr);
+    // Keep canvas pixel size equal to CSS size for simplest, reliable touch mapping
+    const displayWidth = Math.floor(canvas.clientWidth);
+    const displayHeight = Math.floor(canvas.clientHeight);
+    if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+      canvas.width = displayWidth;
+      canvas.height = displayHeight;
     }
   }
 
