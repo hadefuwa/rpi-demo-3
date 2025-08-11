@@ -98,27 +98,10 @@
     lastPos = pos;
   }
 
-  // Resize canvas to fill available space and match pixel ratio
+  // Fixed-size canvas (rolled back to stable behavior)
   function resizeCanvasToDisplaySize() {
-    // Keep canvas pixel size equal to CSS size for simplest, reliable touch mapping
-    const displayWidth = Math.floor(canvas.clientWidth);
-    const displayHeight = Math.floor(canvas.clientHeight);
-    if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
-      canvas.width = displayWidth;
-      canvas.height = displayHeight;
-    }
+    // No-op: leave width/height as defined in HTML
   }
-
-  const touchScreen = document.getElementById('screen-touch');
-  const resizeObserver = new ResizeObserver(() => resizeCanvasToDisplaySize());
-  resizeObserver.observe(touchScreen);
-  window.addEventListener('resize', resizeCanvasToDisplaySize);
-  // Also adjust when we switch to the touch screen
-  const showTouchIfActive = () => {
-    if (touchScreen.classList.contains('active')) {
-      resizeCanvasToDisplaySize();
-    }
-  };
 
   // Prefer Pointer Events for consistent mouse/touch/pen handling
   canvas.addEventListener('pointerdown', (e) => { e.preventDefault(); start(e); });
@@ -202,8 +185,7 @@
 
   resetBtn.addEventListener('click', resetGame);
   renderBoard();
-  // Initial size pass (in case touch screen is default visible)
-  showTouchIfActive();
+  // No dynamic resize needed
 
   // About
   const versionEl = document.getElementById('version');
