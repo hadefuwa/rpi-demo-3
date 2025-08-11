@@ -19,16 +19,38 @@
         <section id="screen-home" class="screen active">
           <div class="hero">
             <img src="../assets/Matrix.png" alt="Matrix Logo" class="logo" />
-            <h1>Welcome</h1>
+            <h1 class="headline">Welcome</h1>
             <p id="clock"></p>
           </div>
           <div class="grid">
-            <button class="card" data-target="screen-touch">Touch Demo</button>
-            <button class="card" data-target="screen-info">System Info</button>
-            <button class="card" data-target="screen-game">Tic‑Tac‑Toe</button>
-            <button class="card" data-target="screen-scroll">Scroll Test</button>
-            <button class="card" data-target="screen-visuals">Visuals</button>
-            <button class="card" data-target="screen-about">About</button>
+            <button class="card fancy" data-target="screen-touch">
+              <span class="icon">🎨</span>
+              <span class="label">Touch Demo</span>
+            </button>
+            <button class="card fancy" data-target="screen-info">
+              <span class="icon">🧠</span>
+              <span class="label">System Info</span>
+            </button>
+            <button class="card fancy" data-target="screen-game">
+              <span class="icon">❌⭕</span>
+              <span class="label">Tic‑Tac‑Toe</span>
+            </button>
+            <button class="card fancy" data-target="screen-scroll">
+              <span class="icon">↕️</span>
+              <span class="label">Scroll Test</span>
+            </button>
+            <button class="card fancy" data-target="screen-visuals">
+              <span class="icon">✨</span>
+              <span class="label">Visuals</span>
+            </button>
+            <button class="card fancy" data-target="screen-settings">
+              <span class="icon">⚙️</span>
+              <span class="label">Settings</span>
+            </button>
+            <button class="card fancy" data-target="screen-about">
+              <span class="icon">ℹ️</span>
+              <span class="label">About</span>
+            </button>
           </div>
         </section>
 
@@ -123,6 +145,9 @@
               <button class="chip visual-mode" data-mode="particles">Particles</button>
               <button class="chip visual-mode" data-mode="ripples">Ripples</button>
               <button class="chip visual-mode" data-mode="clock">Analog Clock</button>
+              <button class="chip visual-mode" data-mode="equalizer">Equalizer</button>
+              <button class="chip visual-mode" data-mode="starfield">Starfield</button>
+              <button class="chip visual-mode" data-mode="fireworks">Fireworks</button>
             </div>
             <canvas id="visualsCanvas" width="1024" height="420"></canvas>
             <div class="note">Tap/drag to interact. Particles follow touch, ripples spawn on taps.</div>
