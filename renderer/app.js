@@ -604,37 +604,10 @@
   }
 
   function showScreen(id, pushToStack = true) {
-    if (!id || id === currentScreenId) return;
-    if (pushToStack && currentScreenId) navStack.push(currentScreenId);
-    screens.forEach(s => s.classList.remove('active'));
-    const el = document.getElementById(id);
-    if (el) {
-      el.classList.add('active');
-      currentScreenId = id;
-      updateBackEnabled();
-      
-      // Debug: Log when 3D model screen is shown
-      if (id === 'screen-stl') {
-        console.log('3D Model screen activated!');
-        console.log('STL screen element:', el);
-        console.log('STL screen visible:', el.offsetWidth > 0 && el.offsetHeight > 0);
-        
-        // Check if buttons are visible after screen activation
-        setTimeout(() => {
-          const stlButtons = [
-            'btnStlUp', 'btnStlDown', 'btnStlLeft', 'btnStlRight',
-            'btnStlZoomIn', 'btnStlZoomOut', 'btnStlAuto', 'btnStlReset'
-          ];
-          
-          stlButtons.forEach(btnId => {
-            const btn = document.getElementById(btnId);
-            if (btn) {
-              console.log(`Button ${btnId} after activation:`, btn);
-              console.log(`Button ${btnId} visible after activation:`, btn.offsetWidth > 0 && btn.offsetHeight > 0);
-            }
-          });
-        }, 100);
-      }
+    // Delegate to dynamic ScreenLoader; map id like 'screen-info' -> 'info'
+    const name = id && id.startsWith('screen-') ? id.slice(7) : id;
+    if (window.screenLoader && name) {
+      window.screenLoader.loadScreen(name, pushToStack);
     }
   }
 
@@ -647,14 +620,22 @@
   btnBack.addEventListener('click', () => {
     if (navStack.length === 0) return;
     const prev = navStack.pop();
-    showScreen(prev, false);
+    if (window.screenLoader) {
+      window.screenLoader.loadScreen(prev, false);
+    } else {
+      showScreen(`screen-${prev}`, false);
+    }
+    updateBackEnabled();
   });
 
-  home.querySelectorAll('.card').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const target = btn.getAttribute('data-target');
+  // Event delegation for Home cards (works even when loaded later)
+  document.addEventListener('click', (e) => {
+    const card = e.target.closest('#screen-home .card');
+    if (!card) return;
+    const target = card.getAttribute('data-target'); // e.g. 'screen-touch'
+    if (target) {
       showScreen(target, true);
-    });
+    }
   });
 
   // Games Hub navigation

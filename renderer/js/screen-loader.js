@@ -250,3 +250,10 @@ class ScreenLoader {
 
 // Export for use in other modules
 window.ScreenLoader = ScreenLoader;
+
+// Auto-instantiate a global loader instance so pages are loaded dynamically
+document.addEventListener('DOMContentLoaded', () => {
+  if (!window.screenLoader) {
+    try { window.screenLoader = new ScreenLoader(); } catch (e) { console.error('Failed to init ScreenLoader', e); }
+  }
+});
