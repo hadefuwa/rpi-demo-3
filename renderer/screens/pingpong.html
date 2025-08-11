@@ -1,0 +1,27 @@
+<section id="screen-pingpong" class="screen">
+  <div class="panel">
+    <h2>Ping Pong</h2>
+    <div class="game-controls">
+      <button id="btnPingPongStart" class="chip primary">Start Game</button>
+      <button id="btnPingPongPause" class="chip">Pause</button>
+      <button id="btnPingPongReset" class="chip">Reset</button>
+    </div>
+    <div class="ping-pong-container">
+      <canvas id="pingPongCanvas"></canvas>
+      <div class="ping-pong-score">
+        <div class="player-score">
+          <span class="score-label">You</span>
+          <span class="score-value" id="playerScore">0</span>
+        </div>
+        <div class="ai-score">
+          <span class="score-label">AI</span>
+          <span class="score-value" id="aiScore">0</span>
+        </div>
+      </div>
+    </div>
+    <div class="game-info">
+      <span>First to 11 wins!</span>
+      <span>Use ↑↓ arrows or W/S keys to move</span>
+    </div>
+  </div>
+</section>

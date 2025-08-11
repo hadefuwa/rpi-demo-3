@@ -1,0 +1,8 @@
+/* Ping Pong layout */
+.ping-pong-container { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-lg); margin: var(--spacing-md) 0; }
+#pingPongCanvas { width: 100%; max-width: min(800px, 95vw); height: clamp(300px, 50vh, 500px); background: #111418; border-radius: var(--radius-md); border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 8px 24px var(--shadow); }
+.ping-pong-score { display: flex; justify-content: space-between; margin: var(--spacing-lg) 0; font-size: clamp(18px, 4vw, 24px); font-weight: bold; flex-wrap: wrap; gap: var(--spacing-sm); }
+.game-controls { display: flex; gap: var(--spacing-md); margin: var(--spacing-lg) 0; justify-content: center; flex-wrap: wrap; }
+.game-info { display: flex; justify-content: space-between; margin: var(--spacing-md) 0; font-size: var(--font-base); flex-wrap: wrap; gap: var(--spacing-sm); }
+
+

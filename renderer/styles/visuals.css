@@ -1,0 +1,8 @@
+/* Visuals modes and canvas */
+.visual-mode { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--fg); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s ease; }
+.visual-mode:hover { background: rgba(255,255,255,0.2); }
+.visual-mode.active { background: var(--brand); color: #000; }
+
+#visualsCanvas { width: 100%; height: clamp(250px, 45vh, 450px); border-radius: var(--radius-lg); background: radial-gradient(800px 400px at 50% 50%, rgba(255,255,255,0.06), rgba(0,0,0,0.2)); border: 6px solid rgba(255, 255, 255, 0.18); max-width: 100%; }
+
+

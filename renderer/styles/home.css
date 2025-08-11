@@ -1,0 +1,99 @@
+/* Home screen grid and cards */
+#screen-home .grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+}
+
+#screen-home .card.fancy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: clamp(120px, 20vh, 180px);
+  padding: var(--spacing-lg) var(--spacing-lg);
+  border-radius: var(--radius-xl);
+  border: 4px solid;
+  background: transparent;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.9), inset 0 2px 0 rgba(255, 255, 255, 1), inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+#screen-home .card.fancy .label {
+  font-size: var(--font-xl);
+  font-weight: 800;
+  text-align: center;
+  color: #000000;
+  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.8px;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+#screen-home .card.fancy:hover { transform: translateY(-12px) scale(1.05) rotateX(8deg) rotateY(3deg); box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 0 3px rgba(255, 255, 255, 1), inset 0 2px 0 rgba(255, 255, 255, 1); }
+#screen-home .card.fancy:hover .label { transform: scale(1.1); text-shadow: 0 4px 8px rgba(255, 255, 255, 1), 0 0 30px rgba(255, 255, 255, 0.8); }
+#screen-home .card.fancy:active { transform: translateY(-4px) scale(0.98) rotateX(3deg); transition: all 0.1s ease; filter: brightness(1.3) contrast(1.2); }
+
+#screen-home .card.fancy::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 23px;
+  padding: 3px;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 1), transparent);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+#screen-home .card.fancy:hover::before { opacity: 1; }
+
+#screen-home .card.fancy::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+  pointer-events: none;
+}
+#screen-home .card.fancy:hover::after { opacity: 1; }
+
+/* Responsive tweaks for home */
+@media (max-width: 480px) {
+  #screen-home .grid { grid-template-columns: 1fr; gap: var(--spacing-sm); padding: var(--spacing-sm); }
+  #screen-home .card.fancy { min-height: 120px; padding: var(--spacing-md); }
+  #screen-home .card.fancy .label { font-size: var(--font-lg); }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  #screen-home .grid { grid-template-columns: repeat(2, 1fr); gap: var(--spacing-md); padding: var(--spacing-md); }
+  #screen-home .card.fancy { min-height: 140px; }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  #screen-home .grid { grid-template-columns: repeat(2, 1fr); gap: var(--spacing-lg); padding: var(--spacing-lg); }
+  #screen-home .card.fancy { min-height: 160px; }
+}
+
+@media (min-width: 1025px) {
+  #screen-home .grid { grid-template-columns: repeat(2, 1fr); gap: var(--spacing-xl); padding: var(--spacing-xl); }
+  #screen-home .card.fancy { min-height: 180px; }
+}
+
+

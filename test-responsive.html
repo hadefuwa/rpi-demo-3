@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Test</title>
+    <link rel="stylesheet" href="renderer/styles.css">
+    <style>
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .test-card {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        .test-info {
+            background: #e0e0e0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .responsive-test {
+            background: var(--card);
+            color: var(--fg);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Responsive Design Test</h1>
+        
+        <div class="test-info">
+            <h2>Current Viewport Size</h2>
+            <p>Width: <span id="width"></span>px</p>
+            <p>Height: <span id="height"></span>px</p>
+            <p>Device Pixel Ratio: <span id="dpr"></span></p>
+        </div>
+        
+        <div class="responsive-test">
+            <h3>CSS Custom Properties Test</h3>
+            <p>This text uses responsive font sizing: <span class="text-responsive">Responsive text</span></p>
+            <p>Large text: <span class="text-large">Large text</span></p>
+            <p>Small text: <span class="text-small">Small text</span></p>
+        </div>
+        
+        <div class="test-grid">
+            <div class="test-card">
+                <h3>Test Card 1</h3>
+                <p>This card should be responsive and adapt to different screen sizes.</p>
+                <button class="chip">Test Button</button>
+            </div>
+            <div class="test-card">
+                <h3>Test Card 2</h3>
+                <p>Another responsive card to test the grid layout.</p>
+                <button class="chip primary">Primary Button</button>
+            </div>
+            <div class="test-card">
+                <h3>Test Card 3</h3>
+                <p>Third card to test responsive behavior.</p>
+                <button class="chip warning">Warning Button</button>
+            </div>
+        </div>
+        
+        <div class="test-info">
+            <h3>Responsive Utilities Test</h3>
+            <div class="container">
+                <p>Container with responsive padding</p>
+            </div>
+            <div class="grid-responsive">
+                <div class="responsive-test">Grid Item 1</div>
+                <div class="responsive-test">Grid Item 2</div>
+                <div class="responsive-test">Grid Item 3</div>
+            </div>
+            <div class="flex-responsive">
+                <button class="chip">Flex Item 1</button>
+                <button class="chip">Flex Item 2</button>
+                <button class="chip">Flex Item 3</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function updateViewportInfo() {
+            document.getElementById('width').textContent = window.innerWidth;
+            document.getElementById('height').textContent = window.innerHeight;
+            document.getElementById('dpr').textContent = window.devicePixelRatio || 1;
+        }
+        
+        window.addEventListener('load', updateViewportInfo);
+        window.addEventListener('resize', updateViewportInfo);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(updateViewportInfo, 100);
+        });
+    </script>
+</body>
+</html>

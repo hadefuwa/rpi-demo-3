@@ -1,0 +1,11 @@
+/* About page */
+#screen-about .panel { text-align: center; font-size: var(--font-lg); }
+#screen-about .logo { margin: var(--spacing-lg) auto; }
+#version { font-size: var(--font-base); color: var(--muted); margin-top: var(--spacing-md); }
+
+@media (max-width: 768px) {
+  #screen-about .panel { font-size: var(--font-base); }
+  #screen-about .logo { width: 100px; height: auto; }
+}
+
+

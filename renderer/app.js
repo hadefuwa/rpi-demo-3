@@ -8,6 +8,101 @@
   let currentScreenId = 'screen-home';
   const navStack = [];
 
+  // ===== RESPONSIVE CANVAS SIZING =====
+  function resizeCanvas(canvas, targetWidth, targetHeight) {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    
+    // Set display size
+    canvas.style.width = `${targetWidth}px`;
+    canvas.style.height = `${targetHeight}px`;
+    
+    // Set actual size in memory (scaled up for retina)
+    canvas.width = targetWidth * dpr;
+    canvas.height = targetHeight * dpr;
+    
+    // Scale the drawing context so everything draws at the correct size
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    
+    return { width: targetWidth, height: targetHeight };
+  }
+
+  function handleCanvasResize() {
+    // Paint canvas
+    const paintCanvas = document.getElementById('paint');
+    if (paintCanvas) {
+      const rect = paintCanvas.getBoundingClientRect();
+      const width = Math.min(rect.width, 1024);
+      const height = Math.min(rect.height, 400);
+      resizeCanvas(paintCanvas, width, height);
+    }
+
+    // Snake canvas
+    const snakeCanvas = document.getElementById('snakeCanvas');
+    if (snakeCanvas) {
+      const rect = snakeCanvas.getBoundingClientRect();
+      const width = Math.min(rect.width, 520);
+      const height = Math.min(rect.height, 400);
+      resizeCanvas(snakeCanvas, width, height);
+    }
+
+    // Ping pong canvas
+    const pingPongCanvas = document.getElementById('pingPongCanvas');
+    if (pingPongCanvas) {
+      const rect = pingPongCanvas.getBoundingClientRect();
+      const width = Math.min(rect.width, 800);
+      const height = Math.min(rect.height, 500);
+      resizeCanvas(pingPongCanvas, width, height);
+    }
+
+    // STL canvas
+    const stlCanvas = document.getElementById('stlCanvas');
+    if (stlCanvas) {
+      const rect = stlCanvas.getBoundingClientRect();
+      const width = Math.min(rect.width, 840);
+      const height = Math.min(rect.height, 420);
+      resizeCanvas(stlCanvas, width, height);
+    }
+
+    // Visuals canvas
+    const visualsCanvas = document.getElementById('visualsCanvas');
+    if (visualsCanvas) {
+      const rect = visualsCanvas.getBoundingClientRect();
+      const width = Math.min(rect.width, 1024);
+      const height = Math.min(rect.height, 420);
+      resizeCanvas(visualsCanvas, width, height);
+    }
+
+    // Chart canvases
+    const performanceChart = document.getElementById('performanceChart');
+    if (performanceChart) {
+      const rect = performanceChart.getBoundingClientRect();
+      const width = Math.min(rect.width, 400);
+      const height = Math.min(rect.height, 200);
+      resizeCanvas(performanceChart, width, height);
+    }
+
+    const memoryChart = document.getElementById('memoryChart');
+    if (memoryChart) {
+      const rect = memoryChart.getBoundingClientRect();
+      const width = Math.min(rect.width, 400);
+      const height = Math.min(rect.height, 200);
+      resizeCanvas(memoryChart, width, height);
+    }
+  }
+
+  // Listen for window resize events
+  window.addEventListener('resize', handleCanvasResize);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(handleCanvasResize, 100);
+  });
+
+  // Initial canvas sizing
+  window.addEventListener('load', () => {
+    setTimeout(handleCanvasResize, 100);
+  });
+
   function updateBackEnabled() {
     const hasBack = navStack.length > 0;
     btnBack.disabled = !hasBack;
