@@ -67,7 +67,10 @@ class ScreenLoader {
       
       // Add to history if requested (legacy app.js manages history now)
       if (addToHistory && window.addToNavigationHistory) {
-        window.addToNavigationHistory(`screen-${screenName}`);
+        // Small delay to ensure the screen is fully loaded before adding to history
+        setTimeout(() => {
+          window.addToNavigationHistory(`screen-${screenName}`);
+        }, 50);
       }
 
       // Initialize screen-specific functionality
@@ -133,7 +136,10 @@ class ScreenLoader {
 
       // Integrate with legacy nav stack used in app.js
       if (window.addToNavigationHistory) {
-        window.addToNavigationHistory(`screen-${screenName}`);
+        // Small delay to ensure the screen is fully loaded before adding to history
+        setTimeout(() => {
+          window.addToNavigationHistory(`screen-${screenName}`);
+        }, 50);
       }
     }
   }

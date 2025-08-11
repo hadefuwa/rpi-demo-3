@@ -4,130 +4,12 @@ const fs = require('fs');
 const os = require('os');
 const { execSync } = require('child_process');
 
-// SUPPRESS GBM ERRORS IMMEDIATELY - This must happen before any other code
-if (os.platform() === 'linux') {
-  // Completely suppress stderr for GBM-related errors
-  const originalStderrWrite = process.stderr.write;
-  process.stderr.write = function(chunk, encoding, callback) {
-    const message = chunk.toString();
-    // Filter out ALL GBM and DMA buffer related errors
-    if (message.includes('gbm_wrapper') || 
-        message.includes('Failed to get fd for plane') ||
-        message.includes('Failed to export buffer to dma_buf') ||
-        message.includes('No such file or directory') ||
-        message.includes('gbm_') ||
-        message.includes('dma_buf') ||
-        message.includes('plane')) {
-      // Completely suppress these errors
-      return true;
-    }
-    // Pass through other errors
-    return originalStderrWrite.call(this, chunk, encoding, callback);
-  };
-  
-  // Also suppress console.error for GBM issues
-  const originalConsoleError = console.error;
-  console.error = function(...args) {
-    const message = args.join(' ');
-    if (message.includes('gbm_wrapper') || 
-        message.includes('Failed to get fd for plane') ||
-        message.includes('Failed to export buffer to dma_buf') ||
-        message.includes('gbm_') ||
-        message.includes('dma_buf')) {
-      return; // Suppress GBM errors
-    }
-    originalConsoleError.apply(console, args);
-  };
-}
-
-// Runtime flags for better compatibility on Raspberry Pi / mixed environments
-// - Disable GPU to avoid GBM/dma_buf issues on some Pi configurations
-// - Prefer software GL (SwiftShader) as a safe fallback
-// - Hint Ozone/Chromium to use X11 when a DISPLAY is available
+// Basic graphics flags for Raspberry Pi compatibility
 app.disableHardwareAcceleration();
 app.commandLine.appendSwitch('use-gl', 'swiftshader');
-app.commandLine.appendSwitch('ozone-platform-hint', 'x11');
-
-// COMPREHENSIVE Raspberry Pi specific flags to fix GBM/DMA buffer errors
-app.commandLine.appendSwitch('disable-gpu-sandbox');
-app.commandLine.appendSwitch('disable-software-rasterizer');
-app.commandLine.appendSwitch('disable-gpu-compositing');
-app.commandLine.appendSwitch('disable-accelerated-2d-canvas');
-app.commandLine.appendSwitch('disable-accelerated-video-decode');
-app.commandLine.appendSwitch('disable-accelerated-video-encode');
-app.commandLine.appendSwitch('disable-webgl');
-app.commandLine.appendSwitch('disable-webgl2');
-app.commandLine.appendSwitch('disable-3d-apis');
-app.commandLine.appendSwitch('disable-gpu-rasterization');
-app.commandLine.appendSwitch('disable-gpu-process');
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-compositor-resources');
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-video-frames');
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-uma-resources');
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-vaapi-video-frames');
-
-// ADDITIONAL FLAGS TO COMPLETELY DISABLE PROBLEMATIC FEATURES
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-video-frames');
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-compositor-resources');
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-uma-resources');
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-vaapi-video-frames');
-
-// Raspberry Pi specific: Force software rendering and disable problematic hardware features
-app.commandLine.appendSwitch('use-angle', 'swiftshader');
-app.commandLine.appendSwitch('disable-features', 'VizDisplayCompositor');
-app.commandLine.appendSwitch('disable-features', 'UseChromeOSDirectVideoDecoder');
-app.commandLine.appendSwitch('disable-features', 'VaapiVideoDecoder');
-app.commandLine.appendSwitch('disable-features', 'VaapiVideoEncoder');
-app.commandLine.appendSwitch('disable-features', 'VaapiVideoDecodeAccelerator');
-app.commandLine.appendSwitch('disable-features', 'VaapiVideoEncodeAccelerator');
-
-// ADDITIONAL FEATURES TO DISABLE
-app.commandLine.appendSwitch('disable-features', 'VizHitTestSurfaceLayer');
-app.commandLine.appendSwitch('disable-features', 'VizSurfaceActivation');
-app.commandLine.appendSwitch('disable-features', 'UseSkiaRenderer');
-app.commandLine.appendSwitch('disable-features', 'UseVulkan');
-app.commandLine.appendSwitch('disable-features', 'UseOzonePlatform');
-app.commandLine.appendSwitch('disable-features', 'UseX11');
-
-// FORCE SOFTWARE RENDERING
-app.commandLine.appendSwitch('disable-gpu');
-app.commandLine.appendSwitch('disable-gpu-compositing');
-app.commandLine.appendSwitch('disable-gpu-rasterization');
-app.commandLine.appendSwitch('disable-gpu-sandbox');
-app.commandLine.appendSwitch('disable-gpu-process');
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-compositor-resources');
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-video-frames');
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-uma-resources');
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-vaapi-video-frames');
 
 // Enable Chromium touch events for better touchscreen behavior
 app.commandLine.appendSwitch('touch-events', 'enabled');
-
-// Add error handling for the main process
-process.on('uncaughtException', (error) => {
-  const errorMessage = error.toString();
-  // Suppress GBM-related errors
-  if (errorMessage.includes('gbm_wrapper') || 
-      errorMessage.includes('Failed to get fd for plane') ||
-      errorMessage.includes('Failed to export buffer to dma_buf') ||
-      errorMessage.includes('gbm_') ||
-      errorMessage.includes('dma_buf')) {
-    return; // Suppress these errors
-  }
-  console.error('Uncaught Exception:', error);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  const reasonStr = String(reason);
-  // Suppress GBM-related errors
-  if (reasonStr.includes('gbm_wrapper') || 
-      reasonStr.includes('Failed to get fd for plane') ||
-      reasonStr.includes('Failed to export buffer to dma_buf') ||
-      reasonStr.includes('gbm_') ||
-      reasonStr.includes('dma_buf')) {
-    return; // Suppress these errors
-  }
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-});
 
 function createMainWindow() {
   const mainWindow = new BrowserWindow({
@@ -147,15 +29,6 @@ function createMainWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
-  
-  // Add error handling for the window
-  mainWindow.webContents.on('crashed', (event) => {
-    console.error('Renderer process crashed:', event);
-  });
-  
-  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
-    console.error('Failed to load:', errorCode, errorDescription);
-  });
 }
 
 app.whenReady().then(() => {
@@ -334,36 +207,24 @@ function getStorageInfo() {
 }
 
 ipcMain.handle('get-system-info', () => {
-  try {
-    const total = os.totalmem();
-    const free = os.freemem();
-    const used = total - free;
-    const memPercent = total > 0 ? Math.round((used / total) * 100) : null;
-    const tempC = readTemperatureC();
-    const cpuPercent = getCPUUsage();
-    const uptime = getUptime();
-    const network = getNetworkInfo();
-    const storage = getStorageInfo();
-    
-    return { 
-      memPercent, 
-      tempC, 
-      cpuPercent, 
-      uptime, 
-      network, 
-      storage 
-    };
-  } catch (error) {
-    console.error('Error getting system info:', error);
-    return {
-      memPercent: null,
-      tempC: null,
-      cpuPercent: null,
-      uptime: 'N/A',
-      network: { name: 'N/A', address: 'N/A' },
-      storage: { root: 'N/A', home: 'N/A' }
-    };
-  }
+  const total = os.totalmem();
+  const free = os.freemem();
+  const used = total - free;
+  const memPercent = total > 0 ? Math.round((used / total) * 100) : null;
+  const tempC = readTemperatureC();
+  const cpuPercent = getCPUUsage();
+  const uptime = getUptime();
+  const network = getNetworkInfo();
+  const storage = getStorageInfo();
+  
+  return { 
+    memPercent, 
+    tempC, 
+    cpuPercent, 
+    uptime, 
+    network, 
+    storage 
+  };
 });
 
 // App version (renderer requests via preload)

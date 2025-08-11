@@ -7,6 +7,9 @@
   // Simple in-app navigation stack so Back works
   let currentScreenId = 'screen-home';
   const navStack = [];
+  
+  // Track if we're currently navigating to prevent recursive calls
+  let isNavigating = false;
 
   // ===== RESPONSIVE CANVAS SIZING =====
   function resizeCanvas(canvas, targetWidth, targetHeight) {
@@ -98,6 +101,51 @@
     const hasBack = navStack.length > 0;
     btnBack.disabled = !hasBack;
     btnBack.style.opacity = hasBack ? '1' : '0.5';
+    
+    // Also update the games back button if it exists
+    const btnBackGames = document.getElementById('btnBackGames');
+    if (btnBackGames) {
+      btnBackGames.disabled = !hasBack;
+      btnBackGames.style.opacity = hasBack ? '1' : '0.5';
+    }
+    
+    // Visual feedback for navigation state (debug mode only)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      // Add navigation breadcrumb to the UI
+      updateNavigationBreadcrumb();
+      console.log('Navigation state:', { currentScreenId, navStack: [...navStack], hasBack });
+    }
+  }
+  
+  function updateNavigationBreadcrumb() {
+    // Remove existing breadcrumb
+    const existingBreadcrumb = document.getElementById('nav-breadcrumb');
+    if (existingBreadcrumb) {
+      existingBreadcrumb.remove();
+    }
+    
+    // Create new breadcrumb
+    if (navStack.length > 0) {
+      const breadcrumb = document.createElement('div');
+      breadcrumb.id = 'nav-breadcrumb';
+      breadcrumb.style.cssText = `
+        position: fixed;
+        top: 60px;
+        left: 10px;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        z-index: 1000;
+        font-family: monospace;
+      `;
+      
+      const path = ['Home', ...navStack.map(id => id.replace('screen-', '').charAt(0).toUpperCase() + id.replace('screen-', '').slice(1))];
+      breadcrumb.textContent = path.join(' > ');
+      
+      document.body.appendChild(breadcrumb);
+    }
   }
 
   // STL viewer (very simple shaded triangles)
@@ -595,35 +643,85 @@
   }
 
   function showScreen(id, pushToStack = true) {
+    if (isNavigating) return; // Prevent recursive navigation
+    
+    // Validate screen ID
+    if (!id || typeof id !== 'string') {
+      console.error('Invalid screen ID:', id);
+      return;
+    }
+    
     // Delegate to dynamic ScreenLoader; map id like 'screen-info' -> 'info'
     const name = id && id.startsWith('screen-') ? id.slice(7) : id;
     if (window.screenLoader && name) {
-      // We manage history ourselves, so always pass false to loader
-      window.screenLoader.loadScreen(name, false);
-      if (pushToStack) {
-        addToNavigationHistory(id);
+      isNavigating = true;
+      try {
+        // We manage history ourselves, so always pass false to loader
+        window.screenLoader.loadScreen(name, false);
+        if (pushToStack) {
+          addToNavigationHistory(id);
+        }
+      } catch (error) {
+        console.error('Failed to show screen:', id, error);
+        // Don't add failed navigation to history
+        if (pushToStack) {
+          // Remove the failed navigation from history if it was added
+          if (navStack.length > 0 && navStack[navStack.length - 1] === currentScreenId) {
+            navStack.pop();
+          }
+        }
+      } finally {
+        isNavigating = false;
       }
+    } else {
+      console.error('ScreenLoader not available or invalid screen name:', name);
     }
   }
 
   function goHome() {
-    navStack.length = 0;
-    if (window.screenLoader) {
-      window.screenLoader.loadScreen('home', false);
-    } else {
-      showScreen('screen-home', false);
+    if (isNavigating) return; // Prevent recursive navigation
+    
+    isNavigating = true;
+    try {
+      navStack.length = 0;
+      currentScreenId = 'screen-home';
+      if (window.screenLoader) {
+        window.screenLoader.loadScreen('home', false);
+      } else {
+        showScreen('screen-home', false);
+      }
+      updateBackEnabled();
+    } finally {
+      isNavigating = false;
     }
-    updateBackEnabled();
   }
 
   btnHome.addEventListener('click', goHome);
   btnBack.addEventListener('click', () => {
-    if (navStack.length === 0) return;
-    const prev = navStack.pop();
-    const normalized = prev.startsWith('screen-') ? prev.slice(7) : prev;
-    // Use our unified showScreen to ensure consistent history behavior
-    showScreen(`screen-${normalized}`, false);
-    updateBackEnabled();
+    if (isNavigating) return;
+    
+    // Safety check: if navStack is empty but we're not on home, go home
+    if (navStack.length === 0) {
+      if (currentScreenId !== 'screen-home') {
+        goHome();
+      }
+      return;
+    }
+    
+    isNavigating = true;
+    try {
+      const prev = navStack.pop();
+      const normalized = prev.startsWith('screen-') ? prev.slice(7) : prev;
+      // Use our unified showScreen to ensure consistent history behavior
+      showScreen(`screen-${normalized}`, false);
+      updateBackEnabled();
+    } catch (error) {
+      console.error('Back navigation failed:', error);
+      // Fallback to home if back navigation fails
+      goHome();
+    } finally {
+      isNavigating = false;
+    }
   });
 
   // Event delegation for Home cards (works even when loaded later)
@@ -632,7 +730,13 @@
     if (!card) return;
     const target = card.getAttribute('data-target'); // e.g. 'screen-touch'
     if (target) {
-      showScreen(target, true);
+      try {
+        showScreen(target, true);
+      } catch (error) {
+        console.error('Failed to navigate to screen:', target, error);
+        // Fallback to home if navigation fails
+        goHome();
+      }
     }
   });
 
@@ -642,28 +746,139 @@
       const gameCard = e.target.closest('.game-card');
       const target = gameCard.getAttribute('data-target');
       if (target) {
-        showScreen(target, true);
+        try {
+          showScreen(target, true);
+        } catch (error) {
+          console.error('Failed to navigate to game screen:', target, error);
+          // Fallback to home if navigation fails
+          goHome();
+        }
       }
     }
   });
 
-  // Games Hub back button
+  // Games Hub back button - now uses the same navigation logic
   document.addEventListener('click', (e) => {
     if (e.target.id === 'btnBackGames') {
-      goHome();
+      if (isNavigating) return;
+      
+      // Use the same back logic instead of always going home
+      if (navStack.length > 0) {
+        isNavigating = true;
+        try {
+          const prev = navStack.pop();
+          const normalized = prev.startsWith('screen-') ? prev.slice(7) : prev;
+          showScreen(`screen-${normalized}`, false);
+          updateBackEnabled();
+        } catch (error) {
+          console.error('Games back navigation failed:', error);
+          goHome();
+        } finally {
+          isNavigating = false;
+        }
+      } else {
+        goHome();
+      }
     }
   });
 
   // Expose history helper so ScreenLoader can push entries
   window.addToNavigationHistory = function(id) {
-    if (!id) return;
+    if (!id || isNavigating) return;
+    
+    // Prevent duplicate entries and navigation loops
     if (currentScreenId && currentScreenId !== id) {
-      navStack.push(currentScreenId);
+      // Don't add home to the stack
+      if (currentScreenId !== 'screen-home') {
+        // Prevent adding the same screen multiple times in a row
+        if (navStack.length === 0 || navStack[navStack.length - 1] !== currentScreenId) {
+          navStack.push(currentScreenId);
+        }
+      }
     }
     currentScreenId = id;
     updateBackEnabled();
+    
+    // Update browser history
+    updateBrowserHistory(id);
   };
 
+  // Navigation state validation and cleanup
+  function validateNavigationState() {
+    // Remove any invalid entries from the stack
+    navStack = navStack.filter(id => id && id.startsWith('screen-'));
+    
+    // Ensure currentScreenId is valid
+    if (!currentScreenId || !currentScreenId.startsWith('screen-')) {
+      currentScreenId = 'screen-home';
+    }
+    
+    // Update UI state
+    updateBackEnabled();
+  }
+  
+  // Emergency navigation reset function
+  function resetNavigation() {
+    console.log('Resetting navigation state');
+    navStack.length = 0;
+    currentScreenId = 'screen-home';
+    isNavigating = false;
+    updateBackEnabled();
+    
+    // Force return to home
+    if (window.screenLoader) {
+      window.screenLoader.loadScreen('home', false);
+    }
+  }
+  
+  // Expose reset function for debugging
+  window.resetNavigation = resetNavigation;
+  
+  // Validate navigation state periodically
+  setInterval(validateNavigationState, 5000);
+  
+  // Keyboard shortcuts for navigation
+  document.addEventListener('keydown', (e) => {
+    // Back button: Escape key or Alt+Left
+    if (e.key === 'Escape' || (e.altKey && e.key === 'ArrowLeft')) {
+      e.preventDefault();
+      if (btnBack && !btnBack.disabled) {
+        btnBack.click();
+      }
+    }
+    
+    // Home button: Alt+Home
+    if (e.altKey && e.key === 'Home') {
+      e.preventDefault();
+      if (btnHome) {
+        btnHome.click();
+      }
+    }
+  });
+  
+  // Browser back/forward button integration
+  window.addEventListener('popstate', (event) => {
+    // Handle browser back/forward buttons
+    if (event.state && event.state.screen) {
+      showScreen(event.state.screen, false);
+    }
+  });
+  
+  // Update browser history when navigating
+  function updateBrowserHistory(screenId) {
+    if (window.history && window.history.pushState) {
+      const state = { screen: screenId };
+      const title = `RPI Showcase - ${screenId.replace('screen-', '')}`;
+      const url = `#${screenId}`;
+      
+      try {
+        window.history.pushState(state, title, url);
+      } catch (error) {
+        console.warn('Failed to update browser history:', error);
+      }
+    }
+  }
+  
   // No clock on home screen anymore
 
   // Touch paint - initialize when the screen is loaded/active
