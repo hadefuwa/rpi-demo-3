@@ -22,7 +22,8 @@
     const H = stlCanvas.height;
     let triangles = [];
     let angleX = -0.5, angleY = 0.6;
-    let zoom = 4; // further out by default
+    let zoom = 2; // start far out
+    let modelCenter = { x: 0, y: 0, z: 0 };
     let autoRotate = false;
     let last = null;
 
@@ -46,10 +47,14 @@
     function project(p) {
       const sx = Math.sin(angleX), cx = Math.cos(angleX);
       const sy = Math.sin(angleY), cy = Math.cos(angleY);
+      // translate to model center
+      let x0 = p.x - modelCenter.x;
+      let y0 = p.y - modelCenter.y;
+      let z0 = p.z - modelCenter.z;
       // rotate around X
-      let y = p.y * cx - p.z * sx;
-      let z = p.y * sx + p.z * cx;
-      let x = p.x;
+      let y = y0 * cx - z0 * sx;
+      let z = y0 * sx + z0 * cx;
+      let x = x0;
       // rotate around Y
       const x2 = x * cy + z * sy;
       const z2 = -x * sy + z * cy;
@@ -125,7 +130,8 @@
             ok = true;
           }
         }
-        if (ok) draw(); else { sctx.fillStyle = '#fff'; sctx.fillText('Failed to load STL: IM0004.STL', 20, 30); }
+        if (ok) { fitModelToView(); draw(); }
+        else { sctx.fillStyle = '#fff'; sctx.fillText('Failed to load STL: IM0004.STL', 20, 30); }
       } catch {
         sctx.fillStyle = '#fff';
         sctx.fillText('Failed to load STL: IM0004.STL', 20, 30);
@@ -149,6 +155,28 @@
         if (offset + 50 > bytes.length) break;
       }
       return out;
+    }
+
+    function fitModelToView() {
+      if (!triangles || triangles.length === 0) return;
+      let minX = Infinity, minY = Infinity, minZ = Infinity;
+      let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+      for (const t of triangles) {
+        for (const v of t) {
+          if (v.x < minX) minX = v.x; if (v.x > maxX) maxX = v.x;
+          if (v.y < minY) minY = v.y; if (v.y > maxY) maxY = v.y;
+          if (v.z < minZ) minZ = v.z; if (v.z > maxZ) maxZ = v.z;
+        }
+      }
+      modelCenter = { x: (minX + maxX) / 2, y: (minY + maxY) / 2, z: (minZ + maxZ) / 2 };
+      const sizeX = Math.max(1, maxX - minX);
+      const sizeY = Math.max(1, maxY - minY);
+      const target = Math.min(W, H) * 0.7; // fill 70% of shorter side
+      const scaleX = target / sizeX;
+      const scaleY = target / sizeY;
+      zoom = Math.min(scaleX, scaleY);
+      // Extra zoom-out per your request
+      zoom *= 0.8;
     }
 
     // Buttons for rotate/zoom
@@ -179,7 +207,7 @@
     onHold(btnZoomOut, 50, () => { zoom = Math.max(zoom - 0.3, 1); draw(); });
 
     btnAuto?.addEventListener('click', () => { autoRotate = !autoRotate; draw(); });
-    btnReset?.addEventListener('click', () => { angleX = -0.5; angleY = 0.6; zoom = 8; autoRotate = false; draw(); });
+    btnReset?.addEventListener('click', () => { angleX = -0.5; angleY = 0.6; fitModelToView(); autoRotate = false; draw(); });
   }
 
   function showScreen(id, pushToStack = true) {
