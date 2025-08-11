@@ -883,8 +883,47 @@
 
   // Touch paint - initialize when the screen is loaded/active
   let touchInitAttempts = 0;
+  let touchDemoInitialized = false;
+  let touchDemoState = {
+    painting: false,
+    brushColor: '#ffffff',
+    brushSize: 8,
+    canvas: null,
+    ctx: null,
+    eventListeners: []
+  };
+
+  function cleanupTouchDemo() {
+    console.log('Cleaning up touch demo');
+    
+    // Remove all event listeners
+    touchDemoState.eventListeners.forEach(({ element, event, handler, options }) => {
+      element.removeEventListener(event, handler, options);
+    });
+    touchDemoState.eventListeners = [];
+    
+    // Reset state
+    touchDemoState.painting = false;
+    touchDemoState.canvas = null;
+    touchDemoState.ctx = null;
+    touchDemoInitialized = false;
+    
+    console.log('Touch demo cleanup completed');
+  }
+
+  function addTouchEventListener(element, event, handler, options = undefined) {
+    element.addEventListener(event, handler, options);
+    touchDemoState.eventListeners.push({ element, event, handler, options });
+  }
+
   function initTouchDemo() {
     console.log('initTouchDemo called');
+    
+    // Prevent multiple initializations
+    if (touchDemoInitialized) {
+      console.log('Touch demo already initialized, skipping');
+      return;
+    }
     
     const canvas = document.getElementById('paint');
     if (!canvas) {
@@ -924,17 +963,17 @@
       return;
     }
 
-    let painting = false;
-    let brushColor = '#ffffff';
-    let brushSize = 8;
+    // Store references
+    touchDemoState.canvas = canvas;
+    touchDemoState.ctx = ctx;
 
     // Debug logging
     console.log('Touch demo initialized:', { 
       canvas, 
       ctx, 
-      painting, 
-      brushColor, 
-      brushSize,
+      painting: touchDemoState.painting, 
+      brushColor: touchDemoState.brushColor, 
+      brushSize: touchDemoState.brushSize,
       canvasExists: !!canvas,
       canvasWidth: canvas?.width,
       canvasHeight: canvas?.height,
@@ -945,9 +984,9 @@
     // Ensure canvas is properly set up
     if (ctx) {
       // Set initial canvas state
-      ctx.fillStyle = brushColor;
-      ctx.strokeStyle = brushColor;
-      ctx.lineWidth = brushSize;
+      ctx.fillStyle = touchDemoState.brushColor;
+      ctx.strokeStyle = touchDemoState.brushColor;
+      ctx.lineWidth = touchDemoState.brushSize;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       
@@ -1000,39 +1039,39 @@
     function start(e) {
       console.log('Start event:', e.type, e);
       e.preventDefault();
-      painting = true;
+      touchDemoState.painting = true;
       lastPos = getPos(e);
       
       // Draw a dot immediately on start
-      ctx.fillStyle = brushColor;
-      ctx.beginPath();
-      ctx.arc(lastPos.x, lastPos.y, brushSize / 2, 0, Math.PI * 2);
-      ctx.fill();
+      touchDemoState.ctx.fillStyle = touchDemoState.brushColor;
+      touchDemoState.ctx.beginPath();
+      touchDemoState.ctx.arc(lastPos.x, lastPos.y, touchDemoState.brushSize / 2, 0, Math.PI * 2);
+      touchDemoState.ctx.fill();
       console.log('Started painting at:', lastPos);
     }
 
     function end(e) {
       console.log('End event:', e.type, e);
       e.preventDefault();
-      painting = false;
+      touchDemoState.painting = false;
       lastPos = null;
     }
 
     function draw(e) {
-      if (!painting) return;
+      if (!touchDemoState.painting) return;
       e.preventDefault();
       
       const pos = getPos(e);
       
-      ctx.strokeStyle = brushColor;
-      ctx.lineWidth = brushSize;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
+      touchDemoState.ctx.strokeStyle = touchDemoState.brushColor;
+      touchDemoState.ctx.lineWidth = touchDemoState.brushSize;
+      touchDemoState.ctx.lineCap = 'round';
+      touchDemoState.ctx.lineJoin = 'round';
       
-      ctx.beginPath();
-      ctx.moveTo(lastPos.x, lastPos.y);
-      ctx.lineTo(pos.x, pos.y);
-      ctx.stroke();
+      touchDemoState.ctx.beginPath();
+      touchDemoState.ctx.moveTo(lastPos.x, lastPos.y);
+      touchDemoState.ctx.lineTo(pos.x, pos.y);
+      touchDemoState.ctx.stroke();
       
       lastPos = pos;
       console.log('Drawing line from', lastPos, 'to', pos);
@@ -1040,10 +1079,10 @@
 
     // Mouse events
     try {
-      canvas.addEventListener('mousedown', start);
-      canvas.addEventListener('mousemove', draw);
-      canvas.addEventListener('mouseup', end);
-      canvas.addEventListener('mouseleave', end);
+      addTouchEventListener(canvas, 'mousedown', start);
+      addTouchEventListener(canvas, 'mousemove', draw);
+      addTouchEventListener(canvas, 'mouseup', end);
+      addTouchEventListener(canvas, 'mouseleave', end);
       console.log('Mouse events bound successfully');
     } catch (error) {
       console.error('Error binding mouse events:', error);
@@ -1051,9 +1090,9 @@
 
     // Touch events
     try {
-      canvas.addEventListener('touchstart', start, { passive: false });
-      canvas.addEventListener('touchmove', draw, { passive: false });
-      canvas.addEventListener('touchend', end, { passive: false });
+      addTouchEventListener(canvas, 'touchstart', start, { passive: false });
+      addTouchEventListener(canvas, 'touchmove', draw, { passive: false });
+      addTouchEventListener(canvas, 'touchend', end, { passive: false });
       console.log('Touch events bound successfully');
     } catch (error) {
       console.error('Error binding touch events:', error);
@@ -1061,20 +1100,30 @@
 
     // Color and brush size controls
     document.querySelectorAll('.swatch').forEach(btn => {
-      btn.addEventListener('click', () => {
-        brushColor = btn.getAttribute('data-color');
-      });
+      const colorHandler = () => {
+        touchDemoState.brushColor = btn.getAttribute('data-color');
+      };
+      addTouchEventListener(btn, 'click', colorHandler);
     });
 
     document.querySelectorAll('.brush').forEach(btn => {
-      btn.addEventListener('click', () => {
-        brushSize = parseInt(btn.getAttribute('data-size'), 10);
-      });
+      const brushHandler = () => {
+        touchDemoState.brushSize = parseInt(btn.getAttribute('data-size'), 10);
+      };
+      addTouchEventListener(btn, 'click', brushHandler);
     });
 
-    document.getElementById('btnClear').addEventListener('click', () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    });
+    const clearBtn = document.getElementById('btnClear');
+    if (clearBtn) {
+      const clearHandler = () => {
+        touchDemoState.ctx.clearRect(0, 0, touchDemoState.canvas.width, touchDemoState.canvas.height);
+      };
+      addTouchEventListener(clearBtn, 'click', clearHandler);
+    }
+
+    // Mark as initialized
+    touchDemoInitialized = true;
+    console.log('Touch demo initialization completed');
   }
 
   // System Dashboard
@@ -2949,6 +2998,9 @@
   window.addEventListener('screenChanged', (e) => {
     if (e?.detail?.screenName === 'touch') {
       setTimeout(initTouchDemo, 50);
+    } else if (touchDemoInitialized) {
+      // Clean up touch demo when leaving the screen
+      cleanupTouchDemo();
     }
   });
 
