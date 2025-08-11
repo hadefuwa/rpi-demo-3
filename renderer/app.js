@@ -137,11 +137,11 @@
       return { x: nx / len, y: ny / len, z: nz / len };
     }
 
-    // Enhanced animated starlight background for STL canvas
+    // Enhanced animated starlight background for STL canvas - Larger, more prominent stars
     const stars = Array.from({ length: 140 }, () => ({
       x: Math.random() * W,
       y: Math.random() * H,
-      r: Math.random() * 1.5 + 0.5,
+      r: Math.random() * 3.5 + 1.5, // Increased from 1.5+0.5 to 3.5+1.5 for larger stars
       t: Math.random() * Math.PI * 2,
       speed: Math.random() * 0.5 + 0.1, // varying speeds for parallax
       depth: Math.random() * 0.5 + 0.5, // depth for 3D effect
@@ -186,20 +186,49 @@
         const saturation = 20 + Math.sin(time * 0.3) * 10;
         const lightness = 60 + Math.sin(time * 0.4) * 20;
         
+        // Enhanced star drawing with better visibility
         sctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${finalAlpha})`;
         sctx.beginPath();
         sctx.arc(s.x, s.y, s.r * s.depth, 0, Math.PI * 2);
         sctx.fill();
         
-        // Add subtle glow effect for brighter stars
-        if (finalAlpha > 0.7) {
-          const glowGradient = sctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 3);
-          glowGradient.addColorStop(0, `hsla(${hue}, ${saturation}%, ${lightness}%, ${finalAlpha * 0.3})`);
+        // Add a bright core for larger stars
+        if (s.r > 2.5) {
+          const coreRadius = (s.r * s.depth) * 0.6;
+          const coreGradient = sctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, coreRadius);
+          coreGradient.addColorStop(0, `hsla(${hue}, ${saturation}%, ${Math.min(100, lightness + 20)}%, ${finalAlpha * 1.2})`);
+          coreGradient.addColorStop(1, `hsla(${hue}, ${saturation}%, ${lightness}%, ${finalAlpha})`);
+          sctx.fillStyle = coreGradient;
+          sctx.beginPath();
+          sctx.arc(s.x, s.y, coreRadius, 0, Math.PI * 2);
+          sctx.fill();
+        }
+        
+        // Enhanced glow effects for larger, more prominent stars
+        if (finalAlpha > 0.6) {
+          // Primary glow (larger radius for bigger stars)
+          const glowRadius = s.r * 4;
+          const glowGradient = sctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowRadius);
+          glowGradient.addColorStop(0, `hsla(${hue}, ${saturation}%, ${lightness}%, ${finalAlpha * 0.4})`);
+          glowGradient.addColorStop(0.5, `hsla(${hue}, ${saturation}%, ${lightness}%, ${finalAlpha * 0.2})`);
           glowGradient.addColorStop(1, 'transparent');
           sctx.fillStyle = glowGradient;
           sctx.beginPath();
-          sctx.arc(s.x, s.y, s.r * 3, 0, Math.PI * 2);
+          sctx.arc(s.x, s.y, glowRadius, 0, Math.PI * 2);
           sctx.fill();
+          
+          // Secondary outer glow for extra prominence
+          if (s.r > 2.5) {
+            const outerGlowRadius = s.r * 6;
+            const outerGlowGradient = sctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, outerGlowRadius);
+            outerGlowGradient.addColorStop(0, `hsla(${hue}, ${saturation}%, ${lightness}%, ${finalAlpha * 0.15})`);
+            outerGlowGradient.addColorStop(0.7, `hsla(${hue}, ${saturation}%, ${lightness}%, ${finalAlpha * 0.05})`);
+            outerGlowGradient.addColorStop(1, 'transparent');
+            sctx.fillStyle = outerGlowGradient;
+            sctx.beginPath();
+            sctx.arc(s.x, s.y, outerGlowRadius, 0, Math.PI * 2);
+            sctx.fill();
+          }
         }
         
         // Update animation phases
