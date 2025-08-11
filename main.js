@@ -120,6 +120,11 @@ ipcMain.handle('get-system-info', () => {
   return { memPercent, tempC };
 });
 
+// App version (renderer requests via preload)
+ipcMain.handle('get-app-version', () => {
+  try { return app.getVersion(); } catch { return '0.0.0'; }
+});
+
 // -----------------------
 // Save drawing
 // -----------------------

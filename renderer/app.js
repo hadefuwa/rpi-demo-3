@@ -637,9 +637,16 @@
   // About + System Info version labels
   const versionEl = document.getElementById('version');
   const versionInfoEl = document.getElementById('versionInfo');
-  const appVersion = (window.appInfo && window.appInfo.version) ? window.appInfo.version : '0.1.0';
-  if (versionEl) versionEl.textContent = appVersion;
-  if (versionInfoEl) versionInfoEl.textContent = appVersion;
+  (async () => {
+    try {
+      const v = (window.appInfo && window.appInfo.getVersion) ? await window.appInfo.getVersion() : '0.1.0';
+      if (versionEl) versionEl.textContent = v;
+      if (versionInfoEl) versionInfoEl.textContent = v;
+    } catch {
+      if (versionEl) versionEl.textContent = '0.1.0';
+      if (versionInfoEl) versionInfoEl.textContent = '0.1.0';
+    }
+  })();
 
   // Scroll Test
   const scrollBox = document.getElementById('scrollbox');

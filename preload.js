@@ -1,20 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron');
-const path = require('path');
-const fs = require('fs');
 
-function readPackageVersion() {
-  try {
-    const pkgPath = path.join(__dirname, 'package.json');
-    const raw = fs.readFileSync(pkgPath, 'utf8');
-    const pkg = JSON.parse(raw);
-    return String(pkg.version || '0.0.0');
-  } catch {
-    return '0.0.0';
-  }
-}
-
+// Expose version via IPC from main (avoids Node APIs in preload on sandboxed builds)
 contextBridge.exposeInMainWorld('appInfo', {
-  version: readPackageVersion(),
+  getVersion: () => ipcRenderer.invoke('get-app-version'),
 });
 
 contextBridge.exposeInMainWorld('api', {
