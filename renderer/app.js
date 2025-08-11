@@ -495,6 +495,9 @@
   function start(e) {
     painting = true;
     lastPos = getPos(e);
+    // draw a tiny dot immediately so taps register without movement
+    ctx.fillStyle = brushColor;
+    ctx.fillRect(lastPos.x, lastPos.y, Math.max(1, brushSize/3), Math.max(1, brushSize/3));
   }
   function end() {
     painting = false;
