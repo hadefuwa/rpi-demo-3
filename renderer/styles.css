@@ -20,14 +20,17 @@
 html, body {
   margin: 0;
   padding: 0;
-  width: 800px;
-  height: 480px;
+  width: 1024px;
+  height: 600px;
   overflow: hidden;
   background: radial-gradient(1200px 600px at 20% 20%, #1f2430 0%, var(--bg1) 55%),
               radial-gradient(1200px 600px at 80% 80%, #12161d 0%, var(--bg2) 55%);
   color: var(--fg);
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
+
+/* Disable text selection and enable simple touch actions */
+* { -webkit-user-select: none; user-select: none; touch-action: manipulation; }
 
 #app { width: 100%; height: 100%; display: flex; flex-direction: column; }
 
@@ -107,7 +110,8 @@ button:active { transform: translateY(1px); }
 .scrollbox {
   height: 300px;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* iOS-like momentum on some engines */
+  -webkit-overflow-scrolling: touch; /* momentum on some engines */
+  touch-action: pan-y; /* allow finger vertical panning */
   border-radius: 8px;
   border: 1px solid rgba(255,255,255,0.08);
   background: rgba(0,0,0,0.2);

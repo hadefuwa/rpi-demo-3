@@ -172,19 +172,31 @@
   // Scroll Test
   const scrollBox = document.getElementById('scrollbox');
   if (scrollBox) {
-    for (let i = 1; i <= 60; i++) {
+    for (let i = 1; i <= 100; i++) {
       const item = document.createElement('div');
       item.className = 'scroll-item';
       item.textContent = `Item ${i}`;
       scrollBox.appendChild(item);
     }
 
-    // Prevent the page itself from dragging while allowing the scrollbox to scroll
-    scrollBox.addEventListener('touchmove', (e) => {
-      // If content is scrollable, allow it; otherwise prevent to avoid rubber-banding
-      const canScroll = scrollBox.scrollHeight > scrollBox.clientHeight;
-      if (!canScroll) e.preventDefault();
-    }, { passive: false });
+    // Drag-to-scroll fallback using Pointer Events
+    let dragging = false;
+    let startY = 0;
+    let startTop = 0;
+    scrollBox.addEventListener('pointerdown', (e) => {
+      dragging = true;
+      startY = e.clientY;
+      startTop = scrollBox.scrollTop;
+      try { scrollBox.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+    scrollBox.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      scrollBox.scrollTop = startTop - (e.clientY - startY);
+    });
+    function endDrag() { dragging = false; }
+    scrollBox.addEventListener('pointerup', endDrag);
+    scrollBox.addEventListener('pointercancel', endDrag);
+    scrollBox.addEventListener('pointerleave', endDrag);
   }
 })();
 

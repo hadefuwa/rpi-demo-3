@@ -1,10 +1,13 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
+// Enable Chromium touch events for better touchscreen behavior
+app.commandLine.appendSwitch('touch-events', 'enabled');
+
 function createMainWindow() {
   const mainWindow = new BrowserWindow({
-    width: 800, // Adjust to your screen resolution
-    height: 480,
+    width: 1024, // Adjusted for 7" 1024x600 screen
+    height: 600,
     backgroundColor: '#0d0f14',
     show: true,
     autoHideMenuBar: true,
