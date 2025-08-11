@@ -529,14 +529,16 @@
     e.preventDefault();
     try { canvas.setPointerCapture(e.pointerId); } catch {}
     start(e);
-  });
+  }, { passive: false });
   canvas.addEventListener('pointerup', (e) => {
     e.preventDefault();
     try { canvas.releasePointerCapture(e.pointerId); } catch {}
     end(e);
-  });
-  canvas.addEventListener('pointerleave', (e) => { e.preventDefault(); end(e); });
-  canvas.addEventListener('pointermove', (e) => { e.preventDefault(); draw(e); });
+  }, { passive: false });
+  // Do not end on leave; with capture, we keep drawing even if pointer leaves the element
+  canvas.addEventListener('pointerleave', (e) => { e.preventDefault(); });
+  canvas.addEventListener('pointercancel', (e) => { e.preventDefault(); end(e); }, { passive: false });
+  canvas.addEventListener('pointermove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
 
   document.querySelectorAll('.swatch').forEach(btn => {
     btn.addEventListener('click', () => {

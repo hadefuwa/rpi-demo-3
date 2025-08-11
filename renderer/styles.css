@@ -388,7 +388,9 @@ main { flex: 1; padding: 12px 16px 16px; }
   border-radius: 16px;
   background: #0b0e13;
   border: 6px solid rgba(255, 255, 255, 0.18); /* thick border to show limits */
-  touch-action: none;
+  touch-action: none; /* allow app to handle drag drawing */
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .panel { padding: 12px; border-radius: 12px; background: var(--card); border: 1px solid rgba(255,255,255,0.08); }
