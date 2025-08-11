@@ -522,8 +522,16 @@
   }
 
   // Prefer Pointer Events for consistent mouse/touch/pen handling
-  canvas.addEventListener('pointerdown', (e) => { e.preventDefault(); start(e); });
-  canvas.addEventListener('pointerup', (e) => { e.preventDefault(); end(e); });
+  canvas.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    try { canvas.setPointerCapture(e.pointerId); } catch {}
+    start(e);
+  });
+  canvas.addEventListener('pointerup', (e) => {
+    e.preventDefault();
+    try { canvas.releasePointerCapture(e.pointerId); } catch {}
+    end(e);
+  });
   canvas.addEventListener('pointerleave', (e) => { e.preventDefault(); end(e); });
   canvas.addEventListener('pointermove', (e) => { e.preventDefault(); draw(e); });
 
