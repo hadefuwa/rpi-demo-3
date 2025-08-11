@@ -1208,6 +1208,7 @@
   }
 
     // Drag-to-scroll fallback using Pointer Events
+    if (scrollBox) {
     let dragging = false;
     let startY = 0;
     let startTop = 0;
