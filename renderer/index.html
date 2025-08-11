@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=800, height=480, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>RPI 5" Showcase</title>
+    <link rel="preload" href="./styles.css" as="style" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <button id="btnBack" class="chip">Back</button>
+        <div class="title">Matrix TSL Showcase</div>
+        <button id="btnHome" class="chip">Home</button>
+      </header>
+
+      <main>
+        <section id="screen-home" class="screen active">
+          <div class="hero">
+            <h1>Welcome</h1>
+            <p id="clock"></p>
+          </div>
+          <div class="grid">
+            <button class="card" data-target="screen-touch">Touch Demo</button>
+            <button class="card" data-target="screen-info">System Info</button>
+            <button class="card" data-target="screen-game">Tic‑Tac‑Toe</button>
+            <button class="card" data-target="screen-about">About</button>
+          </div>
+        </section>
+
+        <section id="screen-touch" class="screen">
+          <div class="toolbar">
+            <div class="swatches">
+              <button class="swatch" data-color="#ff6b6b" style="background:#ff6b6b"></button>
+              <button class="swatch" data-color="#ffd93d" style="background:#ffd93d"></button>
+              <button class="swatch" data-color="#6bcBef" style="background:#6bcBef"></button>
+              <button class="swatch" data-color="#9d7cf3" style="background:#9d7cf3"></button>
+              <button class="swatch" data-color="#ffffff" style="background:#ffffff"></button>
+            </div>
+            <div class="brushes">
+              <button class="brush" data-size="4">Small</button>
+              <button class="brush" data-size="8">Med</button>
+              <button class="brush" data-size="14">Large</button>
+            </div>
+            <button id="btnClear" class="chip">Clear</button>
+          </div>
+          <canvas id="paint" width="800" height="360"></canvas>
+        </section>
+
+        <section id="screen-info" class="screen">
+          <div class="panel">
+            <h2>System Info</h2>
+            <div class="meter">
+              <span>CPU</span>
+              <div class="bar"><div id="cpuBar" class="fill" style="width: 10%"></div></div>
+            </div>
+            <div class="meter">
+              <span>Memory</span>
+              <div class="bar"><div id="memBar" class="fill" style="width: 20%"></div></div>
+            </div>
+            <div class="note">Live values to be wired later.</div>
+          </div>
+        </section>
+
+        <section id="screen-game" class="screen">
+          <div id="board" class="board"></div>
+          <div class="toolbar center">
+            <div id="status" class="chip">Your move</div>
+            <button id="btnReset" class="chip">Reset</button>
+          </div>
+        </section>
+
+        <section id="screen-about" class="screen">
+          <div class="panel">
+            <h2>About</h2>
+            <p>Version <span id="version"></span></p>
+            <p>Beautiful 5" showcase for Raspberry Pi.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+  </html>
+
+
