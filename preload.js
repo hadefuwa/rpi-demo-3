@@ -1,9 +1,15 @@
-// In v1 we do not expose any special APIs.
-// This file is kept to allow safe expansion later.
-const { contextBridge } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('appInfo', {
   version: '0.1.0',
+});
+
+contextBridge.exposeInMainWorld('api', {
+  saveImage: async (dataUrl) => ipcRenderer.invoke('save-image', dataUrl),
+  getSystemInfo: async () => ipcRenderer.invoke('get-system-info'),
+  onSystemInfo: (callback) => {
+    ipcRenderer.on('system-info', (_event, payload) => callback(payload));
+  },
 });
 
 

@@ -99,6 +99,31 @@
     lastPos = pos;
   }
 
+  // Resize canvas to fill available space and match pixel ratio
+  function resizeCanvasToDisplaySize() {
+    const dpr = window.devicePixelRatio || 1;
+    const displayWidth = canvas.clientWidth;
+    const displayHeight = canvas.clientHeight;
+    const neededWidth = Math.floor(displayWidth * dpr);
+    const neededHeight = Math.floor(displayHeight * dpr);
+    if (canvas.width !== neededWidth || canvas.height !== neededHeight) {
+      canvas.width = neededWidth;
+      canvas.height = neededHeight;
+      ctx.scale(dpr, dpr);
+    }
+  }
+
+  const touchScreen = document.getElementById('screen-touch');
+  const resizeObserver = new ResizeObserver(() => resizeCanvasToDisplaySize());
+  resizeObserver.observe(touchScreen);
+  window.addEventListener('resize', resizeCanvasToDisplaySize);
+  // Also adjust when we switch to the touch screen
+  const showTouchIfActive = () => {
+    if (touchScreen.classList.contains('active')) {
+      resizeCanvasToDisplaySize();
+    }
+  };
+
   canvas.addEventListener('mousedown', start);
   canvas.addEventListener('mouseup', end);
   canvas.addEventListener('mouseleave', end);
@@ -183,6 +208,8 @@
 
   resetBtn.addEventListener('click', resetGame);
   renderBoard();
+  // Initial size pass (in case touch screen is default visible)
+  showTouchIfActive();
 
   // About
   const versionEl = document.getElementById('version');
