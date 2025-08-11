@@ -97,6 +97,10 @@
   window.addEventListener('orientationchange', () => {
     setTimeout(handleCanvasResize, 100);
   });
+  // When screen changes (dynamic loader), ensure canvases are resized to their CSS boxes
+  window.addEventListener('screenChanged', () => {
+    setTimeout(handleCanvasResize, 50);
+  });
 
   // Initial canvas sizing
   window.addEventListener('load', () => {
@@ -669,6 +673,14 @@
       return;
     }
 
+    // Ensure canvas internal resolution matches its displayed size before any drawing
+    try {
+      const rect = canvas.getBoundingClientRect();
+      const width = Math.min(rect.width, 1024);
+      const height = Math.min(rect.height, 400);
+      resizeCanvas(canvas, width, height);
+    } catch {}
+
     console.log('Canvas found:', canvas);
     console.log('Canvas dimensions:', { width: canvas.width, height: canvas.height });
     console.log('Canvas style:', canvas.style);
@@ -723,24 +735,32 @@
 
     function getPos(e) {
       const rect = canvas.getBoundingClientRect();
-      let x, y;
-      
+      const styles = window.getComputedStyle(canvas);
+      const borderLeft = parseFloat(styles.borderLeftWidth) || 0;
+      const borderTop = parseFloat(styles.borderTopWidth) || 0;
+      const borderRight = parseFloat(styles.borderRightWidth) || 0;
+      const borderBottom = parseFloat(styles.borderBottomWidth) || 0;
+      const contentWidth = Math.max(0, rect.width - borderLeft - borderRight);
+      const contentHeight = Math.max(0, rect.height - borderTop - borderBottom);
+
+      let clientX, clientY;
       if (e.touches && e.touches[0]) {
-        // Touch event
-        x = e.touches[0].clientX - rect.left;
-        y = e.touches[0].clientY - rect.top;
-        console.log('Touch event:', { x, y, rect: { left: rect.left, top: rect.top } });
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
       } else {
-        // Mouse event
-        x = e.clientX - rect.left;
-        y = e.clientY - rect.top;
-        console.log('Mouse event:', { x, y, rect: { left: rect.left, top: rect.top } });
+        clientX = e.clientX;
+        clientY = e.clientY;
       }
+
+      // Convert to content-box coordinates
+      let x = clientX - rect.left - borderLeft;
+      let y = clientY - rect.top - borderTop;
+
+      // Clamp to canvas content
+      x = Math.max(0, Math.min(contentWidth, x));
+      y = Math.max(0, Math.min(contentHeight, y));
       
-      return {
-        x: Math.max(0, Math.min(rect.width, x)),
-        y: Math.max(0, Math.min(rect.height, y))
-      };
+      return { x, y };
     }
 
     let lastPos = null;
