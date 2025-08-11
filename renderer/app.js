@@ -634,13 +634,12 @@
   renderBoard();
   // No dynamic resize needed
 
-  // About
+  // About + System Info version labels
   const versionEl = document.getElementById('version');
-  if (window.appInfo && window.appInfo.version) {
-    versionEl.textContent = window.appInfo.version;
-  } else {
-    versionEl.textContent = '0.1.0';
-  }
+  const versionInfoEl = document.getElementById('versionInfo');
+  const appVersion = (window.appInfo && window.appInfo.version) ? window.appInfo.version : '0.1.0';
+  if (versionEl) versionEl.textContent = appVersion;
+  if (versionInfoEl) versionInfoEl.textContent = appVersion;
 
   // Scroll Test
   const scrollBox = document.getElementById('scrollbox');

@@ -1,7 +1,20 @@
 const { contextBridge, ipcRenderer } = require('electron');
+const path = require('path');
+const fs = require('fs');
+
+function readPackageVersion() {
+  try {
+    const pkgPath = path.join(__dirname, 'package.json');
+    const raw = fs.readFileSync(pkgPath, 'utf8');
+    const pkg = JSON.parse(raw);
+    return String(pkg.version || '0.0.0');
+  } catch {
+    return '0.0.0';
+  }
+}
 
 contextBridge.exposeInMainWorld('appInfo', {
-  version: '0.1.0',
+  version: readPackageVersion(),
 });
 
 contextBridge.exposeInMainWorld('api', {
