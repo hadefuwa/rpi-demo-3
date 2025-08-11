@@ -17,9 +17,6 @@
 
       <main>
         <section id="screen-home" class="screen active">
-          <div class="hero">
-            <img src="../assets/Matrix.png" alt="Matrix Logo" class="logo animated-logo" />
-          </div>
           <div class="grid">
             <button class="card fancy theme-cyan" data-target="screen-touch"><span class="label">Touch Demo</span></button>
             <button class="card fancy theme-purple" data-target="screen-info"><span class="label">System Info</span></button>
@@ -166,8 +163,26 @@
         <section id="screen-stl" class="screen">
           <div class="panel">
             <h2>3D Model (STL)</h2>
-            <div class="note">Drag to rotate. Loading `IM0004.STL` from assets.</div>
-            <canvas id="stlCanvas" width="1024" height="420"></canvas>
+            <div class="note">Use buttons to rotate/zoom. Drag also works.</div>
+            <div class="stl-wrap">
+              <canvas id="stlCanvas" width="840" height="420"></canvas>
+              <div class="stl-controls">
+                <button id="btnStlUp" class="chip big">▲</button>
+                <div class="row">
+                  <button id="btnStlLeft" class="chip big">◀</button>
+                  <button id="btnStlRight" class="chip big">▶</button>
+                </div>
+                <button id="btnStlDown" class="chip big">▼</button>
+                <div class="row">
+                  <button id="btnStlZoomIn" class="chip big">＋</button>
+                  <button id="btnStlZoomOut" class="chip big">－</button>
+                </div>
+                <div class="row">
+                  <button id="btnStlAuto" class="chip big">Auto Rotate</button>
+                  <button id="btnStlReset" class="chip big">Reset</button>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </main>

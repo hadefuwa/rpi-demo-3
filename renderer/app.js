@@ -22,6 +22,8 @@
     const H = stlCanvas.height;
     let triangles = [];
     let angleX = -0.5, angleY = 0.6;
+    let zoom = 8;
+    let autoRotate = false;
     let last = null;
 
     // Basic ASCII STL parser
@@ -51,7 +53,7 @@
       // rotate around Y
       const x2 = x * cy + z * sy;
       const z2 = -x * sy + z * cy;
-      const scale = 8; // scale model to fit
+      const scale = zoom; // scale model to fit
       const px = W / 2 + x2 * scale;
       const py = H / 2 - y * scale;
       return { x: px, y: py, z: z2 };
@@ -69,6 +71,7 @@
 
     function draw() {
       sctx.clearRect(0, 0, W, H);
+      if (autoRotate) angleY += 0.01;
       const light = { x: 0.2, y: -0.6, z: 1 };
       const polys = [];
       for (const t of triangles) {
@@ -147,6 +150,36 @@
       }
       return out;
     }
+
+    // Buttons for rotate/zoom
+    const btnUp = document.getElementById('btnStlUp');
+    const btnDown = document.getElementById('btnStlDown');
+    const btnLeft = document.getElementById('btnStlLeft');
+    const btnRight = document.getElementById('btnStlRight');
+    const btnZoomIn = document.getElementById('btnStlZoomIn');
+    const btnZoomOut = document.getElementById('btnStlZoomOut');
+    const btnAuto = document.getElementById('btnStlAuto');
+    const btnReset = document.getElementById('btnStlReset');
+
+    function onHold(button, repeatMs, fn) {
+      let id = null;
+      const start = () => { fn(); id = setInterval(fn, repeatMs); };
+      const end = () => { if (id) clearInterval(id); id = null; };
+      button?.addEventListener('pointerdown', start);
+      button?.addEventListener('pointerup', end);
+      button?.addEventListener('pointerleave', end);
+      button?.addEventListener('pointercancel', end);
+    }
+
+    onHold(btnUp, 50, () => { angleX -= 0.03; draw(); });
+    onHold(btnDown, 50, () => { angleX += 0.03; draw(); });
+    onHold(btnLeft, 50, () => { angleY -= 0.03; draw(); });
+    onHold(btnRight, 50, () => { angleY += 0.03; draw(); });
+    onHold(btnZoomIn, 50, () => { zoom = Math.min(zoom + 0.3, 30); draw(); });
+    onHold(btnZoomOut, 50, () => { zoom = Math.max(zoom - 0.3, 1); draw(); });
+
+    btnAuto?.addEventListener('click', () => { autoRotate = !autoRotate; draw(); });
+    btnReset?.addEventListener('click', () => { angleX = -0.5; angleY = 0.6; zoom = 8; autoRotate = false; draw(); });
   }
 
   function showScreen(id, pushToStack = true) {
