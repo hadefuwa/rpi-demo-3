@@ -3,9 +3,27 @@ Changelog
 
 All notable changes to this project will be documented here.
 
-Unreleased
-----------
-- Planned: Add logo to Home, Save drawing to PNG, Real System Info (memory/temperature/CPU).
+2025-08-11 – Per-screen CSS split, loader and touch fixes (v0.2.0)
+-----------------------------------------------------------------
+- CSS split by screen and dynamic loader updates
+  - Split monolithic `renderer/styles.css` into `renderer/styles/base.css` and page-specific CSS files (home, games, game, touch, memory, snake, pingpong, stl, info, visuals, settings, about, scroll)
+  - `index.html` now loads `styles/base.css` only; per‑screen CSS auto-loads on demand
+  - `screen-loader.js` now auto-initializes and injects `styles/<screen>.css` when a screen is loaded
+  - Navigation in `app.js` delegates to `screenLoader`, and Home card clicks use event delegation
+  - Fixed null reference errors during dynamic screen loading
+
+- Touch Demo fixes and improvements
+  - Corrected input-to-canvas coordinate mapping (accounts for borders and DPR)
+  - Resizes canvas when the screen is shown and on orientation changes
+  - Increased draw area height to be taller and more responsive
+
+- Kiosk UX
+  - Force-hide mouse cursor across UI elements for touch-first experience
+  - Allow vertical scrolling in `main` while keeping compact layout on short displays
+
+- Home layout tweaks
+  - Compact spacing and reduced card min-height on short screens to avoid overflow
+
 
 2025-01-27 – Comprehensive responsive design system implementation
 ----------------------------------------------------------------

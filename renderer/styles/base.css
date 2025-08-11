@@ -196,4 +196,9 @@ button:focus { outline: 2px solid var(--brand); outline-offset: 2px; }
   main { padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-sm); }
 }
 
+/* Touch-first: force-hide cursor even on interactive elements */
+html, body, #app, main, .screen, button, .chip, .card, .card.fancy, .game-card, a, canvas {
+  cursor: none !important;
+}
+
 
