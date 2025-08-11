@@ -1144,60 +1144,69 @@
     }
   };
 
-  // Tic Tac Toe
-  const boardEl = document.getElementById('board');
-  const statusEl = document.getElementById('status');
-  const resetBtn = document.getElementById('btnReset');
-  let board = Array(9).fill('');
-  let player = 'X';
-
-  function renderBoard() {
-    boardEl.innerHTML = '';
-    for (let i = 0; i < 9; i++) {
-      const btn = document.createElement('button');
-      btn.textContent = board[i];
-      if (board[i]) btn.classList.add(board[i]);
-      btn.addEventListener('click', () => place(i));
-      boardEl.appendChild(btn);
+  // Tic Tac Toe (initialized when screen is shown)
+  function initTicTacToe() {
+    const boardEl = document.getElementById('board');
+    const statusEl = document.getElementById('status');
+    const resetBtn = document.getElementById('btnReset');
+    if (!boardEl || !statusEl || !resetBtn) {
+      // Retry shortly in case DOM is not yet attached
+      setTimeout(initTicTacToe, 100);
+      return;
     }
-  }
 
-  function checkWinner(b) {
-    const w = [
-      [0,1,2],[3,4,5],[6,7,8],
-      [0,3,6],[1,4,7],[2,5,8],
-      [0,4,8],[2,4,6]
-    ];
-    for (const [a,b2,c] of w) {
-      if (b[a] && b[a] === b[b2] && b[a] === b[c]) return b[a];
+    let board = Array(9).fill('');
+    let player = 'X';
+
+    function checkWinner(b) {
+      const w = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+      for (const [a,b2,c] of w) {
+        if (b[a] && b[a] === b[b2] && b[a] === b[c]) return b[a];
+      }
+      if (b.every(x => x)) return 'Draw';
+      return '';
     }
-    if (b.every(x => x)) return 'Draw';
-    return '';
-  }
 
-  function place(i) {
-    if (board[i]) return;
-    const winnerBefore = checkWinner(board);
-    if (winnerBefore) return;
-    board[i] = player;
-    player = player === 'X' ? 'O' : 'X';
-    const winner = checkWinner(board);
-    if (winner === 'Draw') statusEl.textContent = 'Draw';
-    else if (winner) statusEl.textContent = `${winner} wins`;
-    else statusEl.textContent = `${player}'s move`;
-    renderBoard();
-  }
+    function renderBoard() {
+      boardEl.innerHTML = '';
+      for (let i = 0; i < 9; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = board[i];
+        if (board[i]) btn.classList.add(board[i]);
+        btn.addEventListener('click', () => place(i));
+        boardEl.appendChild(btn);
+      }
+    }
 
-  function resetGame() {
-    board = Array(9).fill('');
-    player = 'X';
+    function place(i) {
+      if (board[i]) return;
+      const winnerBefore = checkWinner(board);
+      if (winnerBefore) return;
+      board[i] = player;
+      player = player === 'X' ? 'O' : 'X';
+      const winner = checkWinner(board);
+      if (winner === 'Draw') statusEl.textContent = 'Draw';
+      else if (winner) statusEl.textContent = `${winner} wins`;
+      else statusEl.textContent = `${player}'s move`;
+      renderBoard();
+    }
+
+    function resetGame() {
+      board = Array(9).fill('');
+      player = 'X';
+      statusEl.textContent = 'Your move';
+      renderBoard();
+    }
+
+    resetBtn.addEventListener('click', resetGame);
     statusEl.textContent = 'Your move';
     renderBoard();
   }
-
-  resetBtn.addEventListener('click', resetGame);
-  renderBoard();
-  // No dynamic resize needed
+  window.initTicTacToe = initTicTacToe;
 
   // About + System Info version labels
   const versionEl = document.getElementById('version');

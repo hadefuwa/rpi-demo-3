@@ -150,6 +150,12 @@ class ScreenLoader {
           window.initGamesHub();
         }
         break;
+      case 'game':
+        // Initialize tic tac toe
+        if (window.initTicTacToe) {
+          window.initTicTacToe();
+        }
+        break;
       case 'snake':
         // Initialize snake game
         if (window.initSnake) {
