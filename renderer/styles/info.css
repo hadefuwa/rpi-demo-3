@@ -22,6 +22,9 @@
 .stat-value { font-size: clamp(24px, 6vw, 32px); font-weight: bold; color: var(--brand); margin: var(--spacing-sm) 0; }
 
 .system-details { display: flex; gap: var(--spacing-lg); margin: var(--spacing-lg) 0; flex-wrap: wrap; }
+
+/* We'll handle vertical swipe scrolling via JS on this screen */
+#screen-info { touch-action: none; }
 .detail-section { flex: 1; min-width: min(300px, 100%); }
 .detail-section h3 { margin-bottom: var(--spacing-sm); font-size: var(--font-lg); }
 .detail-grid { display: grid; gap: var(--spacing-sm); }

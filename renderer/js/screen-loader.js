@@ -65,9 +65,9 @@ class ScreenLoader {
       // Show the screen
       this.showScreen(screenName);
       
-      // Add to history if requested
-      if (addToHistory) {
-        this.addToHistory(screenName);
+      // Add to history if requested (legacy app.js manages history now)
+      if (addToHistory && window.addToNavigationHistory) {
+        window.addToNavigationHistory(`screen-${screenName}`);
       }
 
       // Initialize screen-specific functionality

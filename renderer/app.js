@@ -598,7 +598,8 @@
     // Delegate to dynamic ScreenLoader; map id like 'screen-info' -> 'info'
     const name = id && id.startsWith('screen-') ? id.slice(7) : id;
     if (window.screenLoader && name) {
-      window.screenLoader.loadScreen(name, pushToStack);
+      // We manage history ourselves, so always pass false to loader
+      window.screenLoader.loadScreen(name, false);
       if (pushToStack) {
         addToNavigationHistory(id);
       }
@@ -619,13 +620,9 @@
   btnBack.addEventListener('click', () => {
     if (navStack.length === 0) return;
     const prev = navStack.pop();
-    // prev is an id like 'screen-touch' if pushed from showScreen; normalize
     const normalized = prev.startsWith('screen-') ? prev.slice(7) : prev;
-    if (window.screenLoader) {
-      window.screenLoader.loadScreen(normalized, false);
-    } else {
-      showScreen(`screen-${normalized}`, false);
-    }
+    // Use our unified showScreen to ensure consistent history behavior
+    showScreen(`screen-${normalized}`, false);
     updateBackEnabled();
   });
 
@@ -669,14 +666,26 @@
 
   // No clock on home screen anymore
 
-  // Touch paint - wait for DOM to be ready
+  // Touch paint - initialize when the screen is loaded/active
+  let touchInitAttempts = 0;
   function initTouchDemo() {
     console.log('initTouchDemo called');
     
     const canvas = document.getElementById('paint');
     if (!canvas) {
-      console.log('Canvas not ready yet, retrying...');
-      setTimeout(initTouchDemo, 100);
+      const touchScreen = document.getElementById('screen-touch');
+      const isActive = !!(touchScreen && touchScreen.classList.contains('active'));
+      if (!isActive) {
+        // Screen not active/loaded yet; do not spam retries
+        return;
+      }
+      if (touchInitAttempts < 20) {
+        touchInitAttempts++;
+        console.log('Canvas not ready yet, retrying...');
+        setTimeout(initTouchDemo, 100);
+      } else {
+        console.warn('Touch canvas not found after multiple retries.');
+      }
       return;
     }
 
@@ -688,6 +697,7 @@
       resizeCanvas(canvas, width, height);
     } catch {}
 
+    touchInitAttempts = 0;
     console.log('Canvas found:', canvas);
     console.log('Canvas dimensions:', { width: canvas.width, height: canvas.height });
     console.log('Canvas style:', canvas.style);
@@ -1186,11 +1196,76 @@
     const screenName = e?.detail?.screenName;
     if (screenName === 'info') {
       setTimeout(initDashboard, 50);
+      enableInfoSwipeScroll();
     } else {
       // Leaving info screen: stop timers to avoid background work
       stopAutoRefresh();
+      disableInfoSwipeScroll();
     }
   });
+
+  // Simple inertial touch swipe -> vertical scroll for System Info
+  let infoSwipe = { el: null, active: false, startY: 0, lastY: 0, velY: 0, raf: 0 };
+  function enableInfoSwipeScroll() {
+    const el = document.getElementById('screen-info');
+    if (!el) return;
+    infoSwipe.el = el;
+
+    const onStart = (e) => {
+      infoSwipe.active = true;
+      const t = e.touches ? e.touches[0] : e;
+      infoSwipe.startY = t.clientY;
+      infoSwipe.lastY = t.clientY;
+      infoSwipe.velY = 0;
+    };
+    const onMove = (e) => {
+      if (!infoSwipe.active) return;
+      const t = e.touches ? e.touches[0] : e;
+      const dy = t.clientY - infoSwipe.lastY;
+      infoSwipe.lastY = t.clientY;
+      infoSwipe.velY = dy;
+      // Apply inverse delta to scroll vertically
+      infoSwipe.el.scrollTop -= dy;
+      e.preventDefault();
+    };
+    const onEnd = () => {
+      infoSwipe.active = false;
+      // Simple inertia
+      const decay = 0.95;
+      const step = () => {
+        if (Math.abs(infoSwipe.velY) < 0.5) { infoSwipe.raf = 0; return; }
+        infoSwipe.el.scrollTop -= infoSwipe.velY;
+        infoSwipe.velY *= decay;
+        infoSwipe.raf = requestAnimationFrame(step);
+      };
+      if (!infoSwipe.raf) infoSwipe.raf = requestAnimationFrame(step);
+    };
+
+    el.addEventListener('touchstart', onStart, { passive: false });
+    el.addEventListener('touchmove', onMove, { passive: false });
+    el.addEventListener('touchend', onEnd, { passive: false });
+    // Mouse drag support if needed
+    el.addEventListener('mousedown', onStart);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onEnd);
+
+    el._infoSwipeHandlers = { onStart, onMove, onEnd };
+  }
+
+  function disableInfoSwipeScroll() {
+    const el = document.getElementById('screen-info');
+    if (!el || !el._infoSwipeHandlers) return;
+    const { onStart, onMove, onEnd } = el._infoSwipeHandlers;
+    el.removeEventListener('touchstart', onStart);
+    el.removeEventListener('touchmove', onMove);
+    el.removeEventListener('touchend', onEnd);
+    el.removeEventListener('mousedown', onStart);
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('mouseup', onEnd);
+    if (infoSwipe.raf) cancelAnimationFrame(infoSwipe.raf);
+    infoSwipe.raf = 0;
+    el._infoSwipeHandlers = null;
+  }
 
   // Tic Tac Toe (initialized when screen is shown)
   function initTicTacToe() {
@@ -1518,34 +1593,15 @@
     }
   }
 
-  // Initialize memory game when elements are available
-  if (btnMemoryReset) {
-    btnMemoryReset.addEventListener('click', initMemory);
-  }
-
-  // Initialize the game when the screen becomes active
-  if (memoryGrid) {
-    // Wait a bit for DOM to be ready
-    setTimeout(initMemory, 100);
-  }
-
-  // Add event listener for when memory screen becomes active
-  document.addEventListener('DOMContentLoaded', () => {
-    // Set up screen change listener for memory game
-    const memoryScreen = document.getElementById('screen-memory');
-    if (memoryScreen) {
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-            if (memoryScreen.classList.contains('active')) {
-              // Memory screen just became active, initialize the game
-              setTimeout(initMemory, 100);
-            }
-          }
-        });
-      });
-
-      observer.observe(memoryScreen, { attributes: true });
+  // Expose and initialize Memory when the screen is shown
+  window.initMemory = initMemory;
+  window.addEventListener('screenChanged', (e) => {
+    if (e?.detail?.screenName === 'memory') {
+      setTimeout(() => {
+        const resetBtnLive = document.getElementById('btnMemoryReset');
+        if (resetBtnLive) resetBtnLive.onclick = initMemory;
+        initMemory();
+      }, 50);
     }
   });
 
@@ -1725,6 +1781,8 @@
     // Initial render
     renderPingPong();
   }
+  // expose for dynamic loader
+  window.initPingPong = initPingPong;
 
   function setupPingPongControls() {
     // Keyboard controls
@@ -1748,13 +1806,15 @@
     });
     
     // Touch controls for mobile
+    const canvasEl = pingPongGame.canvas;
+    if (!canvasEl) return;
     let touchStartY = 0;
-    canvas.addEventListener('touchstart', (e) => {
+    canvasEl.addEventListener('touchstart', (e) => {
       e.preventDefault();
       touchStartY = e.touches[0].clientY;
-    });
+    }, { passive: false });
     
-    canvas.addEventListener('touchmove', (e) => {
+    canvasEl.addEventListener('touchmove', (e) => {
       if (!pingPongGame.isRunning || pingPongGame.isPaused) return;
       e.preventDefault();
       
@@ -1765,7 +1825,7 @@
         movePlayerPaddle(deltaY > 0 ? pingPongGame.playerPaddle.speed : -pingPongGame.playerPaddle.speed);
         touchStartY = touchY;
       }
-    });
+    }, { passive: false });
   }
 
   function movePlayerPaddle(deltaY) {
@@ -2329,25 +2389,12 @@
     scrollBox.addEventListener('pointerleave', endDrag);
   }
 
-  // Initialize the touch demo
-  initTouchDemo();
-  
-  // Also reinitialize when the touch screen becomes active
-  const touchScreen = document.getElementById('screen-touch');
-  if (touchScreen) {
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-          if (touchScreen.classList.contains('active')) {
-            console.log('Touch screen became active, reinitializing...');
-            setTimeout(initTouchDemo, 100);
-          }
-        }
-      });
-    });
-    
-    observer.observe(touchScreen, { attributes: true });
-  }
+  // Initialize touch demo when the touch screen is shown
+  window.addEventListener('screenChanged', (e) => {
+    if (e?.detail?.screenName === 'touch') {
+      setTimeout(initTouchDemo, 50);
+    }
+  });
 
   // Snake game controls
   const btnSnakeEasy = document.getElementById('btnSnakeEasy');
