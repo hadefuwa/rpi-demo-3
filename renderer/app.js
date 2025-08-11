@@ -901,6 +901,14 @@
         sctx2.fillRect(seg.x*cell, seg.y*cell, cell-1, cell-1);
       }
     }
+    let stepTimer = null;
+    let stepDelayMs = 140; // default speed
+
+    function restartLoop() {
+      if (stepTimer) clearInterval(stepTimer);
+      stepTimer = setInterval(step, stepDelayMs);
+    }
+
     function step() {
       if (!alive) return;
       const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
@@ -913,7 +921,7 @@
       }
       drawSnake();
     }
-    setInterval(step, 140);
+    restartLoop();
     document.querySelectorAll('.dir').forEach(b=>{
       b.addEventListener('click',()=>{
         const dx = parseInt(b.getAttribute('data-dx'),10);
@@ -924,7 +932,17 @@
       });
     });
     document.getElementById('btnSnakeReset')?.addEventListener('click',()=>{
-      snake=[{x:12,y:8}]; dir={x:1,y:0}; alive=true; drawSnake();
+      snake=[{x:12,y:8}]; dir={x:1,y:0}; alive=true; drawSnake(); restartLoop();
+    });
+
+    // Difficulty buttons
+    document.getElementById('btnSnakeEasy')?.addEventListener('click', () => {
+      stepDelayMs = 180; // slower
+      restartLoop();
+    });
+    document.getElementById('btnSnakeHard')?.addEventListener('click', () => {
+      stepDelayMs = 90; // faster
+      restartLoop();
     });
     drawSnake();
   }
