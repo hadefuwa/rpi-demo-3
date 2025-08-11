@@ -22,10 +22,11 @@
     const H = stlCanvas.height;
     let triangles = [];
     let angleX = -0.5, angleY = 0.6;
-    let zoom = 2; // start far out
+    let zoom = 3; // increased from 2 for better model visibility
     let modelCenter = { x: 0, y: 0, z: 0 };
     let autoRotate = false;
     let last = null;
+    let time = 0; // for animated background
 
     // Basic ASCII STL parser
     function parseSTL(text) {
@@ -41,6 +42,68 @@
         }
       }
       return tri; // array of [v1,v2,v3]
+    }
+
+    // Fit model to view by calculating center and adjusting zoom
+    function fitModelToView() {
+      if (triangles.length === 0) return;
+      
+      // Calculate bounding box
+      let minX = Infinity, minY = Infinity, minZ = Infinity;
+      let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+      
+      for (const tri of triangles) {
+        for (const v of tri) {
+          minX = Math.min(minX, v.x);
+          minY = Math.min(minY, v.y);
+          minZ = Math.min(minZ, v.z);
+          maxX = Math.max(maxX, v.x);
+          maxY = Math.max(maxY, v.y);
+          maxZ = Math.max(maxZ, v.z);
+        }
+      }
+      
+      // Calculate center
+      modelCenter.x = (minX + maxX) / 2;
+      modelCenter.y = (minY + maxY) / 2;
+      modelCenter.z = (minZ + maxZ) / 2;
+      
+      // Calculate size and adjust zoom if needed
+      const sizeX = maxX - minX;
+      const sizeY = maxY - minY;
+      const sizeZ = maxZ - minZ;
+      const maxSize = Math.max(sizeX, sizeY, sizeZ);
+      
+      // Adjust zoom to fit model nicely in view
+      if (maxSize > 0) {
+        const targetZoom = Math.min(W, H) / (maxSize * 1.5);
+        zoom = Math.max(0.5, Math.min(targetZoom, 8));
+      }
+    }
+
+    // Parse binary STL files
+    function parseBinarySTL(bytes) {
+      if (bytes.length < 84) return [];
+      
+      const triangles = [];
+      const numTriangles = new DataView(bytes.buffer, 80, 4).getUint32(0, true);
+      
+      for (let i = 0; i < numTriangles; i++) {
+        const offset = 84 + i * 50;
+        if (offset + 50 > bytes.length) break;
+        
+        const triangle = [];
+        for (let j = 0; j < 3; j++) {
+          const vOffset = offset + 12 + j * 12;
+          const x = new DataView(bytes.buffer, vOffset, 4).getFloat32(0, true);
+          const y = new DataView(bytes.buffer, vOffset + 4, 4).getFloat32(0, true);
+          const z = new DataView(bytes.buffer, vOffset + 8, 4).getFloat32(0, true);
+          triangle.push({ x, y, z });
+        }
+        triangles.push(triangle);
+      }
+      
+      return triangles;
     }
 
     // Simple projection
@@ -74,25 +137,74 @@
       return { x: nx / len, y: ny / len, z: nz / len };
     }
 
-    // Starry background for STL canvas
+    // Enhanced animated starlight background for STL canvas
     const stars = Array.from({ length: 140 }, () => ({
       x: Math.random() * W,
       y: Math.random() * H,
       r: Math.random() * 1.5 + 0.5,
       t: Math.random() * Math.PI * 2,
+      speed: Math.random() * 0.5 + 0.1, // varying speeds for parallax
+      depth: Math.random() * 0.5 + 0.5, // depth for 3D effect
+      twinkle: Math.random() * Math.PI * 2, // individual twinkle phase
     }));
 
     function draw() {
-      // Space background
-      sctx.fillStyle = '#0b0e13';
+      time += 0.016; // increment time for animations
+      
+      // Enhanced space background with subtle gradient movement
+      const gradientX = (Math.sin(time * 0.1) * 0.1 + 0.5) * W;
+      const gradientY = (Math.cos(time * 0.08) * 0.1 + 0.5) * H;
+      
+      // Create animated radial gradient background
+      const gradient = sctx.createRadialGradient(gradientX, gradientY, 0, gradientX, gradientY, H * 0.8);
+      gradient.addColorStop(0, '#0b0e13');
+      gradient.addColorStop(0.3, '#0d0f14');
+      gradient.addColorStop(0.7, '#0f1116');
+      gradient.addColorStop(1, '#0b0e13');
+      sctx.fillStyle = gradient;
       sctx.fillRect(0, 0, W, H);
+      
+      // Enhanced animated stars with movement and parallax
       for (const s of stars) {
-        const a = 0.6 + 0.4 * Math.sin(s.t);
-        s.t += 0.02;
-        sctx.fillStyle = `rgba(255,255,255,${a})`;
+        // Parallax movement based on depth
+        s.x += Math.sin(time * s.speed) * s.depth * 0.5;
+        s.y += Math.cos(time * s.speed * 0.7) * s.depth * 0.3;
+        
+        // Wrap stars around screen edges
+        if (s.x < -10) s.x = W + 10;
+        if (s.x > W + 10) s.x = -10;
+        if (s.y < -10) s.y = H + 10;
+        if (s.y > H + 10) s.y = -10;
+        
+        // Enhanced twinkling with multiple effects
+        const baseAlpha = 0.6 + 0.4 * Math.sin(s.t + time * 2);
+        const twinkleAlpha = 0.3 + 0.7 * Math.sin(s.twinkle + time * 3);
+        const finalAlpha = baseAlpha * twinkleAlpha;
+        
+        // Color variation based on depth and time
+        const hue = 200 + Math.sin(time * 0.5 + s.depth) * 20;
+        const saturation = 20 + Math.sin(time * 0.3) * 10;
+        const lightness = 60 + Math.sin(time * 0.4) * 20;
+        
+        sctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${finalAlpha})`;
         sctx.beginPath();
-        sctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        sctx.arc(s.x, s.y, s.r * s.depth, 0, Math.PI * 2);
         sctx.fill();
+        
+        // Add subtle glow effect for brighter stars
+        if (finalAlpha > 0.7) {
+          const glowGradient = sctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 3);
+          glowGradient.addColorStop(0, `hsla(${hue}, ${saturation}%, ${lightness}%, ${finalAlpha * 0.3})`);
+          glowGradient.addColorStop(1, 'transparent');
+          sctx.fillStyle = glowGradient;
+          sctx.beginPath();
+          sctx.arc(s.x, s.y, s.r * 3, 0, Math.PI * 2);
+          sctx.fill();
+        }
+        
+        // Update animation phases
+        s.t += 0.02;
+        s.twinkle += 0.03;
       }
 
       if (autoRotate) angleY += 0.01;
@@ -133,6 +245,78 @@
       draw();
     });
 
+    // Add zoom controls
+    document.getElementById('btnStlZoomIn')?.addEventListener('click', () => {
+      zoom = Math.min(zoom * 1.2, 8);
+      draw();
+    });
+    
+    document.getElementById('btnStlZoomOut')?.addEventListener('click', () => {
+      zoom = Math.max(zoom / 1.2, 0.5);
+      draw();
+    });
+
+    // Add rotation controls
+    document.getElementById('btnStlUp')?.addEventListener('click', () => {
+      angleX -= 0.1;
+      draw();
+    });
+    
+    document.getElementById('btnStlDown')?.addEventListener('click', () => {
+      angleX += 0.1;
+      draw();
+    });
+    
+    document.getElementById('btnStlLeft')?.addEventListener('click', () => {
+      angleY -= 0.1;
+      draw();
+    });
+    
+    document.getElementById('btnStlRight')?.addEventListener('click', () => {
+      angleY += 0.1;
+      draw();
+    });
+
+    // Auto-rotate toggle
+    document.getElementById('btnStlAuto')?.addEventListener('click', () => {
+      autoRotate = !autoRotate;
+      const btn = document.getElementById('btnStlAuto');
+      if (btn) btn.textContent = autoRotate ? 'Stop Rotate' : 'Auto Rotate';
+      if (autoRotate) {
+        // Start continuous animation loop for background
+        function animateBackground() {
+          if (autoRotate) {
+            draw();
+            requestAnimationFrame(animateBackground);
+          }
+        }
+        animateBackground();
+      }
+    });
+
+    // Reset view
+    document.getElementById('btnStlReset')?.addEventListener('click', () => {
+      angleX = -0.5;
+      angleY = 0.6;
+      zoom = 3; // reset to new default zoom
+      autoRotate = false;
+      const btn = document.getElementById('btnStlAuto');
+      if (btn) btn.textContent = 'Auto Rotate';
+      draw();
+    });
+
+    // Model switching functionality
+    document.querySelectorAll('[data-model]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const modelName = btn.getAttribute('data-model');
+        await loadModelByName(modelName);
+        
+        // Update active button state
+        document.querySelectorAll('[data-model]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
     // Load STL via main process. Try ASCII first, then binary STL.
     async function loadModelByName(name) {
       try {
@@ -149,19 +333,34 @@
             ok = true;
           }
         }
-        if (ok) { fitModelToView(); draw(); }
+        if (ok) { fitModelToView(); draw(); } 
         else { sctx.fillStyle = '#fff'; sctx.fillText('Failed to load '+name, 20, 30); }
       } catch {
         sctx.fillStyle = '#fff'; sctx.fillText('Failed to load '+name, 20, 30);
       }
     }
 
+    // Start continuous background animation loop
+    function animateBackground() {
+      time += 0.016;
+      draw();
+      requestAnimationFrame(animateBackground);
+    }
+
     (async () => {
       try {
         await loadModelByName('cad1.stl');
+        // Start the continuous background animation
+        animateBackground();
+        
+        // Set first model as active by default
+        const firstModelBtn = document.querySelector('[data-model="cad1.stl"]');
+        if (firstModelBtn) firstModelBtn.classList.add('active');
       } catch {
         sctx.fillStyle = '#fff';
         sctx.fillText('Select a model to view', 20, 30);
+        // Start background animation even without model
+        animateBackground();
       }
     })();
 
@@ -546,48 +745,126 @@
   const btnMemoryReset = document.getElementById('btnMemoryReset');
   let memoryTiles = [];
   let memoryRevealed = [];
+  
   function initMemory() {
-    const emojis = ['🍎','🍊','🍋','🍉','🍇','🍓','🍒','🍑'];
+    // Use more reliable emojis and ensure they're properly encoded
+    const emojis = ['🍎', '🍊', '🍋', '🍉', '🍇', '🍓', '🍒', '🍑'];
     const deck = [...emojis, ...emojis];
-    deck.sort(() => Math.random() - 0.5);
-    memoryTiles = deck.map((e, i) => ({ id: i, emoji: e, matched: false, revealed: false }));
+    // Shuffle the deck
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    
+    memoryTiles = deck.map((emoji, i) => ({ 
+      id: i, 
+      emoji: emoji, 
+      matched: false, 
+      revealed: false 
+    }));
+    
+    memoryRevealed = [];
     renderMemory();
-    memoryStatus.textContent = 'Find all pairs';
+    if (memoryStatus) memoryStatus.textContent = 'Find all pairs!';
   }
+  
   function renderMemory() {
     if (!memoryGrid) return;
+    
     memoryGrid.innerHTML = '';
-    for (const t of memoryTiles) {
-      const d = document.createElement('div');
-      d.className = 'card-tile';
-      if (t.revealed) d.classList.add('revealed');
-      if (t.matched) d.classList.add('matched');
-      d.textContent = t.revealed || t.matched ? t.emoji : '❔';
-      d.addEventListener('click', () => flipTile(t.id));
-      memoryGrid.appendChild(d);
+    
+    for (const tile of memoryTiles) {
+      const tileElement = document.createElement('div');
+      tileElement.className = 'card-tile';
+      
+      if (tile.revealed) tileElement.classList.add('revealed');
+      if (tile.matched) tileElement.classList.add('matched');
+      
+      // Set the content - show emoji if revealed or matched, otherwise show question mark
+      const content = (tile.revealed || tile.matched) ? tile.emoji : '❓';
+      tileElement.textContent = content;
+      
+      // Add click handler
+      tileElement.addEventListener('click', () => flipTile(tile.id));
+      
+      memoryGrid.appendChild(tileElement);
     }
   }
+  
   function flipTile(id) {
-    const t = memoryTiles.find(x => x.id === id);
-    if (!t || t.matched || t.revealed) return;
-    t.revealed = true;
-    memoryRevealed.push(t);
+    const tile = memoryTiles.find(t => t.id === id);
+    if (!tile || tile.matched || tile.revealed) return;
+    
+    // Reveal this tile
+    tile.revealed = true;
+    memoryRevealed.push(tile);
+    
+    // Re-render to show the emoji
     renderMemory();
+    
+    // Check if we have two revealed tiles
     if (memoryRevealed.length === 2) {
-      const [a, b] = memoryRevealed;
-      if (a.emoji === b.emoji) {
-        a.matched = b.matched = true;
-        memoryStatus.textContent = 'Good match!';
+      const [first, second] = memoryRevealed;
+      
+      if (first.emoji === second.emoji) {
+        // Match found!
+        first.matched = true;
+        second.matched = true;
+        if (memoryStatus) memoryStatus.textContent = 'Great match! 🎉';
+        
+        // Check if all pairs are found
+        if (memoryTiles.every(t => t.matched)) {
+          if (memoryStatus) memoryStatus.textContent = 'Congratulations! All pairs found! 🎊';
+        }
       } else {
-        memoryStatus.textContent = 'Try again';
-        setTimeout(() => { a.revealed = b.revealed = false; renderMemory(); }, 700);
+        // No match, hide them after a delay
+        if (memoryStatus) memoryStatus.textContent = 'Try again!';
+        
+        setTimeout(() => {
+          first.revealed = false;
+          second.revealed = false;
+          renderMemory();
+        }, 1000);
       }
+      
+      // Clear the revealed array
       memoryRevealed = [];
-      if (memoryTiles.every(x => x.matched)) memoryStatus.textContent = 'All pairs found!';
+    } else {
+      // First tile flipped
+      if (memoryStatus) memoryStatus.textContent = 'Find the matching pair!';
     }
   }
-  btnMemoryReset?.addEventListener('click', initMemory);
-  if (memoryGrid) initMemory();
+  
+  // Initialize memory game when elements are available
+  if (btnMemoryReset) {
+    btnMemoryReset.addEventListener('click', initMemory);
+  }
+  
+  // Initialize the game when the screen becomes active
+  if (memoryGrid) {
+    // Wait a bit for DOM to be ready
+    setTimeout(initMemory, 100);
+  }
+
+  // Add event listener for when memory screen becomes active
+  document.addEventListener('DOMContentLoaded', () => {
+    // Set up screen change listener for memory game
+    const memoryScreen = document.getElementById('screen-memory');
+    if (memoryScreen) {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            if (memoryScreen.classList.contains('active')) {
+              // Memory screen just became active, initialize the game
+              setTimeout(initMemory, 100);
+            }
+          }
+        });
+      });
+      
+      observer.observe(memoryScreen, { attributes: true });
+    }
+  });
 
   // Snake
   const snakeCanvas = document.getElementById('snakeCanvas');
@@ -878,6 +1155,8 @@
     scrollBox.addEventListener('pointerleave', endDrag);
   }
 })();
+
+
 
 
 
