@@ -22,7 +22,7 @@
     const H = stlCanvas.height;
     let triangles = [];
     let angleX = -0.5, angleY = 0.6;
-    let zoom = 8;
+    let zoom = 4; // further out by default
     let autoRotate = false;
     let last = null;
 
