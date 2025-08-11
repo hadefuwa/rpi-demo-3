@@ -231,6 +231,13 @@
       }
     }
 
+    // Enhanced continuous background animation loop with star movement
+    function animateBackground() {
+      time += 0.016;
+      draw();
+      requestAnimationFrame(animateBackground);
+    }
+
     // Drag to rotate
     stlCanvas.addEventListener('pointerdown', (e) => { last = { x: e.clientX, y: e.clientY }; });
     stlCanvas.addEventListener('pointerup', () => { last = null; });
@@ -283,14 +290,8 @@
       const btn = document.getElementById('btnStlAuto');
       if (btn) btn.textContent = autoRotate ? 'Stop Rotate' : 'Auto Rotate';
       if (autoRotate) {
-        // Start continuous animation loop for background
-        function animateBackground() {
-          if (autoRotate) {
-            draw();
-            requestAnimationFrame(animateBackground);
-          }
-        }
-        animateBackground();
+        // Auto-rotate is now handled by the global animateBackground loop
+        // The stars will continue moving regardless of auto-rotate state
       }
     });
 
@@ -340,12 +341,7 @@
       }
     }
 
-    // Start continuous background animation loop
-    function animateBackground() {
-      time += 0.016;
-      draw();
-      requestAnimationFrame(animateBackground);
-    }
+
 
     (async () => {
       try {
@@ -783,6 +779,18 @@
       // Set the content - show emoji if revealed or matched, otherwise show question mark
       const content = (tile.revealed || tile.matched) ? tile.emoji : '❓';
       tileElement.textContent = content;
+      // If Twemoji is available, parse to images to avoid missing glyphs on Linux
+      if (window.twemoji) {
+        const parsed = window.twemoji.parse(tileElement, { folder: 'svg', ext: '.svg' });
+        // Ensure emoji images are centered and sized
+        const imgs = tileElement.querySelectorAll('img.emoji');
+        imgs.forEach(img => {
+          img.style.width = '36px';
+          img.style.height = '36px';
+          img.style.margin = '0 auto';
+          img.style.display = 'block';
+        });
+      }
       
       // Add click handler
       tileElement.addEventListener('click', () => flipTile(tile.id));
