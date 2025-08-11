@@ -211,6 +211,7 @@ main { flex: 1; padding: 12px 16px 16px; }
   padding: 8px;
   border-radius: 26px;
   background: conic-gradient(from 0deg, #6bcbef, #9d7cf3, #6bcbef);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -222,6 +223,7 @@ main { flex: 1; padding: 12px 16px 16px; }
   padding: 10px; 
   border-radius: 28px;
   background: conic-gradient(from 0deg, #9d7cf3, #ff8ad4, #9d7cf3);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -257,6 +259,7 @@ main { flex: 1; padding: 12px 16px 16px; }
   padding: 6px; 
   border-radius: 24px;
   background: conic-gradient(from 0deg, #adff2f, #6bcbef, #adff2f);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
