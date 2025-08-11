@@ -644,12 +644,55 @@
   // Scroll Test
   const scrollBox = document.getElementById('scrollbox');
   if (scrollBox) {
-    for (let i = 1; i <= 100; i++) {
+    for (let i = 1; i <= 80; i++) {
       const item = document.createElement('div');
       item.className = 'scroll-item';
-      item.textContent = `Item ${i}`;
+      const disc = document.createElement('div');
+      disc.className = 'scroll-disc';
+      const label = document.createElement('div');
+      label.className = 'scroll-label';
+      label.textContent = `Spinny ${i}`;
+      item.appendChild(disc);
+      item.appendChild(label);
       scrollBox.appendChild(item);
     }
+
+    // Spin/roll transforms based on position + scroll velocity
+    let lastTop = scrollBox.scrollTop;
+    let vel = 0;
+    let rafId = 0;
+    function updateSpin() {
+      const h = scrollBox.clientHeight;
+      const center = scrollBox.scrollTop + h / 2;
+      const children = Array.from(scrollBox.children);
+      const dt = scrollBox.scrollTop - lastTop;
+      lastTop = scrollBox.scrollTop;
+      vel = vel * 0.85 + dt * 0.15;
+      for (const el of children) {
+        const mid = el.offsetTop + el.offsetHeight / 2;
+        const d = (mid - center) / (h / 2);
+        const clamped = Math.max(-1, Math.min(1, d));
+        const depth = 1 - Math.abs(clamped);
+        const translateZ = depth * 70;
+        const rotateX = clamped * 40;
+        const scale = 0.92 + depth * 0.12;
+        const opacity = 0.35 + depth * 0.65;
+        el.style.transform = `translateZ(${translateZ}px) rotateX(${rotateX}deg) scale(${scale})`;
+        el.style.opacity = String(opacity);
+        const disc = el.querySelector('.scroll-disc');
+        if (disc) {
+          const spin = (mid - center) * 0.2 + vel * 2.5;
+          disc.style.transform = `translateZ(1px) rotate(${spin}deg)`;
+        }
+      }
+      rafId = 0;
+    }
+    function onScroll() {
+      if (!rafId) rafId = requestAnimationFrame(updateSpin);
+    }
+    scrollBox.addEventListener('scroll', onScroll, { passive: true });
+    requestAnimationFrame(updateSpin);
+  }
 
   // Settings
   const chkSound = document.getElementById('chkSound');

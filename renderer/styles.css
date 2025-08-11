@@ -588,15 +588,31 @@ button:active { transform: translateY(1px); }
   touch-action: pan-y; /* allow finger vertical panning */
   border-radius: 8px;
   border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(0,0,0,0.2);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.005));
   padding: 8px;
+  perspective: 800px; /* enable 3D transforms of children */
 }
 .scroll-item {
-  padding: 12px;
-  margin-bottom: 8px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: linear-gradient(180deg, rgba(107,203,239,0.08), rgba(157,124,243,0.05));
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  box-shadow: 0 10px 28px var(--shadow);
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  align-items: center;
+}
+
+.scroll-label { font-weight: 600; color: var(--fg); }
+.scroll-disc {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #6bcbef, #9d7cf3, #ffd93d, #6bcbef);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.2), 0 4px 10px rgba(0,0,0,0.3);
 }
 
 
