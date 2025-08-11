@@ -24,6 +24,7 @@
             <button class="card fancy theme-gold" data-target="screen-game"><span class="label">Tic‑Tac‑Toe</span></button>
             <button class="card fancy theme-teal" data-target="screen-memory"><span class="label">Memory Match</span></button>
             <button class="card fancy theme-pink" data-target="screen-snake"><span class="label">Snake</span></button>
+            <button class="card fancy theme-red" data-target="screen-pingpong"><span class="label">Ping Pong</span></button>
             <button class="card fancy theme-white" data-target="screen-scroll"><span class="label">Scroll Test</span></button>
             <button class="card fancy theme-lime" data-target="screen-visuals"><span class="label">Visuals</span></button>
             <button class="card fancy theme-orange" data-target="screen-stl"><span class="label">3D Model</span></button>
@@ -171,22 +172,44 @@
 
         <section id="screen-snake" class="screen">
           <div class="panel">
-            <h2>Snake</h2>
-            <div class="snake-wrap">
-              <canvas id="snakeCanvas" width="480" height="320"></canvas>
-              <div class="snake-controls">
-                <button class="chip dir big" data-dx="0" data-dy="-1">▲</button>
-                <div class="row">
-                  <button class="chip dir big" data-dx="-1" data-dy="0">◀</button>
-                  <button class="chip dir big" data-dx="1" data-dy="0">▶</button>
+            <h2>Snake Game</h2>
+            <div class="game-controls">
+              <button id="btnSnakeEasy" class="chip">Easy</button>
+              <button id="btnSnakeHard" class="chip">Hard</button>
+              <button id="btnSnakeStart" class="chip primary">Start Game</button>
+            </div>
+            <canvas id="snakeCanvas" width="800" height="400"></canvas>
+            <div class="game-info">
+              <span>Score: <span id="snakeScore">0</span></span>
+              <span>High Score: <span id="snakeHighScore">0</span></span>
+            </div>
+          </div>
+        </section>
+
+        <section id="screen-pingpong" class="screen">
+          <div class="panel">
+            <h2>Ping Pong</h2>
+            <div class="game-controls">
+              <button id="btnPingPongStart" class="chip primary">Start Game</button>
+              <button id="btnPingPongPause" class="chip">Pause</button>
+              <button id="btnPingPongReset" class="chip">Reset</button>
+            </div>
+            <div class="ping-pong-container">
+              <canvas id="pingPongCanvas" width="800" height="500"></canvas>
+              <div class="ping-pong-score">
+                <div class="player-score">
+                  <span class="score-label">You</span>
+                  <span class="score-value" id="playerScore">0</span>
                 </div>
-                <button class="chip dir big" data-dx="0" data-dy="1">▼</button>
-                <button id="btnSnakeReset" class="chip big">Reset</button>
-                <div class="row">
-                  <button id="btnSnakeEasy" class="chip big">Easy</button>
-                  <button id="btnSnakeHard" class="chip big">Hard</button>
+                <div class="ai-score">
+                  <span class="score-label">AI</span>
+                  <span class="score-value" id="aiScore">0</span>
                 </div>
               </div>
+            </div>
+            <div class="game-info">
+              <span>First to 11 wins!</span>
+              <span>Use ↑↓ arrows or W/S keys to move</span>
             </div>
           </div>
         </section>

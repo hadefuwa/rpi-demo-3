@@ -954,6 +954,9 @@
       // Small delay to ensure DOM is ready
       setTimeout(initDashboard, 100);
     }
+    if (id === 'screen-pingpong') {
+      setTimeout(initPingPong, 100);
+    }
   };
 
   // Tic Tac Toe
@@ -1304,6 +1307,61 @@
     }
   });
 
+  // Snake Game
+  let snake = [];
+  let snakeFood = {};
+  let snakeDirection = { x: 1, y: 0 };
+  let snakeGameLoop;
+  let snakeScore = 0;
+  let snakeHighScore = 0;
+  let stepDelayMs = 180; // Easy mode default
+
+  // Ping Pong Game
+  let pingPongGame = {
+    canvas: null,
+    ctx: null,
+    isRunning: false,
+    isPaused: false,
+    gameLoop: null,
+    
+    // Game objects
+    ball: {
+      x: 400,
+      y: 250,
+      radius: 8,
+      velocityX: 4,
+      velocityY: 2,
+      speed: 4
+    },
+    
+    playerPaddle: {
+      x: 50,
+      y: 200,
+      width: 12,
+      height: 80,
+      speed: 6,
+      score: 0
+    },
+    
+    aiPaddle: {
+      x: 738,
+      y: 200,
+      width: 12,
+      height: 80,
+      speed: 4,
+      score: 0
+    },
+    
+    // Game settings
+    canvasWidth: 800,
+    canvasHeight: 500,
+    winningScore: 11,
+    
+    // Visual effects
+    particles: [],
+    lastHitTime: 0
+  };
+
   // Snake
   const snakeCanvas = document.getElementById('snakeCanvas');
   if (snakeCanvas) {
@@ -1378,6 +1436,342 @@
       restartLoop();
     });
     drawSnake();
+  }
+
+  // Snake Game Functions
+  function initSnake() {
+    const canvas = document.getElementById('snakeCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    canvas.width = 800;
+    canvas.height = 400;
+    
+    // Initialize snake
+    snake = [
+      { x: 400, y: 200 },
+      { x: 380, y: 200 },
+      { x: 360, y: 200 }
+    ];
+    
+    snakeDirection = { x: 1, y: 0 };
+    snakeScore = 0;
+    generateSnakeFood();
+    
+    // Draw initial state
+    drawSnake();
+  }
+
+  // Ping Pong Game Functions
+  function initPingPong() {
+    const canvas = document.getElementById('pingPongCanvas');
+    if (!canvas) return;
+    
+    pingPongGame.canvas = canvas;
+    pingPongGame.ctx = canvas.getContext('2d');
+    
+    // Set canvas dimensions
+    canvas.width = pingPongGame.canvasWidth;
+    canvas.height = pingPongGame.canvasHeight;
+    
+    // Reset game state
+    resetPingPong();
+    
+    // Set up event listeners
+    setupPingPongControls();
+    
+    // Initial render
+    renderPingPong();
+  }
+
+  function setupPingPongControls() {
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      if (!pingPongGame.isRunning || pingPongGame.isPaused) return;
+      
+      switch(e.key) {
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+          e.preventDefault();
+          movePlayerPaddle(-pingPongGame.playerPaddle.speed);
+          break;
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+          e.preventDefault();
+          movePlayerPaddle(pingPongGame.playerPaddle.speed);
+          break;
+      }
+    });
+    
+    // Touch controls for mobile
+    let touchStartY = 0;
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      touchStartY = e.touches[0].clientY;
+    });
+    
+    canvas.addEventListener('touchmove', (e) => {
+      if (!pingPongGame.isRunning || pingPongGame.isPaused) return;
+      e.preventDefault();
+      
+      const touchY = e.touches[0].clientY;
+      const deltaY = touchY - touchStartY;
+      
+      if (Math.abs(deltaY) > 10) {
+        movePlayerPaddle(deltaY > 0 ? pingPongGame.playerPaddle.speed : -pingPongGame.playerPaddle.speed);
+        touchStartY = touchY;
+      }
+    });
+  }
+
+  function movePlayerPaddle(deltaY) {
+    const newY = pingPongGame.playerPaddle.y + deltaY;
+    pingPongGame.playerPaddle.y = Math.max(0, Math.min(pingPongGame.canvasHeight - pingPongGame.playerPaddle.height, newY));
+  }
+
+  function updatePingPong() {
+    if (!pingPongGame.isRunning || pingPongGame.isPaused) return;
+    
+    // Update ball position
+    pingPongGame.ball.x += pingPongGame.ball.velocityX;
+    pingPongGame.ball.y += pingPongGame.ball.velocityY;
+    
+    // Ball collision with top and bottom walls
+    if (pingPongGame.ball.y <= pingPongGame.ball.radius || 
+        pingPongGame.ball.y >= pingPongGame.canvasHeight - pingPongGame.ball.radius) {
+      pingPongGame.ball.velocityY = -pingPongGame.ball.velocityY;
+      createPingPongParticles(pingPongGame.ball.x, pingPongGame.ball.y);
+    }
+    
+    // Ball collision with paddles
+    if (checkPaddleCollision(pingPongGame.playerPaddle) || 
+        checkPaddleCollision(pingPongGame.aiPaddle)) {
+      pingPongGame.ball.velocityX = -pingPongGame.ball.velocityX;
+      pingPongGame.ball.speed += 0.2; // Increase speed slightly
+      pingPongGame.lastHitTime = Date.now();
+      createPingPongParticles(pingPongGame.ball.x, pingPongGame.ball.y);
+    }
+    
+    // Ball out of bounds - scoring
+    if (pingPongGame.ball.x <= 0) {
+      pingPongGame.aiPaddle.score++;
+      resetBall();
+      checkWinCondition();
+    } else if (pingPongGame.ball.x >= pingPongGame.canvasWidth) {
+      pingPongGame.playerPaddle.score++;
+      resetBall();
+      checkWinCondition();
+    }
+    
+    // AI paddle movement
+    updateAIPaddle();
+    
+    // Update particles
+    updatePingPongParticles();
+  }
+
+  function checkPaddleCollision(paddle) {
+    return pingPongGame.ball.x + pingPongGame.ball.radius >= paddle.x &&
+           pingPongGame.ball.x - pingPongGame.ball.radius <= paddle.x + paddle.width &&
+           pingPongGame.ball.y + pingPongGame.ball.radius >= paddle.y &&
+           pingPongGame.ball.y - pingPongGame.ball.radius <= paddle.y + paddle.height;
+  }
+
+  function updateAIPaddle() {
+    const ai = pingPongGame.aiPaddle;
+    const ball = pingPongGame.ball;
+    
+    // Simple AI: follow the ball with some prediction
+    const targetY = ball.y - ai.height / 2;
+    const currentY = ai.y;
+    
+    if (Math.abs(targetY - currentY) > ai.speed) {
+      if (targetY > currentY) {
+        ai.y += ai.speed;
+      } else {
+        ai.y -= ai.speed;
+      }
+    }
+    
+    // Keep AI paddle within bounds
+    ai.y = Math.max(0, Math.min(pingPongGame.canvasHeight - ai.height, ai.y));
+  }
+
+  function resetBall() {
+    pingPongGame.ball.x = pingPongGame.canvasWidth / 2;
+    pingPongGame.ball.y = pingPongGame.canvasHeight / 2;
+    pingPongGame.ball.velocityX = (Math.random() > 0.5 ? 1 : -1) * pingPongGame.ball.speed;
+    pingPongGame.ball.velocityY = (Math.random() - 0.5) * 2;
+    pingPongGame.ball.speed = 4; // Reset speed
+  }
+
+  function checkWinCondition() {
+    if (pingPongGame.playerPaddle.score >= pingPongGame.winningScore) {
+      endPingPongGame('Player wins!');
+    } else if (pingPongGame.aiPaddle.score >= pingPongGame.winningScore) {
+      endPingPongGame('AI wins!');
+    }
+  }
+
+  function endPingPongGame(message) {
+    pingPongGame.isRunning = false;
+    clearInterval(pingPongGame.gameLoop);
+    alert(message);
+    updatePingPongScore();
+  }
+
+  function createPingPongParticles(x, y) {
+    for (let i = 0; i < 8; i++) {
+      pingPongGame.particles.push({
+        x: x,
+        y: y,
+        vx: (Math.random() - 0.5) * 6,
+        vy: (Math.random() - 0.5) * 6,
+        life: 30,
+        maxLife: 30,
+        color: `hsl(${Math.random() * 60 + 180}, 70%, 60%)`
+      });
+    }
+  }
+
+  function updatePingPongParticles() {
+    pingPongGame.particles = pingPongGame.particles.filter(particle => {
+      particle.x += particle.vx;
+      particle.y += particle.vy;
+      particle.life--;
+      return particle.life > 0;
+    });
+  }
+
+  function renderPingPong() {
+    const ctx = pingPongGame.ctx;
+    const canvas = pingPongGame.canvas;
+    
+    // Clear canvas
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw center line
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.setLineDash([5, 15]);
+    ctx.beginPath();
+    ctx.moveTo(canvas.width / 2, 0);
+    ctx.lineTo(canvas.width / 2, canvas.height);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    // Draw paddles
+    ctx.fillStyle = '#6bcbef';
+    ctx.fillRect(
+      pingPongGame.playerPaddle.x, 
+      pingPongGame.playerPaddle.y, 
+      pingPongGame.playerPaddle.width, 
+      pingPongGame.playerPaddle.height
+    );
+    
+    ctx.fillStyle = '#9d7cf3';
+    ctx.fillRect(
+      pingPongGame.aiPaddle.x, 
+      pingPongGame.aiPaddle.y, 
+      pingPongGame.aiPaddle.width, 
+      pingPongGame.aiPaddle.height
+    );
+    
+    // Draw ball with glow effect
+    const ball = pingPongGame.ball;
+    const timeSinceHit = Date.now() - pingPongGame.lastHitTime;
+    const glowIntensity = Math.max(0, 1 - timeSinceHit / 200);
+    
+    // Glow effect
+    ctx.shadowColor = '#6bcbef';
+    ctx.shadowBlur = 20 * glowIntensity;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    
+    // Draw particles
+    pingPongGame.particles.forEach(particle => {
+      const alpha = particle.life / particle.maxLife;
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = particle.color;
+      ctx.beginPath();
+      ctx.arc(particle.x, particle.y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    
+    // Draw score
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(pingPongGame.playerPaddle.score, canvas.width * 0.25, 50);
+    ctx.fillText(pingPongGame.aiPaddle.score, canvas.width * 0.75, 50);
+  }
+
+  function startPingPongGame() {
+    if (pingPongGame.isRunning) return;
+    
+    pingPongGame.isRunning = true;
+    pingPongGame.isPaused = false;
+    
+    // Start game loop
+    pingPongGame.gameLoop = setInterval(() => {
+      updatePingPong();
+      renderPingPong();
+    }, 1000 / 60); // 60 FPS
+    
+    updatePingPongScore();
+  }
+
+  function pausePingPongGame() {
+    pingPongGame.isPaused = !pingPongGame.isPaused;
+    const btn = document.getElementById('btnPingPongPause');
+    if (btn) {
+      btn.textContent = pingPongGame.isPaused ? 'Resume' : 'Pause';
+    }
+  }
+
+  function resetPingPong() {
+    // Stop current game
+    if (pingPongGame.gameLoop) {
+      clearInterval(pingPongGame.gameLoop);
+      pingPongGame.gameLoop = null;
+    }
+    
+    pingPongGame.isRunning = false;
+    pingPongGame.isPaused = false;
+    
+    // Reset scores
+    pingPongGame.playerPaddle.score = 0;
+    pingPongGame.aiPaddle.score = 0;
+    
+    // Reset ball
+    resetBall();
+    
+    // Reset paddles
+    pingPongGame.playerPaddle.y = 200;
+    pingPongGame.aiPaddle.y = 200;
+    
+    // Clear particles
+    pingPongGame.particles = [];
+    
+    // Update UI
+    updatePingPongScore();
+    
+    // Render
+    renderPingPong();
+  }
+
+  function updatePingPongScore() {
+    const playerScore = document.getElementById('playerScore');
+    const aiScore = document.getElementById('aiScore');
+    
+    if (playerScore) playerScore.textContent = pingPongGame.playerPaddle.score;
+    if (aiScore) aiScore.textContent = pingPongGame.aiPaddle.score;
   }
 
   // Visuals screen
@@ -1630,6 +2024,63 @@
     });
     
     observer.observe(touchScreen, { attributes: true });
+  }
+
+  // Snake game controls
+  const btnSnakeEasy = document.getElementById('btnSnakeEasy');
+  const btnSnakeHard = document.getElementById('btnSnakeHard');
+  const btnSnakeStart = document.getElementById('btnSnakeStart');
+
+  if (btnSnakeEasy) {
+    btnSnakeEasy.addEventListener('click', () => {
+      stepDelayMs = 180; // Easy mode
+      restartLoop();
+    });
+  }
+
+  if (btnSnakeHard) {
+    btnSnakeHard.addEventListener('click', () => {
+      stepDelayMs = 90; // Hard mode
+      restartLoop();
+    });
+  }
+
+  if (btnSnakeStart) {
+    btnSnakeStart.addEventListener('click', () => {
+      if (snakeGameLoop) {
+        clearInterval(snakeGameLoop);
+        snakeGameLoop = null;
+        btnSnakeStart.textContent = 'Start Game';
+      } else {
+        startSnakeGame();
+        btnSnakeStart.textContent = 'Stop Game';
+      }
+    });
+  }
+
+  // Ping Pong game controls
+  const btnPingPongStart = document.getElementById('btnPingPongStart');
+  const btnPingPongPause = document.getElementById('btnPingPongPause');
+  const btnPingPongReset = document.getElementById('btnPingPongReset');
+
+  if (btnPingPongStart) {
+    btnPingPongStart.addEventListener('click', () => {
+      if (pingPongGame.isRunning) {
+        endPingPongGame('Game stopped');
+        btnPingPongStart.textContent = 'Start Game';
+      } else {
+        startPingPongGame();
+        btnPingPongStart.textContent = 'Stop Game';
+      }
+    });
+  }
+
+  if (btnPingPongPause) {
+    btnPingPongPause.addEventListener('click', pausePingPongGame);
+  }
+
+  if (btnPingPongReset) {
+    btnPingPongReset.addEventListener('click', resetPingPong);
   }
 })();
 
