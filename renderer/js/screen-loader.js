@@ -192,6 +192,12 @@ class ScreenLoader {
           window.initVisuals();
         }
         break;
+      case 'scroll':
+        // Initialize scroll test
+        if (window.initScrollTest) {
+          window.initScrollTest();
+        }
+        break;
       case 'settings':
         // Initialize settings
         if (window.initSettings) {

@@ -1,5 +1,5 @@
 /* Dashboard panels and charts */
-.dashboard-panel { background: rgba(255,255,255,0.05); border-radius: var(--radius-lg); padding: var(--spacing-lg); border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+.dashboard-panel { background: rgba(255,255,255,0.05); border-radius: var(--radius-lg); padding: var(--spacing-lg); border: 1px solid rgba(255,255,255,0.1); overflow-y: auto; -webkit-overflow-scrolling: touch; max-height: 100%; }
 .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg); flex-wrap: wrap; gap: var(--spacing-sm); }
 .version-badge { background: var(--brand); color: #000; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); font-size: var(--font-sm); font-weight: 600; }
 .refresh-controls { display: flex; gap: var(--spacing-xs); }
@@ -23,8 +23,8 @@
 
 .system-details { display: flex; gap: var(--spacing-lg); margin: var(--spacing-lg) 0; flex-wrap: wrap; }
 
-/* We'll handle vertical swipe scrolling via JS on this screen */
-#screen-info { touch-action: none; }
+/* We'll handle vertical swipe scrolling via JS on the panel */
+#screen-info .dashboard-panel { touch-action: none; }
 .detail-section { flex: 1; min-width: min(300px, 100%); }
 .detail-section h3 { margin-bottom: var(--spacing-sm); font-size: var(--font-lg); }
 .detail-grid { display: grid; gap: var(--spacing-sm); }

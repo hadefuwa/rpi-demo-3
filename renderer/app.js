@@ -1207,7 +1207,7 @@
   // Simple inertial touch swipe -> vertical scroll for System Info
   let infoSwipe = { el: null, active: false, startY: 0, lastY: 0, velY: 0, raf: 0 };
   function enableInfoSwipeScroll() {
-    const el = document.getElementById('screen-info');
+    const el = document.querySelector('#screen-info .dashboard-panel');
     if (!el) return;
     infoSwipe.el = el;
 
@@ -1345,20 +1345,27 @@
     }
   })();
 
-  // Scroll Test
-  const scrollBox = document.getElementById('scrollbox');
-  if (scrollBox) {
-    for (let i = 1; i <= 80; i++) {
-      const item = document.createElement('div');
-      item.className = 'scroll-item';
-      const disc = document.createElement('div');
-      disc.className = 'scroll-disc';
-      const label = document.createElement('div');
-      label.className = 'scroll-label';
-      label.textContent = `Spinny ${i}`;
-      item.appendChild(disc);
-      item.appendChild(label);
-      scrollBox.appendChild(item);
+  // Scroll Test (init on demand)
+  function initScrollTest() {
+    const scrollBox = document.getElementById('scrollbox');
+    if (!scrollBox) return;
+    // Avoid duplicate init
+    if (scrollBox._inited) return; scrollBox._inited = true;
+
+    // Populate items only once
+    if (scrollBox.childElementCount === 0) {
+      for (let i = 1; i <= 80; i++) {
+        const item = document.createElement('div');
+        item.className = 'scroll-item';
+        const disc = document.createElement('div');
+        disc.className = 'scroll-disc';
+        const label = document.createElement('div');
+        label.className = 'scroll-label';
+        label.textContent = `Spinny ${i}`;
+        item.appendChild(disc);
+        item.appendChild(label);
+        scrollBox.appendChild(item);
+      }
     }
 
     // Spin/roll transforms based on position + scroll velocity
@@ -1391,12 +1398,22 @@
       }
       rafId = 0;
     }
-    function onScroll() {
-      if (!rafId) rafId = requestAnimationFrame(updateSpin);
-    }
+    function onScroll() { if (!rafId) rafId = requestAnimationFrame(updateSpin); }
     scrollBox.addEventListener('scroll', onScroll, { passive: true });
     requestAnimationFrame(updateSpin);
+
+    // Clean up on screen change
+    const onScreenChange = (e) => {
+      if (e?.detail?.screenName !== 'scroll') {
+        scrollBox.removeEventListener('scroll', onScroll);
+        if (rafId) cancelAnimationFrame(rafId);
+        window.removeEventListener('screenChanged', onScreenChange);
+        scrollBox._inited = false;
+      }
+    };
+    window.addEventListener('screenChanged', onScreenChange);
   }
+  window.initScrollTest = initScrollTest;
 
   // Settings
   const chkSound = document.getElementById('chkSound');
@@ -1443,15 +1460,15 @@
 
   // Removed Save button and its handler as requested
 
-  // Memory Match
-  const memoryGrid = document.getElementById('memoryGrid');
-  const memoryStatus = document.getElementById('memoryStatus');
-  const btnMemoryReset = document.getElementById('btnMemoryReset');
+  // Memory Match (dynamic screen: query elements at runtime)
   let memoryTiles = [];
   let memoryRevealed = [];
   const memoryUsesText = true; // use plain text labels instead of emojis
 
   function initMemory() {
+    const memoryStatus = document.getElementById('memoryStatus');
+    const memoryGrid = document.getElementById('memoryGrid');
+    if (!memoryGrid) return;
     // Use English foods as plain text tiles
     const foods = [
       'Fish & Chips',
@@ -1483,6 +1500,7 @@
   }
 
   function renderMemory() {
+    const memoryGrid = document.getElementById('memoryGrid');
     if (!memoryGrid) return;
 
     memoryGrid.innerHTML = '';
@@ -1509,6 +1527,7 @@
   }
 
   function flipTile(id) {
+    const memoryStatus = document.getElementById('memoryStatus');
     const tile = memoryTiles.find(t => t.id === id);
     if (!tile || tile.matched || tile.revealed) return;
 
@@ -1736,28 +1755,131 @@
     drawSnake();
   }
 
-  // Snake Game Functions
+  // Snake Game Functions (self-contained init for dynamic screen)
   function initSnake() {
     const canvas = document.getElementById('snakeCanvas');
     if (!canvas) return;
-    
+
+    // Resize canvas to its CSS size with DPR
+    try {
+      const rect = canvas.getBoundingClientRect();
+      resizeCanvas(canvas, Math.min(rect.width, 520), Math.min(rect.height, 400));
+    } catch {}
+
     const ctx = canvas.getContext('2d');
-    canvas.width = 800;
-    canvas.height = 400;
-    
-    // Initialize snake
-    snake = [
-      { x: 400, y: 200 },
-      { x: 380, y: 200 },
-      { x: 360, y: 200 }
-    ];
-    
-    snakeDirection = { x: 1, y: 0 };
-    snakeScore = 0;
-    generateSnakeFood();
-    
-    // Draw initial state
-    drawSnake();
+    const cols = 24, rows = 16;
+    const cell = Math.floor(Math.min(canvas.width / (window.devicePixelRatio||1) / cols, canvas.height / (window.devicePixelRatio||1) / rows));
+
+    let snake = [{ x: Math.floor(cols/2), y: Math.floor(rows/2) }];
+    let dir = { x: 1, y: 0 };
+    let food = spawnFood();
+    let alive = true;
+    let stepTimer = null;
+    let stepDelayMs = 140;
+    let score = 0;
+    window._snakeKeyHandler && window.removeEventListener('keydown', window._snakeKeyHandler);
+
+    function spawnFood() {
+      let f;
+      do {
+        f = { x: Math.floor(Math.random()*cols), y: Math.floor(Math.random()*rows) };
+      } while (snake.some(s => s.x === f.x && s.y === f.y));
+      return f;
+    }
+
+    function drawBoard() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // grid background
+      ctx.fillStyle = 'rgba(255,255,255,0.03)';
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          ctx.fillRect(x*cell, y*cell, cell-1, cell-1);
+        }
+      }
+      // food
+      const grad = ctx.createRadialGradient(food.x*cell+cell/2, food.y*cell+cell/2, 2, food.x*cell+cell/2, food.y*cell+cell/2, cell);
+      grad.addColorStop(0,'#ffd93d'); grad.addColorStop(1,'rgba(255,217,61,0)');
+      ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(food.x*cell+cell/2, food.y*cell+cell/2, cell/2, 0, Math.PI*2); ctx.fill();
+      // snake
+      for (let i = 0; i < snake.length; i++) {
+        const seg = snake[i];
+        ctx.fillStyle = i === 0 ? '#6bcbef' : 'rgba(107,203,239,0.8)';
+        ctx.fillRect(seg.x*cell, seg.y*cell, cell-1, cell-1);
+      }
+    }
+
+    function step() {
+      if (!alive) return;
+      const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+      // bounds / self collision
+      if (head.x < 0 || head.y < 0 || head.x >= cols || head.y >= rows || snake.some(s => s.x === head.x && s.y === head.y)) {
+        alive = false;
+        updateUI();
+        return;
+      }
+      snake.unshift(head);
+      if (head.x === food.x && head.y === food.y) {
+        score += 1;
+        food = spawnFood();
+      } else {
+        snake.pop();
+      }
+      drawBoard();
+      updateUI();
+    }
+
+    function restartLoop() {
+      if (stepTimer) clearInterval(stepTimer);
+      stepTimer = setInterval(step, stepDelayMs);
+    }
+
+    function updateUI() {
+      const scoreEl = document.getElementById('snakeScore');
+      const hiEl = document.getElementById('snakeHighScore');
+      if (scoreEl) scoreEl.textContent = String(score);
+      if (!window._snakeHighScore) window._snakeHighScore = 0;
+      if (score > window._snakeHighScore) window._snakeHighScore = score;
+      if (hiEl) hiEl.textContent = String(window._snakeHighScore);
+    }
+
+    // Arrow keys
+    const onKey = (e) => {
+      switch (e.key) {
+        case 'ArrowUp': if (dir.y !== 1) dir = { x: 0, y: -1 }; break;
+        case 'ArrowDown': if (dir.y !== -1) dir = { x: 0, y: 1 }; break;
+        case 'ArrowLeft': if (dir.x !== 1) dir = { x: -1, y: 0 }; break;
+        case 'ArrowRight': if (dir.x !== -1) dir = { x: 1, y: 0 }; break;
+      }
+    };
+    window._snakeKeyHandler = onKey;
+    window.addEventListener('keydown', onKey);
+
+    // Buttons
+    const btnEasy = document.getElementById('btnSnakeEasy');
+    const btnHard = document.getElementById('btnSnakeHard');
+    const btnStart = document.getElementById('btnSnakeStart');
+    btnEasy && (btnEasy.onclick = () => { stepDelayMs = 180; restartLoop(); });
+    btnHard && (btnHard.onclick = () => { stepDelayMs = 90; restartLoop(); });
+    if (btnStart) {
+      btnStart.onclick = () => {
+        if (alive && stepTimer) { clearInterval(stepTimer); stepTimer = null; alive = false; btnStart.textContent = 'Start Game'; }
+        else { alive = true; restartLoop(); btnStart.textContent = 'Stop Game'; }
+      };
+    }
+
+    // Initial render
+    drawBoard();
+    updateUI();
+
+    // Cleanup when leaving screen
+    const onScreenChange = (e) => {
+      if (e?.detail?.screenName !== 'snake') {
+        if (stepTimer) clearInterval(stepTimer);
+        window.removeEventListener('keydown', onKey);
+        window.removeEventListener('screenChanged', onScreenChange);
+      }
+    };
+    window.addEventListener('screenChanged', onScreenChange);
   }
 
   // Ping Pong Game Functions
@@ -1780,6 +1902,38 @@
     
     // Initial render
     renderPingPong();
+
+    // Wire up screen-local buttons each time screen loads
+    const btnStart = document.getElementById('btnPingPongStart');
+    const btnPause = document.getElementById('btnPingPongPause');
+    const btnReset = document.getElementById('btnPingPongReset');
+    if (btnStart) {
+      btnStart.onclick = () => {
+        if (pingPongGame.isRunning) {
+          endPingPongGame('Game stopped');
+          btnStart.textContent = 'Start Game';
+        } else {
+          startPingPongGame();
+          btnStart.textContent = 'Stop Game';
+        }
+      };
+    }
+    if (btnPause) {
+      btnPause.onclick = pausePingPongGame;
+    }
+    if (btnReset) {
+      btnReset.onclick = resetPingPong;
+    }
+
+    // Stop game when leaving screen
+    const onScreenChange = (e) => {
+      if (e?.detail?.screenName !== 'pingpong') {
+        if (pingPongGame.gameLoop) { clearInterval(pingPongGame.gameLoop); pingPongGame.gameLoop = null; }
+        pingPongGame.isRunning = false;
+        window.removeEventListener('screenChanged', onScreenChange);
+      }
+    };
+    window.addEventListener('screenChanged', onScreenChange);
   }
   // expose for dynamic loader
   window.initPingPong = initPingPong;
@@ -2075,6 +2229,193 @@
     if (playerScore) playerScore.textContent = pingPongGame.playerPaddle.score;
     if (aiScore) aiScore.textContent = pingPongGame.aiPaddle.score;
   }
+
+  // STL Viewer init for dynamically loaded screen
+  function initSTLViewer() {
+    const canvas = document.getElementById('stlCanvas');
+    if (!canvas) return;
+    // Size to CSS box
+    try {
+      const r = canvas.getBoundingClientRect();
+      resizeCanvas(canvas, Math.min(r.width, 840), Math.min(r.height, 420));
+    } catch {}
+
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width / (window.devicePixelRatio || 1);
+    const H = canvas.height / (window.devicePixelRatio || 1);
+    let tris = [];
+    let angleX = -0.5, angleY = 0.6;
+    let zoom = 3;
+    let center = { x: 0, y: 0, z: 0 };
+
+    function parseASCII(text) {
+      const lines = text.split(/\r?\n/);
+      const out = []; let cur = [];
+      for (const line of lines) {
+        const t = line.trim();
+        if (t.startsWith('vertex')) {
+          const p = t.split(/\s+/);
+          cur.push({ x: parseFloat(p[1]), y: parseFloat(p[2]), z: parseFloat(p[3]) });
+          if (cur.length === 3) { out.push(cur); cur = []; }
+        }
+      }
+      return out;
+    }
+    function parseBinary(bytes) {
+      if (!bytes || bytes.length < 84) return [];
+      const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      const n = dv.getUint32(80, true); const out = [];
+      let off = 84;
+      for (let i = 0; i < n; i++) {
+        off += 12; // skip normal
+        const v1 = { x: dv.getFloat32(off, true), y: dv.getFloat32(off+4, true), z: dv.getFloat32(off+8, true) }; off += 12;
+        const v2 = { x: dv.getFloat32(off, true), y: dv.getFloat32(off+4, true), z: dv.getFloat32(off+8, true) }; off += 12;
+        const v3 = { x: dv.getFloat32(off, true), y: dv.getFloat32(off+4, true), z: dv.getFloat32(off+8, true) }; off += 12;
+        out.push([v1, v2, v3]); off += 2;
+        if (off + 50 > bytes.length) break;
+      }
+      return out;
+    }
+    function fit() {
+      if (!tris.length) return;
+      let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
+      for (const t of tris) for (const v of t) { minX=Math.min(minX,v.x); minY=Math.min(minY,v.y); minZ=Math.min(minZ,v.z); maxX=Math.max(maxX,v.x); maxY=Math.max(maxY,v.y); maxZ=Math.max(maxZ,v.z); }
+      center = { x:(minX+maxX)/2, y:(minY+maxY)/2, z:(minZ+maxZ)/2 };
+      const size = Math.max(maxX-minX, maxY-minY, maxZ-minZ) || 1;
+      zoom = Math.min(W, H) / (size * 1.5);
+    }
+    function proj(p) {
+      const sx=Math.sin(angleX), cx=Math.cos(angleX), sy=Math.sin(angleY), cy=Math.cos(angleY);
+      let x0=p.x-center.x, y0=p.y-center.y, z0=p.z-center.z;
+      let y=y0*cx - z0*sx; let z=y0*sx + z0*cx; let x=x0;
+      const x2 = x*cy + z*sy; const z2 = -x*sy + z*cy;
+      return { x: W/2 + x2*zoom, y: H/2 - y*zoom, z: z2 };
+    }
+    function normal(a,b,c){const ux=b.x-a.x,uy=b.y-a.y,uz=b.z-a.z;const vx=c.x-a.x,vy=c.y-a.y,vz=c.z-a.z;const nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;const len=Math.hypot(nx,ny,nz)||1;return{ x:nx/len,y:ny/len,z:nz/len};}
+    function draw() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      const light = { x: 0.2, y: -0.6, z: 1 };
+      const polys = [];
+      for (const t of tris) {
+        const pa=proj(t[0]), pb=proj(t[1]), pc=proj(t[2]);
+        const n=normal(t[0],t[1],t[2]);
+        const b=Math.max(0,n.x*light.x+n.y*light.y+n.z*light.z);
+        const l=30+b*70;
+        polys.push({ z:(pa.z+pb.z+pc.z)/3, p:[pa,pb,pc], c:`hsl(0,0%,${l}%)`});
+      }
+      polys.sort((a,b)=>a.z-b.z);
+      for (const poly of polys) { ctx.fillStyle=poly.c; ctx.beginPath(); ctx.moveTo(poly.p[0].x,poly.p[0].y); ctx.lineTo(poly.p[1].x,poly.p[1].y); ctx.lineTo(poly.p[2].x,poly.p[2].y); ctx.closePath(); ctx.fill(); }
+    }
+    async function loadModel(name) {
+      try {
+        const resTxt = await window.api.readAssetText(name);
+        if (resTxt && resTxt.ok && resTxt.content && resTxt.content.includes('solid')) {
+          tris = parseASCII(resTxt.content);
+        } else {
+          const resBin = await window.api.readAssetBytes(name);
+          if (resBin && resBin.ok && resBin.data) {
+            const bytes = Uint8Array.from(atob(resBin.data), c => c.charCodeAt(0));
+            tris = parseBinary(bytes);
+          }
+        }
+        if (tris.length) { fit(); draw(); }
+        else { ctx.fillStyle = '#fff'; ctx.fillText('Failed to load '+name, 20, 30); }
+      } catch {
+        ctx.fillStyle = '#fff'; ctx.fillText('Failed to load '+name, 20, 30);
+      }
+    }
+
+    // Buttons
+    document.getElementById('btnStlUp')?.addEventListener('click', () => { angleX -= 0.1; draw(); });
+    document.getElementById('btnStlDown')?.addEventListener('click', () => { angleX += 0.1; draw(); });
+    document.getElementById('btnStlLeft')?.addEventListener('click', () => { angleY -= 0.1; draw(); });
+    document.getElementById('btnStlRight')?.addEventListener('click', () => { angleY += 0.1; draw(); });
+    document.getElementById('btnStlZoomIn')?.addEventListener('click', () => { zoom = Math.min(zoom*1.2, 30); draw(); });
+    document.getElementById('btnStlZoomOut')?.addEventListener('click', () => { zoom = Math.max(zoom/1.2, 0.5); draw(); });
+    document.getElementById('btnStlAuto')?.addEventListener('click', () => {});
+    document.getElementById('btnStlReset')?.addEventListener('click', () => { angleX=-0.5; angleY=0.6; fit(); draw(); });
+    document.querySelectorAll('.stl-models [data-model]')?.forEach(b => b.addEventListener('click', () => loadModel(b.getAttribute('data-model'))));
+
+    // Load default model
+    loadModel('cad1.stl');
+
+    // Cleanup on leave
+    const onScreenChange = (e) => { if (e?.detail?.screenName !== 'stl') { window.removeEventListener('screenChanged', onScreenChange); } };
+    window.addEventListener('screenChanged', onScreenChange);
+  }
+  window.initSTLViewer = initSTLViewer;
+
+  // Visuals (initialize on demand for dynamically loaded screen)
+  function initVisuals() {
+    const canvas = document.getElementById('visualsCanvas');
+    if (!canvas) return;
+    if (canvas._visInit) return; // guard against double init
+    canvas._visInit = true;
+
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    // Ensure internal resolution matches display
+    try { resizeCanvas(canvas, rect.width, rect.height); } catch {}
+
+    let rafId = 0;
+    const W = canvas.width / (window.devicePixelRatio || 1);
+    const H = canvas.height / (window.devicePixelRatio || 1);
+
+    const particles = Array.from({ length: 140 }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.7,
+      vy: (Math.random() - 0.5) * 0.7,
+      r: 1 + Math.random() * 2
+    }));
+    const mouse = { x: W / 2, y: H / 2 };
+
+    const onMove = (e) => {
+      const bounds = canvas.getBoundingClientRect();
+      mouse.x = Math.max(0, Math.min(W, e.clientX - bounds.left));
+      mouse.y = Math.max(0, Math.min(H, e.clientY - bounds.top));
+    };
+    canvas.addEventListener('pointermove', onMove);
+
+    function drawParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const p of particles) {
+        const ax = (mouse.x - p.x) * 0.0006;
+        const ay = (mouse.y - p.y) * 0.0006;
+        p.vx += ax; p.vy += ay;
+        p.vx *= 0.99; p.vy *= 0.99;
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+        const grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 20);
+        grd.addColorStop(0, 'rgba(107,203,239,0.9)');
+        grd.addColorStop(1, 'rgba(157,124,243,0.0)');
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 10 + p.r * 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function loop() {
+      drawParticles();
+      rafId = requestAnimationFrame(loop);
+    }
+    loop();
+
+    // Cleanup on screen change
+    const cleanup = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      canvas.removeEventListener('pointermove', onMove);
+      canvas._visInit = false;
+      window.removeEventListener('screenChanged', onScreenChange);
+    };
+    const onScreenChange = (e) => {
+      if (e?.detail?.screenName !== 'visuals') cleanup();
+    };
+    window.addEventListener('screenChanged', onScreenChange);
+  }
+  window.initVisuals = initVisuals;
 
   // Visuals screen
   const visualsCanvas = document.getElementById('visualsCanvas');

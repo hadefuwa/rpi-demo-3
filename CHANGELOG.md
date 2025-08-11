@@ -12,6 +12,29 @@ All notable changes to this project will be documented here.
   - Navigation in `app.js` delegates to `screenLoader`, and Home card clicks use event delegation
   - Fixed null reference errors during dynamic screen loading
 
+- 2025-08-11 – Dynamic screen fixes, stability and UX improvements (v0.2.1)
+--------------------------------------------------------------------------------
+- Navigation and history
+  - Unified history management to fix Back button across dynamically loaded screens
+  - Initial Home load no longer pushed to history
+- Touch Demo
+  - Corrected coordinate mapping and DPR scaling; initialize only when screen is active
+  - Increased draw area height; reduced console spam with capped retries
+- Kiosk UX
+  - Force-hide mouse cursor across all interactive elements
+- Home layout
+  - Compact spacing and card sizes on short displays; `main` scrolls vertically
+- System Info
+  - Fixed charts growing infinitely by removing manual canvas resizing; fixed canvas heights via CSS
+  - Destroy/recreate Chart.js instances on screen enter; stop auto-refresh on exit
+  - Added swipe scrolling with inertial drag
+- Games Hub and Screens
+  - Twemoji parsing after dynamic load so emojis render
+  - Ping Pong: proper dynamic init and touch controls bound to canvas
+  - Memory Match: dynamic DOM querying and init on screen show; Reset re-bound each time
+  - Visuals: dynamic init with DPR-aware sizing and cleanup on exit
+  - Scroll Test: dynamic init, no duplicate listeners, cleanup on exit
+
 - Touch Demo fixes and improvements
   - Corrected input-to-canvas coordinate mapping (accounts for borders and DPR)
   - Resizes canvas when the screen is shown and on orientation changes
