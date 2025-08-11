@@ -30,7 +30,7 @@ html, body {
 }
 
 /* Disable text selection and enable simple touch actions */
-* { -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+* { -webkit-user-select: none; user-select: none; touch-action: manipulation; cursor: none; }
 
 #app { width: 100%; height: 100%; display: flex; flex-direction: column; }
 
