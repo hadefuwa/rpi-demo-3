@@ -640,35 +640,321 @@
     });
   }
 
-  // Simple system info demo (static until wired)
+  // System Dashboard
+  let dashboardCharts = {};
+  let dashboardData = {
+    cpu: [],
+    memory: [],
+    temperature: [],
+    timestamps: []
+  };
+  let autoRefresh = true;
+  let refreshInterval;
+
+  // Dashboard elements
   const cpuBar = document.getElementById('cpuBar');
   const memBar = document.getElementById('memBar');
   const tempBar = document.getElementById('tempBar');
-  const infoLabels = document.getElementById('infoLabels');
-  let demo = 10;
-  setInterval(async () => {
-    // Simple demo CPU animation (placeholder)
-    demo = (demo + 7) % 90;
-    cpuBar.style.width = `${10 + demo}%`;
+  const cpuValue = document.getElementById('cpuValue');
+  const memValue = document.getElementById('memValue');
+  const tempValue = document.getElementById('tempValue');
+  const uptimeValue = document.getElementById('uptimeValue');
+  const wifiStatus = document.getElementById('wifiStatus');
+  const ipAddress = document.getElementById('ipAddress');
+  const rootStorage = document.getElementById('rootStorage');
+  const homeStorage = document.getElementById('homeStorage');
+  const btnRefreshStats = document.getElementById('btnRefreshStats');
+  const btnAutoRefresh = document.getElementById('btnAutoRefresh');
 
-    // Real system info via IPC
+  // Initialize dashboard
+  function initDashboard() {
+    // Initialize charts
+    initPerformanceChart();
+    initMemoryChart();
+    
+    // Set up event listeners
+    if (btnRefreshStats) {
+      btnRefreshStats.addEventListener('click', refreshDashboard);
+    }
+    if (btnAutoRefresh) {
+      btnAutoRefresh.addEventListener('click', toggleAutoRefresh);
+    }
+    
+    // Start auto-refresh
+    startAutoRefresh();
+    
+    // Initial refresh
+    refreshDashboard();
+  }
+
+  function initPerformanceChart() {
+    const ctx = document.getElementById('performanceChart');
+    if (!ctx) return;
+    
+    dashboardCharts.performance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'CPU %',
+          data: [],
+          borderColor: '#6bcbef',
+          backgroundColor: 'rgba(107, 203, 239, 0.1)',
+          tension: 0.4,
+          fill: true
+        }, {
+          label: 'Memory %',
+          data: [],
+          borderColor: '#9d7cf3',
+          backgroundColor: 'rgba(157, 124, 243, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: { color: '#ffffff' }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#ffffff' },
+            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+          },
+          y: {
+            ticks: { color: '#ffffff' },
+            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+            min: 0,
+            max: 100
+          }
+        },
+        animation: {
+          duration: 750,
+          easing: 'easeInOutQuart'
+        }
+      }
+    });
+  }
+
+  function initMemoryChart() {
+    const ctx = document.getElementById('memoryChart');
+    if (!ctx) return;
+    
+    dashboardCharts.memory = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Used', 'Free'],
+        datasets: [{
+          data: [0, 100],
+          backgroundColor: ['#6bcbef', 'rgba(255, 255, 255, 0.1)'],
+          borderWidth: 0,
+          cutout: '70%'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#ffffff' }
+          }
+        },
+        animation: {
+          animateRotate: true,
+          duration: 1000
+        }
+      }
+    });
+  }
+
+  async function refreshDashboard() {
     try {
       const info = await window.api.getSystemInfo();
-      if (info && typeof info.memPercent === 'number') {
-        memBar.style.width = `${Math.min(100, Math.max(0, info.memPercent))}%`;
+      if (!info) return;
+      
+      // Update stat bars and values
+      if (cpuValue && typeof info.cpuPercent === 'number') {
+        const cpuPct = Math.min(100, Math.max(0, info.cpuPercent));
+        cpuValue.textContent = `${cpuPct}%`;
+        if (cpuBar) cpuBar.style.width = `${cpuPct}%`;
       }
-      if (info && typeof info.tempC === 'number') {
-        // Map ~30–85C to 0–100%
-        const pct = Math.max(0, Math.min(100, ((info.tempC - 30) / 55) * 100));
-        tempBar.style.width = `${pct}%`;
+      
+      if (memValue && typeof info.memPercent === 'number') {
+        const memPct = Math.min(100, Math.max(0, info.memPercent));
+        memValue.textContent = `${memPct}%`;
+        if (memBar) memBar.style.width = `${memPct}%`;
       }
-      if (infoLabels) {
-        const memTxt = (info && typeof info.memPercent === 'number') ? `${info.memPercent}%` : 'N/A';
-        const tempTxt = (info && typeof info.tempC === 'number') ? `${info.tempC.toFixed(1)}°C` : 'N/A';
-        infoLabels.textContent = `Mem: ${memTxt} • Temp: ${tempTxt}`;
+      
+      if (tempValue && typeof info.tempC === 'number') {
+        const tempPct = Math.max(0, Math.min(100, ((info.tempC - 30) / 55) * 100));
+        tempValue.textContent = `${info.tempC.toFixed(1)}°C`;
+        if (tempBar) tempBar.style.width = `${tempPct}%`;
       }
-    } catch {}
-  }, 1200);
+      
+      if (uptimeValue && info.uptime) {
+        uptimeValue.textContent = info.uptime;
+      }
+      
+      if (wifiStatus && info.network) {
+        wifiStatus.textContent = info.network.wifiStatus;
+        wifiStatus.className = `detail-value ${info.network.wifiStatus === 'Connected' ? 'connected' : 'disconnected'}`;
+      }
+      
+      if (ipAddress && info.network) {
+        ipAddress.textContent = info.network.ipAddress;
+      }
+      
+      if (rootStorage && info.storage) {
+        rootStorage.textContent = info.storage.root;
+      }
+      
+      if (homeStorage && info.storage) {
+        homeStorage.textContent = info.storage.home;
+      }
+      
+      // Update chart data
+      updateChartData(info);
+      
+    } catch (error) {
+      console.error('Failed to refresh dashboard:', error);
+    }
+  }
+
+  function updateChartData(info) {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { 
+      hour12: false, 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+    
+    // Add new data point
+    dashboardData.timestamps.push(timeStr);
+    dashboardData.cpu.push(info.cpuPercent || 0);
+    dashboardData.memory.push(info.memPercent || 0);
+    dashboardData.temperature.push(info.tempC || 0);
+    
+    // Keep only last 20 data points
+    if (dashboardData.timestamps.length > 20) {
+      dashboardData.timestamps.shift();
+      dashboardData.cpu.shift();
+      dashboardData.memory.shift();
+      dashboardData.temperature.shift();
+    }
+    
+    // Update performance chart
+    if (dashboardCharts.performance) {
+      dashboardCharts.performance.data.labels = dashboardData.timestamps;
+      dashboardCharts.performance.data.datasets[0].data = dashboardData.cpu;
+      dashboardCharts.performance.data.datasets[1].data = dashboardData.memory;
+      dashboardCharts.performance.update('none');
+    }
+    
+    // Update memory chart
+    if (dashboardCharts.memory && typeof info.memPercent === 'number') {
+      const memPct = Math.min(100, Math.max(0, info.memPercent));
+      dashboardCharts.memory.data.datasets[0].data = [memPct, 100 - memPct];
+      dashboardCharts.memory.update('none');
+    }
+  }
+
+  function startAutoRefresh() {
+    if (refreshInterval) clearInterval(refreshInterval);
+    refreshInterval = setInterval(refreshDashboard, 2000); // Refresh every 2 seconds
+  }
+
+  function stopAutoRefresh() {
+    if (refreshInterval) {
+      clearInterval(refreshInterval);
+      refreshInterval = null;
+    }
+  }
+
+  function toggleAutoRefresh() {
+    if (autoRefresh) {
+      stopAutoRefresh();
+      autoRefresh = false;
+      if (btnAutoRefresh) {
+        btnAutoRefresh.classList.remove('active');
+        btnAutoRefresh.textContent = '⏸️ Manual';
+      }
+    } else {
+      startAutoRefresh();
+      autoRefresh = true;
+      if (btnAutoRefresh) {
+        btnAutoRefresh.classList.add('active');
+        btnAutoRefresh.textContent = '⏱️ Auto';
+      }
+    }
+  }
+
+  // Initialize dashboard when System Info screen is shown
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check if we're on the System Info screen
+    if (document.getElementById('screen-info')) {
+      initDashboard();
+    }
+  });
+
+  // System action handlers
+  document.addEventListener('DOMContentLoaded', () => {
+    const btnSystemRestart = document.getElementById('btnSystemRestart');
+    const btnSystemShutdown = document.getElementById('btnSystemShutdown');
+    const btnSystemUpdate = document.getElementById('btnSystemUpdate');
+
+    if (btnSystemRestart) {
+      btnSystemRestart.addEventListener('click', () => {
+        if (confirm('Are you sure you want to restart the system?')) {
+          // This would require additional IPC handlers in main.js
+          console.log('System restart requested');
+          alert('Restart functionality requires additional system permissions');
+        }
+      });
+    }
+
+    if (btnSystemShutdown) {
+      btnSystemShutdown.addEventListener('click', () => {
+        if (confirm('Are you sure you want to shutdown the system?')) {
+          // This would require additional IPC handlers in main.js
+          console.log('System shutdown requested');
+          alert('Shutdown functionality requires additional system permissions');
+        }
+      });
+    }
+
+    if (btnSystemUpdate) {
+      btnSystemUpdate.addEventListener('click', async () => {
+        try {
+          btnSystemUpdate.textContent = '📦 Updating...';
+          btnSystemUpdate.disabled = true;
+          
+          // Simulate update process
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          alert('System update completed! (This is a demo)');
+        } catch (error) {
+          alert('Update failed: ' + error.message);
+        } finally {
+          btnSystemUpdate.textContent = '📦 Update';
+          btnSystemUpdate.disabled = false;
+        }
+      });
+    }
+  });
+
+  // Re-initialize dashboard when switching to System Info screen
+  const originalShowScreen = showScreen;
+  showScreen = function(id, pushToStack = true) {
+    originalShowScreen(id, pushToStack);
+    if (id === 'screen-info') {
+      // Small delay to ensure DOM is ready
+      setTimeout(initDashboard, 100);
+    }
+  };
 
   // Tic Tac Toe
   const boardEl = document.getElementById('board');

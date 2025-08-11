@@ -91,7 +91,7 @@ ipcMain.handle('write-settings', (_event, updated) => {
 });
 
 // -----------------------
-// System info (memory, temp)
+// System info (memory, temp, CPU, network, storage)
 // -----------------------
 function readTemperatureC() {
   try {
@@ -111,13 +111,111 @@ function readTemperatureC() {
   return null;
 }
 
+function getCPUUsage() {
+  try {
+    // Read CPU stats from /proc/stat
+    const statContent = fs.readFileSync('/proc/stat', 'utf8');
+    const cpuLine = statContent.split('\n')[0];
+    const cpuValues = cpuLine.split(' ').filter(val => val.trim() !== '');
+    
+    if (cpuValues.length >= 5) {
+      const user = parseInt(cpuValues[1]);
+      const nice = parseInt(cpuValues[2]);
+      const system = parseInt(cpuValues[3]);
+      const idle = parseInt(cpuValues[4]);
+      
+      const total = user + nice + system + idle;
+      const used = total - idle;
+      
+      return total > 0 ? Math.round((used / total) * 100) : null;
+    }
+  } catch {}
+  return null;
+}
+
+function getUptime() {
+  try {
+    const uptime = os.uptime();
+    const days = Math.floor(uptime / 86400);
+    const hours = Math.floor((uptime % 86400) / 3600);
+    const minutes = Math.floor((uptime % 3600) / 60);
+    
+    if (days > 0) {
+      return `${days}d ${hours}h ${minutes}m`;
+    } else if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    } else {
+      return `${minutes}m`;
+    }
+  } catch {}
+  return null;
+}
+
+function getNetworkInfo() {
+  try {
+    // Get network interfaces
+    const interfaces = os.networkInterfaces();
+    let wifiStatus = 'Disconnected';
+    let ipAddress = 'N/A';
+    
+    for (const [name, nets] of Object.entries(interfaces)) {
+      if (name.startsWith('wlan') || name.startsWith('wifi')) {
+        for (const net of nets) {
+          if (net.family === 'IPv4' && !net.internal) {
+            wifiStatus = 'Connected';
+            ipAddress = net.address;
+            break;
+          }
+        }
+      }
+    }
+    
+    return { wifiStatus, ipAddress };
+  } catch {}
+  return { wifiStatus: 'Unknown', ipAddress: 'N/A' };
+}
+
+function getStorageInfo() {
+  try {
+    // Get disk usage for root and home
+    const rootStats = fs.statSync('/');
+    const homeStats = fs.statSync(os.homedir());
+    
+    const formatBytes = (bytes) => {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    };
+    
+    return {
+      root: formatBytes(rootStats.size || 0),
+      home: formatBytes(homeStats.size || 0)
+    };
+  } catch {}
+  return { root: 'N/A', home: 'N/A' };
+}
+
 ipcMain.handle('get-system-info', () => {
   const total = os.totalmem();
   const free = os.freemem();
   const used = total - free;
   const memPercent = total > 0 ? Math.round((used / total) * 100) : null;
   const tempC = readTemperatureC();
-  return { memPercent, tempC };
+  const cpuPercent = getCPUUsage();
+  const uptime = getUptime();
+  const network = getNetworkInfo();
+  const storage = getStorageInfo();
+  
+  return { 
+    memPercent, 
+    tempC, 
+    cpuPercent, 
+    uptime, 
+    network, 
+    storage 
+  };
 });
 
 // App version (renderer requests via preload)

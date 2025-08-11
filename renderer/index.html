@@ -52,23 +52,101 @@
         </section>
 
         <section id="screen-info" class="screen">
-          <div class="panel">
-            <h2>System Info</h2>
-            <div class="note">App version: <span id="versionInfo"></span></div>
-            <div class="meter">
-              <span>CPU</span>
-              <div class="bar"><div id="cpuBar" class="fill" style="width: 10%"></div></div>
+          <div class="panel dashboard-panel">
+            <h2>System Dashboard</h2>
+            
+            <!-- App Version -->
+            <div class="dashboard-header">
+              <div class="version-badge">App v<span id="versionInfo"></span></div>
+              <div class="refresh-controls">
+                <button id="btnRefreshStats" class="chip small">🔄 Refresh</button>
+                <button id="btnAutoRefresh" class="chip small active">⏱️ Auto</button>
+              </div>
             </div>
-            <div class="meter">
-              <span>Memory</span>
-              <div class="bar"><div id="memBar" class="fill" style="width: 20%"></div></div>
+
+            <!-- Real-time Stats Grid -->
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-header">CPU Usage</div>
+                <div class="stat-value" id="cpuValue">--</div>
+                <div class="stat-bar">
+                  <div id="cpuBar" class="stat-fill"></div>
+                </div>
+              </div>
+              
+              <div class="stat-card">
+                <div class="stat-header">Memory</div>
+                <div class="stat-value" id="memValue">--</div>
+                <div class="stat-bar">
+                  <div id="memBar" class="stat-fill"></div>
+                </div>
+              </div>
+              
+              <div class="stat-card">
+                <div class="stat-header">Temperature</div>
+                <div class="stat-value" id="tempValue">--</div>
+                <div class="stat-bar">
+                  <div id="tempBar" class="stat-fill"></div>
+                </div>
+              </div>
+              
+              <div class="stat-card">
+                <div class="stat-header">Uptime</div>
+                <div class="stat-value" id="uptimeValue">--</div>
+                <div class="stat-subtitle">System running time</div>
+              </div>
             </div>
-            <div class="meter">
-              <span>Temp</span>
-              <div class="bar"><div id="tempBar" class="fill" style="width: 0%"></div></div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+              <div class="chart-container">
+                <h3>System Performance</h3>
+                <canvas id="performanceChart" width="400" height="200"></canvas>
+              </div>
+              
+              <div class="chart-container">
+                <h3>Memory Usage</h3>
+                <canvas id="memoryChart" width="400" height="200"></canvas>
+              </div>
             </div>
-            <div id="infoLabels" class="note">Mem: N/A • Temp: N/A</div>
-            <div class="note">Live values to be wired later.</div>
+
+            <!-- Network & Disk Info -->
+            <div class="system-details">
+              <div class="detail-section">
+                <h3>Network Status</h3>
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <span class="detail-label">WiFi:</span>
+                    <span class="detail-value" id="wifiStatus">Checking...</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">IP:</span>
+                    <span class="detail-value" id="ipAddress">--</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="detail-section">
+                <h3>Storage</h3>
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <span class="detail-label">Root:</span>
+                    <span class="detail-value" id="rootStorage">--</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Home:</span>
+                    <span class="detail-value" id="homeStorage">--</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- System Actions -->
+            <div class="system-actions">
+              <button id="btnSystemRestart" class="chip warning">🔄 Restart</button>
+              <button id="btnSystemShutdown" class="chip danger">⏹️ Shutdown</button>
+              <button id="btnSystemUpdate" class="chip">📦 Update</button>
+            </div>
           </div>
         </section>
 
@@ -199,6 +277,7 @@
       </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="./app.js"></script>
   </body>
   </html>
