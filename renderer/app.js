@@ -5,21 +5,44 @@
   const btnBack = document.getElementById('btnBack');
   const clock = document.getElementById('clock');
 
-  function showScreen(id) {
+  // Simple in-app navigation stack so Back works
+  let currentScreenId = 'screen-home';
+  const navStack = [];
+
+  function updateBackEnabled() {
+    const hasBack = navStack.length > 0;
+    btnBack.disabled = !hasBack;
+    btnBack.style.opacity = hasBack ? '1' : '0.5';
+  }
+
+  function showScreen(id, pushToStack = true) {
+    if (!id || id === currentScreenId) return;
+    if (pushToStack && currentScreenId) navStack.push(currentScreenId);
     screens.forEach(s => s.classList.remove('active'));
     const el = document.getElementById(id);
     if (el) {
       el.classList.add('active');
+      currentScreenId = id;
+      updateBackEnabled();
     }
   }
 
-  btnHome.addEventListener('click', () => showScreen('screen-home'));
-  btnBack.addEventListener('click', () => history.back());
+  function goHome() {
+    navStack.length = 0;
+    showScreen('screen-home', false);
+  }
+
+  btnHome.addEventListener('click', goHome);
+  btnBack.addEventListener('click', () => {
+    if (navStack.length === 0) return;
+    const prev = navStack.pop();
+    showScreen(prev, false);
+  });
 
   home.querySelectorAll('.card').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.getAttribute('data-target');
-      showScreen(target);
+      showScreen(target, true);
     });
   });
 
@@ -199,5 +222,6 @@
     scrollBox.addEventListener('pointerleave', endDrag);
   }
 })();
+
 
 
