@@ -292,7 +292,7 @@
   const visualsCanvas = document.getElementById('visualsCanvas');
   if (visualsCanvas) {
     const vctx = visualsCanvas.getContext('2d');
-    const modes = { particles: 0, ripples: 1, clock: 2 };
+    const modes = { particles: 0, ripples: 1, clock: 2, equalizer: 3, starfield: 4, fireworks: 5 };
     let mode = modes.particles;
     let rafId = 0;
 
@@ -397,10 +397,91 @@
       hand((Math.PI / 30) * s, R * 0.9, 2, '#6bcbef');
     }
 
+    // Equalizer (colorful bars)
+    let eqPhase = 0;
+    function drawEqualizer() {
+      vctx.clearRect(0, 0, W, H);
+      const bars = 36;
+      const bw = W / bars;
+      eqPhase += 0.08;
+      for (let i = 0; i < bars; i++) {
+        const t = eqPhase + i * 0.35;
+        const h = (Math.sin(t) * 0.5 + 0.5) * (H * 0.8);
+        const x = i * bw + 2;
+        const y = H - h;
+        const hue = (i * 12 + (eqPhase * 40)) % 360;
+        vctx.fillStyle = `hsl(${hue}, 80%, 55%)`;
+        vctx.fillRect(x, y, bw - 4, h);
+      }
+    }
+
+    // Starfield (parallax, colorful)
+    const stars = Array.from({ length: 200 }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      z: Math.random() * 1 + 0.2,
+      c: Math.floor(Math.random() * 360),
+    }));
+    function drawStarfield() {
+      vctx.fillStyle = 'rgba(0,0,0,0.25)';
+      vctx.fillRect(0, 0, W, H);
+      for (const s of stars) {
+        s.x += (mouse.x - W / 2) * 0.0005 * (1 / s.z);
+        s.y += (mouse.y - H / 2) * 0.0005 * (1 / s.z);
+        if (s.x < 0) s.x = W; if (s.x > W) s.x = 0;
+        if (s.y < 0) s.y = H; if (s.y > H) s.y = 0;
+        vctx.fillStyle = `hsl(${s.c}, 90%, ${60 + (1 - s.z) * 30}%)`;
+        vctx.fillRect(s.x, s.y, 2 + (1 - s.z) * 2, 2 + (1 - s.z) * 2);
+      }
+    }
+
+    // Fireworks
+    const fireworks = [];
+    function spawnFirework(x, y) {
+      const particles = [];
+      const n = 80;
+      const baseHue = Math.floor(Math.random() * 360);
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2;
+        const speed = Math.random() * 3 + 1;
+        particles.push({
+          x, y,
+          vx: Math.cos(a) * speed,
+          vy: Math.sin(a) * speed,
+          life: 1,
+          hue: (baseHue + i * 4) % 360,
+        });
+      }
+      fireworks.push({ particles });
+    }
+    visualsCanvas.addEventListener('pointerdown', (e) => {
+      if (mode === modes.fireworks) spawnFirework(e.offsetX, e.offsetY);
+    });
+    function drawFireworks() {
+      vctx.fillStyle = 'rgba(0,0,0,0.2)';
+      vctx.fillRect(0, 0, W, H);
+      for (const f of fireworks) {
+        for (const p of f.particles) {
+          vctx.fillStyle = `hsla(${p.hue}, 90%, 60%, ${p.life})`;
+          vctx.fillRect(p.x, p.y, 3, 3);
+          p.x += p.vx; p.y += p.vy;
+          p.vy += 0.03; // gravity
+          p.life *= 0.97;
+        }
+        f.particles = f.particles.filter(p => p.life > 0.05);
+      }
+      for (let i = fireworks.length - 1; i >= 0; i--) {
+        if (fireworks[i].particles.length === 0) fireworks.splice(i, 1);
+      }
+    }
+
     function loop() {
       if (mode === modes.particles) drawParticles();
       else if (mode === modes.ripples) drawRipples();
-      else drawClock();
+      else if (mode === modes.clock) drawClock();
+      else if (mode === modes.equalizer) drawEqualizer();
+      else if (mode === modes.starfield) drawStarfield();
+      else drawFireworks();
       rafId = requestAnimationFrame(loop);
     }
     loop();
@@ -410,7 +491,10 @@
         const m = btn.getAttribute('data-mode');
         if (m === 'particles') mode = modes.particles;
         else if (m === 'ripples') mode = modes.ripples;
-        else mode = modes.clock;
+        else if (m === 'clock') mode = modes.clock;
+        else if (m === 'equalizer') mode = modes.equalizer;
+        else if (m === 'starfield') mode = modes.starfield;
+        else mode = modes.fireworks;
       });
     });
   }
