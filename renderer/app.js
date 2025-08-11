@@ -75,21 +75,8 @@
     }
 
     // Chart canvases
-    const performanceChart = document.getElementById('performanceChart');
-    if (performanceChart) {
-      const rect = performanceChart.getBoundingClientRect();
-      const width = Math.min(rect.width, 400);
-      const height = Math.min(rect.height, 200);
-      resizeCanvas(performanceChart, width, height);
-    }
-
-    const memoryChart = document.getElementById('memoryChart');
-    if (memoryChart) {
-      const rect = memoryChart.getBoundingClientRect();
-      const width = Math.min(rect.width, 400);
-      const height = Math.min(rect.height, 200);
-      resizeCanvas(memoryChart, width, height);
-    }
+    // Chart.js manages its own device pixel ratio and sizing when maintainAspectRatio is false.
+    // We avoid manually resizing these canvases to prevent infinite growth.
   }
 
   // Listen for window resize events
@@ -612,22 +599,32 @@
     const name = id && id.startsWith('screen-') ? id.slice(7) : id;
     if (window.screenLoader && name) {
       window.screenLoader.loadScreen(name, pushToStack);
+      if (pushToStack) {
+        addToNavigationHistory(id);
+      }
     }
   }
 
   function goHome() {
     navStack.length = 0;
-    showScreen('screen-home', false);
+    if (window.screenLoader) {
+      window.screenLoader.loadScreen('home', false);
+    } else {
+      showScreen('screen-home', false);
+    }
+    updateBackEnabled();
   }
 
   btnHome.addEventListener('click', goHome);
   btnBack.addEventListener('click', () => {
     if (navStack.length === 0) return;
     const prev = navStack.pop();
+    // prev is an id like 'screen-touch' if pushed from showScreen; normalize
+    const normalized = prev.startsWith('screen-') ? prev.slice(7) : prev;
     if (window.screenLoader) {
-      window.screenLoader.loadScreen(prev, false);
+      window.screenLoader.loadScreen(normalized, false);
     } else {
-      showScreen(`screen-${prev}`, false);
+      showScreen(`screen-${normalized}`, false);
     }
     updateBackEnabled();
   });
@@ -659,6 +656,16 @@
       goHome();
     }
   });
+
+  // Expose history helper so ScreenLoader can push entries
+  window.addToNavigationHistory = function(id) {
+    if (!id) return;
+    if (currentScreenId && currentScreenId !== id) {
+      navStack.push(currentScreenId);
+    }
+    currentScreenId = id;
+    updateBackEnabled();
+  };
 
   // No clock on home screen anymore
 
@@ -873,21 +880,32 @@
 
   // Initialize dashboard
   function initDashboard() {
+    // Destroy existing charts if re-entering screen
+    if (dashboardCharts.performance && typeof dashboardCharts.performance.destroy === 'function') {
+      dashboardCharts.performance.destroy();
+      dashboardCharts.performance = null;
+    }
+    if (dashboardCharts.memory && typeof dashboardCharts.memory.destroy === 'function') {
+      dashboardCharts.memory.destroy();
+      dashboardCharts.memory = null;
+    }
+
     // Initialize charts
     initPerformanceChart();
     initMemoryChart();
-    
-    // Set up event listeners
+
+    // Set up event listeners without duplication
     if (btnRefreshStats) {
-      btnRefreshStats.addEventListener('click', refreshDashboard);
+      btnRefreshStats.onclick = refreshDashboard;
     }
     if (btnAutoRefresh) {
-      btnAutoRefresh.addEventListener('click', toggleAutoRefresh);
+      btnAutoRefresh.onclick = toggleAutoRefresh;
     }
-    
-    // Start auto-refresh
+
+    // Restart auto-refresh cleanly
+    stopAutoRefresh();
     startAutoRefresh();
-    
+
     // Initial refresh
     refreshDashboard();
   }
@@ -896,6 +914,12 @@
     const ctx = document.getElementById('performanceChart');
     if (!ctx) return;
     
+    // Safety: destroy any existing chart bound to this canvas
+    if (dashboardCharts.performance && typeof dashboardCharts.performance.destroy === 'function') {
+      dashboardCharts.performance.destroy();
+      dashboardCharts.performance = null;
+    }
+
     dashboardCharts.performance = new Chart(ctx, {
       type: 'line',
       data: {
@@ -919,6 +943,7 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        aspectRatio: 2,
         plugins: {
           legend: {
             labels: { color: '#ffffff' }
@@ -948,6 +973,11 @@
     const ctx = document.getElementById('memoryChart');
     if (!ctx) return;
     
+    if (dashboardCharts.memory && typeof dashboardCharts.memory.destroy === 'function') {
+      dashboardCharts.memory.destroy();
+      dashboardCharts.memory = null;
+    }
+
     dashboardCharts.memory = new Chart(ctx, {
       type: 'doughnut',
       data: {
@@ -1151,18 +1181,16 @@
     }
   });
 
-  // Re-initialize dashboard when switching to System Info screen
-  const originalShowScreen = showScreen;
-  showScreen = function(id, pushToStack = true) {
-    originalShowScreen(id, pushToStack);
-    if (id === 'screen-info') {
-      // Small delay to ensure DOM is ready
-      setTimeout(initDashboard, 100);
+  // Manage dashboard lifecycle on screen changes
+  window.addEventListener('screenChanged', (e) => {
+    const screenName = e?.detail?.screenName;
+    if (screenName === 'info') {
+      setTimeout(initDashboard, 50);
+    } else {
+      // Leaving info screen: stop timers to avoid background work
+      stopAutoRefresh();
     }
-    if (id === 'screen-pingpong') {
-      setTimeout(initPingPong, 100);
-    }
-  };
+  });
 
   // Tic Tac Toe (initialized when screen is shown)
   function initTicTacToe() {

@@ -1,6 +1,6 @@
 {
   "name": "rpi-5inch-showcase",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Beautiful 5-inch Raspberry Pi Electron showcase app",
   "main": "main.js",
   "author": "",

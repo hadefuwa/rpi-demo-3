@@ -18,8 +18,8 @@ class ScreenLoader {
       return;
     }
     
-    // Load the home screen by default
-    this.loadScreen('home');
+    // Load the home screen by default without adding to history
+    this.loadScreen('home', false);
   }
 
   /**
@@ -119,10 +119,22 @@ class ScreenLoader {
       // Update page title
       document.title = `RPI 5" Showcase - ${screenName.charAt(0).toUpperCase() + screenName.slice(1)}`;
       
+      // Parse emojis for dynamically loaded content (Twemoji fallback)
+      try {
+        if (window.twemoji && typeof window.twemoji.parse === 'function') {
+          window.twemoji.parse(targetScreen);
+        }
+      } catch {}
+
       // Dispatch custom event for screen change
       window.dispatchEvent(new CustomEvent('screenChanged', { 
         detail: { screenName, screenElement: targetScreen } 
       }));
+
+      // Integrate with legacy nav stack used in app.js
+      if (window.addToNavigationHistory) {
+        window.addToNavigationHistory(`screen-${screenName}`);
+      }
     }
   }
 
