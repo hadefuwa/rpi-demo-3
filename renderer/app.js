@@ -124,13 +124,11 @@
     }
   };
 
-  canvas.addEventListener('mousedown', start);
-  canvas.addEventListener('mouseup', end);
-  canvas.addEventListener('mouseleave', end);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); start(e); });
-  canvas.addEventListener('touchend', (e) => { e.preventDefault(); end(e); });
-  canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
+  // Prefer Pointer Events for consistent mouse/touch/pen handling
+  canvas.addEventListener('pointerdown', (e) => { e.preventDefault(); start(e); });
+  canvas.addEventListener('pointerup', (e) => { e.preventDefault(); end(e); });
+  canvas.addEventListener('pointerleave', (e) => { e.preventDefault(); end(e); });
+  canvas.addEventListener('pointermove', (e) => { e.preventDefault(); draw(e); });
 
   document.querySelectorAll('.swatch').forEach(btn => {
     btn.addEventListener('click', () => {
