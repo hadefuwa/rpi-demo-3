@@ -17,6 +17,45 @@
   // STL viewer (very simple shaded triangles)
   const stlCanvas = document.getElementById('stlCanvas');
   if (stlCanvas) {
+    console.log('STL Canvas found:', stlCanvas);
+    
+    // Debug: Check if STL control buttons exist
+    const stlButtons = [
+      'btnStlUp', 'btnStlDown', 'btnStlLeft', 'btnStlRight',
+      'btnStlZoomIn', 'btnStlZoomOut', 'btnStlAuto', 'btnStlReset'
+    ];
+    
+    stlButtons.forEach(btnId => {
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        console.log(`Button ${btnId} found:`, btn);
+        console.log(`Button ${btnId} visible:`, btn.offsetWidth > 0 && btn.offsetHeight > 0);
+        console.log(`Button ${btnId} computed style:`, window.getComputedStyle(btn));
+      } else {
+        console.warn(`Button ${btnId} NOT found!`);
+      }
+    });
+    
+    // Debug: Check STL controls container
+    const stlControls = document.querySelector('.stl-controls');
+    if (stlControls) {
+      console.log('STL Controls container found:', stlControls);
+      console.log('STL Controls visible:', stlControls.offsetWidth > 0 && stlControls.offsetHeight > 0);
+      console.log('STL Controls computed style:', window.getComputedStyle(stlControls));
+    } else {
+      console.warn('STL Controls container NOT found!');
+    }
+    
+    // Debug: Check STL models container
+    const stlModels = document.querySelector('.stl-models');
+    if (stlModels) {
+      console.log('STL Models container found:', stlModels);
+      console.log('STL Models visible:', stlModels.offsetWidth > 0 && stlModels.offsetHeight > 0);
+      console.log('STL Models computed style:', window.getComputedStyle(stlModels));
+    } else {
+      console.warn('STL Models container NOT found!');
+    }
+    
     const sctx = stlCanvas.getContext('2d');
     const W = stlCanvas.width;
     const H = stlCanvas.height;
@@ -478,6 +517,29 @@
       el.classList.add('active');
       currentScreenId = id;
       updateBackEnabled();
+      
+      // Debug: Log when 3D model screen is shown
+      if (id === 'screen-stl') {
+        console.log('3D Model screen activated!');
+        console.log('STL screen element:', el);
+        console.log('STL screen visible:', el.offsetWidth > 0 && el.offsetHeight > 0);
+        
+        // Check if buttons are visible after screen activation
+        setTimeout(() => {
+          const stlButtons = [
+            'btnStlUp', 'btnStlDown', 'btnStlLeft', 'btnStlRight',
+            'btnStlZoomIn', 'btnStlZoomOut', 'btnStlAuto', 'btnStlReset'
+          ];
+          
+          stlButtons.forEach(btnId => {
+            const btn = document.getElementById(btnId);
+            if (btn) {
+              console.log(`Button ${btnId} after activation:`, btn);
+              console.log(`Button ${btnId} visible after activation:`, btn.offsetWidth > 0 && btn.offsetHeight > 0);
+            }
+          });
+        }, 100);
+      }
     }
   }
 
