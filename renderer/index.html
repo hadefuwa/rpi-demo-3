@@ -43,6 +43,10 @@
               <span class="icon">✨</span>
               <span class="label">Visuals</span>
             </button>
+            <button class="card fancy" data-target="screen-stl">
+              <span class="icon">📦</span>
+              <span class="label">3D Model</span>
+            </button>
             <button class="card fancy" data-target="screen-settings">
               <span class="icon">⚙️</span>
               <span class="label">Settings</span>
@@ -151,6 +155,14 @@
             </div>
             <canvas id="visualsCanvas" width="1024" height="420"></canvas>
             <div class="note">Tap/drag to interact. Particles follow touch, ripples spawn on taps.</div>
+          </div>
+        </section>
+
+        <section id="screen-stl" class="screen">
+          <div class="panel">
+            <h2>3D Model (STL)</h2>
+            <div class="note">Drag to rotate. Loading `IM0004.STL` from assets.</div>
+            <canvas id="stlCanvas" width="1024" height="420"></canvas>
           </div>
         </section>
       </main>

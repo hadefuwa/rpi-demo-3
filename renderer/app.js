@@ -15,6 +15,109 @@
     btnBack.style.opacity = hasBack ? '1' : '0.5';
   }
 
+  // STL viewer (very simple shaded triangles)
+  const stlCanvas = document.getElementById('stlCanvas');
+  if (stlCanvas) {
+    const sctx = stlCanvas.getContext('2d');
+    const W = stlCanvas.width;
+    const H = stlCanvas.height;
+    let triangles = [];
+    let angleX = -0.5, angleY = 0.6;
+    let last = null;
+
+    // Basic ASCII STL parser
+    function parseSTL(text) {
+      const lines = text.split(/\r?\n/);
+      const tri = [];
+      let cur = [];
+      for (const line of lines) {
+        const t = line.trim();
+        if (t.startsWith('vertex')) {
+          const parts = t.split(/\s+/);
+          cur.push({ x: parseFloat(parts[1]), y: parseFloat(parts[2]), z: parseFloat(parts[3]) });
+          if (cur.length === 3) { tri.push(cur); cur = []; }
+        }
+      }
+      return tri; // array of [v1,v2,v3]
+    }
+
+    // Simple projection
+    function project(p) {
+      const sx = Math.sin(angleX), cx = Math.cos(angleX);
+      const sy = Math.sin(angleY), cy = Math.cos(angleY);
+      // rotate around X
+      let y = p.y * cx - p.z * sx;
+      let z = p.y * sx + p.z * cx;
+      let x = p.x;
+      // rotate around Y
+      const x2 = x * cy + z * sy;
+      const z2 = -x * sy + z * cy;
+      const scale = 8; // scale model to fit
+      const px = W / 2 + x2 * scale;
+      const py = H / 2 - y * scale;
+      return { x: px, y: py, z: z2 };
+    }
+
+    function normal(a, b, c) {
+      const ux = b.x - a.x, uy = b.y - a.y, uz = b.z - a.z;
+      const vx = c.x - a.x, vy = c.y - a.y, vz = c.z - a.z;
+      const nx = uy * vz - uz * vy;
+      const ny = uz * vx - ux * vz;
+      const nz = ux * vy - uy * vx;
+      const len = Math.hypot(nx, ny, nz) || 1;
+      return { x: nx / len, y: ny / len, z: nz / len };
+    }
+
+    function draw() {
+      sctx.clearRect(0, 0, W, H);
+      const light = { x: 0.2, y: -0.6, z: 1 };
+      const polys = [];
+      for (const t of triangles) {
+        const pa = project(t[0]);
+        const pb = project(t[1]);
+        const pc = project(t[2]);
+        const n = normal(t[0], t[1], t[2]);
+        const brightness = Math.max(0, n.x * light.x + n.y * light.y + n.z * light.z);
+        const hue = 200 + brightness * 100;
+        polys.push({ z: (pa.z + pb.z + pc.z) / 3, p: [pa, pb, pc], color: `hsl(${hue}, 70%, ${30 + brightness * 40}%)` });
+      }
+      polys.sort((a, b) => a.z - b.z);
+      for (const poly of polys) {
+        sctx.fillStyle = poly.color;
+        sctx.beginPath();
+        sctx.moveTo(poly.p[0].x, poly.p[0].y);
+        sctx.lineTo(poly.p[1].x, poly.p[1].y);
+        sctx.lineTo(poly.p[2].x, poly.p[2].y);
+        sctx.closePath();
+        sctx.fill();
+      }
+    }
+
+    // Drag to rotate
+    stlCanvas.addEventListener('pointerdown', (e) => { last = { x: e.clientX, y: e.clientY }; });
+    stlCanvas.addEventListener('pointerup', () => { last = null; });
+    stlCanvas.addEventListener('pointerleave', () => { last = null; });
+    stlCanvas.addEventListener('pointermove', (e) => {
+      if (!last) return;
+      const dx = e.clientX - last.x;
+      const dy = e.clientY - last.y;
+      angleY += dx * 0.01;
+      angleX += dy * 0.01;
+      last = { x: e.clientX, y: e.clientY };
+      draw();
+    });
+
+    // Load STL (ASCII)
+    fetch('../assets/IM0004.STL').then(r => r.text()).then(text => {
+      triangles = parseSTL(text);
+      draw();
+    }).catch(() => {
+      // If loading fails, show message
+      sctx.fillStyle = '#fff';
+      sctx.fillText('Failed to load STL: IM0004.STL', 20, 30);
+    });
+  }
+
   function showScreen(id, pushToStack = true) {
     if (!id || id === currentScreenId) return;
     if (pushToStack && currentScreenId) navStack.push(currentScreenId);
