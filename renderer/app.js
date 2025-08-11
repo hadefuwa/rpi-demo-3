@@ -1902,22 +1902,103 @@
     }
 
     // Starfield (parallax, colorful)
-    const stars = Array.from({ length: 200 }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      z: Math.random() * 1 + 0.2,
-      c: Math.floor(Math.random() * 360),
+    const stars = Array.from({ length: 300 }, () => ({
+      x: (Math.random() - 0.5) * W * 2,  // Wider spawn area
+      y: (Math.random() - 0.5) * H * 2,  // Wider spawn area
+      z: Math.random() * 2 + 0.1,         // Z depth from 0.1 to 2.1
+      c: Math.floor(Math.random() * 360),  // Random hue
+      size: Math.random() * 3 + 1,         // Random star size
+      speed: Math.random() * 0.02 + 0.005, // Random movement speed
+      twinkle: Math.random() * Math.PI * 2, // Random twinkle phase
+      twinkleSpeed: Math.random() * 0.1 + 0.05 // Random twinkle speed
     }));
     function drawStarfield() {
-      vctx.fillStyle = 'rgba(0,0,0,0.25)';
+      // Create a subtle fade effect for motion blur
+      vctx.fillStyle = 'rgba(0,0,0,0.15)';
       vctx.fillRect(0, 0, W, H);
-      for (const s of stars) {
-        s.x += (mouse.x - W / 2) * 0.0005 * (1 / s.z);
-        s.y += (mouse.y - H / 2) * 0.0005 * (1 / s.z);
-        if (s.x < 0) s.x = W; if (s.x > W) s.x = 0;
-        if (s.y < 0) s.y = H; if (s.y > H) s.y = 0;
-        vctx.fillStyle = `hsl(${s.c}, 90%, ${60 + (1 - s.z) * 30}%)`;
-        vctx.fillRect(s.x, s.y, 2 + (1 - s.z) * 2, 2 + (1 - s.z) * 2);
+      
+      // Sort stars by Z depth for proper layering (back to front)
+      const sortedStars = [...stars].sort((a, b) => b.z - a.z);
+      
+      for (const s of sortedStars) {
+        // Update twinkle effect
+        s.twinkle += s.twinkleSpeed;
+        
+        // Calculate twinkle intensity
+        const twinkleIntensity = Math.sin(s.twinkle) * 0.3 + 0.7;
+        
+        // Stars move towards the viewer (Z decreases, making them appear larger and closer)
+        s.z -= s.speed;
+        
+        // Reset star when it gets too close (flies past the viewer)
+        if (s.z < 0.1) {
+          s.z = Math.random() * 2 + 1.5;  // Reset to back
+          s.x = (Math.random() - 0.5) * W * 2;
+          s.y = (Math.random() - 0.5) * H * 2;
+          s.size = Math.random() * 3 + 1;
+          s.speed = Math.random() * 0.02 + 0.005;
+        }
+        
+        // Calculate 3D perspective projection
+        const scale = 1 / s.z;
+        const x = (s.x * scale) + W / 2;
+        const y = (s.y * scale) + H / 2;
+        
+        // Skip stars that are off-screen
+        if (x < -50 || x > W + 50 || y < -50 || y > H + 50) continue;
+        
+        // Calculate star size based on Z depth (closer = bigger)
+        const starSize = s.size * scale * twinkleIntensity;
+        
+        // Calculate brightness based on Z depth and twinkle
+        const brightness = Math.min(100, 40 + (1 - s.z) * 60) * twinkleIntensity;
+        
+        // Create star color with dynamic brightness
+        const starColor = `hsl(${s.c}, 90%, ${brightness}%)`;
+        
+        // Draw the star with glow effect
+        if (starSize > 0.5) {
+          // Main star
+          vctx.fillStyle = starColor;
+          vctx.fillRect(x - starSize/2, y - starSize/2, starSize, starSize);
+          
+          // Glow effect for larger stars
+          if (starSize > 2) {
+            const glowSize = starSize * 2;
+            const glowGradient = vctx.createRadialGradient(x, y, 0, x, y, glowSize);
+            glowGradient.addColorStop(0, `${starColor}80`);
+            glowGradient.addColorStop(0.5, `${starColor}40`);
+            glowGradient.addColorStop(1, 'transparent');
+            
+            vctx.fillStyle = glowGradient;
+            vctx.fillRect(x - glowSize/2, y - glowSize/2, glowSize, glowSize);
+          }
+          
+          // Add subtle motion trails for fast-moving stars
+          if (s.speed > 0.015) {
+            const trailLength = Math.min(20, s.speed * 1000);
+            const trailGradient = vctx.createLinearGradient(
+              x - trailLength, y, x, y
+            );
+            trailGradient.addColorStop(0, 'transparent');
+            trailGradient.addColorStop(1, `${starColor}60`);
+            
+            vctx.fillStyle = trailGradient;
+            vctx.fillRect(x - trailLength, y - 1, trailLength, 2);
+          }
+        }
+      }
+      
+      // Add some interactive mouse influence for extra immersion
+      if (mouse.x > 0 && mouse.y > 0) {
+        const mouseInfluence = 0.0003;
+        for (const s of stars) {
+          // Subtle attraction to mouse position
+          const dx = (mouse.x - W/2) * mouseInfluence * (1/s.z);
+          const dy = (mouse.y - H/2) * mouseInfluence * (1/s.z);
+          s.x += dx;
+          s.y += dy;
+        }
       }
     }
 
