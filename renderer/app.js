@@ -722,18 +722,7 @@
   }
   document.querySelectorAll('button').forEach(b => b.addEventListener('click', playClick));
 
-  // Save drawing
-  document.getElementById('btnSave').addEventListener('click', async () => {
-    try {
-      const dataUrl = canvas.toDataURL('image/png');
-      const result = await window.api.saveImage(dataUrl);
-      const chip = document.createElement('div');
-      chip.className = 'chip';
-      chip.textContent = result && result.ok ? 'Saved ✓' : 'Save failed';
-      document.querySelector('.toolbar').appendChild(chip);
-      setTimeout(() => chip.remove(), 1500);
-    } catch {}
-  });
+  // Removed Save button and its handler as requested
 
   // Memory Match
   const memoryGrid = document.getElementById('memoryGrid');
