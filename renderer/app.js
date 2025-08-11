@@ -115,15 +115,15 @@
     });
 
     // Load STL via main process. Try ASCII first, then binary STL.
-    (async () => {
+    async function loadModelByName(name) {
       try {
         let ok = false;
-        const resTxt = await window.api.readAssetText('IM0004.STL');
+        const resTxt = await window.api.readAssetText(name);
         if (resTxt && resTxt.ok && resTxt.content && resTxt.content.includes('solid')) {
           triangles = parseSTL(resTxt.content);
           ok = true;
         } else {
-          const resBin = await window.api.readAssetBytes('IM0004.STL');
+          const resBin = await window.api.readAssetBytes(name);
           if (resBin && resBin.ok && resBin.data) {
             const bytes = Uint8Array.from(atob(resBin.data), c => c.charCodeAt(0));
             triangles = parseBinarySTL(bytes);
@@ -131,10 +131,18 @@
           }
         }
         if (ok) { fitModelToView(); draw(); }
-        else { sctx.fillStyle = '#fff'; sctx.fillText('Failed to load STL: IM0004.STL', 20, 30); }
+        else { sctx.fillStyle = '#fff'; sctx.fillText('Failed to load '+name, 20, 30); }
+      } catch {
+        sctx.fillStyle = '#fff'; sctx.fillText('Failed to load '+name, 20, 30);
+      }
+    }
+
+    (async () => {
+      try {
+        await loadModelByName('cad1.stl');
       } catch {
         sctx.fillStyle = '#fff';
-        sctx.fillText('Failed to load STL: IM0004.STL', 20, 30);
+        sctx.fillText('Select a model to view', 20, 30);
       }
     })();
 
@@ -208,6 +216,14 @@
 
     btnAuto?.addEventListener('click', () => { autoRotate = !autoRotate; draw(); });
     btnReset?.addEventListener('click', () => { angleX = -0.5; angleY = 0.6; fitModelToView(); autoRotate = false; draw(); });
+
+    // Model switcher
+    document.querySelectorAll('.stl-models button[data-model]')?.forEach(b => {
+      b.addEventListener('click', async () => {
+        const name = b.getAttribute('data-model');
+        await loadModelByName(name);
+      });
+    });
   }
 
   function showScreen(id, pushToStack = true) {
