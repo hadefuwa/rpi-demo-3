@@ -21,10 +21,7 @@
           <div class="grid">
             <button class="card fancy theme-cyan" data-target="screen-touch"><span class="label">Touch Demo</span></button>
             <button class="card fancy theme-purple" data-target="screen-info"><span class="label">System Info</span></button>
-            <button class="card fancy theme-gold" data-target="screen-game"><span class="label">Tic‑Tac‑Toe</span></button>
-            <button class="card fancy theme-teal" data-target="screen-memory"><span class="label">Memory Match</span></button>
-            <button class="card fancy theme-pink" data-target="screen-snake"><span class="label">Snake</span></button>
-            <button class="card fancy theme-red" data-target="screen-pingpong"><span class="label">Ping Pong</span></button>
+            <button class="card fancy theme-gold" data-target="screen-games"><span class="label">Games Hub</span></button>
             <button class="card fancy theme-white" data-target="screen-scroll"><span class="label">Scroll Test</span></button>
             <button class="card fancy theme-lime" data-target="screen-visuals"><span class="label">Visuals</span></button>
             <button class="card fancy theme-orange" data-target="screen-stl"><span class="label">3D Model</span></button>
@@ -295,6 +292,42 @@
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        <!-- Games Hub Screen -->
+        <section id="screen-games" class="screen">
+          <div class="panel">
+            <div class="toolbar">
+              <button id="btnBackGames" class="chip">← Back</button>
+              <h2>Games Hub</h2>
+            </div>
+            <div class="games-grid">
+              <button class="game-card theme-gold" data-target="screen-game">
+                <span class="game-icon">⭕</span>
+                <span class="game-title">Tic-Tac-Toe</span>
+                <span class="game-desc">Classic 3x3 grid game</span>
+              </button>
+              
+              <button class="game-card theme-teal" data-target="screen-memory">
+                <span class="game-icon">🧠</span>
+                <span class="game-title">Memory Match</span>
+                <span class="game-desc">Find matching food pairs</span>
+              </button>
+              
+              <button class="game-card theme-pink" data-target="screen-snake">
+                <span class="game-icon">🐍</span>
+                <span class="game-title">Snake</span>
+                <span class="game-desc">Grow your snake, avoid walls</span>
+              </button>
+              
+              <button class="game-card theme-red" data-target="screen-pingpong">
+                <span class="game-icon">🏓</span>
+                <span class="game-title">Ping Pong</span>
+                <span class="game-desc">You vs AI, first to 11 wins</span>
+              </button>
+            </div>
+            <div class="note">Tap any game to start playing!</div>
           </div>
         </section>
       </main>

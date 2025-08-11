@@ -562,6 +562,24 @@
     });
   });
 
+  // Games Hub navigation
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.game-card')) {
+      const gameCard = e.target.closest('.game-card');
+      const target = gameCard.getAttribute('data-target');
+      if (target) {
+        showScreen(target, true);
+      }
+    }
+  });
+
+  // Games Hub back button
+  document.addEventListener('click', (e) => {
+    if (e.target.id === 'btnBackGames') {
+      goHome();
+    }
+  });
+
   // No clock on home screen anymore
 
   // Touch paint - wait for DOM to be ready
