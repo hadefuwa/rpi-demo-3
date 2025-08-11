@@ -7,9 +7,8 @@ contextBridge.exposeInMainWorld('appInfo', {
 contextBridge.exposeInMainWorld('api', {
   saveImage: async (dataUrl) => ipcRenderer.invoke('save-image', dataUrl),
   getSystemInfo: async () => ipcRenderer.invoke('get-system-info'),
-  onSystemInfo: (callback) => {
-    ipcRenderer.on('system-info', (_event, payload) => callback(payload));
-  },
+  readSettings: async () => ipcRenderer.invoke('read-settings'),
+  writeSettings: async (settings) => ipcRenderer.invoke('write-settings', settings),
 });
 
 

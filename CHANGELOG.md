@@ -29,6 +29,13 @@ Unreleased
 - Scroll Test screen added with touch panning and drag‑to‑scroll fallback.
 - Drawing canvas switched to smooth line strokes.
 
+2025-08-11 – Logo, Save PNG, System Info, Settings
+--------------------------------------------------
+- Added Matrix logo on Home.
+- Touch Demo can save PNGs to `~/Pictures/Showcase`.
+- System Info shows memory percent and temperature via IPC.
+- Added Settings screen with theme (dark/light) and sound toggle, saved to app data.
+
 2025-08-11 – Raspberry Pi setup & autostart
 -------------------------------------------
 - Added `RPI_SETUP.md` with step‑by‑step Pi instructions.

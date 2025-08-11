@@ -17,6 +17,7 @@ Core setup
 Visual/branding
 ---------------
 - [ ] Place Matrix logo on Home (`assets/matrix.png`) and size nicely
+- [x] Place Matrix logo on Home (`assets/matrix.png`) and size nicely
 - [ ] Apply final brand color in CSS variables (`--brand`, `--accent`)
 - [ ] Confirm fonts (local) and text sizes on device
 
@@ -34,20 +35,21 @@ Touch Demo (canvas)
 - [x] Smooth line strokes (no dotted gaps)
 - [x] Canvas fills remaining height; resizes with window and DPR
 - [ ] Add Save button → write PNG to `~/Pictures/Showcase`
-- [ ] Add simple success toast after save
+- [x] Add Save button → write PNG to `~/Pictures/Showcase`
+- [x] Add simple success toast after save
 
 System Info
 -----------
-- [ ] Memory percent: `os.totalmem()` and `os.freemem()` via IPC
-- [ ] Temperature: read `/sys/class/thermal/thermal_zone0/temp` (fallback `vcgencmd`)
-- [ ] Update UI every 1s; show "N/A" on failure
+- [x] Memory percent: `os.totalmem()` and `os.freemem()` via IPC
+- [x] Temperature: read `/sys/class/thermal/thermal_zone0/temp` (fallback `vcgencmd`)
+- [x] Update UI every 1s; show "N/A" on failure
 - [~] CPU usage (optional first pass)
 
 Settings (simple)
 -----------------
-- [ ] Theme toggle: Dark/Light
-- [ ] Sound toggle: Click sound on taps
-- [ ] Persist settings to JSON file in app data
+- [x] Theme toggle: Dark/Light
+- [x] Sound toggle: Click sound on taps
+- [x] Persist settings to JSON file in app data
 
 Raspberry Pi integration
 ------------------------

@@ -126,11 +126,31 @@
   // Simple system info demo (static until wired)
   const cpuBar = document.getElementById('cpuBar');
   const memBar = document.getElementById('memBar');
+  const tempBar = document.getElementById('tempBar');
+  const infoLabels = document.getElementById('infoLabels');
   let demo = 10;
-  setInterval(() => {
+  setInterval(async () => {
+    // Simple demo CPU animation (placeholder)
     demo = (demo + 7) % 90;
     cpuBar.style.width = `${10 + demo}%`;
-    memBar.style.width = `${20 + ((demo * 2) % 60)}%`;
+
+    // Real system info via IPC
+    try {
+      const info = await window.api.getSystemInfo();
+      if (info && typeof info.memPercent === 'number') {
+        memBar.style.width = `${Math.min(100, Math.max(0, info.memPercent))}%`;
+      }
+      if (info && typeof info.tempC === 'number') {
+        // Map ~30–85C to 0–100%
+        const pct = Math.max(0, Math.min(100, ((info.tempC - 30) / 55) * 100));
+        tempBar.style.width = `${pct}%`;
+      }
+      if (infoLabels) {
+        const memTxt = (info && typeof info.memPercent === 'number') ? `${info.memPercent}%` : 'N/A';
+        const tempTxt = (info && typeof info.tempC === 'number') ? `${info.tempC.toFixed(1)}°C` : 'N/A';
+        infoLabels.textContent = `Mem: ${memTxt} • Temp: ${tempTxt}`;
+      }
+    } catch {}
   }, 1200);
 
   // Tic Tac Toe
@@ -204,6 +224,69 @@
       item.textContent = `Item ${i}`;
       scrollBox.appendChild(item);
     }
+
+  // Settings
+  const chkSound = document.getElementById('chkSound');
+  const selTheme = document.getElementById('selTheme');
+  const btnSaveSettings = document.getElementById('btnSaveSettings');
+  const settingsNote = document.getElementById('settingsNote');
+
+  async function loadSettings() {
+    try {
+      const s = await window.api.readSettings();
+      if (!s) return;
+      chkSound.checked = !!s.sound;
+      selTheme.value = (s.theme === 'light') ? 'light' : 'dark';
+      applyTheme(selTheme.value);
+    } catch {}
+  }
+
+  function applyTheme(theme) {
+    const root = document.documentElement;
+    if (theme === 'light') {
+      root.style.setProperty('--bg1', '#f4f6fa');
+      root.style.setProperty('--bg2', '#e9edf4');
+      root.style.setProperty('--fg', '#1c2330');
+      root.style.setProperty('--card', 'rgba(0,0,0,0.06)');
+    } else {
+      root.style.setProperty('--bg1', '#0d0f14');
+      root.style.setProperty('--bg2', '#151a22');
+      root.style.setProperty('--fg', '#e6e8ec');
+      root.style.setProperty('--card', 'rgba(255,255,255,0.06)');
+    }
+  }
+
+  btnSaveSettings?.addEventListener('click', async () => {
+    const newSettings = { sound: chkSound.checked, theme: selTheme.value };
+    await window.api.writeSettings(newSettings);
+    applyTheme(selTheme.value);
+    settingsNote.textContent = 'Saved.';
+    setTimeout(() => settingsNote.textContent = '', 1200);
+  });
+
+  loadSettings();
+
+  // Simple click sound
+  let clickAudio = null;
+  function playClick() {
+    if (!chkSound.checked) return;
+    if (!clickAudio) clickAudio = new Audio('../assets/sounds/click.mp3');
+    try { clickAudio.currentTime = 0; clickAudio.play(); } catch {}
+  }
+  document.querySelectorAll('button').forEach(b => b.addEventListener('click', playClick));
+
+  // Save drawing
+  document.getElementById('btnSave').addEventListener('click', async () => {
+    try {
+      const dataUrl = canvas.toDataURL('image/png');
+      const result = await window.api.saveImage(dataUrl);
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.textContent = result && result.ok ? 'Saved ✓' : 'Save failed';
+      document.querySelector('.toolbar').appendChild(chip);
+      setTimeout(() => chip.remove(), 1500);
+    } catch {}
+  });
 
     // Drag-to-scroll fallback using Pointer Events
     let dragging = false;
