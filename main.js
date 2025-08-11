@@ -11,8 +11,73 @@ const { execSync } = require('child_process');
 app.disableHardwareAcceleration();
 app.commandLine.appendSwitch('use-gl', 'swiftshader');
 app.commandLine.appendSwitch('ozone-platform-hint', 'x11');
+
+// Additional Raspberry Pi specific flags to fix GBM/DMA buffer errors
+app.commandLine.appendSwitch('disable-gpu-sandbox');
+app.commandLine.appendSwitch('disable-software-rasterizer');
+app.commandLine.appendSwitch('disable-gpu-compositing');
+app.commandLine.appendSwitch('disable-accelerated-2d-canvas');
+app.commandLine.appendSwitch('disable-accelerated-video-decode');
+app.commandLine.appendSwitch('disable-accelerated-video-encode');
+app.commandLine.appendSwitch('disable-webgl');
+app.commandLine.appendSwitch('disable-webgl2');
+app.commandLine.appendSwitch('disable-3d-apis');
+app.commandLine.appendSwitch('disable-gpu-rasterization');
+app.commandLine.appendSwitch('disable-gpu-process');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-compositor-resources');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-video-frames');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-uma-resources');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-vaapi-video-frames');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-video-frames');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-compositor-resources');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-uma-resources');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-vaapi-video-frames');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-video-frames');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-compositor-resources');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-uma-resources');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-vaapi-video-frames');
+
+// Raspberry Pi specific: Force software rendering and disable problematic hardware features
+app.commandLine.appendSwitch('use-angle', 'swiftshader');
+app.commandLine.appendSwitch('disable-features', 'VizDisplayCompositor');
+app.commandLine.appendSwitch('disable-features', 'UseChromeOSDirectVideoDecoder');
+app.commandLine.appendSwitch('disable-features', 'VaapiVideoDecoder');
+app.commandLine.appendSwitch('disable-features', 'VaapiVideoEncoder');
+app.commandLine.appendSwitch('disable-features', 'VaapiVideoDecodeAccelerator');
+app.commandLine.appendSwitch('disable-features', 'VaapiVideoEncodeAccelerator');
+
 // Enable Chromium touch events for better touchscreen behavior
 app.commandLine.appendSwitch('touch-events', 'enabled');
+
+// Add error handling for the main process
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  // Don't exit the app, just log the error
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Don't exit the app, just log the error
+});
+
+// Suppress GBM and DMA buffer errors on Raspberry Pi
+if (os.platform() === 'linux') {
+  // Redirect stderr to suppress GBM errors
+  const originalStderrWrite = process.stderr.write;
+  process.stderr.write = function(chunk, encoding, callback) {
+    const message = chunk.toString();
+    // Filter out GBM and DMA buffer related errors
+    if (message.includes('gbm_wrapper') || 
+        message.includes('Failed to get fd for plane') ||
+        message.includes('Failed to export buffer to dma_buf') ||
+        message.includes('No such file or directory')) {
+      // Suppress these errors
+      return true;
+    }
+    // Pass through other errors
+    return originalStderrWrite.call(this, chunk, encoding, callback);
+  };
+}
 
 function createMainWindow() {
   const mainWindow = new BrowserWindow({
@@ -32,6 +97,15 @@ function createMainWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+  
+  // Add error handling for the window
+  mainWindow.webContents.on('crashed', (event) => {
+    console.error('Renderer process crashed:', event);
+  });
+  
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.error('Failed to load:', errorCode, errorDescription);
+  });
 }
 
 app.whenReady().then(() => {
@@ -91,43 +165,50 @@ ipcMain.handle('write-settings', (_event, updated) => {
 });
 
 // -----------------------
-// System info (memory, temp, CPU, network, storage)
+// System info (memory, temp, CPU, network, storage) - Cross-platform compatible
 // -----------------------
 function readTemperatureC() {
   try {
-    const sysPath = '/sys/class/thermal/thermal_zone0/temp';
-    if (fs.existsSync(sysPath)) {
-      const v = fs.readFileSync(sysPath, 'utf8').trim();
-      const num = parseInt(v, 10);
-      if (!Number.isNaN(num)) return Math.round(num / 100) / 10; // e.g. 55234 -> 55.2
+    // Only try Linux-specific paths if we're on Linux
+    if (os.platform() === 'linux') {
+      const sysPath = '/sys/class/thermal/thermal_zone0/temp';
+      if (fs.existsSync(sysPath)) {
+        const v = fs.readFileSync(sysPath, 'utf8').trim();
+        const num = parseInt(v, 10);
+        if (!Number.isNaN(num)) return Math.round(num / 100) / 10; // e.g. 55234 -> 55.2
+      }
+      
+      try {
+        const out = execSync('vcgencmd measure_temp', { encoding: 'utf8' }).trim();
+        // Example: temp=45.2'C
+        const m = out.match(/temp=([0-9.]+)/);
+        if (m) return parseFloat(m[1]);
+      } catch {}
     }
-  } catch {}
-  try {
-    const out = execSync('vcgencmd measure_temp', { encoding: 'utf8' }).trim();
-    // Example: temp=45.2'C
-    const m = out.match(/temp=([0-9.]+)/);
-    if (m) return parseFloat(m[1]);
   } catch {}
   return null;
 }
 
 function getCPUUsage() {
   try {
-    // Read CPU stats from /proc/stat
-    const statContent = fs.readFileSync('/proc/stat', 'utf8');
-    const cpuLine = statContent.split('\n')[0];
-    const cpuValues = cpuLine.split(' ').filter(val => val.trim() !== '');
-    
-    if (cpuValues.length >= 5) {
-      const user = parseInt(cpuValues[1]);
-      const nice = parseInt(cpuValues[2]);
-      const system = parseInt(cpuValues[3]);
-      const idle = parseInt(cpuValues[4]);
+    // Only try Linux-specific paths if we're on Linux
+    if (os.platform() === 'linux') {
+      // Read CPU stats from /proc/stat
+      const statContent = fs.readFileSync('/proc/stat', 'utf8');
+      const cpuLine = statContent.split('\n')[0];
+      const cpuValues = cpuLine.split(' ').filter(val => val.trim() !== '');
       
-      const total = user + nice + system + idle;
-      const used = total - idle;
-      
-      return total > 0 ? Math.round((used / total) * 100) : null;
+      if (cpuValues.length >= 5) {
+        const user = parseInt(cpuValues[1]);
+        const nice = parseInt(cpuValues[2]);
+        const system = parseInt(cpuValues[3]);
+        const idle = parseInt(cpuValues[4]);
+        
+        const total = user + nice + system + idle;
+        const used = total - idle;
+        
+        return total > 0 ? Math.round((used / total) * 100) : null;
+      }
     }
   } catch {}
   return null;
@@ -140,46 +221,51 @@ function getUptime() {
     const hours = Math.floor((uptime % 86400) / 3600);
     const minutes = Math.floor((uptime % 3600) / 60);
     
-    if (days > 0) {
-      return `${days}d ${hours}h ${minutes}m`;
-    } else if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    } else {
-      return `${minutes}m`;
-    }
+    if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
   } catch {}
-  return null;
+  return 'N/A';
 }
 
 function getNetworkInfo() {
   try {
-    // Get network interfaces
     const interfaces = os.networkInterfaces();
-    let wifiStatus = 'Disconnected';
-    let ipAddress = 'N/A';
+    const active = [];
     
     for (const [name, nets] of Object.entries(interfaces)) {
-      if (name.startsWith('wlan') || name.startsWith('wifi')) {
-        for (const net of nets) {
-          if (net.family === 'IPv4' && !net.internal) {
-            wifiStatus = 'Connected';
-            ipAddress = net.address;
-            break;
-          }
+      for (const net of nets) {
+        if (net.family === 'IPv4' && !net.internal) {
+          active.push({ name, address: net.address });
         }
       }
     }
     
-    return { wifiStatus, ipAddress };
+    return active.length > 0 ? active[0] : { name: 'N/A', address: 'N/A' };
   } catch {}
-  return { wifiStatus: 'Unknown', ipAddress: 'N/A' };
+  return { name: 'N/A', address: 'N/A' };
 }
 
 function getStorageInfo() {
   try {
-    // Get disk usage for root and home
-    const rootStats = fs.statSync('/');
-    const homeStats = fs.statSync(os.homedir());
+    // Cross-platform storage info
+    const home = os.homedir();
+    let rootStats = null;
+    
+    // Try to get root directory stats safely
+    if (os.platform() === 'win32') {
+      // On Windows, try to get C: drive info
+      try {
+        rootStats = fs.statSync('C:\\');
+      } catch {}
+    } else {
+      // On Unix-like systems, try root directory
+      try {
+        rootStats = fs.statSync('/');
+      } catch {}
+    }
+    
+    const homeStats = fs.statSync(home);
     
     const formatBytes = (bytes) => {
       if (bytes === 0) return '0 B';
@@ -190,7 +276,7 @@ function getStorageInfo() {
     };
     
     return {
-      root: formatBytes(rootStats.size || 0),
+      root: rootStats ? formatBytes(rootStats.size || 0) : 'N/A',
       home: formatBytes(homeStats.size || 0)
     };
   } catch {}
@@ -198,24 +284,36 @@ function getStorageInfo() {
 }
 
 ipcMain.handle('get-system-info', () => {
-  const total = os.totalmem();
-  const free = os.freemem();
-  const used = total - free;
-  const memPercent = total > 0 ? Math.round((used / total) * 100) : null;
-  const tempC = readTemperatureC();
-  const cpuPercent = getCPUUsage();
-  const uptime = getUptime();
-  const network = getNetworkInfo();
-  const storage = getStorageInfo();
-  
-  return { 
-    memPercent, 
-    tempC, 
-    cpuPercent, 
-    uptime, 
-    network, 
-    storage 
-  };
+  try {
+    const total = os.totalmem();
+    const free = os.freemem();
+    const used = total - free;
+    const memPercent = total > 0 ? Math.round((used / total) * 100) : null;
+    const tempC = readTemperatureC();
+    const cpuPercent = getCPUUsage();
+    const uptime = getUptime();
+    const network = getNetworkInfo();
+    const storage = getStorageInfo();
+    
+    return { 
+      memPercent, 
+      tempC, 
+      cpuPercent, 
+      uptime, 
+      network, 
+      storage 
+    };
+  } catch (error) {
+    console.error('Error getting system info:', error);
+    return {
+      memPercent: null,
+      tempC: null,
+      cpuPercent: null,
+      uptime: 'N/A',
+      network: { name: 'N/A', address: 'N/A' },
+      storage: { root: 'N/A', home: 'N/A' }
+    };
+  }
 });
 
 // App version (renderer requests via preload)

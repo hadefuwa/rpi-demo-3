@@ -6,10 +6,30 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "start:windows": "electron . --disable-gpu --disable-software-rasterizer",
+    "start:raspberry-pi": "DISPLAY=:0 electron .",
+    "start:debug": "electron . --enable-logging --v=1",
+    "start:dev": "electron . --dev-tools",
+    "install:raspberry-pi": "chmod +x scripts/raspberry-pi-optimization.sh && ./scripts/raspberry-pi-optimization.sh",
+    "test": "echo \"No tests specified\" && exit 0",
+    "build": "echo \"Build process not configured\" && exit 0"
   },
   "devDependencies": {
     "electron": "^30.0.0"
-  }
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "os": [
+    "linux",
+    "win32",
+    "darwin"
+  ],
+  "cpu": [
+    "arm",
+    "x64"
+  ]
 }
 
