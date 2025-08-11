@@ -139,4 +139,18 @@ ipcMain.handle('save-image', (_event, dataUrl) => {
   }
 });
 
+// -----------------------
+// Read asset text (e.g., STL) safely from packaged app
+// -----------------------
+ipcMain.handle('read-asset-text', (_event, relativeName) => {
+  try {
+    // Assets live in app root 'assets' whether unpacked or asar
+    const assetPath = path.join(__dirname, 'assets', String(relativeName));
+    const content = fs.readFileSync(assetPath, 'utf8');
+    return { ok: true, content };
+  } catch (err) {
+    return { ok: false, error: String(err) };
+  }
+});
+
 

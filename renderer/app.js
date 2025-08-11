@@ -106,15 +106,22 @@
       draw();
     });
 
-    // Load STL (ASCII)
-    fetch('../assets/IM0004.STL').then(r => r.text()).then(text => {
-      triangles = parseSTL(text);
-      draw();
-    }).catch(() => {
-      // If loading fails, show message
-      sctx.fillStyle = '#fff';
-      sctx.fillText('Failed to load STL: IM0004.STL', 20, 30);
-    });
+    // Load STL (ASCII) via main process to support packaged asar
+    (async () => {
+      try {
+        const res = await window.api.readAssetText('IM0004.STL');
+        if (res && res.ok && res.content) {
+          triangles = parseSTL(res.content);
+          draw();
+        } else {
+          sctx.fillStyle = '#fff';
+          sctx.fillText('Failed to load STL: IM0004.STL', 20, 30);
+        }
+      } catch {
+        sctx.fillStyle = '#fff';
+        sctx.fillText('Failed to load STL: IM0004.STL', 20, 30);
+      }
+    })();
   }
 
   function showScreen(id, pushToStack = true) {
@@ -365,7 +372,11 @@
   let clickAudio = null;
   function playClick() {
     if (!chkSound.checked) return;
-    if (!clickAudio) clickAudio = new Audio('../assets/sounds/click.mp3');
+    if (!clickAudio) {
+      // Build absolute file path from app root for packaged app
+      const base = location.href.replace(/\/renderer\/index\.html.*$/, '/');
+      clickAudio = new Audio(base + 'assets/sounds/click.mp3');
+    }
     try { clickAudio.currentTime = 0; clickAudio.play(); } catch {}
   }
   document.querySelectorAll('button').forEach(b => b.addEventListener('click', playClick));
