@@ -158,6 +158,50 @@ main { flex: 1; padding: 12px 16px 16px; }
 .theme-blue::after { background: radial-gradient(800px 300px at 50% 0%, rgba(30,144,255,0.5), rgba(0,0,0,0.2)); }
 .theme-silver::after { background: radial-gradient(800px 300px at 50% 0%, rgba(192,192,192,0.5), rgba(0,0,0,0.2)); }
 
+/* Unique animations per button */
+.theme-cyan::before { animation: spin 6s linear infinite; }
+.theme-purple::before { animation: spin-reverse 7s linear infinite; }
+.theme-gold::before { animation: pulse-glow 3.5s ease-in-out infinite; }
+.theme-teal::before { animation: float-x 6s ease-in-out infinite; }
+.theme-pink::before { animation: float-y 6s ease-in-out infinite; }
+.theme-white::before { animation: pulse-glow 2.8s ease-in-out infinite; filter: blur(36px); }
+.theme-lime::before { animation: spin 10s linear infinite; filter: blur(40px); opacity: 0.35; }
+.theme-orange::before { animation: spin-reverse 9s linear infinite; }
+.theme-blue::before { animation: float-x 9s ease-in-out infinite; }
+.theme-silver::before { animation: shimmer 8s ease-in-out infinite; }
+
+.theme-cyan::after { animation: float-y 6s ease-in-out infinite; }
+.theme-purple::after { animation: float-x 7s ease-in-out infinite; }
+.theme-gold::after { animation: pulse-glow 3s ease-in-out infinite; }
+.theme-teal::after { animation: float-x 8s ease-in-out infinite; }
+.theme-pink::after { animation: float-y 7s ease-in-out infinite; }
+.theme-white::after { animation: pulse-glow 4s ease-in-out infinite; }
+.theme-lime::after { animation: float-y 10s ease-in-out infinite; }
+.theme-orange::after { animation: float-x 9s ease-in-out infinite; }
+.theme-blue::after { animation: float-x 11s ease-in-out infinite; }
+.theme-silver::after { animation: shimmer 10s ease-in-out infinite; }
+
+@keyframes spin-reverse { to { transform: rotate(-360deg); } }
+@keyframes float-x {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes float-y {
+  0% { background-position: 50% 0%; }
+  50% { background-position: 50% 100%; }
+  100% { background-position: 50% 0%; }
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.25; filter: blur(28px); }
+  50% { opacity: 0.55; filter: blur(46px); }
+}
+@keyframes shimmer {
+  0% { filter: hue-rotate(0deg) blur(28px); }
+  50% { filter: hue-rotate(45deg) blur(36px); }
+  100% { filter: hue-rotate(0deg) blur(28px); }
+}
+
 .toolbar {
   display: flex;
   align-items: center;
