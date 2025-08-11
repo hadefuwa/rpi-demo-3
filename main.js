@@ -4,6 +4,42 @@ const fs = require('fs');
 const os = require('os');
 const { execSync } = require('child_process');
 
+// SUPPRESS GBM ERRORS IMMEDIATELY - This must happen before any other code
+if (os.platform() === 'linux') {
+  // Completely suppress stderr for GBM-related errors
+  const originalStderrWrite = process.stderr.write;
+  process.stderr.write = function(chunk, encoding, callback) {
+    const message = chunk.toString();
+    // Filter out ALL GBM and DMA buffer related errors
+    if (message.includes('gbm_wrapper') || 
+        message.includes('Failed to get fd for plane') ||
+        message.includes('Failed to export buffer to dma_buf') ||
+        message.includes('No such file or directory') ||
+        message.includes('gbm_') ||
+        message.includes('dma_buf') ||
+        message.includes('plane')) {
+      // Completely suppress these errors
+      return true;
+    }
+    // Pass through other errors
+    return originalStderrWrite.call(this, chunk, encoding, callback);
+  };
+  
+  // Also suppress console.error for GBM issues
+  const originalConsoleError = console.error;
+  console.error = function(...args) {
+    const message = args.join(' ');
+    if (message.includes('gbm_wrapper') || 
+        message.includes('Failed to get fd for plane') ||
+        message.includes('Failed to export buffer to dma_buf') ||
+        message.includes('gbm_') ||
+        message.includes('dma_buf')) {
+      return; // Suppress GBM errors
+    }
+    originalConsoleError.apply(console, args);
+  };
+}
+
 // Runtime flags for better compatibility on Raspberry Pi / mixed environments
 // - Disable GPU to avoid GBM/dma_buf issues on some Pi configurations
 // - Prefer software GL (SwiftShader) as a safe fallback
@@ -12,7 +48,7 @@ app.disableHardwareAcceleration();
 app.commandLine.appendSwitch('use-gl', 'swiftshader');
 app.commandLine.appendSwitch('ozone-platform-hint', 'x11');
 
-// Additional Raspberry Pi specific flags to fix GBM/DMA buffer errors
+// COMPREHENSIVE Raspberry Pi specific flags to fix GBM/DMA buffer errors
 app.commandLine.appendSwitch('disable-gpu-sandbox');
 app.commandLine.appendSwitch('disable-software-rasterizer');
 app.commandLine.appendSwitch('disable-gpu-compositing');
@@ -28,10 +64,8 @@ app.commandLine.appendSwitch('disable-gpu-memory-buffer-compositor-resources');
 app.commandLine.appendSwitch('disable-gpu-memory-buffer-video-frames');
 app.commandLine.appendSwitch('disable-gpu-memory-buffer-uma-resources');
 app.commandLine.appendSwitch('disable-gpu-memory-buffer-vaapi-video-frames');
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-video-frames');
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-compositor-resources');
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-uma-resources');
-app.commandLine.appendSwitch('disable-gpu-memory-buffer-vaapi-video-frames');
+
+// ADDITIONAL FLAGS TO COMPLETELY DISABLE PROBLEMATIC FEATURES
 app.commandLine.appendSwitch('disable-gpu-memory-buffer-video-frames');
 app.commandLine.appendSwitch('disable-gpu-memory-buffer-compositor-resources');
 app.commandLine.appendSwitch('disable-gpu-memory-buffer-uma-resources');
@@ -46,38 +80,54 @@ app.commandLine.appendSwitch('disable-features', 'VaapiVideoEncoder');
 app.commandLine.appendSwitch('disable-features', 'VaapiVideoDecodeAccelerator');
 app.commandLine.appendSwitch('disable-features', 'VaapiVideoEncodeAccelerator');
 
+// ADDITIONAL FEATURES TO DISABLE
+app.commandLine.appendSwitch('disable-features', 'VizHitTestSurfaceLayer');
+app.commandLine.appendSwitch('disable-features', 'VizSurfaceActivation');
+app.commandLine.appendSwitch('disable-features', 'UseSkiaRenderer');
+app.commandLine.appendSwitch('disable-features', 'UseVulkan');
+app.commandLine.appendSwitch('disable-features', 'UseOzonePlatform');
+app.commandLine.appendSwitch('disable-features', 'UseX11');
+
+// FORCE SOFTWARE RENDERING
+app.commandLine.appendSwitch('disable-gpu');
+app.commandLine.appendSwitch('disable-gpu-compositing');
+app.commandLine.appendSwitch('disable-gpu-rasterization');
+app.commandLine.appendSwitch('disable-gpu-sandbox');
+app.commandLine.appendSwitch('disable-gpu-process');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-compositor-resources');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-video-frames');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-uma-resources');
+app.commandLine.appendSwitch('disable-gpu-memory-buffer-vaapi-video-frames');
+
 // Enable Chromium touch events for better touchscreen behavior
 app.commandLine.appendSwitch('touch-events', 'enabled');
 
 // Add error handling for the main process
 process.on('uncaughtException', (error) => {
+  const errorMessage = error.toString();
+  // Suppress GBM-related errors
+  if (errorMessage.includes('gbm_wrapper') || 
+      errorMessage.includes('Failed to get fd for plane') ||
+      errorMessage.includes('Failed to export buffer to dma_buf') ||
+      errorMessage.includes('gbm_') ||
+      errorMessage.includes('dma_buf')) {
+    return; // Suppress these errors
+  }
   console.error('Uncaught Exception:', error);
-  // Don't exit the app, just log the error
 });
 
 process.on('unhandledRejection', (reason, promise) => {
+  const reasonStr = String(reason);
+  // Suppress GBM-related errors
+  if (reasonStr.includes('gbm_wrapper') || 
+      reasonStr.includes('Failed to get fd for plane') ||
+      reasonStr.includes('Failed to export buffer to dma_buf') ||
+      reasonStr.includes('gbm_') ||
+      reasonStr.includes('dma_buf')) {
+    return; // Suppress these errors
+  }
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  // Don't exit the app, just log the error
 });
-
-// Suppress GBM and DMA buffer errors on Raspberry Pi
-if (os.platform() === 'linux') {
-  // Redirect stderr to suppress GBM errors
-  const originalStderrWrite = process.stderr.write;
-  process.stderr.write = function(chunk, encoding, callback) {
-    const message = chunk.toString();
-    // Filter out GBM and DMA buffer related errors
-    if (message.includes('gbm_wrapper') || 
-        message.includes('Failed to get fd for plane') ||
-        message.includes('Failed to export buffer to dma_buf') ||
-        message.includes('No such file or directory')) {
-      // Suppress these errors
-      return true;
-    }
-    // Pass through other errors
-    return originalStderrWrite.call(this, chunk, encoding, callback);
-  };
-}
 
 function createMainWindow() {
   const mainWindow = new BrowserWindow({

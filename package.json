@@ -9,6 +9,7 @@
     "start": "electron .",
     "start:windows": "electron . --disable-gpu --disable-software-rasterizer",
     "start:raspberry-pi": "DISPLAY=:0 electron .",
+    "start:no-errors": "bash scripts/start-raspberry-pi-no-errors.sh",
     "start:debug": "electron . --enable-logging --v=1",
     "start:dev": "electron . --dev-tools",
     "install:raspberry-pi": "chmod +x scripts/raspberry-pi-optimization.sh && ./scripts/raspberry-pi-optimization.sh",
