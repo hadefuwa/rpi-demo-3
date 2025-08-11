@@ -41,22 +41,39 @@
 
   function getPos(e) {
     const rect = canvas.getBoundingClientRect();
-    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-    return { x: Math.max(0, Math.min(rect.width, x)), y: Math.max(0, Math.min(rect.height, y)) };
+    const client = e.touches ? e.touches[0] : e;
+    const x = client.clientX - rect.left;
+    const y = client.clientY - rect.top;
+    return {
+      x: Math.max(0, Math.min(rect.width, x)),
+      y: Math.max(0, Math.min(rect.height, y))
+    };
   }
 
+  let lastPos = null;
+
   function start(e) {
-    painting = true; draw(e);
+    painting = true;
+    lastPos = getPos(e);
   }
-  function end() { painting = false; ctx.beginPath(); }
+  function end() {
+    painting = false;
+    lastPos = null;
+    ctx.beginPath();
+  }
   function draw(e) {
     if (!painting) return;
     const pos = getPos(e);
-    ctx.fillStyle = brushColor;
+    ctx.strokeStyle = brushColor;
+    ctx.lineWidth = brushSize;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, brushSize / 2, 0, Math.PI * 2);
-    ctx.fill();
+    const from = lastPos || pos;
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    lastPos = pos;
   }
 
   canvas.addEventListener('mousedown', start);
@@ -150,6 +167,24 @@
     versionEl.textContent = window.appInfo.version;
   } else {
     versionEl.textContent = '0.1.0';
+  }
+
+  // Scroll Test
+  const scrollBox = document.getElementById('scrollbox');
+  if (scrollBox) {
+    for (let i = 1; i <= 60; i++) {
+      const item = document.createElement('div');
+      item.className = 'scroll-item';
+      item.textContent = `Item ${i}`;
+      scrollBox.appendChild(item);
+    }
+
+    // Prevent the page itself from dragging while allowing the scrollbox to scroll
+    scrollBox.addEventListener('touchmove', (e) => {
+      // If content is scrollable, allow it; otherwise prevent to avoid rubber-banding
+      const canScroll = scrollBox.scrollHeight > scrollBox.clientHeight;
+      if (!canScroll) e.preventDefault();
+    }, { passive: false });
   }
 })();
 
