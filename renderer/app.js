@@ -3,7 +3,6 @@
   const home = document.getElementById('screen-home');
   const btnHome = document.getElementById('btnHome');
   const btnBack = document.getElementById('btnBack');
-  const clock = document.getElementById('clock');
 
   // Simple in-app navigation stack so Back works
   let currentScreenId = 'screen-home';
@@ -149,14 +148,7 @@
     });
   });
 
-  function updateClock() {
-    const now = new Date();
-    const date = now.toLocaleDateString();
-    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    clock.textContent = `${date} • ${time}`;
-  }
-  setInterval(updateClock, 1000);
-  updateClock();
+  // No clock on home screen anymore
 
   // Touch paint
   const canvas = document.getElementById('paint');
