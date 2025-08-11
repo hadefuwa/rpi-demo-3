@@ -106,22 +106,47 @@
       draw();
     });
 
-    // Load STL (ASCII) via main process to support packaged asar
+    // Load STL via main process. Try ASCII first, then binary STL.
     (async () => {
       try {
-        const res = await window.api.readAssetText('IM0004.STL');
-        if (res && res.ok && res.content) {
-          triangles = parseSTL(res.content);
-          draw();
+        let ok = false;
+        const resTxt = await window.api.readAssetText('IM0004.STL');
+        if (resTxt && resTxt.ok && resTxt.content && resTxt.content.includes('solid')) {
+          triangles = parseSTL(resTxt.content);
+          ok = true;
         } else {
-          sctx.fillStyle = '#fff';
-          sctx.fillText('Failed to load STL: IM0004.STL', 20, 30);
+          const resBin = await window.api.readAssetBytes('IM0004.STL');
+          if (resBin && resBin.ok && resBin.data) {
+            const bytes = Uint8Array.from(atob(resBin.data), c => c.charCodeAt(0));
+            triangles = parseBinarySTL(bytes);
+            ok = true;
+          }
         }
+        if (ok) draw(); else { sctx.fillStyle = '#fff'; sctx.fillText('Failed to load STL: IM0004.STL', 20, 30); }
       } catch {
         sctx.fillStyle = '#fff';
         sctx.fillText('Failed to load STL: IM0004.STL', 20, 30);
       }
     })();
+
+    function parseBinarySTL(bytes) {
+      // Binary STL: 80-byte header, 4-byte uint32 triangle count, then 50 bytes per triangle
+      if (bytes.length < 84) return [];
+      const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      const triCount = dv.getUint32(80, true);
+      const out = [];
+      let offset = 84;
+      for (let i = 0; i < triCount; i++) {
+        offset += 12; // skip normal (3 floats)
+        const v1 = { x: dv.getFloat32(offset, true), y: dv.getFloat32(offset+4, true), z: dv.getFloat32(offset+8, true) }; offset += 12;
+        const v2 = { x: dv.getFloat32(offset, true), y: dv.getFloat32(offset+4, true), z: dv.getFloat32(offset+8, true) }; offset += 12;
+        const v3 = { x: dv.getFloat32(offset, true), y: dv.getFloat32(offset+4, true), z: dv.getFloat32(offset+8, true) }; offset += 12;
+        out.push([v1, v2, v3]);
+        offset += 2; // attribute byte count
+        if (offset + 50 > bytes.length) break;
+      }
+      return out;
+    }
   }
 
   function showScreen(id, pushToStack = true) {

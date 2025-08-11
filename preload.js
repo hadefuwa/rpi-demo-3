@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('api', {
   readSettings: async () => ipcRenderer.invoke('read-settings'),
   writeSettings: async (settings) => ipcRenderer.invoke('write-settings', settings),
   readAssetText: async (name) => ipcRenderer.invoke('read-asset-text', name),
+  readAssetBytes: async (name) => ipcRenderer.invoke('read-asset-bytes', name),
 });
 
 

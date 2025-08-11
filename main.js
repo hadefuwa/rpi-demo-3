@@ -153,4 +153,14 @@ ipcMain.handle('read-asset-text', (_event, relativeName) => {
   }
 });
 
+ipcMain.handle('read-asset-bytes', (_event, relativeName) => {
+  try {
+    const assetPath = path.join(__dirname, 'assets', String(relativeName));
+    const buf = fs.readFileSync(assetPath);
+    return { ok: true, data: buf.toString('base64') };
+  } catch (err) {
+    return { ok: false, error: String(err) };
+  }
+});
+
 
