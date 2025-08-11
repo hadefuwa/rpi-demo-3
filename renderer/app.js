@@ -288,6 +288,133 @@
     } catch {}
   });
 
+  // Visuals screen
+  const visualsCanvas = document.getElementById('visualsCanvas');
+  if (visualsCanvas) {
+    const vctx = visualsCanvas.getContext('2d');
+    const modes = { particles: 0, ripples: 1, clock: 2 };
+    let mode = modes.particles;
+    let rafId = 0;
+
+    const W = visualsCanvas.width;
+    const H = visualsCanvas.height;
+
+    // Particles
+    const particles = [];
+    for (let i = 0; i < 140; i++) {
+      particles.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.7,
+        vy: (Math.random() - 0.5) * 0.7,
+        r: 1 + Math.random() * 2,
+      });
+    }
+    const mouse = { x: W / 2, y: H / 2, down: false };
+
+    visualsCanvas.addEventListener('pointerdown', (e) => { mouse.down = true; mouse.x = e.offsetX; mouse.y = e.offsetY; });
+    visualsCanvas.addEventListener('pointerup', () => { mouse.down = false; });
+    visualsCanvas.addEventListener('pointermove', (e) => { mouse.x = e.offsetX; mouse.y = e.offsetY; });
+
+    function drawParticles() {
+      vctx.clearRect(0, 0, W, H);
+      for (const p of particles) {
+        // Attraction to the pointer
+        const ax = (mouse.x - p.x) * 0.0006;
+        const ay = (mouse.y - p.y) * 0.0006;
+        p.vx += ax; p.vy += ay;
+        p.vx *= 0.99; p.vy *= 0.99;
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+        const grd = vctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 20);
+        grd.addColorStop(0, 'rgba(107,203,239,0.9)');
+        grd.addColorStop(1, 'rgba(157,124,243,0.0)');
+        vctx.fillStyle = grd;
+        vctx.beginPath();
+        vctx.arc(p.x, p.y, 10 + p.r * 3, 0, Math.PI * 2);
+        vctx.fill();
+      }
+    }
+
+    // Ripples
+    const ripples = [];
+    visualsCanvas.addEventListener('pointerdown', (e) => {
+      ripples.push({ x: e.offsetX, y: e.offsetY, r: 2, a: 1 });
+    });
+    function drawRipples() {
+      vctx.fillStyle = 'rgba(13,15,20,0.35)';
+      vctx.fillRect(0, 0, W, H);
+      for (const r of ripples) {
+        vctx.strokeStyle = `rgba(107,203,239,${r.a})`;
+        vctx.lineWidth = 2;
+        vctx.beginPath();
+        vctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
+        vctx.stroke();
+        r.r += 2;
+        r.a *= 0.97;
+      }
+      for (let i = ripples.length - 1; i >= 0; i--) {
+        if (ripples[i].a < 0.02) ripples.splice(i, 1);
+      }
+    }
+
+    // Analog clock
+    function drawClock() {
+      vctx.clearRect(0, 0, W, H);
+      const cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.38;
+      // face
+      vctx.fillStyle = 'rgba(0,0,0,0.3)';
+      vctx.beginPath(); vctx.arc(cx, cy, R + 16, 0, Math.PI * 2); vctx.fill();
+      vctx.strokeStyle = 'rgba(255,255,255,0.2)'; vctx.lineWidth = 8; vctx.stroke();
+      // ticks
+      vctx.save();
+      vctx.translate(cx, cy);
+      for (let i = 0; i < 60; i++) {
+        vctx.rotate(Math.PI / 30);
+        vctx.beginPath();
+        vctx.moveTo(0, -R);
+        vctx.lineTo(0, -R + (i % 5 === 0 ? 18 : 8));
+        vctx.strokeStyle = 'rgba(255,255,255,0.5)';
+        vctx.lineWidth = i % 5 === 0 ? 3 : 1;
+        vctx.stroke();
+      }
+      vctx.restore();
+      const now = new Date();
+      const s = now.getSeconds();
+      const m = now.getMinutes();
+      const h = now.getHours() % 12;
+      function hand(angle, length, width, color) {
+        vctx.save();
+        vctx.translate(cx, cy);
+        vctx.rotate(angle);
+        vctx.strokeStyle = color; vctx.lineWidth = width; vctx.lineCap = 'round';
+        vctx.beginPath(); vctx.moveTo(0, 10); vctx.lineTo(0, -length); vctx.stroke();
+        vctx.restore();
+      }
+      hand((Math.PI / 6) * (h + m / 60), R * 0.5, 6, '#ffffff');
+      hand((Math.PI / 30) * (m + s / 60), R * 0.75, 4, '#9d7cf3');
+      hand((Math.PI / 30) * s, R * 0.9, 2, '#6bcbef');
+    }
+
+    function loop() {
+      if (mode === modes.particles) drawParticles();
+      else if (mode === modes.ripples) drawRipples();
+      else drawClock();
+      rafId = requestAnimationFrame(loop);
+    }
+    loop();
+
+    document.querySelectorAll('.visual-mode').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const m = btn.getAttribute('data-mode');
+        if (m === 'particles') mode = modes.particles;
+        else if (m === 'ripples') mode = modes.ripples;
+        else mode = modes.clock;
+      });
+    });
+  }
+
     // Drag-to-scroll fallback using Pointer Events
     let dragging = false;
     let startY = 0;

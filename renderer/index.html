@@ -27,6 +27,7 @@
             <button class="card" data-target="screen-info">System Info</button>
             <button class="card" data-target="screen-game">Tic‑Tac‑Toe</button>
             <button class="card" data-target="screen-scroll">Scroll Test</button>
+            <button class="card" data-target="screen-visuals">Visuals</button>
             <button class="card" data-target="screen-about">About</button>
           </div>
         </section>
@@ -112,6 +113,19 @@
             </div>
             <button id="btnSaveSettings" class="chip">Save Settings</button>
             <div id="settingsNote" class="note"></div>
+          </div>
+        </section>
+
+        <section id="screen-visuals" class="screen">
+          <div class="panel">
+            <h2>Visuals</h2>
+            <div class="toolbar">
+              <button class="chip visual-mode" data-mode="particles">Particles</button>
+              <button class="chip visual-mode" data-mode="ripples">Ripples</button>
+              <button class="chip visual-mode" data-mode="clock">Analog Clock</button>
+            </div>
+            <canvas id="visualsCanvas" width="1024" height="420"></canvas>
+            <div class="note">Tap/drag to interact. Particles follow touch, ripples spawn on taps.</div>
           </div>
         </section>
       </main>

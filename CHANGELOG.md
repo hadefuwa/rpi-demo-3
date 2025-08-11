@@ -36,6 +36,11 @@ Unreleased
 - System Info shows memory percent and temperature via IPC.
 - Added Settings screen with theme (dark/light) and sound toggle, saved to app data.
 
+2025-08-11 – Visuals screen
+---------------------------
+- New Visuals screen with three demos: Particles, Ripples, and Analog Clock.
+- Interactive: touch/mouse influences particles and spawns ripples.
+
 2025-08-11 – Raspberry Pi setup & autostart
 -------------------------------------------
 - Added `RPI_SETUP.md` with step‑by‑step Pi instructions.

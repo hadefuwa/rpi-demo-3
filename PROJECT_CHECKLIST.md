@@ -29,6 +29,7 @@ Screens
 - [x] Tic‑Tac‑Toe game
 - [ ] System Info (real values)
 - [ ] Settings (simple toggles)
+- [x] Visuals screen (Particles, Ripples, Clock)
 
 Touch Demo (canvas)
 -------------------
