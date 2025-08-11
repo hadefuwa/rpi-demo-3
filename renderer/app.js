@@ -738,20 +738,30 @@
   const btnMemoryReset = document.getElementById('btnMemoryReset');
   let memoryTiles = [];
   let memoryRevealed = [];
+  const memoryUsesText = true; // use plain text labels instead of emojis
   
   function initMemory() {
-    // Use more reliable emojis and ensure they're properly encoded
-    const emojis = ['🍎', '🍊', '🍋', '🍉', '🍇', '🍓', '🍒', '🍑'];
-    const deck = [...emojis, ...emojis];
+    // Use English foods as plain text tiles
+    const foods = [
+      'Fish & Chips',
+      "Shepherd's Pie",
+      'Bangers & Mash',
+      'Full English',
+      'Sunday Roast',
+      'Cornish Pasty',
+      'Scotch Egg',
+      'Victoria Sponge'
+    ];
+    const deck = [...foods, ...foods];
     // Shuffle the deck
     for (let i = deck.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [deck[i], deck[j]] = [deck[j], deck[i]];
     }
     
-    memoryTiles = deck.map((emoji, i) => ({ 
+    memoryTiles = deck.map((label, i) => ({ 
       id: i, 
-      emoji: emoji, 
+      emoji: label, 
       matched: false, 
       revealed: false 
     }));
@@ -769,25 +779,15 @@
     for (const tile of memoryTiles) {
       const tileElement = document.createElement('div');
       tileElement.className = 'card-tile';
+      if (memoryUsesText) tileElement.classList.add('text');
       
       if (tile.revealed) tileElement.classList.add('revealed');
       if (tile.matched) tileElement.classList.add('matched');
       
-      // Set the content - show emoji if revealed or matched, otherwise show question mark
-      const content = (tile.revealed || tile.matched) ? tile.emoji : '❓';
+      // Set the content - show text if revealed or matched, otherwise show question mark
+      const content = (tile.revealed || tile.matched) ? tile.emoji : '?';
       tileElement.textContent = content;
-      // If Twemoji is available, parse to images to avoid missing glyphs on Linux
-      if (window.twemoji) {
-        const parsed = window.twemoji.parse(tileElement, { folder: 'svg', ext: '.svg' });
-        // Ensure emoji images are centered and sized
-        const imgs = tileElement.querySelectorAll('img.emoji');
-        imgs.forEach(img => {
-          img.style.width = '36px';
-          img.style.height = '36px';
-          img.style.margin = '0 auto';
-          img.style.display = 'block';
-        });
-      }
+      // Skip Twemoji parsing since we are using plain text labels
       
       // Add click handler
       tileElement.addEventListener('click', () => flipTile(tile.id));
@@ -815,11 +815,11 @@
         // Match found!
         first.matched = true;
         second.matched = true;
-        if (memoryStatus) memoryStatus.textContent = 'Great match! 🎉';
+        if (memoryStatus) memoryStatus.textContent = 'Great match!';
         
         // Check if all pairs are found
         if (memoryTiles.every(t => t.matched)) {
-          if (memoryStatus) memoryStatus.textContent = 'Congratulations! All pairs found! 🎊';
+          if (memoryStatus) memoryStatus.textContent = 'Congratulations! All pairs found!';
         }
       } else {
         // No match, hide them after a delay
