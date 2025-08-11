@@ -11,7 +11,7 @@
     <div id="app">
       <header class="topbar">
         <button id="btnBack" class="chip">Back</button>
-        <div class="title">Matrix TSL Showcase</div>
+        <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo top-logo animated-logo2" />
         <button id="btnHome" class="chip">Home</button>
       </header>
 
@@ -126,17 +126,17 @@
         <section id="screen-snake" class="screen">
           <div class="panel">
             <h2>Snake</h2>
-            <canvas id="snakeCanvas" width="480" height="320"></canvas>
-            <div class="toolbar center">
-              <button class="chip dir" data-dx="0" data-dy="-1">▲</button>
-            </div>
-            <div class="toolbar center">
-              <button class="chip dir" data-dx="-1" data-dy="0">◀</button>
-              <button class="chip dir" data-dx="1" data-dy="0">▶</button>
-            </div>
-            <div class="toolbar center">
-              <button class="chip dir" data-dx="0" data-dy="1">▼</button>
-              <button id="btnSnakeReset" class="chip">Reset</button>
+            <div class="snake-wrap">
+              <canvas id="snakeCanvas" width="480" height="320"></canvas>
+              <div class="snake-controls">
+                <button class="chip dir big" data-dx="0" data-dy="-1">▲</button>
+                <div class="row">
+                  <button class="chip dir big" data-dx="-1" data-dy="0">◀</button>
+                  <button class="chip dir big" data-dx="1" data-dy="0">▶</button>
+                </div>
+                <button class="chip dir big" data-dx="0" data-dy="1">▼</button>
+                <button id="btnSnakeReset" class="chip big">Reset</button>
+              </div>
             </div>
           </div>
         </section>

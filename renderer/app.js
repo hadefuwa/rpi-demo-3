@@ -369,16 +369,40 @@
 
   loadSettings();
 
-  // Simple click sound
+  // Simple click sound with fallback beep if file missing
   let clickAudio = null;
+  let clickAudioFailed = false;
+  let audioCtx = null;
+  function beepFallback() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = 880;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      const t = audioCtx.currentTime;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.05, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+      osc.start();
+      osc.stop(t + 0.12);
+    } catch {}
+  }
   function playClick() {
     if (!chkSound.checked) return;
+    if (clickAudioFailed) { beepFallback(); return; }
     if (!clickAudio) {
-      // Build absolute file path from app root for packaged app
-      const base = location.href.replace(/\/renderer\/index\.html.*$/, '/');
-      clickAudio = new Audio(base + 'assets/sounds/click.mp3');
+      try {
+        const base = location.href.replace(/\/renderer\/index\.html.*$/, '/');
+        clickAudio = new Audio(base + 'assets/sounds/click.mp3');
+        clickAudio.onerror = () => { clickAudioFailed = true; clickAudio = null; beepFallback(); };
+      } catch {
+        clickAudioFailed = true; beepFallback(); return;
+      }
     }
-    try { clickAudio.currentTime = 0; clickAudio.play(); } catch {}
+    try { clickAudio.currentTime = 0; clickAudio.play().catch(beepFallback); } catch { beepFallback(); }
   }
   document.querySelectorAll('button').forEach(b => b.addEventListener('click', playClick));
 
