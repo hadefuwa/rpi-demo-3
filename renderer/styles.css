@@ -391,6 +391,10 @@ main { flex: 1; padding: 12px 16px 16px; }
   touch-action: none; /* allow app to handle drag drawing */
   -webkit-user-select: none;
   user-select: none;
+  /* Debug styles to ensure canvas is visible */
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+  position: relative;
+  z-index: 10;
 }
 
 .panel { padding: 12px; border-radius: 12px; background: var(--card); border: 1px solid rgba(255,255,255,0.08); }
@@ -581,12 +585,15 @@ button { touch-action: manipulation; }
 #paint {
   touch-action: none; /* disable browser panning/zooming on touch */
   -ms-touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Scroll Test */
 .scrollbox {
   height: 300px;
   overflow-y: auto;
+  overflow-x: hidden; /* hide horizontal scroll */
   -webkit-overflow-scrolling: touch; /* momentum on some engines */
   touch-action: pan-y; /* allow finger vertical panning */
   border-radius: 8px;
@@ -594,7 +601,10 @@ button { touch-action: manipulation; }
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.005));
   padding: 8px;
   perspective: 800px; /* enable 3D transforms of children */
+  /* Hide scrollbars while preserving scrollability */
+  scrollbar-width: none; /* Firefox */
 }
+.scrollbox::-webkit-scrollbar { width: 0; height: 0; }
 .scroll-item {
   padding: 12px 14px;
   margin-bottom: 10px;
