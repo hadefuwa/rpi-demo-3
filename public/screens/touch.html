@@ -419,248 +419,228 @@
   (function() {
     'use strict';
     
-    // App state
-    let touchCounts = { area1: 0, area2: 0, area3: 0 };
-    let totalTaps = 0;
-    let lastTouch = 'None';
-    let gestureStartX = 0;
-    let gestureStartY = 0;
-    let gestureStartDistance = 0;
-    
-    // DOM elements
-    let totalTapsElement;
-    let lastTouchElement;
-    let gestureTypeElement;
-    let gestureCoordsElement;
+    // Canvas drawing state
+    let canvas, ctx;
+    let isDrawing = false;
+    let currentColor = '#ff0000';
+    let currentBrushSize = 5;
+    let lastX = 0;
+    let lastY = 0;
     
     function initApp() {
-      console.log('Touch Demo app initialized');
-      setupDOM();
+      console.log('Touch Drawing Demo app initialized');
+      setupCanvas();
       setupEventListeners();
-      updateDisplay();
+      resizeCanvas();
     }
     
-    function setupDOM() {
-      totalTapsElement = document.querySelector('#totalTaps');
-      lastTouchElement = document.querySelector('#lastTouch');
-      gestureTypeElement = document.querySelector('#gestureType');
-      gestureCoordsElement = document.querySelector('#gestureCoords');
+    function setupCanvas() {
+      canvas = document.getElementById('drawing-canvas');
+      ctx = canvas.getContext('2d');
+      
+      // Set canvas properties
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = currentColor;
+      ctx.lineWidth = currentBrushSize;
+      
+      // Prevent context menu on right click
+      canvas.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+      });
     }
     
     function setupEventListeners() {
-      const container = document.querySelector('#screen-touch');
-      
       // Home button
       const homeButton = document.querySelector('#btnHome');
       if (homeButton) {
         homeButton.addEventListener('click', goHome);
       }
       
-      // Touch area clicks
-      container.addEventListener('click', function(e) {
-        if (e.target.classList.contains('touch-area')) {
-          handleTouchAreaClick(e.target);
-        } else if (e.target.id === 'btnTouchReset') {
-          resetTouchDemo();
-        }
-      });
-      
-      // Touch events for mobile
-      setupTouchEvents();
-      
-      // Mouse events for desktop
-      setupMouseEvents();
-    }
-    
-    function setupTouchEvents() {
-      const touchAreas = document.querySelectorAll('.touch-area');
-      const gestureArea = document.querySelector('#gestureArea');
-      
-      // Touch area events
-      touchAreas.forEach(area => {
-        area.addEventListener('touchstart', function(e) {
-          e.preventDefault();
-          handleTouchAreaClick(this);
+      // Color palette
+      const colorSwatches = document.querySelectorAll('.color-swatch');
+      colorSwatches.forEach(swatch => {
+        swatch.addEventListener('click', function() {
+          selectColor(this);
         });
       });
       
-      // Gesture area events
-      gestureArea.addEventListener('touchstart', function(e) {
+      // Brush sizes
+      const brushSizes = document.querySelectorAll('.brush-size');
+      brushSizes.forEach(brushSize => {
+        brushSize.addEventListener('click', function() {
+          selectBrushSize(this);
+        });
+      });
+      
+      // Action buttons
+      document.getElementById('clear-canvas').addEventListener('click', clearCanvas);
+      document.getElementById('save-drawing').addEventListener('click', saveDrawing);
+      
+      // Canvas drawing events
+      setupCanvasEvents();
+      
+      // Window resize
+      window.addEventListener('resize', resizeCanvas);
+    }
+    
+    function setupCanvasEvents() {
+      // Mouse events
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDrawing);
+      canvas.addEventListener('mouseout', stopDrawing);
+      
+      // Touch events
+      canvas.addEventListener('touchstart', function(e) {
         e.preventDefault();
-        handleGestureStart(e);
-      });
-      
-      gestureArea.addEventListener('touchmove', function(e) {
-        e.preventDefault();
-        handleGestureMove(e);
-      });
-      
-      gestureArea.addEventListener('touchend', function(e) {
-        e.preventDefault();
-        handleGestureEnd(e);
-      });
-    }
-    
-    function setupMouseEvents() {
-      const gestureArea = document.querySelector('#gestureArea');
-      
-      // Mouse events for desktop testing
-      gestureArea.addEventListener('mousedown', function(e) {
-        handleMouseGestureStart(e);
-      });
-      
-      gestureArea.addEventListener('mousemove', function(e) {
-        handleMouseGestureMove(e);
-      });
-      
-      gestureArea.addEventListener('mouseup', function(e) {
-        handleMouseGestureEnd(e);
-      });
-    }
-    
-    function handleTouchAreaClick(area) {
-      const areaId = area.id;
-      let areaKey;
-      
-      if (areaId === 'touchArea1') areaKey = 'area1';
-      else if (areaId === 'touchArea2') areaKey = 'area2';
-      else if (areaId === 'touchArea3') areaKey = 'area3';
-      
-      if (areaKey) {
-        touchCounts[areaKey]++;
-        totalTaps++;
-        lastTouch = `Area ${areaKey.slice(-1)}`;
-        
-        // Visual feedback
-        area.classList.add('touched');
-        setTimeout(() => {
-          area.classList.remove('touched');
-        }, 300);
-        
-        updateDisplay();
-      }
-    }
-    
-    function handleGestureStart(e) {
-      const touch = e.touches[0];
-      gestureStartX = touch.clientX;
-      gestureStartY = touch.clientY;
-      
-      if (e.touches.length === 2) {
-        const touch2 = e.touches[1];
-        gestureStartDistance = getDistance(touch, touch2);
-      }
-      
-      gestureTypeElement.textContent = 'Gesture started...';
-      gestureCoordsElement.textContent = `Start: (${gestureStartX}, ${gestureStartY})`;
-    }
-    
-    function handleGestureMove(e) {
-      if (e.touches.length === 1) {
         const touch = e.touches[0];
-        const deltaX = touch.clientX - gestureStartX;
-        const deltaY = touch.clientY - gestureStartY;
-        
-        if (Math.abs(deltaX) > 20 || Math.abs(deltaY) > 20) {
-          const direction = getSwipeDirection(deltaX, deltaY);
-          gestureTypeElement.textContent = `Swiping ${direction}`;
-          gestureCoordsElement.textContent = `Delta: (${deltaX}, ${deltaY})`;
-        }
-      } else if (e.touches.length === 2) {
-        const touch1 = e.touches[0];
-        const touch2 = e.touches[1];
-        const currentDistance = getDistance(touch1, touch2);
-        const delta = currentDistance - gestureStartDistance;
-        
-        if (Math.abs(delta) > 20) {
-          const gesture = delta > 0 ? 'Pinch Out' : 'Pinch In';
-          gestureTypeElement.textContent = gesture;
-          gestureCoordsElement.textContent = `Distance: ${Math.round(currentDistance)}px`;
-        }
-      }
-      
-      // Visual feedback
-      gestureArea.classList.add('gesturing');
-    }
-    
-    function handleGestureEnd(e) {
-      gestureTypeElement.textContent = 'Gesture ended';
-      gestureCoordsElement.textContent = `End: (${gestureStartX}, ${gestureStartY})`;
-      
-      // Remove visual feedback
-      setTimeout(() => {
-        gestureArea.classList.remove('gesturing');
-      }, 500);
-    }
-    
-    function handleMouseGestureStart(e) {
-      gestureStartX = e.clientX;
-      gestureStartY = e.clientY;
-      gestureTypeElement.textContent = 'Mouse gesture started...';
-      gestureCoordsElement.textContent = `Start: (${gestureStartX}, ${gestureStartY})`;
-    }
-    
-    function handleMouseGestureMove(e) {
-      const deltaX = e.clientX - gestureStartX;
-      const deltaY = e.clientY - gestureStartY;
-      
-      if (Math.abs(deltaX) > 20 || Math.abs(deltaY) > 20) {
-        const direction = getSwipeDirection(deltaX, deltaY);
-        gestureTypeElement.textContent = `Mouse ${direction}`;
-        gestureCoordsElement.textContent = `Delta: (${deltaX}, ${deltaY})`;
-      }
-      
-      gestureArea.classList.add('gesturing');
-    }
-    
-    function handleMouseGestureEnd(e) {
-      gestureTypeElement.textContent = 'Mouse gesture ended';
-      gestureCoordsElement.textContent = `End: (${gestureStartX}, ${gestureStartY})`;
-      
-      setTimeout(() => {
-        gestureArea.classList.remove('gesturing');
-      }, 500);
-    }
-    
-    function getDistance(touch1, touch2) {
-      const dx = touch1.clientX - touch2.clientX;
-      const dy = touch1.clientY - touch2.clientY;
-      return Math.sqrt(dx * dx + dy * dy);
-    }
-    
-    function getSwipeDirection(deltaX, deltaY) {
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        return deltaX > 0 ? 'Right' : 'Left';
-      } else {
-        return deltaY > 0 ? 'Down' : 'Up';
-      }
-    }
-    
-    function resetTouchDemo() {
-      touchCounts = { area1: 0, area2: 0, area3: 0 };
-      totalTaps = 0;
-      lastTouch = 'None';
-      
-      // Update display
-      document.querySelectorAll('.touch-count').forEach((element, index) => {
-        element.textContent = '0';
+        const mouseEvent = new MouseEvent('mousedown', {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
       });
       
-      updateDisplay();
+      canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent('mousemove', {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+      });
       
-      // Reset gesture area
-      gestureTypeElement.textContent = 'Swipe or pinch here';
-      gestureCoordsElement.textContent = 'Coordinates: (0, 0)';
+      canvas.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        const mouseEvent = new MouseEvent('mouseup', {});
+        canvas.dispatchEvent(mouseEvent);
+      });
     }
     
-    function updateDisplay() {
-      totalTapsElement.textContent = totalTaps;
-      lastTouchElement.textContent = lastTouch;
+    function startDrawing(e) {
+      isDrawing = true;
+      const rect = canvas.getBoundingClientRect();
+      lastX = e.clientX - rect.left;
+      lastY = e.clientY - rect.top;
+    }
+    
+    function draw(e) {
+      if (!isDrawing) return;
       
-      // Update individual area counts
-      document.querySelector('#touchArea1 .touch-count').textContent = touchCounts.area1;
-      document.querySelector('#touchArea2 .touch-count').textContent = touchCounts.area2;
-      document.querySelector('#touchArea3 .touch-count').textContent = touchCounts.area3;
+      const rect = canvas.getBoundingClientRect();
+      const currentX = e.clientX - rect.left;
+      const currentY = e.clientY - rect.top;
+      
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(currentX, currentY);
+      ctx.stroke();
+      
+      lastX = currentX;
+      lastY = currentY;
+    }
+    
+    function stopDrawing() {
+      isDrawing = false;
+    }
+    
+    function selectColor(swatch) {
+      // Remove active class from all swatches
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+      
+      // Add active class to clicked swatch
+      swatch.classList.add('active');
+      
+      // Update current color
+      currentColor = swatch.dataset.color;
+      ctx.strokeStyle = currentColor;
+    }
+    
+    function selectBrushSize(brushButton) {
+      // Remove active class from all brush sizes
+      document.querySelectorAll('.brush-size').forEach(b => b.classList.remove('active'));
+      
+      // Add active class to clicked brush
+      brushButton.classList.add('active');
+      
+      // Update current brush size
+      currentBrushSize = parseInt(brushButton.dataset.size);
+      ctx.lineWidth = currentBrushSize;
+    }
+    
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    
+    function saveDrawing() {
+      try {
+        // Create download link
+        const link = document.createElement('a');
+        link.download = `drawing-${new Date().getTime()}.png`;
+        link.href = canvas.toDataURL();
+        
+        // Trigger download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Show feedback
+        const button = document.getElementById('save-drawing');
+        const originalText = button.textContent;
+        button.textContent = 'Saved!';
+        button.style.background = '#28a745';
+        
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.style.background = '#3a6df0';
+        }, 2000);
+      } catch (error) {
+        console.error('Error saving drawing:', error);
+        
+        // Show error feedback
+        const button = document.getElementById('save-drawing');
+        const originalText = button.textContent;
+        button.textContent = 'Error saving';
+        button.style.background = '#dc3545';
+        
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.style.background = '#3a6df0';
+        }, 2000);
+      }
+    }
+    
+    function resizeCanvas() {
+      const container = document.querySelector('.canvas-container');
+      const containerRect = container.getBoundingClientRect();
+      
+      // Calculate maximum size while maintaining aspect ratio
+      const maxWidth = containerRect.width - 16; // Account for padding
+      const maxHeight = containerRect.height - 16;
+      
+      // Set a reasonable aspect ratio (4:3)
+      let canvasWidth = Math.min(maxWidth, 800);
+      let canvasHeight = Math.min(maxHeight, 600);
+      
+      // Maintain aspect ratio
+      const aspectRatio = 4 / 3;
+      if (canvasWidth / canvasHeight > aspectRatio) {
+        canvasWidth = canvasHeight * aspectRatio;
+      } else {
+        canvasHeight = canvasWidth / aspectRatio;
+      }
+      
+      // Set canvas size
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      
+      // Restore drawing context properties after resize
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = currentColor;
+      ctx.lineWidth = currentBrushSize;
     }
     
     function goHome() {
@@ -671,19 +651,19 @@
     // Lifecycle management
     window.appLifecycle = {
       activate: function() {
-        console.log('Touch Demo app activated');
-        // No special activation needed
+        console.log('Touch Drawing Demo app activated');
+        resizeCanvas();
       },
       
       deactivate: function() {
-        console.log('Touch Demo app deactivated');
+        console.log('Touch Drawing Demo app deactivated');
         // No special deactivation needed
       },
       
       cleanup: function() {
-        console.log('Touch Demo app cleanup');
-        // Reset demo state
-        resetTouchDemo();
+        console.log('Touch Drawing Demo app cleanup');
+        // Clear the canvas
+        clearCanvas();
       }
     };
     
