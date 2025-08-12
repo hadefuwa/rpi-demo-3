@@ -5,6 +5,20 @@ All notable changes to the RPI-5Inch Showcase project will be documented in this
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2025-08-17
+
+### 🎮 Tic‑Tac‑Toe Improvements
+
+#### Changed
+- Renamed `game.html` → `tictac.html` across the app (links and service worker cache list updated).
+- Stabilized board rendering to prevent shrinking/jumping of other cells when one is pressed.
+
+#### Added
+- 2‑Player mode toggle to disable AI.
+- AI difficulty levels with persistence: Easy (random), Medium (heuristic + randomness), Hard (Minimax).
+
+---
+
 ## [0.4.0] - 2025-08-17
 
 ### 🎨 **Home Page Enhancement & 3D Printer Demo**

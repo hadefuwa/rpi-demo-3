@@ -1,33 +1,40 @@
-# RPI 5Inch Showcase - Progressive Web App
+# RPI Demo 3 - Progressive Web App Showcase
 
-A beautiful, touch-optimized Progressive Web App (PWA) designed specifically for 5-inch Raspberry Pi displays. This showcase application demonstrates various capabilities including touch interactions, games, 3D models, and system information.
+A beautiful, touch-optimized Progressive Web App (PWA) designed specifically for Raspberry Pi displays. This showcase application demonstrates various capabilities including touch interactions, games, 3D STL model viewing, and system information displays.
 
 ## 🚀 Features
 
 - **Progressive Web App (PWA)** - Installable, offline-capable web application
 - **Touch Optimized** - Designed for touchscreen displays with gesture support
+- **3D STL Viewer** - Interactive 3D model viewer with starlit galaxy background
 - **Responsive Design** - Adapts to different screen sizes and orientations
 - **Offline Support** - Service worker caching for offline functionality
 - **Kiosk Mode** - Full-screen kiosk mode for Raspberry Pi displays
-- **Multiple Screens** - Touch demo, games hub, system info, and more
-- **3D Model Viewer** - STL file viewing capabilities
-- **Game Collection** - Memory, Snake, Ping Pong, and other games
+- **Multiple Screens** - Touch demo, games hub, system info, STL viewer, and more
+- **Game Collection** - Memory, Snake, Ping Pong, and other interactive games
+- **Visual Effects** - Animated backgrounds and smooth transitions
 
 ## 📁 Project Structure
 
 ```
-RPI-5Inch/
+rpi-demo-3/
 ├── public/                 # Public assets (served directly)
 │   ├── index.html         # Main application entry point
 │   ├── manifest.json      # PWA manifest
 │   ├── sw.js             # Service worker
-│   ├── assets/           # Images, 3D models, fonts
-│   ├── icons/            # PWA icons (generated)
-│   └── fonts/            # Custom fonts
-├── src/                   # Source code
-│   ├── styles/           # CSS stylesheets
-│   ├── screens/          # HTML screen templates
-│   └── js/               # JavaScript modules
+│   ├── assets/           # Images, 3D models (STL files), fonts
+│   │   ├── cad1.stl      # 3D model files
+│   │   ├── cad2.stl
+│   │   └── cad3.stl
+│   ├── screens/          # Individual screen HTML files
+│   │   ├── stl.html      # 3D STL viewer
+│   │   ├── games.html    # Games hub
+│   │   └── ...
+│   └── styles/           # CSS stylesheets
+│       ├── base.css      # Core styling system
+│       ├── stl.css       # STL viewer styles
+│       └── ...
+├── src/                   # Source development files
 ├── scripts/               # Utility scripts
 │   ├── start-kiosk.sh    # Kiosk mode launcher
 │   ├── install-autostart.sh
@@ -43,14 +50,14 @@ RPI-5Inch/
 
 - Node.js (v14 or higher)
 - npm or yarn
-- Raspberry Pi with 5-inch display (optional, for full experience)
+- Raspberry Pi with display (optional, for full experience)
 
 ### Quick Start
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/hadefuwa/rpi-5inch-showcase.git
-   cd rpi-5inch-showcase
+   git clone https://github.com/hadefuwa/rpi-demo-3.git
+   cd rpi-demo-3
    ```
 
 2. **Install dependencies**
@@ -90,6 +97,27 @@ npm run kiosk
 npm run install-service    # Install autostart service
 npm run uninstall-service  # Remove autostart service
 ```
+
+## ✨ Featured Components
+
+### 3D STL Viewer
+- **Interactive 3D Models**: Load and view CAD files (cad1.stl, cad2.stl, cad3.stl)
+- **Starlit Galaxy Background**: Beautiful animated star field backdrop
+- **Touch Controls**: Drag to rotate, scroll to zoom, button controls
+- **Multiple Models**: Switch between different 3D models seamlessly
+- **Auto-rotation**: Optional automatic model rotation
+- **Responsive Layout**: Optimized for all screen sizes
+
+### Games Hub
+- Memory matching game with customizable difficulty
+- Classic Snake game with touch controls
+- Ping Pong game with AI opponent
+- Touch-optimized interfaces
+
+### System Information
+- Real-time system monitoring
+- Touch-friendly information display
+- Performance metrics
 
 ## 🔧 Configuration
 
