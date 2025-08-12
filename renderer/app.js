@@ -591,9 +591,14 @@
   }
 
   function showScreen(id, pushToStack = true) {
-    if (isNavigating) return; // Prevent recursive navigation
+    console.log('showScreen called with:', id, 'pushToStack:', pushToStack, 'isNavigating:', isNavigating);
     
-    console.log('showScreen called with:', id, 'pushToStack:', pushToStack);
+    if (isNavigating) {
+      console.log('Navigation already in progress, ignoring request for:', id);
+      return; // Prevent recursive navigation
+    }
+    
+    console.log('showScreen proceeding with:', id, 'pushToStack:', pushToStack);
     
     // Validate screen ID
     if (!id || typeof id !== 'string') {
@@ -607,6 +612,7 @@
     
     if (window.screenLoader && name) {
       isNavigating = true;
+      console.log('Set isNavigating to true, calling screenLoader.loadScreen');
       try {
         console.log('Calling screenLoader.loadScreen with:', name);
         // We manage history ourselves, so always pass false to loader
@@ -625,7 +631,11 @@
           }
         }
       } finally {
-        isNavigating = false;
+        // Use a timeout to prevent rapid navigation issues
+        setTimeout(() => {
+          isNavigating = false;
+          console.log('Set isNavigating to false after timeout');
+        }, 300);
       }
     } else {
       console.error('ScreenLoader not available or invalid screen name:', name);
@@ -633,9 +643,14 @@
   }
 
   function goHome() {
-    if (isNavigating) return; // Prevent recursive navigation
+    console.log('goHome called, isNavigating:', isNavigating);
+    if (isNavigating) {
+      console.log('Navigation in progress, ignoring goHome');
+      return; // Prevent recursive navigation
+    }
     
     isNavigating = true;
+    console.log('goHome: Set isNavigating to true');
     try {
       navStack.length = 0;
       currentScreenId = 'screen-home';
@@ -645,7 +660,11 @@
         showScreen('screen-home', false);
       }
     } finally {
-      isNavigating = false;
+      // Use same timeout pattern as showScreen for consistency
+      setTimeout(() => {
+        isNavigating = false;
+        console.log('goHome: Set isNavigating to false after timeout');
+      }, 300);
     }
   }
 
@@ -653,12 +672,29 @@
 
   // Event delegation for Home cards (works even when loaded later)
   document.addEventListener('click', (e) => {
+    console.log('Click detected on:', e.target, 'Event target closest card:', e.target.closest('#screen-home .card'));
+    
     const card = e.target.closest('#screen-home .card');
-    if (!card) return;
+    if (!card) {
+      // Check if we're clicking anywhere in the home screen for debugging
+      const homeScreen = e.target.closest('#screen-home');
+      if (homeScreen) {
+        console.log('Click detected in home screen but not on a card');
+      }
+      return;
+    }
+
+    // Prevent multiple rapid clicks
+    if (isNavigating) {
+      console.log('Navigation in progress, ignoring click');
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
 
     // Prevent default button behavior and stop bubbling to avoid double handling
-    if (typeof e.preventDefault === 'function') e.preventDefault();
-    if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
     
     console.log('Button clicked:', card);
     const target = card.getAttribute('data-target'); // e.g. 'screen-touch'
@@ -667,9 +703,17 @@
     if (target) {
       try {
         console.log('Attempting to show screen:', target);
+        // Add visual feedback
+        card.style.pointerEvents = 'none';
+        setTimeout(() => {
+          if (card) card.style.pointerEvents = '';
+        }, 500);
+        
         showScreen(target, true);
       } catch (error) {
         console.error('Failed to navigate to screen:', target, error);
+        // Restore click ability on error
+        card.style.pointerEvents = '';
         // Fallback to home if navigation fails
         goHome();
       }
@@ -3037,6 +3081,29 @@
   if (btnPingPongReset) {
     btnPingPongReset.addEventListener('click', resetPingPong);
   }
+
+  // Safety mechanism: Reset navigation state periodically if stuck
+  setInterval(() => {
+    if (isNavigating) {
+      console.warn('Navigation flag has been true for extended period, resetting');
+      isNavigating = false;
+    }
+  }, 5000);
+
+  // Add global debugging for clicks
+  window.debugClicks = () => {
+    console.log('isNavigating:', isNavigating);
+    console.log('currentScreenId:', currentScreenId);
+    console.log('navStack:', navStack);
+    console.log('screenLoader available:', !!window.screenLoader);
+  };
+
+  // Expose reset function for debugging
+  window.resetNavigation = () => {
+    isNavigating = false;
+    console.log('Navigation state reset manually');
+  };
+
 })();
 
 

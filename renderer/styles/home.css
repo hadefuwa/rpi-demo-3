@@ -45,9 +45,22 @@
   cursor: pointer;
   transform-style: preserve-3d;
   z-index: 1;
+  /* Prevent text selection and dragging */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -moz-user-drag: none;
+  -ms-user-drag: none;
 }
 
-/* Add icon placeholder */
+/* Touch/interaction improvements */
+#screen-home .card.fancy {
+  /* Ensure touch targets are large enough */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
 #screen-home .card.fancy .icon {
   width: clamp(32px, 8vw, 48px);
   height: clamp(32px, 8vw, 48px);
@@ -107,18 +120,24 @@
   transform: translateX(100%);
 }
 
-/* Add subtle pulsing glow animation */
+/* Add subtle pulsing glow animation - reduced for performance */
 @keyframes pulse-glow {
   0%, 100% { 
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.15); 
   }
   50% { 
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.25); 
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.2); 
   }
 }
 
 #screen-home .card.fancy .icon {
-  animation: pulse-glow 3s ease-in-out infinite;
+  animation: pulse-glow 4s ease-in-out infinite;
+  /* Pause animation on hover/active to prevent interference */
+}
+
+#screen-home .card.fancy:hover .icon,
+#screen-home .card.fancy:active .icon {
+  animation-play-state: paused;
 }
 
 /* Add shimmer effect on the card itself */
@@ -176,12 +195,13 @@
     0 0 20px rgba(255, 255, 255, 0.3);
 }
 #screen-home .card.fancy:active { 
-  transform: translateY(-2px) scale(0.98); 
-  transition: all 0.1s ease; 
+  transform: translateY(-2px) scale(0.98) !important; 
+  transition: all 0.1s ease !important; 
   box-shadow: 
     0 8px 20px rgba(0, 0, 0, 0.4),
     0 1px 0 rgba(255, 255, 255, 0.1) inset,
     0 -1px 0 rgba(0, 0, 0, 0.1) inset;
+  pointer-events: none; /* Prevent multiple clicks during transition */
 }
 
 #screen-home .card.fancy::before {

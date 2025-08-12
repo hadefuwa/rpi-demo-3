@@ -119,10 +119,18 @@ class ScreenLoader {
   showScreen(screenName) {
     console.log('ScreenLoader.showScreen called with:', screenName);
     
-    // Hide all screens
+    // Don't hide the screen if it's already the current screen
+    if (this.currentScreen === screenName) {
+      console.log('Screen already active:', screenName);
+      return;
+    }
+    
+    // Hide all screens except the one we're about to show
     this.screens.forEach((screen, name) => {
-      screen.classList.remove('active');
-      console.log('Hid screen:', name);
+      if (name !== screenName) {
+        screen.classList.remove('active');
+        console.log('Hid screen:', name);
+      }
     });
 
     // Show the requested screen
