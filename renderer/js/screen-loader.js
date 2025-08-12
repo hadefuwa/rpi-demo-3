@@ -151,10 +151,8 @@ class ScreenLoader {
   initializeScreen(screenName) {
     switch (screenName) {
       case 'touch':
-        // Initialize touch demo
-        if (window.initTouchDemo) {
-          window.initTouchDemo();
-        }
+        // Touch demo is now initialized via screenChanged event in app.js
+        // No need to call it here to avoid duplicate initialization
         break;
       case 'info':
         // Initialize dashboard

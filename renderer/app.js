@@ -894,11 +894,19 @@
   };
 
   function cleanupTouchDemo() {
-    console.log('Cleaning up touch demo');
+    console.log('Cleaning up touch demo - current state:', {
+      initialized: touchDemoInitialized,
+      listenerCount: touchDemoState.eventListeners.length,
+      canvas: !!touchDemoState.canvas,
+      ctx: !!touchDemoState.ctx
+    });
     
     // Remove all event listeners
     touchDemoState.eventListeners.forEach(({ element, event, handler, options }) => {
-      element.removeEventListener(event, handler, options);
+      if (element && element.removeEventListener) {
+        element.removeEventListener(event, handler, options);
+        console.log('Removed event listener:', event);
+      }
     });
     touchDemoState.eventListeners = [];
     
@@ -917,7 +925,7 @@
   }
 
   function initTouchDemo() {
-    console.log('initTouchDemo called');
+    console.log('initTouchDemo called - touchDemoInitialized:', touchDemoInitialized);
     
     // Prevent multiple initializations
     if (touchDemoInitialized) {
@@ -944,18 +952,52 @@
     }
 
     // Ensure canvas internal resolution matches its displayed size before any drawing
-    try {
-      const rect = canvas.getBoundingClientRect();
-      const width = Math.min(rect.width, 1024);
-      const height = Math.min(rect.height, 400);
-      resizeCanvas(canvas, width, height);
-    } catch {}
+    // Wait a bit for the screen to be fully rendered
+    setTimeout(() => {
+      try {
+        const rect = canvas.getBoundingClientRect();
+        console.log('Canvas rect dimensions:', rect);
+        
+        // Only resize if we have reasonable dimensions
+        if (rect.width > 10 && rect.height > 10) {
+          const width = Math.min(rect.width, 1024);
+          const height = Math.min(rect.height, 400);
+          console.log('Resizing canvas to:', width, 'x', height);
+          resizeCanvas(canvas, width, height);
+        } else {
+          console.warn('Canvas dimensions too small, waiting for proper sizing...');
+          // Try again in a bit
+          setTimeout(() => {
+            const rect2 = canvas.getBoundingClientRect();
+            if (rect2.width > 10 && rect2.height > 10) {
+              const width = Math.min(rect2.width, 1024);
+              const height = Math.min(rect2.height, 400);
+              console.log('Retry resize canvas to:', width, 'x', height);
+              resizeCanvas(canvas, width, height);
+            }
+          }, 200);
+        }
+      } catch (error) {
+        console.error('Error resizing canvas:', error);
+      }
+    }, 100);
 
     touchInitAttempts = 0;
     console.log('Canvas found:', canvas);
     console.log('Canvas dimensions:', { width: canvas.width, height: canvas.height });
     console.log('Canvas style:', canvas.style);
     console.log('Canvas computed style:', window.getComputedStyle(canvas));
+    
+    // Check if canvas has reasonable dimensions
+    if (canvas.width < 100 || canvas.height < 100) {
+      console.warn('Canvas dimensions too small, waiting for proper sizing...');
+      setTimeout(() => {
+        if (!touchDemoInitialized) {
+          initTouchDemo();
+        }
+      }, 300);
+      return;
+    }
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
@@ -2997,7 +3039,8 @@
   // Initialize touch demo when the touch screen is shown
   window.addEventListener('screenChanged', (e) => {
     if (e?.detail?.screenName === 'touch') {
-      setTimeout(initTouchDemo, 50);
+      // Wait longer for the screen to be fully loaded and rendered
+      setTimeout(initTouchDemo, 150);
     } else if (touchDemoInitialized) {
       // Clean up touch demo when leaving the screen
       cleanupTouchDemo();
