@@ -445,9 +445,9 @@
       
       #screen-home .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        max-width: 800px;
+        grid-template-columns: repeat(3, 1fr); /* Fixed 3-column layout */
+        gap: clamp(8px, 2vw, 20px); /* Responsive gap */
+        max-width: 90vw; /* Use viewport width instead of fixed pixels */
         width: 100%;
         z-index: 10;
         position: relative;
@@ -456,14 +456,14 @@
       #screen-home .card {
         background: rgba(255, 255, 255, 0.1);
         border: 2px solid rgba(255, 255, 255, 0.2);
-        border-radius: 15px;
-        padding: 30px 20px;
+        border-radius: clamp(8px, 2vw, 15px);
+        padding: clamp(15px, 3vw, 30px) clamp(10px, 2vw, 20px);
         text-align: center;
         cursor: pointer;
         transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         position: relative;
         overflow: hidden;
-        min-height: 150px;
+        min-height: clamp(100px, 20vh, 150px);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -477,9 +477,10 @@
         transform-style: preserve-3d;
         perspective: 1000px;
         box-shadow: 
-          0 10px 30px rgba(0, 0, 0, 0.4),
+          0 clamp(5px, 2vw, 10px) clamp(15px, 4vw, 30px) rgba(0, 0, 0, 0.4),
           0 0 0 2px rgba(255, 255, 255, 0.2),
           inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+        aspect-ratio: 1 / 1; /* Make cards square for better layout */
       }
       
       /* Add a glossy reflection effect */
@@ -916,43 +917,108 @@
       }
       
       /* Responsive design */
-      @media (max-width: 768px) {
+      @media (max-width: 1024px) {
         .title {
           font-size: 20px;
         }
         
         #screen-home .grid {
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-          gap: 15px;
+          grid-template-columns: repeat(3, 1fr); /* Keep 3 columns */
+          gap: clamp(8px, 2vw, 15px);
+          max-width: 95vw;
         }
         
         #screen-home .card {
-          padding: 20px 15px;
-          min-height: 120px;
+          padding: clamp(10px, 2vw, 20px);
+          min-height: clamp(100px, 15vh, 120px);
         }
         
         #screen-home .card .label {
-          font-size: 16px;
+          font-size: clamp(14px, 2.5vw, 16px);
         }
         
         #screen-home .card .icon {
-          width: 40px;
-          height: 40px;
+          width: clamp(30px, 8vw, 40px);
+          height: clamp(30px, 8vw, 40px);
+        }
+      }
+      
+      @media (max-width: 768px) {
+        #screen-home .grid {
+          grid-template-columns: repeat(3, 1fr); /* Keep 3 columns */
+          gap: clamp(6px, 1.5vw, 12px);
+        }
+        
+        #screen-home .card {
+          padding: clamp(8px, 1.5vw, 15px);
+          min-height: clamp(90px, 14vh, 110px);
+        }
+        
+        #screen-home .card .label {
+          font-size: clamp(12px, 2vw, 14px);
+          margin-top: 8px;
+        }
+        
+        #screen-home .card .icon {
+          width: clamp(25px, 6vw, 35px);
+          height: clamp(25px, 6vw, 35px);
+          margin-bottom: 8px;
         }
       }
       
       @media (max-width: 480px) {
         .topbar {
-          padding: 10px 15px;
+          padding: 8px 12px;
         }
         
         .logo {
-          height: 32px;
+          height: 28px;
         }
         
         .title {
-          font-size: 16px;
+          font-size: clamp(12px, 3.5vw, 16px);
           white-space: normal;
+        }
+        
+        #screen-home .grid {
+          grid-template-columns: repeat(3, 1fr); /* Keep 3 columns even on small screens */
+          gap: 6px;
+          padding: 6px;
+        }
+        
+        #screen-home .card {
+          padding: 8px 6px;
+          min-height: 80px;
+          border-width: 1px;
+        }
+        
+        #screen-home .card .label {
+          font-size: clamp(10px, 3vw, 12px);
+          margin-top: 4px;
+        }
+        
+        #screen-home .card .icon {
+          width: clamp(20px, 5vw, 30px);
+          height: clamp(20px, 5vw, 30px);
+          margin-bottom: 4px;
+        }
+        
+        /* Simplify animations on small screens for better performance */
+        #screen-home .card::before,
+        #screen-home .card::after {
+          animation: none;
+        }
+      }
+      
+      /* Ensure portrait orientation on very small devices works well */
+      @media (max-width: 380px) {
+        #screen-home .grid {
+          max-width: 98vw;
+          padding: 4px;
+        }
+        
+        #screen-home .card {
+          min-height: 70px;
         }
       }
     </style>
