@@ -15,8 +15,8 @@
   min-height: clamp(110px, 18vh, 170px);
   padding: var(--spacing-lg) var(--spacing-lg);
   border-radius: var(--radius-xl);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 
@@ -35,7 +35,7 @@
   height: 40px;
   margin-bottom: var(--spacing-sm);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -46,27 +46,27 @@
 #screen-home .card.fancy .icon::before {
   content: '◆';
   font-size: 20px;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.8);
   transition: all 0.3s ease;
 }
 
 /* Specific icons for each theme */
-#screen-home .card.fancy.theme-cyan .icon::before { content: '👆'; }
-#screen-home .card.fancy.theme-purple .icon::before { content: '📊'; }
-#screen-home .card.fancy.theme-gold .icon::before { content: '🎮'; }
-#screen-home .card.fancy.theme-white .icon::before { content: '📜'; }
-#screen-home .card.fancy.theme-lime .icon::before { content: '🎨'; }
-#screen-home .card.fancy.theme-orange .icon::before { content: '🧊'; }
-#screen-home .card.fancy.theme-blue .icon::before { content: '⚙️'; }
-#screen-home .card.fancy.theme-silver .icon::before { content: 'ℹ️'; }
+#screen-home .card.fancy.theme-cyan .icon::before { content: '⊹'; font-size: 24px; }
+#screen-home .card.fancy.theme-purple .icon::before { content: '▣'; font-size: 20px; }
+#screen-home .card.fancy.theme-gold .icon::before { content: '♦'; font-size: 22px; }
+#screen-home .card.fancy.theme-white .icon::before { content: '⟐'; font-size: 20px; }
+#screen-home .card.fancy.theme-lime .icon::before { content: '◈'; font-size: 22px; }
+#screen-home .card.fancy.theme-orange .icon::before { content: '◯'; font-size: 22px; }
+#screen-home .card.fancy.theme-blue .icon::before { content: '⚙'; font-size: 20px; }
+#screen-home .card.fancy.theme-silver .icon::before { content: 'ⓘ'; font-size: 20px; }
 
 #screen-home .card.fancy:hover .icon {
   transform: scale(1.1) rotate(180deg);
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 #screen-home .card.fancy:hover .icon::before {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 1);
 }
 
 /* Add a subtle animated border effect */
