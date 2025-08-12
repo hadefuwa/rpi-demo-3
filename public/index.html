@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
     <title>RPI 5" Showcase - Home</title>
     
+    <!-- Emoji Font Support for Raspberry Pi -->
+    <style>
+      @font-face {
+        font-family: 'EmojiFont';
+        src: url('data:font/woff2;base64,') format('woff2'),
+             url('https://fonts.gstatic.com/s/notocoloremoji/v25/Yq6P-KqIXTD0t4D9z1ESnKM3-HpFabsE4tq3luCC7p-aXxcn.woff2') format('woff2');
+        font-display: swap;
+      }
+      
+      /* Fallback emoji font stack for Raspberry Pi */
+      .emoji-text {
+        font-family: 'EmojiFont', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', 'EmojiOne Mozilla', 'Twemoji Mozilla', 'Segoe UI Symbol', sans-serif;
+        font-variant-emoji: emoji;
+        text-rendering: optimizeSpeed;
+      }
+    </style>
+    
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="./manifest.json" />
     <meta name="theme-color" content="#000000" />

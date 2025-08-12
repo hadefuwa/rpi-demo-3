@@ -105,6 +105,7 @@
     gap: 10px;
     max-width: 500px;
     width: 100%;
+    perspective: 800px;
   }
   
   #screen-memory .memory-card {
@@ -117,9 +118,11 @@
     justify-content: center;
     font-size: 2em;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.35s ease, background 0.25s ease, border-color 0.25s ease;
     position: relative;
     overflow: hidden;
+    transform-style: preserve-3d;
+    will-change: transform;
   }
   
   #screen-memory .memory-card:hover {
@@ -159,6 +162,7 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     font-size: 1.5em;
+    backface-visibility: hidden;
     transform: rotateY(0deg);
     transition: transform 0.3s ease;
   }
@@ -178,6 +182,7 @@
     justify-content: center;
     background: rgba(255,255,255,0.9);
     color: #333;
+    backface-visibility: hidden;
     transform: rotateY(180deg);
     transition: transform 0.3s ease;
   }
@@ -288,18 +293,19 @@
           startNewGame();
         } else if (e.target.id === 'btnHome') {
           goHome();
-        } else if (e.target.classList.contains('memory-card')) {
+        } else if (e.target.classList && e.target.classList.contains('memory-card')) {
           handleCardClick(e.target);
         }
       });
       
       // Touch events for mobile
       container.addEventListener('touchstart', function(e) {
-        if (e.target.classList.contains('memory-card')) {
+        const target = e.target.closest('.memory-card');
+        if (target && container.contains(target)) {
           e.preventDefault();
-          handleCardClick(e.target);
+          handleCardClick(target);
         }
-      });
+      }, { passive: false });
     }
     
     function startNewGame() {
@@ -317,6 +323,7 @@
       
       // Create new cards
       createCards();
+      resetTimerDisplay();
       
       // Update display
       updateDisplay();
@@ -425,6 +432,11 @@
       
       timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
+
+    function resetTimerDisplay() {
+      timerElement.textContent = '00:00';
+      startTime = null;
+    }
     
     function updateDisplay() {
       moveCountElement.textContent = moveCount;
@@ -442,7 +454,7 @@
       }
       
       // Calculate final time
-      const finalTime = timerElement.textContent;
+      const finalTime = timerElement.textContent || '00:00';
       
       // Show victory message
       setTimeout(() => {
