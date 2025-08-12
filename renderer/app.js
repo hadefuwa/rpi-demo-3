@@ -891,6 +891,7 @@
     painting: false,
     brushColor: '#ff6b6b',
     brushSize: 8,
+    lastPos: null,
     eventListeners: []
   };
 
@@ -911,6 +912,7 @@
     
     touchDemoState.eventListeners = [];
     touchDemoState.painting = false;
+    touchDemoState.lastPos = null;
     touchDemoState.canvas = null;
     touchDemoState.ctx = null;
     touchDemoInitialized = false;
@@ -924,7 +926,6 @@
   }
 
   function initTouchDemo() {
-    console.log('initTouchDemo called - touchDemoInitialized:', touchDemoInitialized);
     if (touchDemoInitialized) {
       console.log('Touch demo already initialized, skipping...');
       return;
@@ -960,15 +961,13 @@
     touchDemoState.canvas = canvas;
     touchDemoState.ctx = ctx;
     
-    console.log('Touch demo setup state:', {
-      painting: touchDemoState.painting,
-      brushColor: touchDemoState.brushColor,
-      brushSize: touchDemoState.brushSize,
-      canvasWidth: canvas.width,
-      canvasHeight: canvas.height,
-      offsetWidth: canvas.offsetWidth,
-      offsetHeight: canvas.offsetHeight
-    });
+    // Ensure canvas is properly sized
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      const width = Math.min(rect.width, 1024);
+      const height = Math.min(rect.height, 400);
+      resizeCanvas(canvas, width, height);
+    }
     
     // Configure the context
     ctx.fillStyle = touchDemoState.brushColor;
@@ -987,16 +986,16 @@
       const rect = canvas.getBoundingClientRect();
       const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
       const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-      const lastPos = { x, y };
+      touchDemoState.lastPos = { x, y };
       
       touchDemoState.ctx.fillStyle = touchDemoState.brushColor;
       touchDemoState.ctx.beginPath();
-      touchDemoState.ctx.arc(lastPos.x, lastPos.y, touchDemoState.brushSize / 2, 0, Math.PI * 2);    
+      touchDemoState.ctx.arc(touchDemoState.lastPos.x, touchDemoState.lastPos.y, touchDemoState.brushSize / 2, 0, Math.PI * 2);    
       touchDemoState.ctx.fill();
     }
     
     function draw(e) {
-      if (!touchDemoState.painting) return;
+      if (!touchDemoState.painting || !touchDemoState.lastPos) return;
       e.preventDefault();
       
       const rect = canvas.getBoundingClientRect();
@@ -1009,16 +1008,17 @@
       touchDemoState.ctx.lineCap = 'round';
       touchDemoState.ctx.lineJoin = 'round';
       touchDemoState.ctx.beginPath();
-      touchDemoState.ctx.moveTo(lastPos.x, lastPos.y);
+      touchDemoState.ctx.moveTo(touchDemoState.lastPos.x, touchDemoState.lastPos.y);
       touchDemoState.ctx.lineTo(pos.x, pos.y);
       touchDemoState.ctx.stroke();
       
-      lastPos = pos;
+      touchDemoState.lastPos = pos;
     }
     
     function end(e) {
       e.preventDefault();
       touchDemoState.painting = false;
+      touchDemoState.lastPos = null;
     }
     
     // Bind events
@@ -1083,6 +1083,8 @@
   const ipAddress = document.getElementById('ipAddress');
   const rootStorage = document.getElementById('rootStorage');
   const homeStorage = document.getElementById('homeStorage');
+  const btnRefreshStats = document.getElementById('btnRefreshStats');
+  const btnAutoRefresh = document.getElementById('btnAutoRefresh');
 
   // Initialize dashboard
   function initDashboard() {
@@ -1100,7 +1102,15 @@
     initPerformanceChart();
     initMemoryChart();
 
-    // Start auto-refresh immediately
+    // Set up event listeners without duplication
+    if (btnRefreshStats) {
+      btnRefreshStats.onclick = refreshDashboard;
+    }
+    if (btnAutoRefresh) {
+      btnAutoRefresh.onclick = toggleAutoRefresh;
+    }
+
+    // Restart auto-refresh cleanly
     stopAutoRefresh();
     startAutoRefresh();
 
@@ -1304,6 +1314,24 @@
     if (refreshInterval) {
       clearInterval(refreshInterval);
       refreshInterval = null;
+    }
+  }
+
+  function toggleAutoRefresh() {
+    if (autoRefresh) {
+      stopAutoRefresh();
+      autoRefresh = false;
+      if (btnAutoRefresh) {
+        btnAutoRefresh.classList.remove('active');
+        btnAutoRefresh.textContent = '⏸️ Manual';
+      }
+    } else {
+      startAutoRefresh();
+      autoRefresh = true;
+      if (btnAutoRefresh) {
+        btnAutoRefresh.classList.add('active');
+        btnAutoRefresh.textContent = '⏱️ Auto';
+      }
     }
   }
 
@@ -2903,8 +2931,11 @@
   // Initialize touch demo when the touch screen is shown
   window.addEventListener('screenChanged', (e) => {
     if (e?.detail?.screenName === 'touch') {
-      // Initialize the original touch demo
-      setTimeout(() => initTouchDemo(), 100);
+      // Initialize the original touch demo with a slight delay to ensure DOM is ready
+      setTimeout(() => {
+        cleanupTouchDemo(); // Clean up any existing state first
+        initTouchDemo();
+      }, 150);
     } else if (touchDemoInitialized) {
       // Clean up touch demo when leaving the screen
       cleanupTouchDemo();
