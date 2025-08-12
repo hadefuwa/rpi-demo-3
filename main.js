@@ -166,19 +166,24 @@ function getUptime() {
 function getNetworkInfo() {
   try {
     const interfaces = os.networkInterfaces();
-    const active = [];
+    let foundIP = null;
     
     for (const [name, nets] of Object.entries(interfaces)) {
       for (const net of nets) {
         if (net.family === 'IPv4' && !net.internal) {
-          active.push({ name, address: net.address });
+          foundIP = net.address;
+          break;
         }
       }
+      if (foundIP) break;
     }
     
-    return active.length > 0 ? active[0] : { name: 'N/A', address: 'N/A' };
+    return {
+      wifiStatus: foundIP ? 'Connected' : 'Disconnected',
+      ipAddress: foundIP || 'N/A'
+    };
   } catch {}
-  return { name: 'N/A', address: 'N/A' };
+  return { wifiStatus: 'Unknown', ipAddress: 'N/A' };
 }
 
 function getStorageInfo() {

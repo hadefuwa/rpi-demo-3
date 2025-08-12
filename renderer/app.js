@@ -889,10 +889,13 @@
     canvas: null,
     ctx: null,
     painting: false,
-    brushColor: '#ffffff',
+    brushColor: '#000000',
     brushSize: 8,
     lastPos: null,
     eventListeners: [],
+    drawingHistory: [],
+    startTime: null,
+    currentHistoryIndex: -1,
     
     // Initialize the touch demo
     init() {
@@ -924,16 +927,19 @@
         return false;
       }
       
-      // Set up the canvas
-      this.setupCanvas();
-      
-      // Bind events
-      this.bindEvents();
-      
-      // Mark as initialized
-      this.isInitialized = true;
-      console.log('Touch demo initialized successfully');
-      return true;
+          // Set up the canvas
+    this.setupCanvas();
+    
+    // Bind events
+    this.bindEvents();
+    
+    // Initialize stats and timing
+    this.initializeStats();
+    
+    // Mark as initialized
+    this.isInitialized = true;
+    console.log('Touch demo initialized successfully');
+    return true;
     },
     
     // Set up the canvas with proper sizing
@@ -959,12 +965,16 @@
     
     // Draw welcome message
     drawWelcomeMessage() {
-      this.ctx.fillStyle = '#333';
-      this.ctx.fillRect(10, 10, 200, 60);
-      this.ctx.fillStyle = '#fff';
+      this.ctx.fillStyle = '#667eea';
+      this.ctx.fillRect(20, 20, 300, 80);
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.font = 'bold 24px Arial';
+      this.ctx.fillText('🎨 Touch Drawing Studio', 40, 55);
       this.ctx.font = '16px Arial';
-      this.ctx.fillText('Touch Demo Ready!', 20, 35);
-      this.ctx.fillText('Draw with your finger', 20, 55);
+      this.ctx.fillText('Start drawing anywhere on the canvas', 40, 80);
+      
+      // Save initial state
+      this.saveToHistory();
     },
     
     // Bind all event listeners
@@ -995,17 +1005,33 @@
       // Color swatches
       document.querySelectorAll('.swatch').forEach(btn => {
         this.addListener(btn, 'click', () => {
+          // Remove active class from all swatches
+          document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+          // Add active class to clicked swatch
+          btn.classList.add('active');
+          
           this.brushColor = btn.getAttribute('data-color');
           this.ctx.strokeStyle = this.brushColor;
           this.ctx.fillStyle = this.brushColor;
+          
+          // Update stats
+          this.updateStats();
         });
       });
       
       // Brush sizes
       document.querySelectorAll('.brush').forEach(btn => {
         this.addListener(btn, 'click', () => {
+          // Remove active class from all brushes
+          document.querySelectorAll('.brush').forEach(b => b.classList.remove('active'));
+          // Add active class to clicked brush
+          btn.classList.add('active');
+          
           this.brushSize = parseInt(btn.getAttribute('data-size'), 10);
           this.ctx.lineWidth = this.brushSize;
+          
+          // Update stats
+          this.updateStats();
         });
       });
       
@@ -1015,6 +1041,44 @@
         this.addListener(clearBtn, 'click', () => {
           this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
           this.drawWelcomeMessage();
+        });
+      }
+      
+      // Save button
+      const saveBtn = document.getElementById('btnSave');
+      if (saveBtn) {
+        this.addListener(saveBtn, 'click', () => {
+          this.saveDrawing();
+        });
+      }
+      
+      // Undo button
+      const undoBtn = document.getElementById('btnUndo');
+      if (undoBtn) {
+        this.addListener(undoBtn, 'click', () => {
+          this.undo();
+        });
+      }
+      
+      // Navigation buttons
+      const homeBtn = document.getElementById('btnHome');
+      if (homeBtn) {
+        this.addListener(homeBtn, 'click', () => {
+          if (window.goHome) window.goHome();
+        });
+      }
+      
+      const backBtn = document.getElementById('btnBack');
+      if (backBtn) {
+        this.addListener(backBtn, 'click', () => {
+          if (window.goBack) window.goBack();
+        });
+      }
+      
+      const fullscreenBtn = document.getElementById('btnFullscreen');
+      if (fullscreenBtn) {
+        this.addListener(fullscreenBtn, 'click', () => {
+          this.toggleFullscreen();
         });
       }
     },
@@ -1070,11 +1134,113 @@
       e.preventDefault();
       this.painting = false;
       this.lastPos = null;
+      
+      // Save to history after each drawing session
+      if (this.drawingHistory.length > 0) {
+        this.saveToHistory();
+      }
+    },
+    
+    // Initialize stats and timing
+    initializeStats() {
+      this.startTime = Date.now();
+      this.updateStats();
+      
+      // Start timer for drawing time
+      this.timerInterval = setInterval(() => {
+        this.updateDrawingTime();
+      }, 1000);
+    },
+    
+    // Update stats display
+    updateStats() {
+      const currentColorEl = document.getElementById('currentColor');
+      const currentSizeEl = document.getElementById('currentSize');
+      
+      if (currentColorEl) {
+        currentColorEl.textContent = this.brushColor;
+        currentColorEl.style.color = this.brushColor;
+      }
+      
+      if (currentSizeEl) {
+        currentSizeEl.textContent = `${this.brushSize}px`;
+      }
+    },
+    
+    // Update drawing time
+    updateDrawingTime() {
+      if (!this.startTime) return;
+      
+      const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      
+      const drawingTimeEl = document.getElementById('drawingTime');
+      if (drawingTimeEl) {
+        drawingTimeEl.textContent = timeString;
+      }
+    },
+    
+    // Save current canvas state to history
+    saveToHistory() {
+      const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+      this.drawingHistory.push(imageData);
+      this.currentHistoryIndex = this.drawingHistory.length - 1;
+      
+      // Limit history to prevent memory issues
+      if (this.drawingHistory.length > 20) {
+        this.drawingHistory.shift();
+        this.currentHistoryIndex--;
+      }
+    },
+    
+    // Undo last action
+    undo() {
+      if (this.currentHistoryIndex > 0) {
+        this.currentHistoryIndex--;
+        const imageData = this.drawingHistory[this.currentHistoryIndex];
+        this.ctx.putImageData(imageData, 0, 0);
+      } else if (this.currentHistoryIndex === 0) {
+        // Clear canvas and show welcome message
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.drawWelcomeMessage();
+      }
+    },
+    
+    // Save drawing as image
+    saveDrawing() {
+      try {
+        const link = document.createElement('a');
+        link.download = `touch-drawing-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.png`;
+        link.href = this.canvas.toDataURL();
+        link.click();
+      } catch (error) {
+        console.error('Failed to save drawing:', error);
+        alert('Failed to save drawing. Please try again.');
+      }
+    },
+    
+    // Toggle fullscreen
+    toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        this.canvas.requestFullscreen().catch(err => {
+          console.error('Error attempting to enable fullscreen:', err);
+        });
+      } else {
+        document.exitFullscreen();
+      }
     },
     
     // Clean up all event listeners and reset state
     cleanup() {
       console.log('Cleaning up touch demo...');
+      
+      // Clear timer
+      if (this.timerInterval) {
+        clearInterval(this.timerInterval);
+        this.timerInterval = null;
+      }
       
       // Remove all event listeners
       this.eventListeners.forEach(({ element, event, handler, options }) => {
@@ -1090,6 +1256,9 @@
       this.canvas = null;
       this.ctx = null;
       this.isInitialized = false;
+      this.drawingHistory = [];
+      this.currentHistoryIndex = -1;
+      this.startTime = null;
       
       console.log('Touch demo cleanup completed');
     }

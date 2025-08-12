@@ -1,18 +1,125 @@
 <section id="screen-touch" class="screen">
-  <div class="toolbar">
-    <div class="swatches">
-      <button class="swatch" data-color="#ff6b6b" style="background:#ff6b6b"></button>
-      <button class="swatch" data-color="#ffd93d" style="background:#ffd93d"></button>
-      <button class="swatch" data-color="#6bcBef" style="background:#6bcBef"></button>
-      <button class="swatch" data-color="#9d7cf3" style="background:#9d7cf3"></button>
-      <button class="swatch" data-color="#ffffff" style="background:#ffffff"></button>
+    <div class="touch-container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>🎨 Touch Drawing Studio</h1>
+            <p>Draw, paint, and create with your finger or mouse</p>
+        </div>
+
+        <!-- Main Drawing Area -->
+        <div class="drawing-area">
+            <div class="canvas-container">
+                <canvas id="paint" width="800" height="500"></canvas>
+                <div class="canvas-overlay">
+                    <div class="welcome-message">
+                        <h2>✨ Ready to Create!</h2>
+                        <p>Start drawing anywhere on the canvas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <!-- Color Palette -->
+            <div class="control-section">
+                <h3>🎨 Colors</h3>
+                <div class="color-palette">
+                    <button class="swatch active" data-color="#000000" style="background-color: #000000;" title="Black"></button>
+                    <button class="swatch" data-color="#ffffff" style="background-color: #ffffff; border: 2px solid #ccc;" title="White"></button>
+                    <button class="swatch" data-color="#ff0000" style="background-color: #ff0000;" title="Red"></button>
+                    <button class="swatch" data-color="#00ff00" style="background-color: #00ff00;" title="Green"></button>
+                    <button class="swatch" data-color="#0000ff" style="background-color: #0000ff;" title="Blue"></button>
+                    <button class="swatch" data-color="#ffff00" style="background-color: #ffff00;" title="Yellow"></button>
+                    <button class="swatch" data-color="#ff00ff" style="background-color: #ff00ff;" title="Magenta"></button>
+                    <button class="swatch" data-color="#00ffff" style="background-color: #00ffff;" title="Cyan"></button>
+                    <button class="swatch" data-color="#ff8800" style="background-color: #ff8800;" title="Orange"></button>
+                    <button class="swatch" data-color="#8800ff" style="background-color: #8800ff;" title="Purple"></button>
+                </div>
+            </div>
+
+            <!-- Brush Sizes -->
+            <div class="control-section">
+                <h3>🖌️ Brush Size</h3>
+                <div class="brush-sizes">
+                    <button class="brush active" data-size="2" title="Fine (2px)">●</button>
+                    <button class="brush" data-size="4" title="Small (4px)">●</button>
+                    <button class="brush" data-size="8" title="Medium (8px)">●</button>
+                    <button class="brush" data-size="16" title="Large (16px)">●</button>
+                    <button class="brush" data-size="32" title="Extra Large (32px)">●</button>
+                </div>
+            </div>
+
+            <!-- Tools -->
+            <div class="control-section">
+                <h3>🛠️ Tools</h3>
+                <div class="tools">
+                    <button id="btnClear" class="tool-btn" title="Clear Canvas">
+                        <span class="tool-icon">🗑️</span>
+                        <span class="tool-label">Clear</span>
+                    </button>
+                    <button id="btnSave" class="tool-btn" title="Save Drawing">
+                        <span class="tool-icon">💾</span>
+                        <span class="tool-label">Save</span>
+                    </button>
+                    <button id="btnUndo" class="tool-btn" title="Undo Last Action">
+                        <span class="tool-icon">↶</span>
+                        <span class="tool-label">Undo</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Drawing Stats -->
+            <div class="control-section">
+                <h3>📊 Stats</h3>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Brush Color:</span>
+                        <span id="currentColor" class="stat-value">#000000</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Brush Size:</span>
+                        <span id="currentSize" class="stat-value">8px</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Drawing Time:</span>
+                        <span id="drawingTime" class="stat-value">0:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Bar -->
+        <div class="quick-actions">
+            <button class="action-btn" id="btnHome" title="Go Home">
+                <span class="action-icon">🏠</span>
+                <span class="action-label">Home</span>
+            </button>
+            <button class="action-btn" id="btnBack" title="Go Back">
+                <span class="action-icon">⬅️</span>
+                <span class="action-label">Back</span>
+            </button>
+            <button class="action-btn" id="btnFullscreen" title="Toggle Fullscreen">
+                <span class="action-icon">⛶</span>
+                <span class="action-label">Fullscreen</span>
+            </button>
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions">
+            <details>
+                <summary>📖 How to Use</summary>
+                <div class="instruction-content">
+                    <ul>
+                        <li><strong>Touch/Mouse:</strong> Draw by touching or clicking and dragging on the canvas</li>
+                        <li><strong>Colors:</strong> Tap any color swatch to change your brush color</li>
+                        <li><strong>Brush Size:</strong> Select different brush sizes for various effects</li>
+                        <li><strong>Clear:</strong> Use the clear button to start over</li>
+                        <li><strong>Save:</strong> Save your artwork as an image</li>
+                        <li><strong>Undo:</strong> Undo your last drawing action</li>
+                    </ul>
+                </div>
+            </details>
+        </div>
     </div>
-    <div class="brushes">
-      <button class="brush" data-size="4">Small</button>
-      <button class="brush" data-size="8">Med</button>
-      <button class="brush" data-size="14">Large</button>
-    </div>
-    <button id="btnClear" class="chip">Clear</button>
-  </div>
-  <canvas id="paint"></canvas>
 </section>
