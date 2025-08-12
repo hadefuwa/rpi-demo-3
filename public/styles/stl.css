@@ -1,11 +1,53 @@
-/* STL viewer */
+/* STL viewer styles */
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-sm);
+  margin: var(--spacing-xs);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  min-height: 0; /* Important for flex shrinking */
+  overflow: hidden;
+}
+
+.stl-models { 
+  display: flex; 
+  gap: var(--spacing-xs); 
+  margin-bottom: var(--spacing-sm); 
+  flex-wrap: wrap; 
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stl-wrap { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  gap: var(--spacing-sm); 
+  position: relative;
+  flex: 1;
+  min-height: 0; /* Important for flex shrinking */
+  overflow: hidden;
+}
+
 #stlCanvas { 
   width: 100%; 
-  height: clamp(300px, 50vh, 500px); 
+  flex: 1;
+  min-height: 200px;
+  max-height: calc(100vh - 200px); /* Reserve space for controls */
   border-radius: var(--radius-md); 
   background: linear-gradient(135deg, #0b0e13 0%, #1a1a2e 50%, #16213e 100%); 
   border: 2px solid rgba(100, 149, 237, 0.3); 
-  max-width: 100%;
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.3),
     inset 0 2px 8px rgba(100, 149, 237, 0.1);
@@ -13,31 +55,18 @@
 }
 
 .stl-controls { 
-  display: flex; 
-  flex-direction: column; 
-  gap: var(--spacing-sm); 
-  align-items: center; 
-  margin-top: var(--spacing-md); 
-}
-
-.stl-models { 
-  display: flex; 
-  gap: var(--spacing-sm); 
-  margin-bottom: var(--spacing-md); 
-  flex-wrap: wrap; 
-  justify-content: center; 
-}
-
-.stl-wrap { 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  gap: var(--spacing-md); 
-  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  flex-shrink: 0; /* Prevent controls from shrinking */
 }
 
 .stl-controls .chip { 
-  min-width: 80px; 
+  min-width: 60px; 
   text-align: center; 
   transition: all 0.3s ease;
 }
@@ -48,32 +77,36 @@
 }
 
 .model-btn.active {
-  background: linear-gradient(135deg, #4169e1, #6495ed);
-  border-color: #4169e1;
-  color: white;
-  box-shadow: 0 0 15px rgba(65, 105, 225, 0.5);
+  background: linear-gradient(135deg, var(--brand), #4169e1);
+  border-color: var(--brand);
+  color: #000;
+  box-shadow: 0 0 15px rgba(107, 203, 239, 0.5);
 }
 
 .chip.big { 
-  font-size: var(--font-xl); 
-  padding: var(--spacing-md) var(--spacing-lg); 
-  min-width: 100px;
-  background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-  border: 1px solid rgba(100, 149, 237, 0.3);
-  color: #ffffff;
+  font-size: var(--font-base); 
+  padding: var(--spacing-xs) var(--spacing-sm); 
+  min-width: 50px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--fg);
   transition: all 0.3s ease;
+  text-align: center;
+  white-space: nowrap;
+  font-size: var(--font-sm);
 }
 
 .chip.big:hover {
-  background: linear-gradient(135deg, #3a3a3a, #4a4a4a);
-  border-color: rgba(100, 149, 237, 0.6);
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.3);
   transform: translateY(-1px);
 }
 
 .chip.big.active {
-  background: linear-gradient(135deg, #4169e1, #6495ed);
-  border-color: #4169e1;
-  box-shadow: 0 0 10px rgba(65, 105, 225, 0.4);
+  background: linear-gradient(135deg, var(--brand), #4169e1);
+  border-color: var(--brand);
+  color: #000;
+  box-shadow: 0 0 10px rgba(107, 203, 239, 0.4);
 }
 
 .chip.small { 
@@ -100,8 +133,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: #ffffff;
+  background: rgba(0, 0, 0, 0.9);
+  color: var(--fg);
   padding: var(--spacing-md) var(--spacing-lg);
   border-radius: var(--radius-md);
   border: 1px solid rgba(100, 149, 237, 0.5);
@@ -118,7 +151,7 @@
   width: 20px;
   height: 20px;
   border: 2px solid rgba(100, 149, 237, 0.3);
-  border-top: 2px solid #4169e1;
+  border-top: 2px solid var(--brand);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-right: var(--spacing-sm);
@@ -138,33 +171,103 @@
 }
 
 @media (max-width: 768px) {
-  #stlCanvas {
-    height: clamp(250px, 40vh, 350px);
+  .panel {
+    padding: var(--spacing-xs);
+    margin: var(--spacing-xs);
   }
   
-  .stl-controls { 
-    flex-direction: row; 
-    flex-wrap: wrap; 
-    justify-content: center; 
+  #stlCanvas {
+    min-height: 150px;
+    max-height: calc(100vh - 180px); /* Less space for mobile controls */
+  }
+  
+  .stl-controls {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-xs);
+    max-width: 280px;
+    margin-top: var(--spacing-xs);
   }
   
   .stl-controls .chip { 
-    min-width: 60px; 
+    min-width: 40px; 
+    font-size: var(--font-xs);
+    padding: var(--spacing-xs);
   }
   
   .chip.big {
-    font-size: var(--font-md);
-    padding: var(--spacing-sm) var(--spacing-md);
-    min-width: 70px;
+    font-size: var(--font-xs);
+    padding: var(--spacing-xs);
+    min-width: 40px;
   }
   
   .stl-models {
     gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .stl-models .chip {
+    font-size: var(--font-xs);
+    padding: var(--spacing-xs);
   }
   
   .loading-indicator {
-    font-size: var(--font-md);
-    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+  
+  .note {
+    font-size: var(--font-xs);
+    margin-top: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  /* Reorganize grid for mobile - remove some empty cells */
+  .stl-controls {
+    grid-template-areas: 
+      ". up . zoom-in"
+      "left reset right zoom-out"
+      ". down . auto";
+  }
+  
+  .stl-controls > *:nth-child(1) { grid-area: 1 / 1; } /* empty */
+  .stl-controls > *:nth-child(2) { grid-area: up; }
+  .stl-controls > *:nth-child(3) { grid-area: 1 / 3; } /* empty */
+  .stl-controls > *:nth-child(4) { grid-area: zoom-in; }
+  .stl-controls > *:nth-child(5) { grid-area: auto; }
+  .stl-controls > *:nth-child(6) { grid-area: left; }
+  .stl-controls > *:nth-child(7) { grid-area: reset; }
+  .stl-controls > *:nth-child(8) { grid-area: right; }
+  .stl-controls > *:nth-child(9) { grid-area: zoom-out; }
+  .stl-controls > *:nth-child(11) { grid-area: down; }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .panel {
+    padding: var(--spacing-xs);
+    margin: 2px;
+  }
+  
+  #stlCanvas {
+    min-height: 120px;
+    max-height: calc(100vh - 160px);
+  }
+  
+  .stl-controls {
+    max-width: 240px;
+    gap: 2px;
+  }
+  
+  .chip.big {
+    min-width: 35px;
+    padding: 4px;
+    font-size: 10px;
+  }
+  
+  .stl-models .chip {
+    min-width: 35px;
+    padding: 4px;
+    font-size: 10px;
   }
 }
 

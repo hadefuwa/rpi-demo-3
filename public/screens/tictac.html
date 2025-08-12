@@ -22,6 +22,8 @@
     
     <div class="toolbar">
       <button id="btnReset" class="btn">Reset Game</button>
+      <button id="btnToggleMode" class="btn" aria-pressed="false">Mode: vs Computer</button>
+      <button id="btnDifficulty" class="btn">Difficulty: Medium</button>
     </div>
     
     <div class="score-board">
@@ -160,10 +162,12 @@
     font-size: 3em;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    /* Limit transitions to visual-only properties to avoid layout thrash */
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
     position: relative;
     overflow: hidden;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    will-change: transform;
   }
   
   #screen-game .cell:hover {
@@ -390,8 +394,10 @@
     let board = ['', '', '', '', '', '', '', '', ''];
     let currentPlayer = 'x';
     let gameActive = true;
+    let aiEnabled = true; // When false, play 2-player and disable AI
     let playerScore = 0;
     let computerScore = 0;
+    let difficulty = 'medium'; // 'easy' | 'medium' | 'hard'
     
     // DOM elements
     let boardElement;
@@ -404,7 +410,9 @@
       setupDOM();
       setupEventListeners();
       loadScores();
+      loadSettings();
       renderBoard();
+      updateModeUI();
       updateStatus();
     }
     
@@ -426,6 +434,18 @@
           resetGame();
         } else if (e.target.id === 'btnHome') {
           goHome();
+        } else if (e.target.id === 'btnToggleMode') {
+          aiEnabled = !aiEnabled;
+          e.target.setAttribute('aria-pressed', String(!aiEnabled));
+          updateModeUI();
+          saveSettings();
+          // Start a fresh round when switching modes
+          resetGame();
+        } else if (e.target.id === 'btnDifficulty') {
+          cycleDifficulty();
+          updateDifficultyUI();
+          saveSettings();
+          resetGame();
         }
       });
       
@@ -445,11 +465,11 @@
         return;
       }
       
-      // Player move
-      makeMove(index, 'x');
+      const playerMakingMove = currentPlayer;
+      makeMove(index, playerMakingMove);
       
-      if (checkWinner(board, 'x')) {
-        endGame('x');
+      if (checkWinner(board, playerMakingMove)) {
+        endGame(playerMakingMove);
         return;
       }
       
@@ -458,26 +478,28 @@
         return;
       }
       
-      // Computer move
-      setTimeout(() => {
-        if (gameActive) {
-          const computerMove = getComputerMove();
-          makeMove(computerMove, 'o');
-          
-          if (checkWinner(board, 'o')) {
-            endGame('o');
-            return;
+      // If AI is enabled, let the computer (O) make a move
+      if (aiEnabled) {
+        setTimeout(() => {
+          if (gameActive) {
+            const computerMove = getComputerMove();
+            makeMove(computerMove, 'o');
+            
+            if (checkWinner(board, 'o')) {
+              endGame('o');
+              return;
+            }
+            
+            if (checkDraw()) {
+              endGame('draw');
+              return;
+            }
+            
+            currentPlayer = 'x';
+            updateStatus();
           }
-          
-          if (checkDraw()) {
-            endGame('draw');
-            return;
-          }
-          
-          currentPlayer = 'x';
-          updateStatus();
-        }
-      }, 500);
+        }, 500);
+      }
     }
     
     function makeMove(index, player) {
@@ -488,9 +510,96 @@
     }
     
     function getComputerMove() {
-      // Simple AI: find first empty cell
-      const emptyCells = board.map((cell, index) => cell === '' ? index : -1).filter(index => index !== -1);
-      return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      if (difficulty === 'easy') {
+        return getRandomMove();
+      }
+      if (difficulty === 'medium') {
+        // 60% best move, 40% random to feel human
+        return Math.random() < 0.6 ? getBestMoveHeuristic() : getRandomMove();
+      }
+      // hard: full minimax
+      return getBestMoveMinimax();
+    }
+
+    function getRandomMove() {
+      const empty = [];
+      for (let i = 0; i < 9; i++) if (board[i] === '') empty.push(i);
+      return empty[Math.floor(Math.random() * empty.length)];
+    }
+
+    function getBestMoveHeuristic() {
+      // Prefer winning move, then block opponent, then center, corners, edges
+      // Try winning
+      for (let i = 0; i < 9; i++) {
+        if (board[i] === '') {
+          board[i] = 'o';
+          const win = checkWinner(board, 'o');
+          board[i] = '';
+          if (win) return i;
+        }
+      }
+      // Try block X
+      for (let i = 0; i < 9; i++) {
+        if (board[i] === '') {
+          board[i] = 'x';
+          const xWin = checkWinner(board, 'x');
+          board[i] = '';
+          if (xWin) return i;
+        }
+      }
+      // Center
+      if (board[4] === '') return 4;
+      // Corners
+      const corners = [0, 2, 6, 8].filter(i => board[i] === '');
+      if (corners.length) return corners[Math.floor(Math.random() * corners.length)];
+      // Edges
+      return getRandomMove();
+    }
+
+    function getBestMoveMinimax() {
+      let bestScore = -Infinity;
+      let move = -1;
+      for (let i = 0; i < 9; i++) {
+        if (board[i] === '') {
+          board[i] = 'o';
+          const score = minimax(board, 0, false);
+          board[i] = '';
+          if (score > bestScore) {
+            bestScore = score;
+            move = i;
+          }
+        }
+      }
+      return move !== -1 ? move : getRandomMove();
+    }
+
+    const scores = { o: 10, x: -10, draw: 0 };
+    function minimax(state, depth, isMaximizing) {
+      if (checkWinner(state, 'o')) return scores.o - depth; // prefer faster win
+      if (checkWinner(state, 'x')) return scores.x + depth; // prefer slower loss
+      if (state.every(c => c !== '')) return scores.draw;
+
+      if (isMaximizing) {
+        let best = -Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (state[i] === '') {
+            state[i] = 'o';
+            best = Math.max(best, minimax(state, depth + 1, false));
+            state[i] = '';
+          }
+        }
+        return best;
+      } else {
+        let best = Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (state[i] === '') {
+            state[i] = 'x';
+            best = Math.min(best, minimax(state, depth + 1, true));
+            state[i] = '';
+          }
+        }
+        return best;
+      }
     }
     
     function checkWinner(board, player) {
@@ -560,29 +669,72 @@
     }
     
     function renderBoard() {
+      // If cells already exist, update in place to prevent layout shifts
+      const existing = boardElement.querySelectorAll('.cell');
+      if (existing.length === 9) {
+        for (let i = 0; i < 9; i++) {
+          const cell = existing[i];
+          const value = board[i];
+          cell.textContent = value === 'x' ? 'X' : value === 'o' ? 'O' : '';
+          cell.classList.toggle('x', value === 'x');
+          cell.classList.toggle('o', value === 'o');
+        }
+        return;
+      }
+
+      // Initial render: create the cells once
       boardElement.innerHTML = '';
-      
       for (let i = 0; i < 9; i++) {
         const cell = document.createElement('div');
         cell.className = 'cell';
         cell.dataset.index = i;
-        
-        if (board[i] === 'x') {
+
+        const value = board[i];
+        if (value === 'x') {
           cell.textContent = 'X';
           cell.classList.add('x');
-        } else if (board[i] === 'o') {
+        } else if (value === 'o') {
           cell.textContent = 'O';
           cell.classList.add('o');
         }
-        
+
         boardElement.appendChild(cell);
       }
     }
     
     function updateStatus() {
-      if (gameActive) {
-        statusElement.textContent = currentPlayer === 'x' ? 'Your move' : 'Computer thinking...';
+      if (!gameActive) {
+        return;
       }
+      if (aiEnabled) {
+        statusElement.textContent = currentPlayer === 'x' ? 'Your move' : 'Computer thinking...';
+      } else {
+        statusElement.textContent = currentPlayer === 'x' ? 'Player X move' : 'Player O move';
+      }
+    }
+
+    function updateModeUI() {
+      const toggleBtn = document.querySelector('#btnToggleMode');
+      if (!toggleBtn) return;
+      toggleBtn.textContent = aiEnabled ? 'Mode: vs Computer' : 'Mode: 2 Players';
+      const labels = document.querySelectorAll('.player-label');
+      if (labels.length >= 2) {
+        if (aiEnabled) {
+          labels[0].textContent = 'You';
+          labels[1].textContent = 'Computer';
+        } else {
+          labels[0].textContent = 'Player X';
+          labels[1].textContent = 'Player O';
+        }
+      }
+    }
+
+    function updateDifficultyUI() {
+      const btn = document.querySelector('#btnDifficulty');
+      if (!btn) return;
+      const label = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+      btn.textContent = `Difficulty: ${label}`;
+      btn.style.display = aiEnabled ? '' : 'none';
     }
     
     function updateScores() {
@@ -613,6 +765,33 @@
       } catch (e) {
         console.warn('Failed to save scores:', e);
       }
+    }
+
+    function loadSettings() {
+      try {
+        const saved = localStorage.getItem('tictactoe-settings');
+        if (saved) {
+          const settings = JSON.parse(saved);
+          aiEnabled = settings.aiEnabled !== false; // default true
+          if (settings.difficulty) difficulty = settings.difficulty;
+        }
+      } catch (e) {
+        console.warn('Failed to load settings:', e);
+      }
+    }
+
+    function saveSettings() {
+      try {
+        localStorage.setItem('tictactoe-settings', JSON.stringify({ aiEnabled, difficulty }));
+      } catch (e) {
+        console.warn('Failed to save settings:', e);
+      }
+    }
+
+    function cycleDifficulty() {
+      if (difficulty === 'easy') difficulty = 'medium';
+      else if (difficulty === 'medium') difficulty = 'hard';
+      else difficulty = 'easy';
     }
     
     function goHome() {
@@ -653,3 +832,5 @@
     }
   })();
 </script>
+
+

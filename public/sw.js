@@ -27,7 +27,7 @@ const htmlFiles = [
   '/src/screens/stl.html',
   '/src/screens/settings.html',
   '/src/screens/about.html',
-  '/src/screens/game.html',
+  '/src/screens/tictac.html',
   '/src/screens/memory.html',
   '/src/screens/pingpong.html',
   '/src/screens/snake.html'

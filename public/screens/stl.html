@@ -1,38 +1,61 @@
-<section id="screen-stl" class="screen">
-  <div class="panel">
-    <h2>3D Model Viewer</h2>
-    <div class="toolbar stl-models">
-      <span class="chip">Models:</span>
-      <button class="chip model-btn active" data-model="cad1.stl">CAD 1</button>
-      <button class="chip model-btn" data-model="cad2.stl">CAD 2</button>
-      <button class="chip model-btn" data-model="cad3.stl">CAD 3</button>
-    </div>
-    <div class="note">Click and drag to rotate. Scroll to zoom. Use controls below.</div>
-    <div class="stl-wrap">
-      <canvas id="stlCanvas"></canvas>
-      <div id="loadingIndicator" class="loading-indicator">Loading 3D model...</div>
-      <div class="stl-controls">
-        <button id="btnStlUp" class="chip big">▲</button>
-        <div class="row">
-          <button id="btnStlLeft" class="chip big">◀</button>
-          <button id="btnStlRight" class="chip big">▶</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Model Viewer</title>
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/stl.css">
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <h1 class="title">3D Model Viewer</h1>
+      <button id="btnHome" class="chip">Home</button>
+    </header>
+    
+    <main>
+      <section id="screen-stl" class="screen active">
+        <div class="container">
+          <div class="panel">
+            <div class="toolbar stl-models">
+              <span class="chip">Models:</span>
+              <button class="chip model-btn active" data-model="cad1.stl">CAD 1</button>
+              <button class="chip model-btn" data-model="cad2.stl">CAD 2</button>
+              <button class="chip model-btn" data-model="cad3.stl">CAD 3</button>
+            </div>
+            
+            <div class="note">Drag to rotate • Scroll to zoom</div>
+            
+            <div class="stl-wrap">
+              <canvas id="stlCanvas"></canvas>
+              <div id="loadingIndicator" class="loading-indicator">Loading 3D model...</div>
+              
+              <div class="stl-controls">
+                <div></div>
+                <button id="btnStlUp" class="chip big">▲</button>
+                <div></div>
+                <button id="btnStlZoomIn" class="chip big">＋</button>
+                <button id="btnStlAuto" class="chip big">Auto</button>
+                
+                <button id="btnStlLeft" class="chip big">◀</button>
+                <button id="btnStlReset" class="chip big">Reset</button>
+                <button id="btnStlRight" class="chip big">▶</button>
+                <button id="btnStlZoomOut" class="chip big">－</button>
+                <div></div>
+                
+                <div></div>
+                <button id="btnStlDown" class="chip big">▼</button>
+                <div></div>
+                <div></div>
+                <div></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <button id="btnStlDown" class="chip big">▼</button>
-        <div class="row">
-          <button id="btnStlZoomIn" class="chip big">＋</button>
-          <button id="btnStlZoomOut" class="chip big">－</button>
-        </div>
-        <div class="row">
-          <button id="btnStlAuto" class="chip big">Auto Rotate</button>
-          <button id="btnStlReset" class="chip big">Reset</button>
-        </div>
-        <div class="row">
-          <button id="btnHome" class="chip big">Home</button>
-        </div>
-      </div>
-    </div>
+      </section>
+    </main>
   </div>
-</section>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
@@ -56,7 +79,6 @@
     
     function setupThreeJS() {
       const canvas = document.getElementById('stlCanvas');
-      const container = canvas.parentElement;
       
       // Scene setup
       scene = new THREE.Scene();
@@ -163,7 +185,7 @@
         function(geometry) {
           // Create material with nice metallic look
           const material = new THREE.MeshPhongMaterial({
-            color: 0x88ccff,
+            color: 0x6bcbef,
             shininess: 100,
             specular: 0x222222
           });
@@ -287,3 +309,5 @@
     }
   })();
 </script>
+</body>
+</html>
