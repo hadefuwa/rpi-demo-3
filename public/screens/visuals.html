@@ -8,8 +8,39 @@
       <button class="chip visual-mode" data-mode="equalizer">Equalizer</button>
       <button class="chip visual-mode" data-mode="starfield">Starfield</button>
       <button class="chip visual-mode" data-mode="fireworks">Fireworks</button>
+      <button id="btnHome" class="chip">Home</button>
     </div>
     <canvas id="visualsCanvas"></canvas>
     <div class="note">Tap/drag to interact. Particles follow touch, ripples spawn on taps.</div>
   </div>
 </section>
+
+<script>
+  (function() {
+    'use strict';
+    
+    function initApp() {
+      console.log('Visuals app initialized');
+      setupEventListeners();
+    }
+    
+    function setupEventListeners() {
+      const homeButton = document.querySelector('#btnHome');
+      if (homeButton) {
+        homeButton.addEventListener('click', goHome);
+      }
+    }
+    
+    function goHome() {
+      // Direct navigation back to home
+      window.location.href = '../index.html';
+    }
+    
+    // Initialize app
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  })();
+</script>

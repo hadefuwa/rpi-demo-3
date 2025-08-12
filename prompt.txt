@@ -1,0 +1,5 @@
+**Remember**: Each mini app should be completely self-contained and not interfere with any other app in the showcase!
+
+can you ensure you stick to the architecture rules
+
+please do not run any server, this is for my pi not my pc. dont run tests, i will run the tests

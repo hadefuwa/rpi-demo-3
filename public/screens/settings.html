@@ -11,7 +11,81 @@
         <option value="light">Light</option>
       </select>
     </div>
-    <button id="btnSaveSettings" class="chip">Save Settings</button>
+    <div class="toolbar center">
+      <button id="btnSaveSettings" class="chip">Save Settings</button>
+      <button id="btnHome" class="chip">Home</button>
+    </div>
     <div id="settingsNote" class="note"></div>
   </div>
 </section>
+
+<style>
+  /* Settings screen toolbar styles */
+  #screen-settings .toolbar {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  #screen-settings .chip {
+    padding: 12px 24px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 25px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+  }
+  
+  #screen-settings .chip:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-2px);
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    #screen-settings .toolbar {
+      gap: 10px;
+    }
+    
+    #screen-settings .chip {
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    'use strict';
+    
+    function initApp() {
+      console.log('Settings app initialized');
+      setupEventListeners();
+    }
+    
+    function setupEventListeners() {
+      const homeButton = document.querySelector('#btnHome');
+      if (homeButton) {
+        homeButton.addEventListener('click', goHome);
+      }
+    }
+    
+    function goHome() {
+      // Direct navigation back to home
+      window.location.href = '../index.html';
+    }
+    
+    // Initialize app
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  })();
+</script>

@@ -5,6 +5,7 @@
       <button id="btnSnakeEasy" class="chip">Easy</button>
       <button id="btnSnakeHard" class="chip">Hard</button>
       <button id="btnSnakeStart" class="chip primary">Start Game</button>
+      <button id="btnHome" class="chip">Home</button>
     </div>
     <canvas id="snakeCanvas"></canvas>
     <div class="game-info">
@@ -167,6 +168,8 @@
           } else {
             startGame();
           }
+        } else if (e.target.id === 'btnHome') {
+          goHome();
         }
       });
       
@@ -406,6 +409,11 @@
         document.removeEventListener('keydown', handleKeyPress);
       }
     };
+    
+    function goHome() {
+      // Direct navigation back to home
+      window.location.href = '../index.html';
+    }
     
     // Initialize app
     if (document.readyState === 'loading') {

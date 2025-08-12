@@ -25,7 +25,40 @@
           <button id="btnStlAuto" class="chip big">Auto Rotate</button>
           <button id="btnStlReset" class="chip big">Reset</button>
         </div>
+        <div class="row">
+          <button id="btnHome" class="chip big">Home</button>
+        </div>
       </div>
     </div>
   </div>
 </section>
+
+<script>
+  (function() {
+    'use strict';
+    
+    function initApp() {
+      console.log('STL Viewer app initialized');
+      setupEventListeners();
+    }
+    
+    function setupEventListeners() {
+      const homeButton = document.querySelector('#btnHome');
+      if (homeButton) {
+        homeButton.addEventListener('click', goHome);
+      }
+    }
+    
+    function goHome() {
+      // Direct navigation back to home
+      window.location.href = '../index.html';
+    }
+    
+    // Initialize app
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  })();
+</script>
