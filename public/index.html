@@ -14,15 +14,6 @@
     <meta name="msapplication-TileColor" content="#000000" />
     <meta name="msapplication-config" content="none" />
     
-    <!-- Preload critical resources -->
-    <link rel="preload" href="./styles/base.css" as="style" />
-    <link rel="preload" href="./styles/home.css" as="style" />
-    <link rel="preload" href="./assets/Matrix.png" as="image" />
-    
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="./styles/base.css" />
-    <link rel="stylesheet" href="./styles/home.css" />
-    
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="./assets/Matrix.png" />
     <link rel="apple-touch-icon" sizes="152x152" href="./assets/Matrix.png" />
@@ -37,96 +28,399 @@
       </header>
 
       <main id="main-content">
-        <!-- Screen container with home screen loaded directly -->
+        <!-- Screen container for dynamic app loading -->
         <div id="screen-container">
-          <section id="screen-home" class="screen active">
-            <div class="grid">
-              <button type="button" class="card fancy theme-cyan" data-target="screen-touch">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">Touch Demo</span>
-              </button>
-              <button type="button" class="card fancy theme-purple" data-target="screen-info">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">System Info</span>
-              </button>
-              <button type="button" class="card fancy theme-gold" data-target="screen-games">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">Games Hub</span>
-              </button>
-              <button type="button" class="card fancy theme-white" data-target="screen-scroll">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">Scroll Test</span>
-              </button>
-              <button type="button" class="card fancy theme-lime" data-target="screen-visuals">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">Visuals</span>
-              </button>
-              <button type="button" class="card fancy theme-orange" data-target="screen-stl">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">3D Model</span>
-              </button>
-              <button type="button" class="card fancy theme-blue" data-target="screen-settings">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">Settings</span>
-              </button>
-              <button type="button" class="card fancy theme-silver" data-target="screen-about">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">About</span>
-              </button>
-            </div>
-          </section>
+          <!-- Home screen will be loaded here by default -->
         </div>
       </main>
     </div>
     
-    <script>
-      // Register service worker for PWA functionality
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js')
-            .then((registration) => {
-              console.log('Service Worker registered successfully:', registration);
-              
-              // Check for updates
-              registration.addEventListener('updatefound', () => {
-                const newWorker = registration.installing;
-                newWorker.addEventListener('statechange', () => {
-                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    // New content is available, refresh the page
-                    if (confirm('New version available! Reload to update?')) {
-                      window.location.reload();
-                    }
-                  }
-                });
-              });
-            })
-            .catch((registrationError) => {
-              console.log('Service Worker registration failed:', registrationError);
-            });
-        });
+    <!-- EMBEDDED CSS - No external CSS files -->
+    <style>
+      /* Base styles for the showcase container */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
       
-      // PWA Install prompt
-      let deferredPrompt;
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        console.log('PWA install prompt ready');
-      });
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #000;
+        color: #fff;
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+      }
       
-      // Handle PWA installation
-      window.addEventListener('appinstalled', () => {
-        console.log('PWA was installed');
-        deferredPrompt = null;
-      });
+      #app {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      /* Topbar styles */
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 1000;
+      }
+      
+      .logo {
+        height: 40px;
+        width: auto;
+      }
+      
+      .top-logo {
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+      }
+      
+      .chip {
+        padding: 8px 16px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+      }
+      
+      .chip:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-1px);
+      }
+      
+      /* Main content area */
+      #main-content {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+      }
+      
+      #screen-container {
+        height: 100%;
+        width: 100%;
+      }
+      
+      /* Screen base styles */
+      .screen {
+        display: none;
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      
+      .screen.active {
+        display: block;
+      }
+      
+      /* Home screen specific styles */
+      #screen-home {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      }
+      
+      #screen-home .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        max-width: 800px;
+        width: 100%;
+      }
+      
+      .card {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        padding: 30px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        min-height: 150px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .card:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+      
+      .card .label {
+        font-size: 18px;
+        font-weight: 600;
+        margin-top: 15px;
+        z-index: 2;
+        position: relative;
+      }
+      
+      .card .icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        margin-bottom: 15px;
+        z-index: 2;
+        position: relative;
+      }
+      
+      .card .border-animation {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 15px;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        animation: borderFlow 3s linear infinite;
+      }
+      
+      @keyframes borderFlow {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+      }
+      
+      /* Theme variations */
+      .theme-cyan { border-color: #00bcd4; }
+      .theme-purple { border-color: #9c27b0; }
+      .theme-gold { border-color: #ff9800; }
+      .theme-white { border-color: #ffffff; }
+      .theme-lime { border-color: #cddc39; }
+      .theme-orange { border-color: #ff5722; }
+      .theme-blue { border-color: #2196f3; }
+      .theme-silver { border-color: #9e9e9e; }
+      
+      /* Responsive design */
+      @media (max-width: 768px) {
+        #screen-home .grid {
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: 15px;
+        }
+        
+        .card {
+          padding: 20px 15px;
+          min-height: 120px;
+        }
+        
+        .card .label {
+          font-size: 16px;
+        }
+        
+        .card .icon {
+          width: 40px;
+          height: 40px;
+        }
+      }
+    </style>
+    
+    <!-- EMBEDDED JAVASCRIPT - No external JS files -->
+    <script>
+      (function() {
+        'use strict';
+        
+        // Showcase Framework
+        window.showcaseFramework = {
+          currentApp: null,
+          apps: {},
+          
+          // Load a mini app
+          loadApp: function(appId) {
+            console.log(`Loading app: ${appId}`);
+            
+            // Hide current app
+            if (this.currentApp) {
+              this.hideApp(this.currentApp);
+            }
+            
+            // Load new app
+            fetch(`./screens/${appId}.html`)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`Failed to load app: ${response.status}`);
+                }
+                return response.text();
+              })
+              .then(html => {
+                // Insert app HTML
+                document.getElementById('screen-container').innerHTML = html;
+                
+                // Activate app
+                this.currentApp = appId;
+                this.activateApp(appId);
+                
+                console.log(`App ${appId} loaded successfully`);
+              })
+              .catch(error => {
+                console.error('Failed to load app:', error);
+                // Fallback to home
+                this.goHome();
+              });
+          },
+          
+          // Hide an app
+          hideApp: function(appId) {
+            console.log(`Hiding app: ${appId}`);
+            if (window.appLifecycle && window.appLifecycle.deactivate) {
+              window.appLifecycle.deactivate();
+            }
+          },
+          
+          // Activate an app
+          activateApp: function(appId) {
+            console.log(`Activating app: ${appId}`);
+            if (window.appLifecycle && window.appLifecycle.activate) {
+              window.appLifecycle.activate();
+            }
+          },
+          
+          // Go home
+          goHome: function() {
+            console.log('Going home');
+            this.loadApp('home');
+          },
+          
+          // Navigate to specific app
+          navigateTo: function(appId) {
+            console.log(`Navigating to: ${appId}`);
+            this.loadApp(appId);
+          },
+          
+          // Performance monitoring
+          performance: {
+            measureAppLoad: function(appId) {
+              const start = performance.now();
+              return {
+                end: function() {
+                  const duration = performance.now() - start;
+                  console.log(`${appId} loaded in ${duration.toFixed(2)}ms`);
+                  return duration;
+                }
+              };
+            },
+            
+            monitorMemory: function() {
+              if (performance.memory) {
+                console.log('Memory usage:', {
+                  used: Math.round(performance.memory.usedJSHeapSize / 1048576) + 'MB',
+                  total: Math.round(performance.memory.totalJSHeapSize / 1048576) + 'MB',
+                  limit: Math.round(performance.memory.jsHeapSizeLimit / 1048576) + 'MB'
+                });
+              }
+            }
+          }
+        };
+        
+        // Initialize showcase
+        function initShowcase() {
+          console.log('Initializing showcase framework');
+          
+          // Load home screen by default
+          showcaseFramework.goHome();
+          
+          // Setup navigation event listeners
+          setupNavigation();
+          
+          // Setup service worker
+          setupServiceWorker();
+          
+          // Setup PWA install prompt
+          setupPWAInstall();
+        }
+        
+        // Setup navigation
+        function setupNavigation() {
+          // Handle home button
+          document.getElementById('btnHome').addEventListener('click', function() {
+            showcaseFramework.goHome();
+          });
+          
+          // Handle card clicks (delegated to screen container)
+          document.getElementById('screen-container').addEventListener('click', function(e) {
+            if (e.target.classList.contains('card')) {
+              const target = e.target.dataset.target;
+              if (target) {
+                const appId = target.replace('screen-', '');
+                showcaseFramework.navigateTo(appId);
+              }
+            }
+          });
+        }
+        
+        // Setup service worker
+        function setupServiceWorker() {
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+              navigator.serviceWorker.register('./sw.js')
+                .then((registration) => {
+                  console.log('Service Worker registered successfully:', registration);
+                  
+                  // Check for updates
+                  registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    newWorker.addEventListener('statechange', () => {
+                      if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // New content is available, refresh the page
+                        if (confirm('New version available! Reload to update?')) {
+                          window.location.reload();
+                        }
+                      }
+                    });
+                  });
+                })
+                .catch((registrationError) => {
+                  console.log('Service Worker registration failed:', registrationError);
+                });
+            });
+          }
+        }
+        
+        // Setup PWA install prompt
+        function setupPWAInstall() {
+          let deferredPrompt;
+          window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            console.log('PWA install prompt ready');
+          });
+          
+          // Handle PWA installation
+          window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            deferredPrompt = null;
+          });
+        }
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initShowcase);
+        } else {
+          initShowcase();
+        }
+      })();
     </script>
   </body>
 </html>

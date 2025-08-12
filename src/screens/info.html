@@ -1,87 +1,573 @@
 <section id="screen-info" class="screen">
-  <div class="panel dashboard-panel">
-    <h2>System Dashboard</h2>
+  <div class="panel">
+    <h2>System Info</h2>
+    <div class="info-description">
+      <p>Detailed information about your device and browser</p>
+    </div>
     
-    <!-- App Version -->
-    <div class="dashboard-header">
-      <div class="version-badge">App v<span id="versionInfo"></span></div>
+    <div class="info-grid">
+      <div class="info-section">
+        <h3>Device Information</h3>
+        <div class="info-item">
+          <span class="info-label">Platform:</span>
+          <span class="info-value" id="platform">Detecting...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">User Agent:</span>
+          <span class="info-value" id="userAgent">Detecting...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Language:</span>
+          <span class="info-value" id="language">Detecting...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Cookies Enabled:</span>
+          <span class="info-value" id="cookiesEnabled">Detecting...</span>
+        </div>
+      </div>
+      
+      <div class="info-section">
+        <h3>Screen & Display</h3>
+        <div class="info-item">
+          <span class="info-label">Screen Size:</span>
+          <span class="info-value" id="screenSize">Detecting...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Viewport:</span>
+          <span class="info-value" id="viewport">Detecting...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Pixel Ratio:</span>
+          <span class="info-value" id="pixelRatio">Detecting...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Color Depth:</span>
+          <span class="info-value" id="colorDepth">Detecting...</span>
+        </div>
+      </div>
+      
+      <div class="info-section">
+        <h3>Browser Capabilities</h3>
+        <div class="info-item">
+          <span class="info-label">Local Storage:</span>
+          <span class="info-value" id="localStorage">Detecting...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Session Storage:</span>
+          <span class="info-value" id="sessionStorage">Detecting...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Web Workers:</span>
+          <span class="info-value" id="webWorkers">Detecting...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Service Workers:</span>
+          <span class="info-value" id="serviceWorkers">Detecting...</span>
+        </div>
+      </div>
+      
+      <div class="info-section">
+        <h3>Performance</h3>
+        <div class="info-item">
+          <span class="info-label">Connection:</span>
+          <span class="info-value" id="connection">Detecting...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Memory:</span>
+          <span class="info-value" id="memory">Detecting...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Battery:</span>
+          <span class="info-value" id="battery">Detecting...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Hardware Concurrency:</span>
+          <span class="info-value" id="hardwareConcurrency">Detecting...</span>
+        </div>
+      </div>
     </div>
-
-    <!-- Real-time Stats Grid -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-header">CPU Usage</div>
-        <div class="stat-value" id="cpuValue">--</div>
-        <div class="stat-bar">
-          <div id="cpuBar" class="stat-fill"></div>
+    
+    <div class="real-time-info">
+      <h3>Real-time Updates</h3>
+      <div class="real-time-grid">
+        <div class="real-time-item">
+          <span class="real-time-label">Current Time:</span>
+          <span class="real-time-value" id="currentTime">--:--:--</span>
         </div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-header">Memory</div>
-        <div class="stat-value" id="memValue">--</div>
-        <div class="stat-bar">
-          <div id="memBar" class="stat-fill"></div>
+        <div class="real-time-item">
+          <span class="real-time-label">Page Load Time:</span>
+          <span class="real-time-value" id="pageLoadTime">--</span>
         </div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-header">Temperature</div>
-        <div class="stat-value" id="tempValue">--</div>
-        <div class="stat-bar">
-          <div id="tempBar" class="stat-fill"></div>
+        <div class="real-time-item">
+          <span class="real-time-label">Memory Usage:</span>
+          <span class="real-time-value" id="memoryUsage">--</span>
         </div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-header">Uptime</div>
-        <div class="stat-value" id="uptimeValue">--</div>
-        <div class="stat-subtitle">System running time</div>
+        <div class="real-time-item">
+          <span class="real-time-label">FPS:</span>
+          <span class="real-time-value" id="fps">--</span>
+        </div>
       </div>
     </div>
-
-    <!-- Charts Section -->
-    <div class="charts-section">
-      <div class="chart-container">
-        <h3>System Performance</h3>
-        <canvas id="performanceChart"></canvas>
-      </div>
-      
-      <div class="chart-container">
-        <h3>Memory Usage</h3>
-        <canvas id="memoryChart"></canvas>
-      </div>
-    </div>
-
-    <!-- Network & Disk Info -->
-    <div class="system-details">
-      <div class="detail-section">
-        <h3>Network Status</h3>
-        <div class="detail-grid">
-          <div class="detail-item">
-            <span class="detail-label">WiFi:</span>
-            <span class="detail-value" id="wifiStatus">Checking...</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">IP:</span>
-            <span class="detail-value" id="ipAddress">--</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="detail-section">
-        <h3>Storage</h3>
-        <div class="detail-grid">
-          <div class="detail-item">
-            <span class="detail-label">Root:</span>
-            <span class="detail-value" id="rootStorage">--</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Home:</span>
-            <span class="detail-value" id="homeStorage">--</span>
-          </div>
-        </div>
-      </div>
+    
+    <div class="toolbar center">
+      <button id="btnInfoRefresh" class="chip">Refresh Info</button>
+      <button id="btnHome" class="chip">Home</button>
     </div>
   </div>
 </section>
+
+<style>
+  /* Info App Specific Styles - All scoped to #screen-info */
+  #screen-info {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-family: 'Arial', sans-serif;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  #screen-info .panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  #screen-info h2 {
+    font-size: 2.5em;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    text-align: center;
+  }
+  
+  #screen-info .info-description {
+    text-align: center;
+    background: rgba(255,255,255,0.1);
+    padding: 15px 25px;
+    border-radius: 25px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  
+  #screen-info .info-description p {
+    margin: 0;
+    font-size: 16px;
+    opacity: 0.9;
+  }
+  
+  #screen-info .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+  }
+  
+  #screen-info .info-section {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 15px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+  }
+  
+  #screen-info .info-section h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.3em;
+    color: #ffeb3b;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 10px;
+  }
+  
+  #screen-info .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  #screen-info .info-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+  
+  #screen-info .info-label {
+    font-weight: bold;
+    opacity: 0.9;
+  }
+  
+  #screen-info .info-value {
+    background: rgba(255,255,255,0.1);
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  #screen-info .real-time-info {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 15px;
+    padding: 20px;
+    width: 100%;
+    max-width: 800px;
+    backdrop-filter: blur(10px);
+  }
+  
+  #screen-info .real-time-info h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.3em;
+    color: #4CAF50;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 10px;
+  }
+  
+  #screen-info .real-time-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+  
+  #screen-info .real-time-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  #screen-info .real-time-label {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-bottom: 8px;
+  }
+  
+  #screen-info .real-time-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #4CAF50;
+    font-family: 'Courier New', monospace;
+  }
+  
+  #screen-info .toolbar {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  #screen-info .chip {
+    padding: 12px 24px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 25px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+  }
+  
+  #screen-info .chip:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-2px);
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    #screen-info .info-grid {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+    
+    #screen-info h2 {
+      font-size: 2em;
+    }
+    
+    #screen-info .info-section {
+      padding: 15px;
+    }
+    
+    #screen-info .info-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+    }
+    
+    #screen-info .info-value {
+      max-width: 100%;
+      text-align: center;
+    }
+    
+    #screen-info .real-time-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    
+    #screen-info .toolbar {
+      gap: 10px;
+    }
+    
+    #screen-info .chip {
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    'use strict';
+    
+    // App state
+    let updateTimer = null;
+    let fpsCounter = 0;
+    let lastFpsTime = 0;
+    let pageLoadStart = performance.now();
+    
+    // DOM elements
+    let elements = {};
+    
+    function initApp() {
+      console.log('System Info app initialized');
+      setupDOM();
+      setupEventListeners();
+      collectSystemInfo();
+      startRealTimeUpdates();
+    }
+    
+    function setupDOM() {
+      // Device Information
+      elements.platform = document.querySelector('#platform');
+      elements.userAgent = document.querySelector('#userAgent');
+      elements.language = document.querySelector('#language');
+      elements.cookiesEnabled = document.querySelector('#cookiesEnabled');
+      
+      // Screen & Display
+      elements.screenSize = document.querySelector('#screenSize');
+      elements.viewport = document.querySelector('#viewport');
+      elements.pixelRatio = document.querySelector('#pixelRatio');
+      elements.colorDepth = document.querySelector('#colorDepth');
+      
+      // Browser Capabilities
+      elements.localStorage = document.querySelector('#localStorage');
+      elements.sessionStorage = document.querySelector('#sessionStorage');
+      elements.webWorkers = document.querySelector('#webWorkers');
+      elements.serviceWorkers = document.querySelector('#serviceWorkers');
+      
+      // Performance
+      elements.connection = document.querySelector('#connection');
+      elements.memory = document.querySelector('#memory');
+      elements.battery = document.querySelector('#battery');
+      elements.hardwareConcurrency = document.querySelector('#hardwareConcurrency');
+      
+      // Real-time
+      elements.currentTime = document.querySelector('#currentTime');
+      elements.pageLoadTime = document.querySelector('#pageLoadTime');
+      elements.memoryUsage = document.querySelector('#memoryUsage');
+      elements.fps = document.querySelector('#fps');
+    }
+    
+    function setupEventListeners() {
+      const container = document.querySelector('#screen-info');
+      
+      container.addEventListener('click', function(e) {
+        if (e.target.id === 'btnInfoRefresh') {
+          collectSystemInfo();
+        } else if (e.target.id === 'btnHome') {
+          goHome();
+        }
+      });
+    }
+    
+    function collectSystemInfo() {
+      // Device Information
+      elements.platform.textContent = navigator.platform || 'Unknown';
+      elements.userAgent.textContent = navigator.userAgent.substring(0, 50) + '...';
+      elements.language.textContent = navigator.language || 'Unknown';
+      elements.cookiesEnabled.textContent = navigator.cookieEnabled ? 'Yes' : 'No';
+      
+      // Screen & Display
+      elements.screenSize.textContent = `${screen.width} × ${screen.height}`;
+      elements.viewport.textContent = `${window.innerWidth} × ${window.innerHeight}`;
+      elements.pixelRatio.textContent = window.devicePixelRatio || '1';
+      elements.colorDepth.textContent = `${screen.colorDepth} bit`;
+      
+      // Browser Capabilities
+      elements.localStorage.textContent = testLocalStorage() ? 'Yes' : 'No';
+      elements.sessionStorage.textContent = testSessionStorage() ? 'Yes' : 'No';
+      elements.webWorkers.textContent = typeof Worker !== 'undefined' ? 'Yes' : 'No';
+      elements.serviceWorkers.textContent = 'serviceWorker' in navigator ? 'Yes' : 'No';
+      
+      // Performance
+      elements.connection.textContent = getConnectionInfo();
+      elements.memory.textContent = getMemoryInfo();
+      elements.battery.textContent = 'Checking...';
+      elements.hardwareConcurrency.textContent = navigator.hardwareConcurrency || 'Unknown';
+      
+      // Check battery if available
+      checkBattery();
+      
+      // Check connection if available
+      checkConnection();
+    }
+    
+    function testLocalStorage() {
+      try {
+        const test = 'test';
+        localStorage.setItem(test, test);
+        localStorage.removeItem(test);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+    
+    function testSessionStorage() {
+      try {
+        const test = 'test';
+        sessionStorage.setItem(test, test);
+        sessionStorage.removeItem(test);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+    
+    function getConnectionInfo() {
+      if ('connection' in navigator) {
+        const conn = navigator.connection;
+        return `${conn.effectiveType || 'Unknown'} (${conn.downlink || 'Unknown'} Mbps)`;
+      }
+      return 'Not available';
+    }
+    
+    function getMemoryInfo() {
+      if ('memory' in performance) {
+        const mem = performance.memory;
+        const used = Math.round(mem.usedJSHeapSize / 1048576);
+        const total = Math.round(mem.totalJSHeapSize / 1048576);
+        return `${used}MB / ${total}MB`;
+      }
+      return 'Not available';
+    }
+    
+    function checkBattery() {
+      if ('getBattery' in navigator) {
+        navigator.getBattery().then(battery => {
+          const level = Math.round(battery.level * 100);
+          const charging = battery.charging ? ' (Charging)' : '';
+          elements.battery.textContent = `${level}%${charging}`;
+        }).catch(() => {
+          elements.battery.textContent = 'Not available';
+        });
+      } else {
+        elements.battery.textContent = 'Not available';
+      }
+    }
+    
+    function checkConnection() {
+      if ('connection' in navigator) {
+        navigator.connection.addEventListener('change', () => {
+          elements.connection.textContent = getConnectionInfo();
+        });
+      }
+    }
+    
+    function startRealTimeUpdates() {
+      updateTimer = setInterval(updateRealTimeInfo, 1000);
+      
+      // FPS counter
+      let lastTime = performance.now();
+      function countFPS() {
+        const currentTime = performance.now();
+        fpsCounter++;
+        
+        if (currentTime - lastTime >= 1000) {
+          const fps = Math.round((fpsCounter * 1000) / (currentTime - lastTime));
+          elements.fps.textContent = `${fps} FPS`;
+          fpsCounter = 0;
+          lastTime = currentTime;
+        }
+        
+        requestAnimationFrame(countFPS);
+      }
+      countFPS();
+    }
+    
+    function updateRealTimeInfo() {
+      // Current time
+      const now = new Date();
+      elements.currentTime.textContent = now.toLocaleTimeString();
+      
+      // Page load time
+      const loadTime = Math.round(performance.now() - pageLoadStart);
+      elements.pageLoadTime.textContent = `${loadTime}ms`;
+      
+      // Memory usage
+      if ('memory' in performance) {
+        const mem = performance.memory;
+        const used = Math.round(mem.usedJSHeapSize / 1048576);
+        elements.memoryUsage.textContent = `${used}MB`;
+      }
+    }
+    
+    function goHome() {
+      if (window.showcaseFramework && window.showcaseFramework.goHome) {
+        window.showcaseFramework.goHome();
+      }
+    }
+    
+    // Lifecycle management
+    window.appLifecycle = {
+      activate: function() {
+        console.log('System Info app activated');
+        // Resume real-time updates
+        if (!updateTimer) {
+          startRealTimeUpdates();
+        }
+      },
+      
+      deactivate: function() {
+        console.log('System Info app deactivated');
+        // Pause real-time updates when switching away
+        if (updateTimer) {
+          clearInterval(updateTimer);
+          updateTimer = null;
+        }
+      },
+      
+      cleanup: function() {
+        console.log('System Info app cleanup');
+        // Stop real-time updates
+        if (updateTimer) {
+          clearInterval(updateTimer);
+          updateTimer = null;
+        }
+      }
+    };
+    
+    // Initialize app
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  })();
+</script>

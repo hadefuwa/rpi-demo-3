@@ -5,6 +5,7 @@
       <button id="btnPingPongStart" class="chip primary">Start Game</button>
       <button id="btnPingPongPause" class="chip">Pause</button>
       <button id="btnPingPongReset" class="chip">Reset</button>
+      <button id="btnHome" class="chip">Home</button>
     </div>
     <div class="ping-pong-container">
       <canvas id="pingPongCanvas"></canvas>
@@ -25,3 +26,524 @@
     </div>
   </div>
 </section>
+
+<style>
+  /* Ping Pong App Specific Styles - All scoped to #screen-pingpong */
+  #screen-pingpong {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    font-family: 'Arial', sans-serif;
+    padding: 20px;
+  }
+  
+  #screen-pingpong .panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  #screen-pingpong h2 {
+    font-size: 2.5em;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    text-align: center;
+  }
+  
+  #screen-pingpong .game-controls {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 20px 0;
+  }
+  
+  #screen-pingpong .chip {
+    padding: 12px 24px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 25px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+  }
+  
+  #screen-pingpong .chip:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-2px);
+  }
+  
+  #screen-pingpong .chip.primary {
+    background: #4CAF50;
+    border-color: #4CAF50;
+  }
+  
+  #screen-pingpong .chip.primary:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+  }
+  
+  #screen-pingpong .ping-pong-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  #screen-pingpong #pingPongCanvas {
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 10px;
+    background: #000;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+  
+  #screen-pingpong .ping-pong-score {
+    display: flex;
+    gap: 40px;
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  
+  #screen-pingpong .player-score,
+  #screen-pingpong .ai-score {
+    text-align: center;
+  }
+  
+  #screen-pingpong .score-label {
+    display: block;
+    font-size: 16px;
+    opacity: 0.8;
+    margin-bottom: 8px;
+  }
+  
+  #screen-pingpong .score-value {
+    display: block;
+    font-size: 32px;
+    font-weight: bold;
+    color: #4CAF50;
+  }
+  
+  #screen-pingpong .game-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+    font-size: 16px;
+    opacity: 0.9;
+  }
+  
+  #screen-pingpong .game-info span {
+    background: rgba(255,255,255,0.1);
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    #screen-pingpong h2 {
+      font-size: 2em;
+    }
+    
+    #screen-pingpong .game-controls {
+      gap: 10px;
+    }
+    
+    #screen-pingpong .chip {
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+    
+    #screen-pingpong .ping-pong-score {
+      gap: 20px;
+      padding: 15px;
+    }
+    
+    #screen-pingpong .score-value {
+      font-size: 24px;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    'use strict';
+    
+    // Game state
+    let canvas, ctx;
+    let gameLoop = null;
+    let isGameRunning = false;
+    let isPaused = false;
+    
+    // Game objects
+    let ball = { x: 0, y: 0, vx: 0, vy: 0, radius: 8 };
+    let playerPaddle = { x: 0, y: 0, width: 10, height: 80, speed: 0 };
+    let aiPaddle = { x: 0, y: 0, width: 10, height: 80, speed: 0 };
+    
+    // Game settings
+    const canvasWidth = 800;
+    const canvasHeight = 400;
+    const paddleSpeed = 5;
+    const ballSpeed = 4;
+    
+    // Scores
+    let playerScore = 0;
+    let aiScore = 0;
+    
+    // Keys state
+    let keys = {};
+    
+    function initApp() {
+      console.log('Ping Pong game initialized');
+      setupCanvas();
+      setupEventListeners();
+      loadScores();
+      resetGame();
+      render();
+    }
+    
+    function setupCanvas() {
+      canvas = document.querySelector('#pingPongCanvas');
+      ctx = canvas.getContext('2d');
+      
+      // Set canvas size
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+    }
+    
+    function setupEventListeners() {
+      const container = document.querySelector('#screen-pingpong');
+      
+      // Game control buttons
+      container.addEventListener('click', function(e) {
+        if (e.target.id === 'btnPingPongStart') {
+          if (isGameRunning) {
+            stopGame();
+          } else {
+            startGame();
+          }
+        } else if (e.target.id === 'btnPingPongPause') {
+          togglePause();
+        } else if (e.target.id === 'btnPingPongReset') {
+          resetGame();
+        } else if (e.target.id === 'btnHome') {
+          goHome();
+        }
+      });
+      
+      // Keyboard controls
+      document.addEventListener('keydown', function(e) {
+        keys[e.key.toLowerCase()] = true;
+      });
+      
+      document.addEventListener('keyup', function(e) {
+        keys[e.key.toLowerCase()] = false;
+      });
+      
+      // Touch controls for mobile
+      let touchStartY = 0;
+      canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        touchStartY = touch.clientY;
+      });
+      
+      canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const deltaY = touch.clientY - touchStartY;
+        
+        if (deltaY > 10) {
+          keys['s'] = true;
+          keys['w'] = false;
+        } else if (deltaY < -10) {
+          keys['w'] = true;
+          keys['s'] = false;
+        }
+      });
+      
+      canvas.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        keys['w'] = false;
+        keys['s'] = false;
+      });
+    }
+    
+    function startGame() {
+      if (isGameRunning) return;
+      
+      isGameRunning = true;
+      isPaused = false;
+      document.querySelector('#btnPingPongStart').textContent = 'Stop Game';
+      document.querySelector('#btnPingPongStart').classList.add('primary');
+      document.querySelector('#btnPingPongPause').textContent = 'Pause';
+      
+      gameLoop = setInterval(updateGame, 1000 / 60); // 60 FPS
+    }
+    
+    function stopGame() {
+      if (!isGameRunning) return;
+      
+      isGameRunning = false;
+      isPaused = false;
+      document.querySelector('#btnPingPongStart').textContent = 'Start Game';
+      document.querySelector('#btnPingPongStart').classList.remove('primary');
+      document.querySelector('#btnPingPongPause').textContent = 'Pause';
+      
+      if (gameLoop) {
+        clearInterval(gameLoop);
+        gameLoop = null;
+      }
+    }
+    
+    function togglePause() {
+      if (!isGameRunning) return;
+      
+      isPaused = !isPaused;
+      document.querySelector('#btnPingPongPause').textContent = isPaused ? 'Resume' : 'Pause';
+      
+      if (isPaused) {
+        if (gameLoop) {
+          clearInterval(gameLoop);
+          gameLoop = null;
+        }
+      } else {
+        gameLoop = setInterval(updateGame, 1000 / 60);
+      }
+    }
+    
+    function resetGame() {
+      // Reset ball
+      ball.x = canvasWidth / 2;
+      ball.y = canvasHeight / 2;
+      ball.vx = (Math.random() > 0.5 ? 1 : -1) * ballSpeed;
+      ball.vy = (Math.random() - 0.5) * ballSpeed;
+      
+      // Reset paddles
+      playerPaddle.x = 50;
+      playerPaddle.y = canvasHeight / 2 - playerPaddle.height / 2;
+      aiPaddle.x = canvasWidth - 50 - aiPaddle.width;
+      aiPaddle.y = canvasHeight / 2 - aiPaddle.height / 2;
+      
+      // Reset scores
+      playerScore = 0;
+      aiScore = 0;
+      updateScores();
+      
+      // Stop game if running
+      if (isGameRunning) {
+        stopGame();
+      }
+    }
+    
+    function updateGame() {
+      if (isPaused) return;
+      
+      // Update player paddle
+      if (keys['w'] || keys['arrowup']) {
+        playerPaddle.y = Math.max(0, playerPaddle.y - paddleSpeed);
+      }
+      if (keys['s'] || keys['arrowdown']) {
+        playerPaddle.y = Math.min(canvasHeight - playerPaddle.height, playerPaddle.y + paddleSpeed);
+      }
+      
+      // Update AI paddle (simple AI)
+      const aiCenter = aiPaddle.y + aiPaddle.height / 2;
+      const ballCenter = ball.y;
+      
+      if (aiCenter < ballCenter - 10) {
+        aiPaddle.y = Math.min(canvasHeight - aiPaddle.height, aiPaddle.y + paddleSpeed * 0.8);
+      } else if (aiCenter > ballCenter + 10) {
+        aiPaddle.y = Math.max(0, aiPaddle.y - paddleSpeed * 0.8);
+      }
+      
+      // Update ball
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+      
+      // Ball collision with top and bottom
+      if (ball.y <= ball.radius || ball.y >= canvasHeight - ball.radius) {
+        ball.vy = -ball.vy;
+      }
+      
+      // Ball collision with paddles
+      if (ball.x <= playerPaddle.x + playerPaddle.width + ball.radius &&
+          ball.y >= playerPaddle.y && ball.y <= playerPaddle.y + playerPaddle.height &&
+          ball.vx < 0) {
+        ball.vx = -ball.vx;
+        ball.x = playerPaddle.x + playerPaddle.width + ball.radius;
+        // Add some randomness to ball direction
+        ball.vy += (Math.random() - 0.5) * 2;
+      }
+      
+      if (ball.x >= aiPaddle.x - ball.radius &&
+          ball.y >= aiPaddle.y && ball.y <= aiPaddle.y + aiPaddle.height &&
+          ball.vx > 0) {
+        ball.vx = -ball.vx;
+        ball.x = aiPaddle.x - ball.radius;
+        // Add some randomness to ball direction
+        ball.vy += (Math.random() - 0.5) * 2;
+      }
+      
+      // Ball out of bounds
+      if (ball.x < 0) {
+        aiScore++;
+        updateScores();
+        saveScores();
+        if (aiScore >= 11) {
+          endGame('ai');
+        } else {
+          resetBall();
+        }
+      } else if (ball.x > canvasWidth) {
+        playerScore++;
+        updateScores();
+        saveScores();
+        if (playerScore >= 11) {
+          endGame('player');
+        } else {
+          resetBall();
+        }
+      }
+      
+      render();
+    }
+    
+    function resetBall() {
+      ball.x = canvasWidth / 2;
+      ball.y = canvasHeight / 2;
+      ball.vx = (Math.random() > 0.5 ? 1 : -1) * ballSpeed;
+      ball.vy = (Math.random() - 0.5) * ballSpeed;
+    }
+    
+    function endGame(winner) {
+      stopGame();
+      
+      if (winner === 'player') {
+        alert('Congratulations! You won!');
+      } else {
+        alert('Game Over! AI wins!');
+      }
+      
+      resetGame();
+    }
+    
+    function render() {
+      // Clear canvas
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      
+      // Draw center line
+      ctx.strokeStyle = '#fff';
+      ctx.setLineDash([5, 15]);
+      ctx.beginPath();
+      ctx.moveTo(canvasWidth / 2, 0);
+      ctx.lineTo(canvasWidth / 2, canvasHeight);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+      // Draw ball
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Draw player paddle
+      ctx.fillStyle = '#4CAF50';
+      ctx.fillRect(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height);
+      
+      // Draw AI paddle
+      ctx.fillStyle = '#f44336';
+      ctx.fillRect(aiPaddle.x, aiPaddle.y, aiPaddle.width, aiPaddle.height);
+      
+      // Draw scores
+      ctx.fillStyle = '#fff';
+      ctx.font = '24px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(playerScore.toString(), canvasWidth / 4, 50);
+      ctx.fillText(aiScore.toString(), 3 * canvasWidth / 4, 50);
+    }
+    
+    function updateScores() {
+      document.querySelector('#playerScore').textContent = playerScore;
+      document.querySelector('#aiScore').textContent = aiScore;
+    }
+    
+    function loadScores() {
+      try {
+        const saved = localStorage.getItem('pingpong-scores');
+        if (saved) {
+          const scores = JSON.parse(saved);
+          playerScore = scores.player || 0;
+          aiScore = scores.ai || 0;
+          updateScores();
+        }
+      } catch (e) {
+        console.warn('Failed to load scores:', e);
+      }
+    }
+    
+    function saveScores() {
+      try {
+        localStorage.setItem('pingpong-scores', JSON.stringify({
+          player: playerScore,
+          ai: aiScore
+        }));
+      } catch (e) {
+        console.warn('Failed to save scores:', e);
+      }
+    }
+    
+    function goHome() {
+      if (window.showcaseFramework && window.showcaseFramework.goHome) {
+        window.showcaseFramework.goHome();
+      }
+    }
+    
+    // Lifecycle management
+    window.appLifecycle = {
+      activate: function() {
+        console.log('Ping Pong game activated');
+        // Resume game if it was running
+        if (isGameRunning && !isPaused) {
+          gameLoop = setInterval(updateGame, 1000 / 60);
+        }
+      },
+      
+      deactivate: function() {
+        console.log('Ping Pong game deactivated');
+        // Pause game when switching away
+        if (isGameRunning && !isPaused) {
+          if (gameLoop) {
+            clearInterval(gameLoop);
+            gameLoop = null;
+          }
+        }
+      },
+      
+      cleanup: function() {
+        console.log('Ping Pong game cleanup');
+        stopGame();
+        // Remove event listeners
+        document.removeEventListener('keydown', function(){});
+        document.removeEventListener('keyup', function(){});
+      }
+    };
+    
+    // Initialize app
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  })();
+</script>

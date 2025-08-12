@@ -42,3 +42,148 @@
     </button>
   </div>
 </section>
+
+<style>
+  /* Home screen specific styles - scoped to #screen-home */
+  #screen-home {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    height: 100%;
+    width: 100%;
+  }
+  
+  #screen-home .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    max-width: 800px;
+    width: 100%;
+  }
+  
+  #screen-home .card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  #screen-home .card:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+  
+  #screen-home .card .label {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 15px;
+    z-index: 2;
+    position: relative;
+  }
+  
+  #screen-home .card .icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    margin-bottom: 15px;
+    z-index: 2;
+    position: relative;
+  }
+  
+  #screen-home .card .border-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 15px;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: borderFlow 3s linear infinite;
+  }
+  
+  @keyframes borderFlow {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  
+  /* Theme variations */
+  #screen-home .theme-cyan { border-color: #00bcd4; }
+  #screen-home .theme-purple { border-color: #9c27b0; }
+  #screen-home .theme-gold { border-color: #ff9800; }
+  #screen-home .theme-white { border-color: #ffffff; }
+  #screen-home .theme-lime { border-color: #cddc39; }
+  #screen-home .theme-orange { border-color: #ff5722; }
+  #screen-home .theme-blue { border-color: #2196f3; }
+  #screen-home .theme-silver { border-color: #9e9e9e; }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    #screen-home .grid {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+    }
+    
+    #screen-home .card {
+      padding: 20px 15px;
+      min-height: 120px;
+    }
+    
+    #screen-home .card .label {
+      font-size: 16px;
+    }
+    
+    #screen-home .card .icon {
+      width: 40px;
+      height: 40px;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    'use strict';
+    
+    function initHome() {
+      console.log('Home screen initialized');
+      // Home screen doesn't need complex lifecycle management
+      // It's just a navigation hub
+    }
+    
+    // Lifecycle management for home screen
+    window.appLifecycle = {
+      activate: function() {
+        console.log('Home screen activated');
+        initHome();
+      },
+      
+      deactivate: function() {
+        console.log('Home screen deactivated');
+        // No cleanup needed for home screen
+      },
+      
+      cleanup: function() {
+        console.log('Home screen cleanup');
+        // No cleanup needed for home screen
+      }
+    };
+    
+    // Initialize home screen
+    initHome();
+  })();
+</script>

@@ -1,7 +1,466 @@
 <section id="screen-game" class="screen">
+  <div class="game-header">
+    <h2>Tic-Tac-Toe</h2>
+    <p>Play against the computer or a friend!</p>
+  </div>
+  
   <div id="board" class="board"></div>
+  
   <div class="toolbar center">
     <div id="status" class="chip">Your move</div>
     <button id="btnReset" class="chip">Reset</button>
+    <button id="btnHome" class="chip">Home</button>
+  </div>
+  
+  <div class="game-info">
+    <div class="score-board">
+      <div class="score-item">
+        <span class="player-label">You</span>
+        <span class="score-value" id="playerScore">0</span>
+      </div>
+      <div class="score-item">
+        <span class="player-label">Computer</span>
+        <span class="score-value" id="computerScore">0</span>
+      </div>
+    </div>
   </div>
 </section>
+
+<style>
+  /* Game App Specific Styles - All scoped to #screen-game */
+  #screen-game {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    color: white;
+    font-family: 'Arial', sans-serif;
+    padding: 20px;
+    align-items: center;
+  }
+  
+  #screen-game .game-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  #screen-game h2 {
+    font-size: 2.5em;
+    margin: 0 0 10px 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  }
+  
+  #screen-game p {
+    font-size: 16px;
+    margin: 0;
+    opacity: 0.9;
+  }
+  
+  #screen-game .board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    width: 300px;
+    height: 300px;
+    margin: 20px 0;
+    background: rgba(255,255,255,0.1);
+    padding: 10px;
+    border-radius: 15px;
+    border: 2px solid rgba(255,255,255,0.2);
+  }
+  
+  #screen-game .cell {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  #screen-game .cell:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+    transform: scale(1.05);
+  }
+  
+  #screen-game .cell.x {
+    color: #e74c3c;
+    text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+  }
+  
+  #screen-game .cell.o {
+    color: #3498db;
+    text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+  }
+  
+  #screen-game .cell.winning {
+    background: rgba(46, 204, 113, 0.3);
+    border-color: #2ecc71;
+    animation: gameWinnerPulse 1s ease-in-out infinite alternate;
+  }
+  
+  @keyframes gameWinnerPulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.1); }
+  }
+  
+  #screen-game .toolbar {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  #screen-game .chip {
+    padding: 12px 24px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 25px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+  }
+  
+  #screen-game .chip:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-2px);
+  }
+  
+  #screen-game .game-info {
+    margin-top: 20px;
+  }
+  
+  #screen-game .score-board {
+    display: flex;
+    gap: 30px;
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  
+  #screen-game .score-item {
+    text-align: center;
+  }
+  
+  #screen-game .player-label {
+    display: block;
+    font-size: 14px;
+    opacity: 0.8;
+    margin-bottom: 5px;
+  }
+  
+  #screen-game .score-value {
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    #screen-game .board {
+      width: 250px;
+      height: 250px;
+    }
+    
+    #screen-game .cell {
+      font-size: 2.5em;
+    }
+    
+    #screen-game h2 {
+      font-size: 2em;
+    }
+    
+    #screen-game .toolbar {
+      gap: 10px;
+    }
+    
+    #screen-game .chip {
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    'use strict';
+    
+    // Game state
+    let board = ['', '', '', '', '', '', '', '', ''];
+    let currentPlayer = 'x';
+    let gameActive = true;
+    let playerScore = 0;
+    let computerScore = 0;
+    
+    // DOM elements
+    let boardElement;
+    let statusElement;
+    let playerScoreElement;
+    let computerScoreElement;
+    
+    function initApp() {
+      console.log('Tic-Tac-Toe game initialized');
+      setupDOM();
+      setupEventListeners();
+      loadScores();
+      renderBoard();
+      updateStatus();
+    }
+    
+    function setupDOM() {
+      boardElement = document.querySelector('#board');
+      statusElement = document.querySelector('#status');
+      playerScoreElement = document.querySelector('#playerScore');
+      computerScoreElement = document.querySelector('#computerScore');
+    }
+    
+    function setupEventListeners() {
+      const container = document.querySelector('#screen-game');
+      
+      // Handle board clicks
+      container.addEventListener('click', function(e) {
+        if (e.target.classList.contains('cell')) {
+          handleCellClick(e.target);
+        } else if (e.target.id === 'btnReset') {
+          resetGame();
+        } else if (e.target.id === 'btnHome') {
+          goHome();
+        }
+      });
+      
+      // Touch events for mobile
+      container.addEventListener('touchstart', function(e) {
+        if (e.target.classList.contains('cell')) {
+          e.preventDefault();
+          handleCellClick(e.target);
+        }
+      });
+    }
+    
+    function handleCellClick(cell) {
+      const index = parseInt(cell.dataset.index);
+      
+      if (board[index] !== '' || !gameActive) {
+        return;
+      }
+      
+      // Player move
+      makeMove(index, 'x');
+      
+      if (checkWinner(board, 'x')) {
+        endGame('x');
+        return;
+      }
+      
+      if (checkDraw()) {
+        endGame('draw');
+        return;
+      }
+      
+      // Computer move
+      setTimeout(() => {
+        if (gameActive) {
+          const computerMove = getComputerMove();
+          makeMove(computerMove, 'o');
+          
+          if (checkWinner(board, 'o')) {
+            endGame('o');
+            return;
+          }
+          
+          if (checkDraw()) {
+            endGame('draw');
+            return;
+          }
+          
+          currentPlayer = 'x';
+          updateStatus();
+        }
+      }, 500);
+    }
+    
+    function makeMove(index, player) {
+      board[index] = player;
+      renderBoard();
+      currentPlayer = player === 'x' ? 'o' : 'x';
+      updateStatus();
+    }
+    
+    function getComputerMove() {
+      // Simple AI: find first empty cell
+      const emptyCells = board.map((cell, index) => cell === '' ? index : -1).filter(index => index !== -1);
+      return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    }
+    
+    function checkWinner(board, player) {
+      const winConditions = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+        [0, 4, 8], [2, 4, 6] // Diagonals
+      ];
+      
+      return winConditions.some(condition => {
+        const [a, b, c] = condition;
+        return board[a] === player && board[b] === player && board[c] === player;
+      });
+    }
+    
+    function checkDraw() {
+      return board.every(cell => cell !== '');
+    }
+    
+    function endGame(winner) {
+      gameActive = false;
+      
+      if (winner === 'x') {
+        playerScore++;
+        statusElement.textContent = 'You win!';
+        highlightWinningCells('x');
+      } else if (winner === 'o') {
+        computerScore++;
+        statusElement.textContent = 'Computer wins!';
+        highlightWinningCells('o');
+      } else {
+        statusElement.textContent = "It's a draw!";
+      }
+      
+      updateScores();
+      saveScores();
+    }
+    
+    function highlightWinningCells(player) {
+      const winConditions = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+        [0, 4, 8], [2, 4, 6] // Diagonals
+      ];
+      
+      for (let condition of winConditions) {
+        const [a, b, c] = condition;
+        if (board[a] === player && board[b] === player && board[c] === player) {
+          const cells = document.querySelectorAll(`[data-index="${a}"], [data-index="${b}"], [data-index="${c}"]`);
+          cells.forEach(cell => cell.classList.add('winning'));
+          break;
+        }
+      }
+    }
+    
+    function resetGame() {
+      board = ['', '', '', '', '', '', '', '', ''];
+      currentPlayer = 'x';
+      gameActive = true;
+      renderBoard();
+      updateStatus();
+      
+      // Remove winning highlights
+      document.querySelectorAll('.cell').forEach(cell => {
+        cell.classList.remove('winning');
+      });
+    }
+    
+    function renderBoard() {
+      boardElement.innerHTML = '';
+      
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.index = i;
+        
+        if (board[i] === 'x') {
+          cell.textContent = 'X';
+          cell.classList.add('x');
+        } else if (board[i] === 'o') {
+          cell.textContent = 'O';
+          cell.classList.add('o');
+        }
+        
+        boardElement.appendChild(cell);
+      }
+    }
+    
+    function updateStatus() {
+      if (gameActive) {
+        statusElement.textContent = currentPlayer === 'x' ? 'Your move' : 'Computer thinking...';
+      }
+    }
+    
+    function updateScores() {
+      playerScoreElement.textContent = playerScore;
+      computerScoreElement.textContent = computerScore;
+    }
+    
+    function loadScores() {
+      try {
+        const saved = localStorage.getItem('tictactoe-scores');
+        if (saved) {
+          const scores = JSON.parse(saved);
+          playerScore = scores.player || 0;
+          computerScore = scores.computer || 0;
+          updateScores();
+        }
+      } catch (e) {
+        console.warn('Failed to load scores:', e);
+      }
+    }
+    
+    function saveScores() {
+      try {
+        localStorage.setItem('tictactoe-scores', JSON.stringify({
+          player: playerScore,
+          computer: computerScore
+        }));
+      } catch (e) {
+        console.warn('Failed to save scores:', e);
+      }
+    }
+    
+    function goHome() {
+      if (window.showcaseFramework && window.showcaseFramework.goHome) {
+        window.showcaseFramework.goHome();
+      }
+    }
+    
+    // Lifecycle management
+    window.appLifecycle = {
+      activate: function() {
+        console.log('Tic-Tac-Toe game activated');
+        // Resume game if it was paused
+        if (!gameActive) {
+          resetGame();
+        }
+      },
+      
+      deactivate: function() {
+        console.log('Tic-Tac-Toe game deactivated');
+        // Game can be paused when switching away
+        // No special cleanup needed
+      },
+      
+      cleanup: function() {
+        console.log('Tic-Tac-Toe game cleanup');
+        // Reset game state
+        resetGame();
+        // No timers or listeners to clean up
+      }
+    };
+    
+    // Initialize app
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  })();
+</script>
