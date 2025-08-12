@@ -1032,18 +1032,22 @@
   let autoRefresh = true;
   let refreshInterval;
 
-  // Dashboard elements
-  const cpuBar = document.getElementById('cpuBar');
-  const memBar = document.getElementById('memBar');
-  const tempBar = document.getElementById('tempBar');
-  const cpuValue = document.getElementById('cpuValue');
-  const memValue = document.getElementById('memValue');
-  const tempValue = document.getElementById('tempValue');
-  const uptimeValue = document.getElementById('uptimeValue');
-  const wifiStatus = document.getElementById('wifiStatus');
-  const ipAddress = document.getElementById('ipAddress');
-  const rootStorage = document.getElementById('rootStorage');
-  const homeStorage = document.getElementById('homeStorage');
+  // Dashboard elements - Get them dynamically when needed
+  function getDashboardElements() {
+    return {
+      cpuBar: document.getElementById('cpuBar'),
+      memBar: document.getElementById('memBar'),
+      tempBar: document.getElementById('tempBar'),
+      cpuValue: document.getElementById('cpuValue'),
+      memValue: document.getElementById('memValue'),
+      tempValue: document.getElementById('tempValue'),
+      uptimeValue: document.getElementById('uptimeValue'),
+      wifiStatus: document.getElementById('wifiStatus'),
+      ipAddress: document.getElementById('ipAddress'),
+      rootStorage: document.getElementById('rootStorage'),
+      homeStorage: document.getElementById('homeStorage')
+    };
+  }
 
   // Initialize dashboard
   function initDashboard() {
@@ -1075,7 +1079,17 @@
 
   function initPerformanceChart() {
     const ctx = document.getElementById('performanceChart');
-    if (!ctx) return;
+    if (!ctx) {
+      console.warn('Performance chart canvas not found');
+      return;
+    }
+    
+    if (typeof Chart === 'undefined') {
+      console.error('Chart.js not loaded');
+      return;
+    }
+    
+    console.log('Initializing performance chart...');
     
     // Safety: destroy any existing chart bound to this canvas
     if (dashboardCharts.performance && typeof dashboardCharts.performance.destroy === 'function') {
@@ -1083,90 +1097,110 @@
       dashboardCharts.performance = null;
     }
 
-    dashboardCharts.performance = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [{
-          label: 'CPU %',
-          data: [],
-          borderColor: '#6bcbef',
-          backgroundColor: 'rgba(107, 203, 239, 0.1)',
-          tension: 0.4,
-          fill: true
-        }, {
-          label: 'Memory %',
-          data: [],
-          borderColor: '#9d7cf3',
-          backgroundColor: 'rgba(157, 124, 243, 0.1)',
-          tension: 0.4,
-          fill: true
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        aspectRatio: 2,
-        plugins: {
-          legend: {
-            labels: { color: '#ffffff' }
-          }
+    try {
+      dashboardCharts.performance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'CPU %',
+            data: [],
+            borderColor: '#6bcbef',
+            backgroundColor: 'rgba(107, 203, 239, 0.1)',
+            tension: 0.4,
+            fill: true
+          }, {
+            label: 'Memory %',
+            data: [],
+            borderColor: '#9d7cf3',
+            backgroundColor: 'rgba(157, 124, 243, 0.1)',
+            tension: 0.4,
+            fill: true
+          }]
         },
-        scales: {
-          x: {
-            ticks: { color: '#ffffff' },
-            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          aspectRatio: 2,
+          plugins: {
+            legend: {
+              labels: { color: '#ffffff' }
+            }
           },
-          y: {
-            ticks: { color: '#ffffff' },
-            grid: { color: 'rgba(255, 255, 255, 0.1)' },
-            min: 0,
-            max: 100
+          scales: {
+            x: {
+              ticks: { color: '#ffffff' },
+              grid: { color: 'rgba(255, 255, 255, 0.1)' }
+            },
+            y: {
+              ticks: { color: '#ffffff' },
+              grid: { color: 'rgba(255, 255, 255, 0.1)' },
+              min: 0,
+              max: 100
+            }
+          },
+          animation: {
+            duration: 750,
+            easing: 'easeInOutQuart'
           }
-        },
-        animation: {
-          duration: 750,
-          easing: 'easeInOutQuart'
         }
-      }
-    });
+      });
+      console.log('Performance chart created successfully');
+    } catch (error) {
+      console.error('Error creating performance chart:', error);
+    }
   }
 
   function initMemoryChart() {
     const ctx = document.getElementById('memoryChart');
-    if (!ctx) return;
+    if (!ctx) {
+      console.warn('Memory chart canvas not found');
+      return;
+    }
+    
+    if (typeof Chart === 'undefined') {
+      console.error('Chart.js not loaded for memory chart');
+      return;
+    }
+    
+    console.log('Initializing memory chart...');
     
     if (dashboardCharts.memory && typeof dashboardCharts.memory.destroy === 'function') {
       dashboardCharts.memory.destroy();
       dashboardCharts.memory = null;
     }
 
-    dashboardCharts.memory = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Used', 'Free'],
-        datasets: [{
-          data: [0, 100],
-          backgroundColor: ['#6bcbef', 'rgba(255, 255, 255, 0.1)'],
-          borderWidth: 0,
-          cutout: '70%'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { color: '#ffffff' }
-          }
+    try {
+      dashboardCharts.memory = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Used', 'Free'],
+          datasets: [{
+            data: [0, 100],
+            backgroundColor: ['#6bcbef', 'rgba(255, 255, 255, 0.1)'],
+            borderWidth: 0,
+            cutout: '70%'
+          }]
         },
-        animation: {
-          animateRotate: true,
-          duration: 1000
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#ffffff' }
+            }
+          },
+          animation: {
+            animateRotate: true,
+            duration: 1000
+          }
         }
-      }
-    });
+      });
+      console.log('Memory chart created successfully');
+    } catch (error) {
+      console.error('Error creating memory chart:', error);
+    }
   }
 
   // Simulated data for professional demo
@@ -1226,6 +1260,18 @@
   async function refreshDashboard() {
     console.log('Refreshing dashboard...');
     try {
+      // Get dashboard elements dynamically
+      const elements = getDashboardElements();
+      console.log('Dashboard elements found:', {
+        cpuBar: !!elements.cpuBar,
+        memBar: !!elements.memBar,
+        tempBar: !!elements.tempBar,
+        cpuValue: !!elements.cpuValue,
+        memValue: !!elements.memValue,
+        tempValue: !!elements.tempValue,
+        uptimeValue: !!elements.uptimeValue
+      });
+      
       // Always use simulated data for reliable demo
       const simData = generateSimulatedData();
       console.log('Generated simulated data:', simData);
@@ -1246,56 +1292,64 @@
       };
       
       // Update stat bars and values
-      if (cpuValue && typeof info.cpuPercent === 'number') {
+      if (elements.cpuValue && typeof info.cpuPercent === 'number') {
         const cpuPct = Math.min(100, Math.max(0, info.cpuPercent));
         console.log('Setting CPU:', cpuPct + '%');
-        cpuValue.textContent = `${cpuPct}%`;
-        if (cpuBar) {
-          cpuBar.style.width = `${cpuPct}%`;
-          console.log('CPU bar width set to:', cpuBar.style.width);
+        elements.cpuValue.textContent = `${cpuPct}%`;
+        if (elements.cpuBar) {
+          elements.cpuBar.style.width = `${cpuPct}%`;
+          console.log('CPU bar width set to:', elements.cpuBar.style.width);
         }
+      } else {
+        console.warn('CPU elements not found or invalid data:', !!elements.cpuValue, info.cpuPercent);
       }
       
-      if (memValue && typeof info.memPercent === 'number') {
+      if (elements.memValue && typeof info.memPercent === 'number') {
         const memPct = Math.min(100, Math.max(0, info.memPercent));
         console.log('Setting Memory:', memPct + '%');
-        memValue.textContent = `${memPct}%`;
-        if (memBar) {
-          memBar.style.width = `${memPct}%`;
-          console.log('Memory bar width set to:', memBar.style.width);
+        elements.memValue.textContent = `${memPct}%`;
+        if (elements.memBar) {
+          elements.memBar.style.width = `${memPct}%`;
+          console.log('Memory bar width set to:', elements.memBar.style.width);
         }
+      } else {
+        console.warn('Memory elements not found or invalid data:', !!elements.memValue, info.memPercent);
       }
       
-      if (tempValue && typeof info.tempC === 'number') {
+      if (elements.tempValue && typeof info.tempC === 'number') {
         const tempPct = Math.max(0, Math.min(100, ((info.tempC - 30) / 55) * 100));
         console.log('Setting Temperature:', info.tempC.toFixed(1) + '°C', 'Bar:', tempPct + '%');
-        tempValue.textContent = `${info.tempC.toFixed(1)}°C`;
-        if (tempBar) {
-          tempBar.style.width = `${tempPct}%`;
-          console.log('Temperature bar width set to:', tempBar.style.width);
+        elements.tempValue.textContent = `${info.tempC.toFixed(1)}°C`;
+        if (elements.tempBar) {
+          elements.tempBar.style.width = `${tempPct}%`;
+          console.log('Temperature bar width set to:', elements.tempBar.style.width);
         }
+      } else {
+        console.warn('Temperature elements not found or invalid data:', !!elements.tempValue, info.tempC);
       }
       
-      if (uptimeValue && info.uptime) {
-        uptimeValue.textContent = info.uptime;
+      if (elements.uptimeValue && info.uptime) {
+        elements.uptimeValue.textContent = info.uptime;
         console.log('Setting uptime:', info.uptime);
+      } else {
+        console.warn('Uptime element not found:', !!elements.uptimeValue);
       }
       
-      if (wifiStatus && info.network) {
-        wifiStatus.textContent = info.network.wifiStatus;
-        wifiStatus.className = `detail-value ${info.network.wifiStatus === 'Connected' ? 'connected' : 'disconnected'}`;
+      if (elements.wifiStatus && info.network) {
+        elements.wifiStatus.textContent = info.network.wifiStatus;
+        elements.wifiStatus.className = `detail-value ${info.network.wifiStatus === 'Connected' ? 'connected' : 'disconnected'}`;
       }
       
-      if (ipAddress && info.network) {
-        ipAddress.textContent = info.network.ipAddress;
+      if (elements.ipAddress && info.network) {
+        elements.ipAddress.textContent = info.network.ipAddress;
       }
       
-      if (rootStorage && info.storage) {
-        rootStorage.textContent = info.storage.root;
+      if (elements.rootStorage && info.storage) {
+        elements.rootStorage.textContent = info.storage.root;
       }
       
-      if (homeStorage && info.storage) {
-        homeStorage.textContent = info.storage.home;
+      if (elements.homeStorage && info.storage) {
+        elements.homeStorage.textContent = info.storage.home;
       }
       
       // Update chart data
@@ -1367,8 +1421,13 @@
   // Manage dashboard lifecycle on screen changes
   window.addEventListener('screenChanged', (e) => {
     const screenName = e?.detail?.screenName;
+    console.log('Screen changed to:', screenName);
     if (screenName === 'info') {
-      setTimeout(initDashboard, 50);
+      // Give DOM time to render completely
+      setTimeout(() => {
+        console.log('Initializing dashboard after screen change...');
+        initDashboard();
+      }, 200);
       enableInfoSwipeScroll();
     } else {
       // Leaving info screen: stop timers to avoid background work
