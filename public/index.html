@@ -306,8 +306,8 @@
             }
             
                       // Load new app
-          console.log(`Attempting to load app from: ./src/screens/${appId}.html`);
-          fetch(`./src/screens/${appId}.html`)
+          console.log(`Attempting to load app from: ../src/screens/${appId}.html`);
+          fetch(`../src/screens/${appId}.html`)
             .then(response => {
               console.log(`Fetch response status: ${response.status}`);
               if (!response.ok) {
