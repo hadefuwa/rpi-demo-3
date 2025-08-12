@@ -134,46 +134,55 @@
           <div class="grid">
              <a href="./screens/touch.html" class="card fancy theme-cyan">
                <div class="border-animation"></div>
+               <div class="card-particles"></div>
                <div class="icon"></div>
                <span class="label">Touch Demo</span>
              </a>
              <a href="./screens/info.html" class="card fancy theme-purple">
                <div class="border-animation"></div>
+               <div class="card-particles"></div>
                <div class="icon"></div>
                <span class="label">System Info</span>
              </a>
              <a href="./screens/games.html" class="card fancy theme-gold">
                <div class="border-animation"></div>
+               <div class="card-particles"></div>
                <div class="icon"></div>
                <span class="label">Games Hub</span>
              </a>
              <a href="./screens/scroll.html" class="card fancy theme-white">
                <div class="border-animation"></div>
+               <div class="card-particles"></div>
                <div class="icon"></div>
                <span class="label">Scroll Test</span>
              </a>
              <a href="./screens/visuals.html" class="card fancy theme-lime">
                <div class="border-animation"></div>
+               <div class="card-particles"></div>
                <div class="icon"></div>
                <span class="label">Visuals</span>
              </a>
              <a href="./screens/stl.html" class="card fancy theme-orange">
                <div class="border-animation"></div>
+               <div class="card-particles"></div>
                <div class="icon"></div>
                <span class="label">3D Model</span>
              </a>
              <a href="./screens/printer.html" class="card fancy theme-red">
                <div class="border-animation"></div>
+               <div class="card-particles"></div>
                <div class="icon"></div>
                <span class="label">3D Printer Demo</span>
              </a>
              <a href="./screens/settings.html" class="card fancy theme-blue">
                <div class="border-animation"></div>
+               <div class="card-particles"></div>
                <div class="icon"></div>
                <span class="label">Settings</span>
              </a>
              <a href="./screens/about.html" class="card fancy theme-silver">
                <div class="border-animation"></div>
+               <div class="card-particles"></div>
                <div class="icon"></div>
                <span class="label">About</span>
              </a>
@@ -301,7 +310,7 @@
         align-items: center;
         justify-content: center;
         padding: 40px 20px;
-        background: #805c9c;
+        background: linear-gradient(to bottom, #1e0033, #3b0057, #4b0063);
         height: 100%;
         width: 100%;
         position: relative;
@@ -317,12 +326,20 @@
         right: 0;
         bottom: 0;
         background: 
-          radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 25%),
-          radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 25%);
+          radial-gradient(circle at 20% 30%, rgba(157, 78, 221, 0.4) 0%, transparent 25%),
+          radial-gradient(circle at 80% 70%, rgba(86, 24, 128, 0.4) 0%, transparent 35%),
+          radial-gradient(circle at 40% 80%, rgba(194, 158, 255, 0.3) 0%, transparent 20%);
         z-index: 0;
+        animation: cosmic-pulse 15s ease infinite alternate;
       }
       
-      /* Moving particles */
+      @keyframes cosmic-pulse {
+        0% { opacity: 0.5; background-position: 0% 0%; }
+        50% { opacity: 0.7; background-position: 10% 10%; }
+        100% { opacity: 0.5; background-position: 0% 0%; }
+      }
+      
+      /* Moving particles - cosmic stars and nebulae */
       .particles {
         position: absolute;
         top: 0;
@@ -336,8 +353,94 @@
       .particle {
         position: absolute;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 
+          0 0 10px rgba(255, 255, 255, 0.5),
+          0 0 20px rgba(255, 255, 255, 0.3),
+          0 0 30px rgba(255, 255, 255, 0.1);
         pointer-events: none;
+      }
+      
+      /* Different types of cosmic particles */
+      .particle:nth-child(3n+1) {
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 
+          0 0 10px rgba(255, 255, 255, 0.8),
+          0 0 20px rgba(255, 255, 255, 0.5),
+          0 0 30px rgba(255, 255, 255, 0.3);
+      }
+      
+      .particle:nth-child(3n+2) {
+        background: rgba(194, 158, 255, 0.9);
+        box-shadow: 
+          0 0 10px rgba(194, 158, 255, 0.8),
+          0 0 20px rgba(194, 158, 255, 0.5),
+          0 0 30px rgba(194, 158, 255, 0.3);
+      }
+      
+      .particle:nth-child(3n+3) {
+        background: rgba(135, 206, 250, 0.9);
+        box-shadow: 
+          0 0 10px rgba(135, 206, 250, 0.8),
+          0 0 20px rgba(135, 206, 250, 0.5),
+          0 0 30px rgba(135, 206, 250, 0.3);
+      }
+      
+      /* Create nebula effect */
+      .nebula {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(40px);
+        opacity: 0.15;
+        pointer-events: none;
+        z-index: 0;
+        animation: nebula-pulse 10s ease-in-out infinite alternate;
+        mix-blend-mode: screen;
+      }
+      
+      @keyframes nebula-pulse {
+        0% { transform: scale(1); opacity: 0.1; }
+        50% { transform: scale(1.1); opacity: 0.2; }
+        100% { transform: scale(1); opacity: 0.1; }
+      }
+      
+      /* Shooting stars */
+      @keyframes shooting-star {
+        0% { 
+          transform: translateX(0) translateY(0) rotate(215deg) scale(0);
+          opacity: 0;
+        }
+        10% {
+          transform: translateX(-10vw) translateY(10vh) rotate(215deg) scale(1);
+          opacity: 1;
+        }
+        20% {
+          transform: translateX(-20vw) translateY(20vh) rotate(215deg) scale(1);
+          opacity: 0;
+        }
+        100% {
+          transform: translateX(-20vw) translateY(20vh) rotate(215deg) scale(1);
+          opacity: 0;
+        }
+      }
+      
+      /* Distant galaxy clusters */
+      .galaxy-cluster {
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(
+          ellipse at center,
+          rgba(255, 255, 255, 0.2) 0%,
+          rgba(194, 158, 255, 0.1) 40%,
+          rgba(86, 24, 128, 0.05) 60%,
+          transparent 80%
+        );
+        border-radius: 50%;
+        filter: blur(15px);
+        opacity: 0.3;
+        z-index: 0;
+        mix-blend-mode: screen;
       }
       
       #screen-home .grid {
@@ -357,7 +460,7 @@
         padding: 30px 20px;
         text-align: center;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         position: relative;
         overflow: hidden;
         min-height: 150px;
@@ -370,6 +473,79 @@
         color: white;
         backdrop-filter: blur(5px);
         -webkit-backdrop-filter: blur(5px);
+        animation: float 3s ease-in-out infinite;
+        transform-style: preserve-3d;
+        perspective: 1000px;
+        box-shadow: 
+          0 10px 30px rgba(0, 0, 0, 0.4),
+          0 0 0 2px rgba(255, 255, 255, 0.2),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+      }
+      
+      /* Add a glossy reflection effect */
+      #screen-home .card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60%;
+        background: linear-gradient(to bottom, 
+          rgba(255, 255, 255, 0.2) 0%, 
+          rgba(255, 255, 255, 0.1) 40%, 
+          rgba(255, 255, 255, 0) 100%);
+        border-radius: 15px 15px 100px 100px;
+        pointer-events: none;
+        z-index: 2;
+        opacity: 0.5;
+        transition: opacity 0.5s ease;
+      }
+      
+      #screen-home .card:hover::after {
+        opacity: 0.8;
+      }
+      
+      /* Add a border glow effect */
+      #screen-home .card::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 17px;
+        background: linear-gradient(45deg, 
+          rgba(255, 255, 255, 0.1), 
+          rgba(255, 255, 255, 0.5), 
+          rgba(255, 255, 255, 0.1));
+        background-size: 200% 200%;
+        z-index: -1;
+        animation: border-glow 3s linear infinite;
+        opacity: 0.5;
+        transition: opacity 0.5s ease;
+      }
+      
+      @keyframes border-glow {
+        0% { background-position: 0% 0%; }
+        100% { background-position: 200% 0%; }
+      }
+      
+      #screen-home .card:hover::before {
+        opacity: 1;
+      }
+      
+      /* Different float animations for each card */
+      #screen-home .card:nth-child(1) { animation: float 4s ease-in-out infinite; }
+      #screen-home .card:nth-child(2) { animation: float 3.5s ease-in-out infinite 0.1s; }
+      #screen-home .card:nth-child(3) { animation: float 4.5s ease-in-out infinite 0.2s; }
+      #screen-home .card:nth-child(4) { animation: float 5s ease-in-out infinite 0.3s; }
+      #screen-home .card:nth-child(5) { animation: float 4.2s ease-in-out infinite 0.4s; }
+      #screen-home .card:nth-child(6) { animation: float 3.8s ease-in-out infinite 0.5s; }
+      #screen-home .card:nth-child(7) { animation: float 4.7s ease-in-out infinite 0.6s; }
+      #screen-home .card:nth-child(8) { animation: float 3.3s ease-in-out infinite 0.7s; }
+      #screen-home .card:nth-child(9) { animation: float 4.9s ease-in-out infinite 0.8s; }
+      
+      @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
       }
       
       #screen-home .card .label {
@@ -378,12 +554,26 @@
         margin-top: 15px;
         z-index: 2;
         position: relative;
+        animation: pulse 2s infinite;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+        transform: translateZ(30px);
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.8));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+      }
+      
+      #screen-home .card:hover .label {
+        transform: translateZ(40px) scale(1.1);
+        filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.6));
       }
       
       #screen-home .card .icon {
-        width: 50px;
-        height: 50px;
-        background: rgba(255, 255, 255, 0.2);
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.3);
         border-radius: 50%;
         margin-bottom: 15px;
         z-index: 2;
@@ -391,7 +581,85 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
+        font-size: 30px;
+        animation: spin 5s linear infinite;
+        transform: translateZ(40px);
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 
+          0 5px 15px rgba(0, 0, 0, 0.3),
+          inset 0 1px 1px rgba(255, 255, 255, 0.6);
+      }
+      
+      #screen-home .card:hover .icon {
+        transform: translateZ(50px) scale(1.2);
+        box-shadow: 
+          0 8px 25px rgba(0, 0, 0, 0.4),
+          inset 0 2px 3px rgba(255, 255, 255, 0.7);
+      }
+      
+      /* Different animations for each card's icon */
+      #screen-home .card:nth-child(1) .icon { animation: bounce 2s infinite; }
+      #screen-home .card:nth-child(2) .icon { animation: spin 4s linear infinite; }
+      #screen-home .card:nth-child(3) .icon { animation: wobble 3s ease-in-out infinite; }
+      #screen-home .card:nth-child(4) .icon { animation: pulse 2.5s infinite; }
+      #screen-home .card:nth-child(5) .icon { animation: flip 4s infinite; }
+      #screen-home .card:nth-child(6) .icon { animation: rotate3d 5s infinite; }
+      #screen-home .card:nth-child(7) .icon { animation: jump 2.5s infinite; }
+      #screen-home .card:nth-child(8) .icon { animation: shake 4s cubic-bezier(.36,.07,.19,.97) infinite; }
+      #screen-home .card:nth-child(9) .icon { animation: glow 3s infinite; }
+      
+      /* Different animations for each card's label */
+      #screen-home .card:nth-child(1) .label { animation: glow 2.5s infinite; }
+      #screen-home .card:nth-child(2) .label { animation: pulse 3s infinite 0.2s; }
+      #screen-home .card:nth-child(3) .label { animation: glow 3.5s infinite 0.3s; }
+      #screen-home .card:nth-child(4) .label { animation: pulse 2.8s infinite 0.4s; }
+      #screen-home .card:nth-child(5) .label { animation: glow 3.2s infinite 0.5s; }
+      #screen-home .card:nth-child(6) .label { animation: pulse 3.4s infinite 0.6s; }
+      #screen-home .card:nth-child(7) .label { animation: glow 2.9s infinite 0.7s; }
+      #screen-home .card:nth-child(8) .label { animation: pulse 3.7s infinite 0.8s; }
+      #screen-home .card:nth-child(9) .label { animation: glow 3.1s infinite 0.9s; }
+      
+      @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      @keyframes wobble {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px) rotate(-5deg); }
+        75% { transform: translateX(5px) rotate(5deg); }
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.05); }
+      }
+      
+      @keyframes flip {
+        0% { transform: rotateY(0); }
+        50% { transform: rotateY(180deg); }
+        100% { transform: rotateY(360deg); }
+      }
+      
+      @keyframes rotate3d {
+        0% { transform: rotate3d(1, 1, 1, 0deg); }
+        50% { transform: rotate3d(1, 1, 1, 180deg); }
+        100% { transform: rotate3d(1, 1, 1, 360deg); }
+      }
+      
+      @keyframes jump {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-15px) scale(1.1); }
+      }
+      
+      @keyframes glow {
+        0%, 100% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+        50% { text-shadow: 0 0 20px rgba(255, 255, 255, 1), 0 0 30px rgba(255, 255, 255, 0.8); }
       }
       
       /* Touch Demo Card - Glow Effect */
@@ -600,16 +868,52 @@
         100% { transform: translateX(100%); }
       }
       
-      /* Theme variations */
-      #screen-home .theme-cyan { border-color: #00bcd4; }
-      #screen-home .theme-purple { border-color: #9c27b0; }
-      #screen-home .theme-gold { border-color: #ff9800; }
-      #screen-home .theme-white { border-color: #ffffff; }
-      #screen-home .theme-lime { border-color: #cddc39; }
-      #screen-home .theme-orange { border-color: #ff5722; }
-      #screen-home .theme-red { border-color: #e53935; }
-      #screen-home .theme-blue { border-color: #2196f3; }
-      #screen-home .theme-silver { border-color: #9e9e9e; }
+      /* Theme variations with vibrant gradients */
+      #screen-home .theme-cyan { 
+        border-color: #00bcd4; 
+        background: linear-gradient(135deg, #00e5ff, #00bcd4, #0097a7);
+        box-shadow: 0 5px 15px rgba(0, 188, 212, 0.6);
+      }
+      #screen-home .theme-purple { 
+        border-color: #9c27b0; 
+        background: linear-gradient(135deg, #ea80fc, #9c27b0, #7b1fa2);
+        box-shadow: 0 5px 15px rgba(156, 39, 176, 0.6);
+      }
+      #screen-home .theme-gold { 
+        border-color: #ff9800; 
+        background: linear-gradient(135deg, #ffd740, #ff9800, #f57c00);
+        box-shadow: 0 5px 15px rgba(255, 152, 0, 0.6);
+      }
+      #screen-home .theme-white { 
+        border-color: #ffffff; 
+        background: linear-gradient(135deg, #ffffff, #f5f5f5, #e0e0e0);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.6);
+      }
+      #screen-home .theme-lime { 
+        border-color: #cddc39; 
+        background: linear-gradient(135deg, #eeff41, #cddc39, #afb42b);
+        box-shadow: 0 5px 15px rgba(205, 220, 57, 0.6);
+      }
+      #screen-home .theme-orange { 
+        border-color: #ff5722; 
+        background: linear-gradient(135deg, #ff9e80, #ff5722, #e64a19);
+        box-shadow: 0 5px 15px rgba(255, 87, 34, 0.6);
+      }
+      #screen-home .theme-red { 
+        border-color: #e53935; 
+        background: linear-gradient(135deg, #ff8a80, #e53935, #c62828);
+        box-shadow: 0 5px 15px rgba(229, 57, 53, 0.6);
+      }
+      #screen-home .theme-blue { 
+        border-color: #2196f3; 
+        background: linear-gradient(135deg, #82b1ff, #2196f3, #1976d2);
+        box-shadow: 0 5px 15px rgba(33, 150, 243, 0.6);
+      }
+      #screen-home .theme-silver { 
+        border-color: #9e9e9e; 
+        background: linear-gradient(135deg, #e0e0e0, #9e9e9e, #757575);
+        box-shadow: 0 5px 15px rgba(158, 158, 158, 0.6);
+      }
       
       /* Responsive design */
       @media (max-width: 768px) {
@@ -653,25 +957,54 @@
       }
     </style>
     
-    <!-- Animated Background Script -->
+    <!-- Animated Cosmic Background Script -->
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         // Create animated particles
         const particlesContainer = document.getElementById('particles');
-        const numParticles = 30;
+        const numParticles = 80; // More stars for galaxy effect
+        const numNebulae = 5;    // Add nebulae
+        const numGalaxies = 3;   // Add distant galaxy clusters
         
-        // Create particles
+        // Create stars
         for (let i = 0; i < numParticles; i++) {
-          createParticle(particlesContainer);
+          createStar(particlesContainer);
         }
         
-        // Create a single particle with random properties
-        function createParticle(container) {
+        // Create nebulae
+        for (let i = 0; i < numNebulae; i++) {
+          createNebula(particlesContainer);
+        }
+        
+        // Create galaxy clusters
+        for (let i = 0; i < numGalaxies; i++) {
+          createGalaxyCluster(particlesContainer);
+        }
+        
+        // Create occasional shooting stars
+        setInterval(() => {
+          if (Math.random() > 0.7) { // 30% chance every interval
+            createShootingStar(particlesContainer);
+          }
+        }, 8000); // Try to create a shooting star every 8 seconds
+        
+        // Create a single star with random properties
+        function createStar(container) {
           const particle = document.createElement('div');
           particle.classList.add('particle');
           
-          // Random size between 5px and 20px
-          const size = Math.random() * 15 + 5;
+          // Random size between 1px and 4px for stars (some larger for effect)
+          let size;
+          const isLargeStar = Math.random() > 0.9;
+          
+          if (isLargeStar) {
+            size = Math.random() * 4 + 3; // 3-7px for bright stars
+            particle.style.opacity = Math.random() * 0.4 + 0.6; // Brighter
+          } else {
+            size = Math.random() * 2 + 1; // 1-3px for regular stars
+            particle.style.opacity = Math.random() * 0.3 + 0.3; // Regular brightness
+          }
+          
           particle.style.width = `${size}px`;
           particle.style.height = `${size}px`;
           
@@ -681,36 +1014,66 @@
           particle.style.left = `${x}%`;
           particle.style.top = `${y}%`;
           
-          // Random opacity
-          particle.style.opacity = Math.random() * 0.5 + 0.1;
-          
-          // Random animation duration between 20s and 40s
-          const duration = Math.random() * 20 + 20;
-          particle.style.animation = `float ${duration}s ease-in-out infinite`;
+          // Add twinkling effect to some stars
+          if (Math.random() > 0.7) {
+            const twinkleDuration = Math.random() * 3 + 2; // 2-5s
+            particle.style.animation = `twinkle ${twinkleDuration}s ease-in-out infinite`;
+          }
           
           // Add to container
           container.appendChild(particle);
           
-          // Set random movement
-          setRandomMovement(particle);
+          // Set random movement for some stars (distant stars move less)
+          if (Math.random() > 0.6) {
+            setRandomStarMovement(particle, size);
+          }
         }
         
-        // Set random floating movement for particles
-        function setRandomMovement(particle) {
-          // Create a unique keyframe animation for each particle
-          const uniqueName = 'float-' + Math.floor(Math.random() * 1000000);
-          const x1 = Math.random() * 100;
-          const y1 = Math.random() * 100;
-          const x2 = Math.random() * 100;
-          const y2 = Math.random() * 100;
+        // Create a nebula effect
+        function createNebula(container) {
+          const nebula = document.createElement('div');
+          nebula.classList.add('nebula');
           
-          // Create keyframe animation
+          // Random size between 100px and 300px
+          const size = Math.random() * 200 + 100;
+          nebula.style.width = `${size}px`;
+          nebula.style.height = `${size}px`;
+          
+          // Random position
+          const x = Math.random() * 100;
+          const y = Math.random() * 100;
+          nebula.style.left = `${x}%`;
+          nebula.style.top = `${y}%`;
+          
+          // Random color - purples and blues for cosmic effect
+          const hue = Math.random() * 60 + 240; // 240-300 range (blues to purples)
+          const saturation = Math.random() * 30 + 70; // 70-100%
+          const lightness = Math.random() * 20 + 50; // 50-70%
+          nebula.style.backgroundColor = `hsla(${hue}, ${saturation}%, ${lightness}%, 0.2)`;
+          
+          // Add to container
+          container.appendChild(nebula);
+          
+          // Add custom animation delay
+          const delay = Math.random() * 5;
+          nebula.style.animationDelay = `${delay}s`;
+        }
+        
+        // Set random floating movement for stars
+        function setRandomStarMovement(particle, size) {
+          // Smaller stars move less (parallax effect)
+          const moveFactor = size < 3 ? 30 : 60;
+          
+          // Create a unique keyframe animation for each particle
+          const uniqueName = 'star-' + Math.floor(Math.random() * 1000000);
+          const x1 = (Math.random() * moveFactor) - (moveFactor/2);
+          const y1 = (Math.random() * moveFactor) - (moveFactor/2);
+          
+          // Create keyframe animation - slower and more subtle for stars
           const keyframes = `
             @keyframes ${uniqueName} {
-              0% { transform: translate(0, 0) rotate(0deg); }
-              33% { transform: translate(${x1}px, ${y1}px) rotate(120deg); }
-              66% { transform: translate(${x2}px, ${y2}px) rotate(240deg); }
-              100% { transform: translate(0, 0) rotate(360deg); }
+              0%, 100% { transform: translate(0, 0); }
+              50% { transform: translate(${x1}px, ${y1}px); }
             }
           `;
           
@@ -719,12 +1082,374 @@
           style.innerHTML = keyframes;
           document.head.appendChild(style);
           
-          // Apply animation to particle
-          const duration = Math.random() * 30 + 30;
-          particle.style.animation = `${uniqueName} ${duration}s ease-in-out infinite`;
+          // Apply animation to particle - much longer for cosmic effect
+          const duration = Math.random() * 40 + 60; // 60-100s
+          const delay = Math.random() * 10;
+          particle.style.animation = `${uniqueName} ${duration}s ease-in-out ${delay}s infinite alternate`;
+        }
+        
+        // Create a galaxy cluster
+        function createGalaxyCluster(container) {
+          const galaxy = document.createElement('div');
+          galaxy.classList.add('galaxy-cluster');
+          
+          // Random size between 80px and 200px
+          const size = Math.random() * 120 + 80;
+          galaxy.style.width = `${size}px`;
+          galaxy.style.height = `${size}px`;
+          
+          // Random position
+          const x = Math.random() * 90 + 5; // Keep away from edges
+          const y = Math.random() * 90 + 5;
+          galaxy.style.left = `${x}%`;
+          galaxy.style.top = `${y}%`;
+          
+          // Random rotation
+          const rotation = Math.random() * 360;
+          galaxy.style.transform = `rotate(${rotation}deg)`;
+          
+          // Add to container
+          container.appendChild(galaxy);
+          
+          // Add subtle animation
+          const uniqueName = 'galaxy-' + Math.floor(Math.random() * 1000000);
+          const keyframes = `
+            @keyframes ${uniqueName} {
+              0%, 100% { transform: rotate(${rotation}deg) scale(1); opacity: 0.3; }
+              50% { transform: rotate(${rotation + 5}deg) scale(1.1); opacity: 0.4; }
+            }
+          `;
+          
+          const style = document.createElement('style');
+          style.innerHTML = keyframes;
+          document.head.appendChild(style);
+          
+          // Apply animation
+          const duration = Math.random() * 20 + 30; // 30-50s
+          galaxy.style.animation = `${uniqueName} ${duration}s ease-in-out infinite alternate`;
+        }
+        
+        // Create a shooting star
+        function createShootingStar(container) {
+          const star = document.createElement('div');
+          star.classList.add('particle');
+          
+          // Make it elongated
+          star.style.width = '3px';
+          star.style.height = '40px'; // Long trail
+          star.style.borderRadius = '40%';
+          star.style.opacity = '0';
+          
+          // Brighter than regular stars
+          star.style.boxShadow = `
+            0 0 10px rgba(255, 255, 255, 0.8),
+            0 0 20px rgba(255, 255, 255, 0.6),
+            0 0 30px rgba(255, 255, 255, 0.4)
+          `;
+          
+          // Random starting position in top-right quadrant
+          const x = Math.random() * 50 + 50; // 50-100%
+          const y = Math.random() * 30; // 0-30%
+          star.style.left = `${x}%`;
+          star.style.top = `${y}%`;
+          
+          // Add to container
+          container.appendChild(star);
+          
+          // Apply shooting star animation
+          star.style.animation = 'shooting-star 4s ease-out forwards';
+          
+          // Remove after animation completes
+          setTimeout(() => {
+            if (star.parentNode) {
+              star.parentNode.removeChild(star);
+            }
+          }, 4000);
+        }
+        
+        // Add twinkling animation
+        const twinkleKeyframes = `
+          @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+          }
+        `;
+        const twinkleStyle = document.createElement('style');
+        twinkleStyle.innerHTML = twinkleKeyframes;
+        document.head.appendChild(twinkleStyle);
+        
+      });
+      
+      document.addEventListener('DOMContentLoaded', function() {
+        // Dynamic button animations
+        const cards = document.querySelectorAll('#screen-home .card');
+        
+        // Add interactive animations to each card
+        cards.forEach((card, index) => {
+          // Create dynamic glow effect on touch/click
+          card.addEventListener('touchstart', function(e) {
+            createRippleEffect(e, this);
+            createGlowEffect(this);
+            createParticleBurst(this);
+          });
+          
+          card.addEventListener('click', function(e) {
+            createRippleEffect(e, this);
+            createGlowEffect(this);
+            createParticleBurst(this);
+          });
+          
+          // Add random movement to each card
+          setRandomCardMovement(card, index);
+          
+          // Create card particles
+          createCardParticles(card, index);
+        });
+        
+        // Create ripple effect on button touch/click
+        function createRippleEffect(e, element) {
+          const ripple = document.createElement('div');
+          ripple.className = 'ripple-effect';
+          
+          const rect = element.getBoundingClientRect();
+          const size = Math.max(rect.width, rect.height);
+          
+          // Get touch/click position relative to element
+          const x = e.type === 'touchstart' ? 
+                  e.touches[0].clientX - rect.left : 
+                  e.clientX - rect.left;
+          const y = e.type === 'touchstart' ? 
+                  e.touches[0].clientY - rect.top : 
+                  e.clientY - rect.top;
+          
+          ripple.style.width = ripple.style.height = `${size * 2}px`;
+          ripple.style.left = `${x - size}px`;
+          ripple.style.top = `${y - size}px`;
+          
+          element.appendChild(ripple);
+          
+          // Remove ripple after animation completes
+          setTimeout(() => {
+            ripple.remove();
+          }, 1000);
+        }
+        
+        // Create glow effect on button
+        function createGlowEffect(element) {
+          // Add intense glow class
+          element.classList.add('intense-glow');
+          
+          // Remove class after animation completes
+          setTimeout(() => {
+            element.classList.remove('intense-glow');
+          }, 700);
+        }
+        
+        // Set random subtle movement for cards
+        function setRandomCardMovement(card, index) {
+          // Create a unique animation for each card
+          const uniqueName = 'card-move-' + index;
+          const rotateX = (Math.random() * 3) - 1.5; // -1.5 to 1.5 degrees
+          const rotateY = (Math.random() * 3) - 1.5; // -1.5 to 1.5 degrees
+          const translateZ = Math.random() * 10 + 5; // 5 to 15px
+          
+          // Create keyframe animation
+          const keyframes = `
+            @keyframes ${uniqueName} {
+              0%, 100% { transform: rotateX(0deg) rotateY(0deg) translateZ(0); }
+              25% { transform: rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px); }
+              75% { transform: rotateX(${-rotateX}deg) rotateY(${-rotateY}deg) translateZ(${translateZ/2}px); }
+            }
+          `;
+          
+          // Add keyframes to document
+          const style = document.createElement('style');
+          style.innerHTML = keyframes;
+          document.head.appendChild(style);
+          
+          // Apply animation to card
+          const duration = Math.random() * 5 + 8; // 8-13 seconds
+          const delay = Math.random() * 2; // 0-2 second delay
+          card.style.animation = `${card.style.animation}, ${uniqueName} ${duration}s ease-in-out ${delay}s infinite`;
+        }
+        
+        // Create particles inside each card
+        function createCardParticles(card, cardIndex) {
+          const particlesContainer = card.querySelector('.card-particles');
+          const numParticles = 8 + Math.floor(Math.random() * 5); // 8-12 particles per card
+          
+          // Create static floating particles
+          for (let i = 0; i < numParticles; i++) {
+            createCardParticle(particlesContainer, cardIndex, i);
+          }
+        }
+        
+        // Create a single card particle
+        function createCardParticle(container, cardIndex, particleIndex) {
+          const particle = document.createElement('div');
+          particle.classList.add('card-particle');
+          
+          // Random size between 3px and 8px
+          const size = Math.random() * 5 + 3;
+          particle.style.width = `${size}px`;
+          particle.style.height = `${size}px`;
+          
+          // Random position within the card
+          const x = Math.random() * 80 + 10; // 10% to 90% of width
+          const y = Math.random() * 80 + 10; // 10% to 90% of height
+          particle.style.left = `${x}%`;
+          particle.style.top = `${y}%`;
+          
+          // Random opacity
+          particle.style.opacity = Math.random() * 0.4 + 0.2;
+          
+          // Add to container
+          container.appendChild(particle);
+          
+          // Set animation
+          setCardParticleAnimation(particle, cardIndex, particleIndex);
+        }
+        
+        // Set animation for card particle
+        function setCardParticleAnimation(particle, cardIndex, particleIndex) {
+          const animations = ['pulse-particle', 'orbit'];
+          const animIndex = (cardIndex + particleIndex) % animations.length;
+          const animation = animations[animIndex];
+          const duration = Math.random() * 4 + 3; // 3-7 seconds
+          const delay = Math.random() * 2; // 0-2 second delay
+          
+          // Apply animation
+          particle.style.animation = `${animation} ${duration}s ease-in-out ${delay}s infinite`;
+        }
+        
+        // Create particle burst on click/touch
+        function createParticleBurst(card) {
+          const particlesContainer = card.querySelector('.card-particles');
+          const numParticles = 15 + Math.floor(Math.random() * 10); // 15-25 particles
+          
+          // Create burst particles
+          for (let i = 0; i < numParticles; i++) {
+            createBurstParticle(particlesContainer);
+          }
+        }
+        
+        // Create a single burst particle
+        function createBurstParticle(container) {
+          const particle = document.createElement('div');
+          particle.classList.add('card-particle');
+          
+          // Random size between 2px and 6px
+          const size = Math.random() * 4 + 2;
+          particle.style.width = `${size}px`;
+          particle.style.height = `${size}px`;
+          
+          // Start from center of card
+          particle.style.left = `${45 + Math.random() * 10}%`;
+          particle.style.top = `${45 + Math.random() * 10}%`;
+          
+          // Add to container
+          container.appendChild(particle);
+          
+          // Set burst animation
+          const animations = ['float-up', 'float-diagonal'];
+          const animation = animations[Math.floor(Math.random() * animations.length)];
+          const duration = Math.random() * 1 + 1; // 1-2 seconds
+          
+          // Apply animation
+          particle.style.animation = `${animation} ${duration}s ease-out forwards`;
+          
+          // Remove particle after animation completes
+          setTimeout(() => {
+            if (particle.parentNode) {
+              particle.parentNode.removeChild(particle);
+            }
+          }, duration * 1000);
         }
       });
     </script>
+    
+    <style>
+      /* Dynamic animation styles */
+      .ripple-effect {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.4);
+        transform: scale(0);
+        animation: ripple 1s linear;
+        pointer-events: none;
+        z-index: 1;
+      }
+      
+      @keyframes ripple {
+        to {
+          transform: scale(1);
+          opacity: 0;
+        }
+      }
+      
+      .intense-glow {
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 60px currentColor !important;
+        z-index: 10;
+        animation-play-state: paused !important;
+        transform: scale(1.05) !important;
+        transition: all 0.3s ease-out !important;
+      }
+      
+      /* Card particles */
+      .card-particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        border-radius: 15px;
+        pointer-events: none;
+        z-index: 1;
+      }
+      
+      .card-particle {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+        opacity: 0.6;
+        z-index: 1;
+      }
+      
+      /* Theme-specific particle colors */
+      .theme-cyan .card-particle { background: rgba(0, 229, 255, 0.8); }
+      .theme-purple .card-particle { background: rgba(234, 128, 252, 0.8); }
+      .theme-gold .card-particle { background: rgba(255, 215, 64, 0.8); }
+      .theme-white .card-particle { background: rgba(255, 255, 255, 0.8); }
+      .theme-lime .card-particle { background: rgba(238, 255, 65, 0.8); }
+      .theme-orange .card-particle { background: rgba(255, 158, 128, 0.8); }
+      .theme-red .card-particle { background: rgba(255, 138, 128, 0.8); }
+      .theme-blue .card-particle { background: rgba(130, 177, 255, 0.8); }
+      .theme-silver .card-particle { background: rgba(224, 224, 224, 0.8); }
+      
+      /* Particle animations */
+      @keyframes float-up {
+        0% { transform: translateY(100%) scale(0); }
+        50% { opacity: 1; }
+        100% { transform: translateY(-100%) scale(1); opacity: 0; }
+      }
+      
+      @keyframes float-diagonal {
+        0% { transform: translate(-50%, 50%) scale(0); }
+        50% { opacity: 1; transform: translate(0%, 0%) scale(1); }
+        100% { transform: translate(50%, -50%) scale(0.5); opacity: 0; }
+      }
+      
+      @keyframes pulse-particle {
+        0%, 100% { transform: scale(0.8); opacity: 0.6; }
+        50% { transform: scale(1.2); opacity: 0.9; }
+      }
+      
+      @keyframes orbit {
+        0% { transform: rotate(0deg) translateX(10px) rotate(0deg); }
+        100% { transform: rotate(360deg) translateX(10px) rotate(-360deg); }
+      }
+    </style>
     
     <!-- Service Worker Registration -->
     <script>
