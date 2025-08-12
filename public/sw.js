@@ -1,4 +1,10 @@
-const CACHE_NAME = 'rpi-5inch-showcase-v3';
+// Version-based cache naming for better invalidation
+const CACHE_VERSION = 'v4';
+const CACHE_NAME = `rpi-5inch-showcase-${CACHE_VERSION}`;
+
+// Add timestamp to force cache invalidation
+const CACHE_TIMESTAMP = Date.now();
+
 const urlsToCache = [
   '/',
   '/index.html',
@@ -31,14 +37,18 @@ const htmlFiles = [
 const allFilesToCache = [...urlsToCache, ...htmlFiles];
 
 self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
+  console.log('Service Worker installing...', CACHE_NAME);
   // Skip waiting to activate immediately
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(allFilesToCache);
+        console.log('Opened cache:', CACHE_NAME);
+        // Add timestamp to force fresh content
+        const timestampedFiles = allFilesToCache.map(url => 
+          url.includes('?') ? `${url}&t=${CACHE_TIMESTAMP}` : `${url}?t=${CACHE_TIMESTAMP}`
+        );
+        return cache.addAll(timestampedFiles);
       })
       .catch((error) => {
         console.log('Cache addAll failed:', error);
@@ -109,7 +119,7 @@ self.addEventListener('fetch', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating...');
+  console.log('Service Worker activating...', CACHE_NAME);
   // Claim all clients immediately
   event.waitUntil(
     Promise.all([
@@ -119,6 +129,17 @@ self.addEventListener('activate', (event) => {
           cacheNames.map((cacheName) => {
             if (cacheName !== CACHE_NAME) {
               console.log('Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // Clear all existing caches if this is a major version update
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName.includes('rpi-5inch-showcase') && !cacheName.includes(CACHE_VERSION)) {
+              console.log('Deleting outdated cache version:', cacheName);
               return caches.delete(cacheName);
             }
           })

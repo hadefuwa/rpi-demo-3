@@ -26,13 +26,34 @@
       (function() {
         'use strict';
         
+        // Add cache-busting timestamps to all critical resources
+        function addCacheBusting() {
+          const timestamp = Date.now();
+          const criticalResources = [
+            { selector: 'link[rel="manifest"]', attr: 'href' },
+            { selector: 'link[rel="apple-touch-icon"]', attr: 'href' },
+            { selector: 'img[src*="Matrix.png"]', attr: 'src' }
+          ];
+          
+          criticalResources.forEach(resource => {
+            const elements = document.querySelectorAll(resource.selector);
+            elements.forEach(element => {
+              const currentUrl = element.getAttribute(resource.attr);
+              if (currentUrl && !currentUrl.includes('?v=')) {
+                const separator = currentUrl.includes('?') ? '&' : '?';
+                element.setAttribute(resource.attr, `${currentUrl}${separator}v=${timestamp}`);
+              }
+            });
+          });
+        }
+        
         // Clear all caches on startup
         async function clearOldCaches() {
           try {
             if ('caches' in window) {
               const cacheNames = await caches.keys();
               const oldCaches = cacheNames.filter(name => 
-                name.includes('rpi-5inch-showcase') && !name.includes('v3')
+                name.includes('rpi-5inch-showcase') && !name.includes('v4')
               );
               
               if (oldCaches.length > 0) {
@@ -67,6 +88,26 @@
         // Run cache clearing on startup
         clearOldCaches();
         updateServiceWorker();
+        addCacheBusting();
+        
+        // Additional development mode cache clearing
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          console.log('🔧 Development mode detected - aggressive cache clearing');
+          // Clear localStorage and sessionStorage in dev mode
+          localStorage.clear();
+          sessionStorage.clear();
+          
+          // Force reload if we detect stale content
+          const lastReload = sessionStorage.getItem('lastReload');
+          const now = Date.now();
+          if (lastReload && (now - parseInt(lastReload)) > 300000) { // 5 minutes
+            console.log('🔄 Development mode: forcing fresh reload');
+            sessionStorage.setItem('lastReload', now.toString());
+            window.location.reload(true);
+          } else {
+            sessionStorage.setItem('lastReload', now.toString());
+          }
+        }
         
         // Add cache clear button handler
         document.addEventListener('DOMContentLoaded', function() {
@@ -374,8 +415,8 @@
     
     <!-- Service Worker Registration -->
     <script>
-      // Register service worker with proper update handling
-      if ('serviceWorker' in navigator) {
+      // Only register service worker in production
+      if ('serviceWorker' in navigator && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
         window.addEventListener('load', async () => {
           try {
             const registration = await navigator.serviceWorker.register('/sw.js');
@@ -389,10 +430,8 @@
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   console.log('🆕 New service worker available');
-                  // Optionally show update notification
-                  if (confirm('New version available! Reload to update?')) {
-                    window.location.reload();
-                  }
+                  // Auto-reload for updates
+                  window.location.reload();
                 }
               });
             });
@@ -408,6 +447,8 @@
             console.error('❌ Service Worker registration failed:', error);
           }
         });
+      } else {
+        console.log('🚫 Service Worker disabled in development mode');
       }
     </script>
   </body>
