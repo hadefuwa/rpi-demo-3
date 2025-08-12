@@ -13,6 +13,7 @@
     "kiosk": "./scripts/kiosk.sh",
     "dev-fresh": "./scripts/dev-fresh.sh",
     "clear-cache": "./scripts/clear-all-caches.sh",
+    "sync": "./scripts/sync-and-run.sh",
     "install-service": "./scripts/install-autostart.sh",
     "uninstall-service": "./scripts/uninstall-autostart.sh",
     "clean": "rm -rf node_modules package-lock.json",
