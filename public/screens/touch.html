@@ -471,14 +471,18 @@
     function setupEventListeners() {
       const container = document.querySelector('#screen-touch');
       
+      // Home button
+      const homeButton = document.querySelector('#btnHome');
+      if (homeButton) {
+        homeButton.addEventListener('click', goHome);
+      }
+      
       // Touch area clicks
       container.addEventListener('click', function(e) {
         if (e.target.classList.contains('touch-area')) {
           handleTouchAreaClick(e.target);
         } else if (e.target.id === 'btnTouchReset') {
           resetTouchDemo();
-        } else if (e.target.id === 'btnHome') {
-          goHome();
         }
       });
       

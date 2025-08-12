@@ -5,6 +5,34 @@ All notable changes to the RPI-5Inch Showcase project will be documented in this
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-08-17
+
+### 🎨 **Home Page Enhancement & 3D Printer Demo**
+
+#### **Added**
+- **3D Printer Demo**: Added fully functional 3D printer monitoring interface
+- **Modern Animated Background**: Implemented purple (#805c9c) animated background with floating particles
+- **Unique Button Animations**: Created distinct animations for each home page button
+- **Inspirational Header**: Changed header text to "Inspiring the next generation of Engineers" with animation
+
+#### **Changed**
+- **Home Page Design**: Completely redesigned with modern aesthetic and interactive elements
+- **Button Interactions**: Enhanced with unique hover effects (glow, flip, bounce, pulse, etc.)
+- **Header Layout**: Removed cache button, added animated title text
+- **Button Icons**: Added emoji icons to replace missing button icons
+
+#### **Fixed**
+- **Touch Demo Home Button**: Fixed non-functioning home button in touch demo
+- **Button Consistency**: Ensured all buttons have proper visual feedback and animations
+
+#### **Technical Improvements**
+- **Animation System**: Implemented lightweight particle system for background effects
+- **CSS Animations**: Added keyframe animations for various UI elements
+- **Button Interaction**: Created unique interaction patterns for each navigation card
+- **Responsive Design**: Ensured all new elements work across all screen sizes
+
+---
+
 ## [0.3.0] - 2025-08-15
 
 ### 🔄 **UI Consistency & Raspberry Pi Optimization**
@@ -128,13 +156,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## **Future Roadmap**
 
-### **v0.4.0 (Planned)**
-- **Additional Mini-Apps**: More showcase applications
+### **v0.5.0 (Planned)**
 - **Enhanced PWA Features**: Offline support and advanced caching
 - **Performance Optimizations**: Lazy loading and code splitting
 - **Accessibility Improvements**: Screen reader support and keyboard navigation
+- **Additional Mini-Apps**: More showcase applications
 
-### **v0.5.0 (Planned)**
+### **v0.6.0 (Planned)**
 - **Plugin System**: Dynamic mini-app loading from external sources
 - **Configuration Management**: User-customizable app layouts
 - **Analytics Dashboard**: Usage statistics and performance metrics

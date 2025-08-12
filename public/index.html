@@ -132,7 +132,7 @@
         <section id="screen-home" class="screen active">
           <div class="particles" id="particles"></div>
           <div class="grid">
-                         <a href="./screens/touch.html" class="card fancy theme-cyan">
+             <a href="./screens/touch.html" class="card fancy theme-cyan">
                <div class="border-animation"></div>
                <div class="icon"></div>
                <span class="label">Touch Demo</span>
@@ -161,6 +161,11 @@
                <div class="border-animation"></div>
                <div class="icon"></div>
                <span class="label">3D Model</span>
+             </a>
+             <a href="./screens/printer.html" class="card fancy theme-red">
+               <div class="border-animation"></div>
+               <div class="icon"></div>
+               <span class="label">3D Printer Demo</span>
              </a>
              <a href="./screens/settings.html" class="card fancy theme-blue">
                <div class="border-animation"></div>
@@ -507,16 +512,51 @@
         transform: rotate(5deg) scale(1.1);
       }
       
-      /* Settings Card - Shake Effect */
+      /* 3D Printer Demo Card - Layered Effect */
       #screen-home .card:nth-child(7) {
-        transition: all 0.3s ease;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
       }
       
       #screen-home .card:nth-child(7) .icon::before {
+        content: "🖨️";
+      }
+      
+      #screen-home .card:nth-child(7)::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(transparent 0%, rgba(229, 57, 53, 0.1) 100%);
+        top: 0;
+        left: 0;
+        z-index: 1;
+        transform: translateY(100%);
+        transition: transform 0.5s ease;
+      }
+      
+      #screen-home .card:nth-child(7):hover::before {
+        transform: translateY(0);
+        animation: layerPrint 2s ease infinite;
+      }
+      
+      @keyframes layerPrint {
+        0% { transform: translateY(100%); }
+        50% { transform: translateY(0%); }
+        100% { transform: translateY(-100%); }
+      }
+      
+      /* Settings Card - Shake Effect */
+      #screen-home .card:nth-child(8) {
+        transition: all 0.3s ease;
+      }
+      
+      #screen-home .card:nth-child(8) .icon::before {
         content: "⚙️";
       }
       
-      #screen-home .card:nth-child(7):hover {
+      #screen-home .card:nth-child(8):hover {
         animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
       }
       
@@ -528,15 +568,15 @@
       }
       
       /* About Card - Expand Effect */
-      #screen-home .card:nth-child(8) {
+      #screen-home .card:nth-child(9) {
         transition: all 0.4s ease;
       }
       
-      #screen-home .card:nth-child(8) .icon::before {
+      #screen-home .card:nth-child(9) .icon::before {
         content: "ℹ️";
       }
       
-      #screen-home .card:nth-child(8):hover {
+      #screen-home .card:nth-child(9):hover {
         transform: scale(1.1);
         border-radius: 25px;
       }
@@ -567,6 +607,7 @@
       #screen-home .theme-white { border-color: #ffffff; }
       #screen-home .theme-lime { border-color: #cddc39; }
       #screen-home .theme-orange { border-color: #ff5722; }
+      #screen-home .theme-red { border-color: #e53935; }
       #screen-home .theme-blue { border-color: #2196f3; }
       #screen-home .theme-silver { border-color: #9e9e9e; }
       
