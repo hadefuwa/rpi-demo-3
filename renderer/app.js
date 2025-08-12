@@ -6,7 +6,7 @@
 
   // Simple in-app navigation stack so Back works
   let currentScreenId = 'screen-home';
-  const navStack = [];
+  let navStack = [];
   
   // Track if we're currently navigating to prevent recursive calls
   let isNavigating = false;
@@ -1161,13 +1161,9 @@
   const ipAddress = document.getElementById('ipAddress');
   const rootStorage = document.getElementById('rootStorage');
   const homeStorage = document.getElementById('homeStorage');
-  const btnRefreshStats = document.getElementById('btnRefreshStats');
-  const btnAutoRefresh = document.getElementById('btnAutoRefresh');
 
   // Initialize dashboard
   function initDashboard() {
-    console.log('Initializing dashboard...');
-    
     // Destroy existing charts if re-entering screen
     if (dashboardCharts.performance && typeof dashboardCharts.performance.destroy === 'function') {
       dashboardCharts.performance.destroy();
@@ -1182,27 +1178,11 @@
     initPerformanceChart();
     initMemoryChart();
 
-    // Set up event listeners without duplication
-    if (btnRefreshStats) {
-      btnRefreshStats.onclick = refreshDashboard;
-      console.log('Refresh button connected');
-    } else {
-      console.warn('Refresh button not found');
-    }
-    if (btnAutoRefresh) {
-      btnAutoRefresh.onclick = toggleAutoRefresh;
-      console.log('Auto-refresh button connected');
-    } else {
-      console.warn('Auto-refresh button not found');
-    }
-
-    // Restart auto-refresh cleanly
-    stopAutoRefresh();
+    // Start auto-refresh
     startAutoRefresh();
 
     // Initial refresh
     refreshDashboard();
-    console.log('Dashboard initialization complete');
   }
 
   function initPerformanceChart() {
@@ -1302,41 +1282,31 @@
   }
 
   async function refreshDashboard() {
-    console.log('Refreshing dashboard data...');
     try {
       const info = await window.api.getSystemInfo();
-      console.log('System info received:', info);
-      
-      if (!info) {
-        console.warn('No system info returned');
-        return;
-      }
+      if (!info) return;
       
       // Update stat bars and values
       if (cpuValue && typeof info.cpuPercent === 'number') {
         const cpuPct = Math.min(100, Math.max(0, info.cpuPercent));
         cpuValue.textContent = `${cpuPct}%`;
         if (cpuBar) cpuBar.style.width = `${cpuPct}%`;
-        console.log(`CPU: ${cpuPct}%`);
       }
       
       if (memValue && typeof info.memPercent === 'number') {
         const memPct = Math.min(100, Math.max(0, info.memPercent));
         memValue.textContent = `${memPct}%`;
         if (memBar) memBar.style.width = `${memPct}%`;
-        console.log(`Memory: ${memPct}%`);
       }
       
       if (tempValue && typeof info.tempC === 'number') {
         const tempPct = Math.max(0, Math.min(100, ((info.tempC - 30) / 55) * 100));
         tempValue.textContent = `${info.tempC.toFixed(1)}°C`;
         if (tempBar) tempBar.style.width = `${tempPct}%`;
-        console.log(`Temperature: ${info.tempC}°C`);
       }
       
       if (uptimeValue && info.uptime) {
         uptimeValue.textContent = info.uptime;
-        console.log(`Uptime: ${info.uptime}`);
       }
       
       if (wifiStatus && info.network) {
@@ -1414,75 +1384,11 @@
     }
   }
 
-  function toggleAutoRefresh() {
-    if (autoRefresh) {
-      stopAutoRefresh();
-      autoRefresh = false;
-      if (btnAutoRefresh) {
-        btnAutoRefresh.classList.remove('active');
-        btnAutoRefresh.textContent = '⏸️ Manual';
-      }
-    } else {
-      startAutoRefresh();
-      autoRefresh = true;
-      if (btnAutoRefresh) {
-        btnAutoRefresh.classList.add('active');
-        btnAutoRefresh.textContent = '⏱️ Auto';
-      }
-    }
-  }
-
   // Initialize dashboard when System Info screen is shown
   document.addEventListener('DOMContentLoaded', () => {
     // Check if we're on the System Info screen
     if (document.getElementById('screen-info')) {
       initDashboard();
-    }
-  });
-
-  // System action handlers
-  document.addEventListener('DOMContentLoaded', () => {
-    const btnSystemRestart = document.getElementById('btnSystemRestart');
-    const btnSystemShutdown = document.getElementById('btnSystemShutdown');
-    const btnSystemUpdate = document.getElementById('btnSystemUpdate');
-
-    if (btnSystemRestart) {
-      btnSystemRestart.addEventListener('click', () => {
-        if (confirm('Are you sure you want to restart the system?')) {
-          // This would require additional IPC handlers in main.js
-          console.log('System restart requested');
-          alert('Restart functionality requires additional system permissions');
-        }
-      });
-    }
-
-    if (btnSystemShutdown) {
-      btnSystemShutdown.addEventListener('click', () => {
-        if (confirm('Are you sure you want to shutdown the system?')) {
-          // This would require additional IPC handlers in main.js
-          console.log('System shutdown requested');
-          alert('Shutdown functionality requires additional system permissions');
-        }
-      });
-    }
-
-    if (btnSystemUpdate) {
-      btnSystemUpdate.addEventListener('click', async () => {
-        try {
-          btnSystemUpdate.textContent = '📦 Updating...';
-          btnSystemUpdate.disabled = true;
-          
-          // Simulate update process
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          
-          alert('System update completed! (This is a demo)');
-        } catch (error) {
-          alert('Update failed: ' + error.message);
-        } finally {
-          btnSystemUpdate.textContent = '📦 Update';
-          btnSystemUpdate.disabled = false;
-        }
-      });
     }
   });
 
@@ -3005,6 +2911,7 @@
   }
 
   // Drag-to-scroll fallback using Pointer Events
+  const scrollBox = document.getElementById('scrollbox');
   if (scrollBox) {
     let dragging = false;
     let startY = 0;
