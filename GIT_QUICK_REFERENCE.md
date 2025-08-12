@@ -19,3 +19,12 @@ git clean -fd
 npm install
 DISPLAY=:0 npm start
 
+
+cd ~
+rm -rf RPI-5Inch
+git clone https://github.com/hadefuwa/RPI-5Inch.git
+cd RPI-5Inch
+npm install
+DISPLAY=:0 npm start
+
+

@@ -1047,6 +1047,8 @@
 
   // Initialize dashboard
   function initDashboard() {
+    console.log('Dashboard initializing...');
+    
     // Destroy existing charts if re-entering screen
     if (dashboardCharts.performance && typeof dashboardCharts.performance.destroy === 'function') {
       dashboardCharts.performance.destroy();
@@ -1064,8 +1066,11 @@
     // Start auto-refresh
     startAutoRefresh();
 
-    // Initial refresh
-    refreshDashboard();
+    // Force immediate display of simulated data
+    setTimeout(() => {
+      console.log('Forcing initial simulated data display...');
+      refreshDashboard();
+    }, 100);
   }
 
   function initPerformanceChart() {
@@ -1219,56 +1224,61 @@
   }
 
   async function refreshDashboard() {
+    console.log('Refreshing dashboard...');
     try {
-      // Try to get real system info, fall back to simulated data
-      let info;
-      try {
-        info = await window.api.getSystemInfo();
-      } catch (error) {
-        console.log('Using simulated data for demo');
-        info = null;
-      }
+      // Always use simulated data for reliable demo
+      const simData = generateSimulatedData();
+      console.log('Generated simulated data:', simData);
       
-      // Use simulated data if real data is not available or incomplete
-      if (!info || typeof info.cpuPercent !== 'number' || typeof info.memPercent !== 'number') {
-        const simData = generateSimulatedData();
-        info = {
-          cpuPercent: Math.round(simData.cpuPercent),
-          memPercent: Math.round(simData.memPercent),
-          tempC: simData.tempC,
-          uptime: simData.uptime,
-          network: {
-            wifiStatus: 'Connected',
-            ipAddress: '192.168.1.150'
-          },
-          storage: {
-            root: '8.2 GB / 32.0 GB (26% used)',
-            home: '2.1 GB / 32.0 GB (7% used)'
-          }
-        };
-      }
+      const info = {
+        cpuPercent: Math.round(simData.cpuPercent),
+        memPercent: Math.round(simData.memPercent),
+        tempC: simData.tempC,
+        uptime: simData.uptime,
+        network: {
+          wifiStatus: 'Connected',
+          ipAddress: '192.168.1.150'
+        },
+        storage: {
+          root: '8.2 GB / 32.0 GB (26% used)',
+          home: '2.1 GB / 32.0 GB (7% used)'
+        }
+      };
       
       // Update stat bars and values
       if (cpuValue && typeof info.cpuPercent === 'number') {
         const cpuPct = Math.min(100, Math.max(0, info.cpuPercent));
+        console.log('Setting CPU:', cpuPct + '%');
         cpuValue.textContent = `${cpuPct}%`;
-        if (cpuBar) cpuBar.style.width = `${cpuPct}%`;
+        if (cpuBar) {
+          cpuBar.style.width = `${cpuPct}%`;
+          console.log('CPU bar width set to:', cpuBar.style.width);
+        }
       }
       
       if (memValue && typeof info.memPercent === 'number') {
         const memPct = Math.min(100, Math.max(0, info.memPercent));
+        console.log('Setting Memory:', memPct + '%');
         memValue.textContent = `${memPct}%`;
-        if (memBar) memBar.style.width = `${memPct}%`;
+        if (memBar) {
+          memBar.style.width = `${memPct}%`;
+          console.log('Memory bar width set to:', memBar.style.width);
+        }
       }
       
       if (tempValue && typeof info.tempC === 'number') {
         const tempPct = Math.max(0, Math.min(100, ((info.tempC - 30) / 55) * 100));
+        console.log('Setting Temperature:', info.tempC.toFixed(1) + '°C', 'Bar:', tempPct + '%');
         tempValue.textContent = `${info.tempC.toFixed(1)}°C`;
-        if (tempBar) tempBar.style.width = `${tempPct}%`;
+        if (tempBar) {
+          tempBar.style.width = `${tempPct}%`;
+          console.log('Temperature bar width set to:', tempBar.style.width);
+        }
       }
       
       if (uptimeValue && info.uptime) {
         uptimeValue.textContent = info.uptime;
+        console.log('Setting uptime:', info.uptime);
       }
       
       if (wifiStatus && info.network) {
