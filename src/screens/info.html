@@ -529,9 +529,8 @@
     }
     
     function goHome() {
-      if (window.showcaseFramework && window.showcaseFramework.goHome) {
-        window.showcaseFramework.goHome();
-      }
+      // Direct navigation back to home
+      window.location.href = '../../public/index.html';
     }
     
     // Lifecycle management

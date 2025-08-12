@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
-    <title>RPI 5" Showcase</title>
+    <title>RPI 5" Showcase - Home</title>
     
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="./manifest.json" />
@@ -24,58 +24,55 @@
     <div id="app">
       <header class="topbar">
         <img src="./assets/Matrix.png" alt="Matrix TSL" class="logo top-logo animated-logo2" />
-        <button id="btnHome" class="chip">Home</button>
+        <h1 class="title">RPI Showcase</h1>
       </header>
 
       <main id="main-content">
-        <!-- Screen container for dynamic app loading -->
-        <div id="screen-container">
-          <!-- Fallback home screen content in case dynamic loading fails -->
-          <section id="screen-home" class="screen active">
-            <div class="grid">
-              <button type="button" class="card fancy theme-cyan" data-target="screen-touch">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">Touch Demo</span>
-              </button>
-              <button type="button" class="card fancy theme-purple" data-target="screen-info">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">System Info</span>
-              </button>
-              <button type="button" class="card fancy theme-gold" data-target="screen-games">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">Games Hub</span>
-              </button>
-              <button type="button" class="card fancy theme-white" data-target="screen-scroll">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">Scroll Test</span>
-              </button>
-              <button type="button" class="card fancy theme-lime" data-target="screen-visuals">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">Visuals</span>
-              </button>
-              <button type="button" class="card fancy theme-orange" data-target="screen-stl">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">3D Model</span>
-              </button>
-              <button type="button" class="card fancy theme-blue" data-target="screen-settings">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">Settings</span>
-              </button>
-              <button type="button" class="card fancy theme-silver" data-target="screen-about">
-                <div class="border-animation"></div>
-                <div class="icon"></div>
-                <span class="label">About</span>
-              </button>
-            </div>
-          </section>
-        </div>
+        <!-- Home screen content -->
+        <section id="screen-home" class="screen active">
+          <div class="grid">
+            <a href="../src/screens/touch.html" class="card fancy theme-cyan">
+              <div class="border-animation"></div>
+              <div class="icon"></div>
+              <span class="label">Touch Demo</span>
+            </a>
+            <a href="../src/screens/info.html" class="card fancy theme-purple">
+              <div class="border-animation"></div>
+              <div class="icon"></div>
+              <span class="label">System Info</span>
+            </a>
+            <a href="../src/screens/games.html" class="card fancy theme-gold">
+              <div class="border-animation"></div>
+              <div class="icon"></div>
+              <span class="label">Games Hub</span>
+            </a>
+            <a href="../src/screens/scroll.html" class="card fancy theme-white">
+              <div class="border-animation"></div>
+              <div class="icon"></div>
+              <span class="label">Scroll Test</span>
+            </a>
+            <a href="../src/screens/visuals.html" class="card fancy theme-lime">
+              <div class="border-animation"></div>
+              <div class="icon"></div>
+              <span class="label">Visuals</span>
+            </a>
+            <a href="../src/screens/stl.html" class="card fancy theme-orange">
+              <div class="border-animation"></div>
+              <div class="icon"></div>
+              <span class="label">3D Model</span>
+            </a>
+            <a href="../src/screens/settings.html" class="card fancy theme-blue">
+              <div class="border-animation"></div>
+              <div class="icon"></div>
+              <span class="label">Settings</span>
+            </a>
+            <a href="../src/screens/about.html" class="card fancy theme-silver">
+              <div class="border-animation"></div>
+              <div class="icon"></div>
+              <span class="label">About</span>
+            </a>
+          </div>
+        </section>
       </main>
     </div>
     
@@ -124,26 +121,16 @@
         animation: pulse 2s infinite;
       }
       
+      .title {
+        font-size: 24px;
+        font-weight: 600;
+        color: white;
+        margin: 0;
+      }
+      
       @keyframes pulse {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.7; }
-      }
-      
-      .chip {
-        padding: 8px 16px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 14px;
-      }
-      
-      .chip:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.5);
-        transform: translateY(-1px);
       }
       
       /* Main content area */
@@ -153,26 +140,14 @@
         position: relative;
       }
       
-      #screen-container {
-        height: 100%;
-        width: 100%;
-      }
-      
       /* Screen base styles */
       .screen {
-        display: none;
+        display: block;
         height: 100%;
         width: 100%;
-        position: absolute;
-        top: 0;
-        left: 0;
       }
       
-      .screen.active {
-        display: block;
-      }
-      
-      /* Home screen specific styles */
+      /* Home screen specific styles - scoped to #screen-home */
       #screen-home {
         display: flex;
         flex-direction: column;
@@ -192,7 +167,7 @@
         width: 100%;
       }
       
-      .card {
+      #screen-home .card {
         background: rgba(255, 255, 255, 0.1);
         border: 2px solid rgba(255, 255, 255, 0.2);
         border-radius: 15px;
@@ -208,16 +183,18 @@
         align-items: center;
         justify-content: center;
         z-index: 2;
+        text-decoration: none;
+        color: white;
       }
       
-      .card:hover {
+      #screen-home .card:hover {
         background: rgba(255, 255, 255, 0.2);
         border-color: rgba(255, 255, 255, 0.4);
         transform: translateY(-5px);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
       }
       
-      .card .label {
+      #screen-home .card .label {
         font-size: 18px;
         font-weight: 600;
         margin-top: 15px;
@@ -225,7 +202,7 @@
         position: relative;
       }
       
-      .card .icon {
+      #screen-home .card .icon {
         width: 50px;
         height: 50px;
         background: rgba(255, 255, 255, 0.2);
@@ -235,7 +212,7 @@
         position: relative;
       }
       
-      .card .border-animation {
+      #screen-home .card .border-animation {
         position: absolute;
         top: 0;
         left: 0;
@@ -254,14 +231,14 @@
       }
       
       /* Theme variations */
-      .theme-cyan { border-color: #00bcd4; }
-      .theme-purple { border-color: #9c27b0; }
-      .theme-gold { border-color: #ff9800; }
-      .theme-white { border-color: #ffffff; }
-      .theme-lime { border-color: #cddc39; }
-      .theme-orange { border-color: #ff5722; }
-      .theme-blue { border-color: #2196f3; }
-      .theme-silver { border-color: #9e9e9e; }
+      #screen-home .theme-cyan { border-color: #00bcd4; }
+      #screen-home .theme-purple { border-color: #9c27b0; }
+      #screen-home .theme-gold { border-color: #ff9800; }
+      #screen-home .theme-white { border-color: #ffffff; }
+      #screen-home .theme-lime { border-color: #cddc39; }
+      #screen-home .theme-orange { border-color: #ff5722; }
+      #screen-home .theme-blue { border-color: #2196f3; }
+      #screen-home .theme-silver { border-color: #9e9e9e; }
       
       /* Responsive design */
       @media (max-width: 768px) {
@@ -270,219 +247,21 @@
           gap: 15px;
         }
         
-        .card {
+        #screen-home .card {
           padding: 20px 15px;
           min-height: 120px;
         }
         
-        .card .label {
+        #screen-home .card .label {
           font-size: 16px;
         }
         
-        .card .icon {
+        #screen-home .card .icon {
           width: 40px;
           height: 40px;
         }
       }
     </style>
-    
-    <!-- EMBEDDED JAVASCRIPT - No external JS files -->
-    <script>
-      (function() {
-        'use strict';
-        
-        // Showcase Framework
-        window.showcaseFramework = {
-          currentApp: null,
-          apps: {},
-          
-          // Load a mini app
-          loadApp: function(appId) {
-            console.log(`Loading app: ${appId}`);
-            
-            // Hide current app
-            if (this.currentApp) {
-              this.hideApp(this.currentApp);
-            }
-            
-                      // Load new app
-          console.log(`Attempting to load app from: ../src/screens/${appId}.html`);
-          fetch(`../src/screens/${appId}.html`)
-            .then(response => {
-              console.log(`Fetch response status: ${response.status}`);
-              if (!response.ok) {
-                throw new Error(`Failed to load app: ${response.status}`);
-              }
-              return response.text();
-            })
-            .then(html => {
-              console.log(`App HTML loaded, length: ${html.length} characters`);
-              // Insert app HTML
-              document.getElementById('screen-container').innerHTML = html;
-              
-              // Activate app
-              this.currentApp = appId;
-              this.activateApp(appId);
-              
-              console.log(`App ${appId} loaded successfully`);
-            })
-            .catch(error => {
-              console.error('Failed to load app:', error);
-              // Show error in the container
-              document.getElementById('screen-container').innerHTML = `
-                <div style="color: white; text-align: center; padding: 50px;">
-                  <h2>Error Loading App: ${appId}</h2>
-                  <p>${error.message}</p>
-                  <p>Path attempted: ./src/screens/${appId}.html</p>
-                  <button onclick="showcaseFramework.goHome()" style="padding: 10px 20px; margin: 20px;">Go Home</button>
-                </div>
-              `;
-            });
-          },
-          
-          // Hide an app
-          hideApp: function(appId) {
-            console.log(`Hiding app: ${appId}`);
-            if (window.appLifecycle && window.appLifecycle.deactivate) {
-              window.appLifecycle.deactivate();
-            }
-          },
-          
-          // Activate an app
-          activateApp: function(appId) {
-            console.log(`Activating app: ${appId}`);
-            if (window.appLifecycle && window.appLifecycle.activate) {
-              window.appLifecycle.activate();
-            }
-          },
-          
-          // Go home
-          goHome: function() {
-            console.log('Going home');
-            this.loadApp('home');
-          },
-          
-          // Navigate to specific app
-          navigateTo: function(appId) {
-            console.log(`Navigating to: ${appId}`);
-            this.loadApp(appId);
-          },
-          
-          // Performance monitoring
-          performance: {
-            measureAppLoad: function(appId) {
-              const start = performance.now();
-              return {
-                end: function() {
-                  const duration = performance.now() - start;
-                  console.log(`${appId} loaded in ${duration.toFixed(2)}ms`);
-                  return duration;
-                }
-              };
-            },
-            
-            monitorMemory: function() {
-              if (performance.memory) {
-                console.log('Memory usage:', {
-                  used: Math.round(performance.memory.usedJSHeapSize / 1048576) + 'MB',
-                  total: Math.round(performance.memory.totalJSHeapSize / 1048576) + 'MB',
-                  limit: Math.round(performance.memory.jsHeapSizeLimit / 1048576) + 'MB'
-                });
-              }
-            }
-          }
-        };
-        
-        // Initialize showcase
-        function initShowcase() {
-          console.log('Initializing showcase framework');
-          
-          // Load home screen by default
-          showcaseFramework.goHome();
-          
-          // Setup navigation event listeners
-          setupNavigation();
-          
-          // Setup service worker
-          setupServiceWorker();
-          
-          // Setup PWA install prompt
-          setupPWAInstall();
-        }
-        
-        // Setup navigation
-        function setupNavigation() {
-          // Handle home button
-          document.getElementById('btnHome').addEventListener('click', function() {
-            showcaseFramework.goHome();
-          });
-          
-          // Handle card clicks for the fallback home screen
-          document.addEventListener('click', function(e) {
-            if (e.target.closest('.card')) {
-              const card = e.target.closest('.card');
-              const target = card.dataset.target;
-              if (target) {
-                console.log('Card clicked:', target);
-                const appId = target.replace('screen-', '');
-                showcaseFramework.navigateTo(appId);
-              }
-            }
-          });
-        }
-        
-        // Setup service worker
-        function setupServiceWorker() {
-          if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-              navigator.serviceWorker.register('./sw.js')
-                .then((registration) => {
-                  console.log('Service Worker registered successfully:', registration);
-                  
-                  // Check for updates
-                  registration.addEventListener('updatefound', () => {
-                    const newWorker = registration.installing;
-                    newWorker.addEventListener('statechange', () => {
-                      if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        // New content is available, refresh the page
-                        if (confirm('New version available! Reload to update?')) {
-                          window.location.reload();
-                        }
-                      }
-                    });
-                  });
-                })
-                .catch((registrationError) => {
-                  console.log('Service Worker registration failed:', registrationError);
-                });
-            });
-          }
-        }
-        
-        // Setup PWA install prompt
-        function setupPWAInstall() {
-          let deferredPrompt;
-          window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            console.log('PWA install prompt ready');
-          });
-          
-          // Handle PWA installation
-          window.addEventListener('appinstalled', () => {
-            console.log('PWA was installed');
-            deferredPrompt = null;
-          });
-        }
-        
-        // Initialize when DOM is ready
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', initShowcase);
-        } else {
-          initShowcase();
-        }
-      })();
-    </script>
   </body>
 </html>
 
