@@ -1135,15 +1135,7 @@
     initPerformanceChart();
     initMemoryChart();
 
-    // Set up event listeners without duplication
-    if (btnRefreshStats) {
-      btnRefreshStats.onclick = refreshDashboard;
-    }
-    if (btnAutoRefresh) {
-      btnAutoRefresh.onclick = toggleAutoRefresh;
-    }
-
-    // Restart auto-refresh cleanly
+    // Start auto-refresh immediately
     stopAutoRefresh();
     startAutoRefresh();
 
@@ -1347,24 +1339,6 @@
     if (refreshInterval) {
       clearInterval(refreshInterval);
       refreshInterval = null;
-    }
-  }
-
-  function toggleAutoRefresh() {
-    if (autoRefresh) {
-      stopAutoRefresh();
-      autoRefresh = false;
-      if (btnAutoRefresh) {
-        btnAutoRefresh.classList.remove('active');
-        btnAutoRefresh.textContent = '⏸️ Manual';
-      }
-    } else {
-      startAutoRefresh();
-      autoRefresh = true;
-      if (btnAutoRefresh) {
-        btnAutoRefresh.classList.add('active');
-        btnAutoRefresh.textContent = '⏱️ Auto';
-      }
     }
   }
 

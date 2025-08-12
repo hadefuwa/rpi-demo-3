@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Fresh Touch Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        #testResults {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Fresh Touch Demo Test</h1>
+        
+        <div class="test-section">
+            <h3>Touch Demo Object Test</h3>
+            <button class="test-button" onclick="testTouchDemoObject()">Test TouchDemo Object</button>
+            <button class="test-button" onclick="testTouchDemoInit()">Test TouchDemo.init()</button>
+            <button class="test-button" onclick="testTouchDemoCleanup()">Test TouchDemo.cleanup()</button>
+            <button class="test-button" onclick="testTouchDemoLifecycle()">Test Full Lifecycle</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Canvas Test</h3>
+            <button class="test-button" onclick="testCanvasCreation()">Test Canvas Creation</button>
+            <button class="test-button" onclick="testCanvasSizing()">Test Canvas Sizing</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Event Listener Test</h3>
+            <button class="test-button" onclick="testEventListeners()">Test Event Listeners</button>
+            <button class="test-button" onclick="testEventCleanup()">Test Event Cleanup</button>
+        </div>
+        
+        <div id="testResults"></div>
+    </div>
+
+    <script>
+        // Mock the TouchDemo object for testing
+        const TouchDemo = {
+            isInitialized: false,
+            canvas: null,
+            ctx: null,
+            painting: false,
+            brushColor: '#ffffff',
+            brushSize: 8,
+            lastPos: null,
+            eventListeners: [],
+            
+            init() {
+                if (this.isInitialized) {
+                    console.log('Touch demo already initialized');
+                    return false;
+                }
+                
+                console.log('Initializing fresh touch demo...');
+                
+                // Find the canvas
+                this.canvas = document.getElementById('paint');
+                if (!this.canvas) {
+                    console.log('Canvas not found, will retry when screen is ready');
+                    return false;
+                }
+                
+                // Wait for the canvas to have proper dimensions
+                if (this.canvas.offsetWidth < 100 || this.canvas.offsetHeight < 100) {
+                    console.log('Canvas dimensions too small, waiting for proper sizing...');
+                    setTimeout(() => this.init(), 200);
+                    return false;
+                }
+                
+                // Get the context
+                this.ctx = this.canvas.getContext('2d');
+                if (!this.ctx) {
+                    console.error('Failed to get canvas context');
+                    return false;
+                }
+                
+                // Set up the canvas
+                this.setupCanvas();
+                
+                // Bind events
+                this.bindEvents();
+                
+                // Mark as initialized
+                this.isInitialized = true;
+                console.log('Touch demo initialized successfully');
+                return true;
+            },
+            
+            setupCanvas() {
+                const rect = this.canvas.getBoundingClientRect();
+                const width = Math.min(rect.width, 1024);
+                const height = Math.min(rect.height, 400);
+                
+                // Set canvas size
+                this.canvas.width = width;
+                this.canvas.height = height;
+                
+                // Configure the context
+                this.ctx.fillStyle = this.brushColor;
+                this.ctx.strokeStyle = this.brushColor;
+                this.ctx.lineWidth = this.brushSize;
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+                
+                // Clear and draw initial content
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.drawWelcomeMessage();
+            },
+            
+            drawWelcomeMessage() {
+                this.ctx.fillStyle = '#333';
+                this.ctx.fillRect(10, 10, 200, 60);
+                this.ctx.fillStyle = '#fff';
+                this.ctx.font = '16px Arial';
+                this.ctx.fillText('Touch Demo Ready!', 20, 35);
+                this.ctx.fillText('Draw with your finger', 20, 55);
+            },
+            
+            bindEvents() {
+                // Mouse events
+                this.addListener(this.canvas, 'mousedown', this.start.bind(this));
+                this.addListener(this.canvas, 'mousemove', this.draw.bind(this));
+                this.addListener(this.canvas, 'mouseup', this.end.bind(this));
+                this.addListener(this.canvas, 'mouseleave', this.end.bind(this));
+                
+                // Touch events
+                this.addListener(this.canvas, 'touchstart', this.start.bind(this), { passive: false });
+                this.addListener(this.canvas, 'touchmove', this.draw.bind(this), { passive: false });
+                this.addListener(this.canvas, 'touchend', this.end.bind(this), { passive: false });
+            },
+            
+            addListener(element, event, handler, options) {
+                element.addEventListener(event, handler, options);
+                this.eventListeners.push({ element, event, handler, options });
+            },
+            
+            start(e) {
+                e.preventDefault();
+                this.painting = true;
+                this.lastPos = this.getPos(e);
+                
+                // Draw initial dot
+                this.ctx.beginPath();
+                this.ctx.arc(this.lastPos.x, this.lastPos.y, this.brushSize / 2, 0, Math.PI * 2);
+                this.ctx.fill();
+            },
+            
+            draw(e) {
+                if (!this.painting) return;
+                e.preventDefault();
+                
+                const pos = this.getPos(e);
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.lastPos.x, this.lastPos.y);
+                this.ctx.lineTo(pos.x, pos.y);
+                this.ctx.stroke();
+                
+                this.lastPos = pos;
+            },
+            
+            end(e) {
+                e.preventDefault();
+                this.painting = false;
+                this.lastPos = null;
+            },
+            
+            getPos(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                let clientX, clientY;
+                
+                if (e.touches && e.touches[0]) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+                
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            },
+            
+            cleanup() {
+                console.log('Cleaning up touch demo...');
+                
+                // Remove all event listeners
+                this.eventListeners.forEach(({ element, event, handler, options }) => {
+                    if (element && element.removeEventListener) {
+                        element.removeEventListener(event, handler, options);
+                    }
+                });
+                
+                // Reset state
+                this.eventListeners = [];
+                this.painting = false;
+                this.lastPos = null;
+                this.canvas = null;
+                this.ctx = null;
+                this.isInitialized = false;
+                
+                console.log('Touch demo cleanup completed');
+            }
+        };
+
+        // Test functions
+        function logResult(message, type = 'info') {
+            const results = document.getElementById('testResults');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            results.textContent += logEntry;
+            results.scrollTop = results.scrollHeight;
+            
+            // Also log to console
+            if (type === 'error') {
+                console.error(message);
+            } else if (type === 'success') {
+                console.log(message);
+            } else {
+                console.info(message);
+            }
+        }
+
+        function testTouchDemoObject() {
+            logResult('Testing TouchDemo object structure...');
+            
+            try {
+                // Check if all required methods exist
+                const requiredMethods = ['init', 'cleanup', 'setupCanvas', 'bindEvents', 'addListener'];
+                const requiredProperties = ['isInitialized', 'canvas', 'ctx', 'painting', 'brushColor', 'brushSize', 'lastPos', 'eventListeners'];
+                
+                const missingMethods = requiredMethods.filter(method => typeof TouchDemo[method] !== 'function');
+                const missingProperties = requiredProperties.filter(prop => !(prop in TouchDemo));
+                
+                if (missingMethods.length === 0 && missingProperties.length === 0) {
+                    logResult('✓ TouchDemo object structure is correct', 'success');
+                } else {
+                    logResult(`✗ Missing methods: ${missingMethods.join(', ')}`, 'error');
+                    logResult(`✗ Missing properties: ${missingProperties.join(', ')}`, 'error');
+                }
+                
+                // Check initial state
+                if (TouchDemo.isInitialized === false && 
+                    TouchDemo.canvas === null && 
+                    TouchDemo.ctx === null && 
+                    TouchDemo.eventListeners.length === 0) {
+                    logResult('✓ TouchDemo initial state is correct', 'success');
+                } else {
+                    logResult('✗ TouchDemo initial state is incorrect', 'error');
+                }
+                
+            } catch (error) {
+                logResult(`✗ Error testing TouchDemo object: ${error.message}`, 'error');
+            }
+        }
+
+        function testTouchDemoInit() {
+            logResult('Testing TouchDemo.init()...');
+            
+            try {
+                // Create a test canvas
+                const testCanvas = document.createElement('canvas');
+                testCanvas.id = 'paint';
+                testCanvas.style.width = '400px';
+                testCanvas.style.height = '300px';
+                document.body.appendChild(testCanvas);
+                
+                // Test initialization
+                const result = TouchDemo.init();
+                
+                if (result === true && TouchDemo.isInitialized === true) {
+                    logResult('✓ TouchDemo.init() successful', 'success');
+                } else {
+                    logResult('✗ TouchDemo.init() failed', 'error');
+                }
+                
+                // Clean up test canvas
+                document.body.removeChild(testCanvas);
+                TouchDemo.cleanup();
+                
+            } catch (error) {
+                logResult(`✗ Error testing TouchDemo.init(): ${error.message}`, 'error');
+            }
+        }
+
+        function testTouchDemoCleanup() {
+            logResult('Testing TouchDemo.cleanup()...');
+            
+            try {
+                // First initialize
+                const testCanvas = document.createElement('canvas');
+                testCanvas.id = 'paint';
+                testCanvas.style.width = '400px';
+                testCanvas.style.height = '300px';
+                document.body.appendChild(testCanvas);
+                
+                TouchDemo.init();
+                
+                // Now test cleanup
+                TouchDemo.cleanup();
+                
+                if (TouchDemo.isInitialized === false && 
+                    TouchDemo.canvas === null && 
+                    TouchDemo.ctx === null && 
+                    TouchDemo.eventListeners.length === 0) {
+                    logResult('✓ TouchDemo.cleanup() successful', 'success');
+                } else {
+                    logResult('✗ TouchDemo.cleanup() failed', 'error');
+                }
+                
+                // Clean up test canvas
+                document.body.removeChild(testCanvas);
+                
+            } catch (error) {
+                logResult(`✗ Error testing TouchDemo.cleanup(): ${error.message}`, 'error');
+            }
+        }
+
+        function testTouchDemoLifecycle() {
+            logResult('Testing TouchDemo full lifecycle...');
+            
+            try {
+                // Create test canvas
+                const testCanvas = document.createElement('canvas');
+                testCanvas.id = 'paint';
+                testCanvas.style.width = '400px';
+                testCanvas.style.height = '300px';
+                document.body.appendChild(testCanvas);
+                
+                // Test multiple init/cleanup cycles
+                for (let i = 1; i <= 3; i++) {
+                    logResult(`Cycle ${i}: Initializing...`);
+                    const initResult = TouchDemo.init();
+                    
+                    if (initResult === true) {
+                        logResult(`Cycle ${i}: ✓ Initialization successful`, 'success');
+                    } else {
+                        logResult(`Cycle ${i}: ✗ Initialization failed`, 'error');
+                        break;
+                    }
+                    
+                    logResult(`Cycle ${i}: Cleaning up...`);
+                    TouchDemo.cleanup();
+                    
+                    if (TouchDemo.isInitialized === false) {
+                        logResult(`Cycle ${i}: ✓ Cleanup successful`, 'success');
+                    } else {
+                        logResult(`Cycle ${i}: ✗ Cleanup failed`, 'error');
+                        break;
+                    }
+                }
+                
+                logResult('✓ Full lifecycle test completed', 'success');
+                
+                // Clean up test canvas
+                document.body.removeChild(testCanvas);
+                
+            } catch (error) {
+                logResult(`✗ Error testing TouchDemo lifecycle: ${error.message}`, 'error');
+            }
+        }
+
+        function testCanvasCreation() {
+            logResult('Testing canvas creation...');
+            
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.id = 'paint';
+                canvas.style.width = '400px';
+                canvas.style.height = '300px';
+                
+                document.body.appendChild(canvas);
+                
+                const ctx = canvas.getContext('2d');
+                
+                if (ctx) {
+                    logResult('✓ Canvas creation successful', 'success');
+                } else {
+                    logResult('✗ Canvas creation failed', 'error');
+                }
+                
+                // Clean up
+                document.body.removeChild(canvas);
+                
+            } catch (error) {
+                logResult(`✗ Error testing canvas creation: ${error.message}`, 'error');
+            }
+        }
+
+        function testCanvasSizing() {
+            logResult('Testing canvas sizing...');
+            
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.id = 'paint';
+                canvas.style.width = '400px';
+                canvas.style.height = '300px';
+                
+                document.body.appendChild(canvas);
+                
+                // Test getBoundingClientRect
+                const rect = canvas.getBoundingClientRect();
+                
+                if (rect.width > 0 && rect.height > 0) {
+                    logResult(`✓ Canvas dimensions: ${rect.width} x ${rect.height}`, 'success');
+                } else {
+                    logResult('✗ Canvas dimensions are zero', 'error');
+                }
+                
+                // Clean up
+                document.body.removeChild(canvas);
+                
+            } catch (error) {
+                logResult(`✗ Error testing canvas sizing: ${error.message}`, 'error');
+            }
+        }
+
+        function testEventListeners() {
+            logResult('Testing event listeners...');
+            
+            try {
+                const testElement = document.createElement('div');
+                const testHandler = () => {};
+                
+                TouchDemo.addListener(testElement, 'click', testHandler);
+                
+                if (TouchDemo.eventListeners.length === 1) {
+                    logResult('✓ Event listener added successfully', 'success');
+                } else {
+                    logResult('✗ Event listener not added', 'error');
+                }
+                
+                // Clean up
+                TouchDemo.cleanup();
+                
+            } catch (error) {
+                logResult(`✗ Error testing event listeners: ${error.message}`, 'error');
+            }
+        }
+
+        function testEventCleanup() {
+            logResult('Testing event listener cleanup...');
+            
+            try {
+                const testElement = document.createElement('div');
+                const testHandler = () => {};
+                
+                TouchDemo.addListener(testElement, 'click', testHandler);
+                
+                if (TouchDemo.eventListeners.length === 1) {
+                    TouchDemo.cleanup();
+                    
+                    if (TouchDemo.eventListeners.length === 0) {
+                        logResult('✓ Event listener cleanup successful', 'success');
+                    } else {
+                        logResult('✗ Event listener cleanup failed', 'error');
+                    }
+                } else {
+                    logResult('✗ Event listener not added for cleanup test', 'error');
+                }
+                
+            } catch (error) {
+                logResult(`✗ Error testing event cleanup: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize test results
+        document.getElementById('testResults').textContent = 'Touch Demo Test Results:\n';
+        logResult('Test page loaded. Click test buttons to run tests.');
+    </script>
+</body>
+</html>
