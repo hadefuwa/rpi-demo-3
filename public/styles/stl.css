@@ -1,0 +1,17 @@
+/* STL viewer */
+#stlCanvas { width: 100%; height: clamp(250px, 45vh, 450px); border-radius: var(--radius-md); background: #0b0e13; border: 2px solid rgba(255,255,255,0.1); max-width: 100%; }
+.stl-controls { display: flex; flex-direction: column; gap: var(--spacing-sm); align-items: center; margin-top: var(--spacing-md); }
+.stl-models { display: flex; gap: var(--spacing-sm); margin-bottom: var(--spacing-md); flex-wrap: wrap; justify-content: center; }
+.stl-wrap { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-md); }
+.stl-controls .chip { min-width: 80px; text-align: center; }
+.chip.big { font-size: var(--font-xl); padding: var(--spacing-md) var(--spacing-lg); min-width: 100px; }
+.chip.small { font-size: var(--font-sm); padding: var(--spacing-xs) var(--spacing-sm); }
+.chip.warning { background: #ffa500; border-color: #ffa500; color: #000; }
+.chip.danger { background: #ff4444; border-color: #ff4444; color: #fff; }
+
+@media (max-width: 768px) {
+  .stl-controls { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+  .stl-controls .chip { min-width: 60px; }
+}
+
+

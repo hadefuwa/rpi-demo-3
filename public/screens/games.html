@@ -1,0 +1,209 @@
+<section id="screen-games" class="screen">
+  <div class="panel">
+    <div class="toolbar">
+      <h2>Games Hub</h2>
+      <button id="btnHome" class="chip">Home</button>
+    </div>
+    <div class="games-grid">
+      <a href="game.html" class="game-card theme-gold">
+        <span class="game-icon">⭕</span>
+        <span class="game-title">Tic-Tac-Toe</span>
+        <span class="game-desc">Classic 3x3 grid game</span>
+      </a>
+      
+      <a href="memory.html" class="game-card theme-teal">
+        <span class="game-icon">🧠</span>
+        <span class="game-title">Memory Match</span>
+        <span class="game-desc">Find matching food pairs</span>
+      </a>
+      
+      <a href="snake.html" class="game-card theme-pink">
+        <span class="game-icon">🐍</span>
+        <span class="game-title">Snake</span>
+        <span class="game-desc">Grow your snake, avoid walls</span>
+      </a>
+      
+      <a href="pingpong.html" class="game-card theme-red">
+        <span class="game-icon">🏓</span>
+        <span class="game-title">Ping Pong</span>
+        <span class="game-desc">You vs AI, first to 11 wins</span>
+      </a>
+    </div>
+    <div class="note">Tap any game to start playing!</div>
+  </div>
+</section>
+
+<style>
+  /* Games Hub Specific Styles - All scoped to #screen-games */
+  #screen-games {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-family: 'Arial', sans-serif;
+    padding: 20px;
+  }
+  
+  #screen-games .panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  #screen-games .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+  }
+  
+  #screen-games h2 {
+    font-size: 2.5em;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  }
+  
+  #screen-games .chip {
+    padding: 10px 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 25px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    text-decoration: none;
+  }
+  
+  #screen-games .chip:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-2px);
+  }
+  
+  #screen-games .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 800px;
+  }
+  
+  #screen-games .game-card {
+    background: rgba(255,255,255,0.1);
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  #screen-games .game-card:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+  
+  #screen-games .game-icon {
+    font-size: 3em;
+    display: block;
+  }
+  
+  #screen-games .game-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 0;
+  }
+  
+  #screen-games .game-desc {
+    font-size: 1em;
+    opacity: 0.8;
+    margin: 0;
+  }
+  
+  #screen-games .note {
+    text-align: center;
+    font-size: 1.2em;
+    opacity: 0.8;
+    margin-top: 20px;
+  }
+  
+  /* Theme variations */
+  #screen-games .theme-gold { border-color: #ffd700; }
+  #screen-games .theme-teal { border-color: #20b2aa; }
+  #screen-games .theme-pink { border-color: #ff69b4; }
+  #screen-games .theme-red { border-color: #ff6347; }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    #screen-games .games-grid {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+    }
+    
+    #screen-games .game-card {
+      padding: 20px 15px;
+    }
+    
+    #screen-games .game-icon {
+      font-size: 2.5em;
+    }
+    
+    #screen-games .game-title {
+      font-size: 1.3em;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    'use strict';
+    
+    function initGames() {
+      console.log('Games Hub initialized');
+      
+      // Setup home button
+      document.getElementById('btnHome').addEventListener('click', goHome);
+    }
+    
+    function goHome() {
+      // Direct navigation back to home
+      window.location.href = '../index.html';
+    }
+    
+    // Lifecycle management
+    window.appLifecycle = {
+      activate: function() {
+        console.log('Games Hub activated');
+        initGames();
+      },
+      
+      deactivate: function() {
+        console.log('Games Hub deactivated');
+      },
+      
+      cleanup: function() {
+        console.log('Games Hub cleanup');
+      }
+    };
+    
+    // Initialize app
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initGames);
+    } else {
+      initGames();
+    }
+  })();
+</script>
