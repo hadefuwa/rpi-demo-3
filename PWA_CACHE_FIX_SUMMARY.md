@@ -50,8 +50,7 @@ Your PWA was serving yesterday's files due to aggressive caching by the service 
 
 ### 6. New Development Scripts ✅
 - **Files**: 
-  - `scripts/dev-fresh.sh` (Linux/Mac)
-  - `scripts/dev-fresh.bat` (Windows)
+  - `scripts/dev-fresh.sh` (Raspberry Pi/Linux)
 - **Features**:
   - Temporary disposable profiles
   - Maximum cache disabling
@@ -60,8 +59,7 @@ Your PWA was serving yesterday's files due to aggressive caching by the service 
 
 ### 7. Cache Clearing Scripts ✅
 - **Files**:
-  - `scripts/clear-all-caches.sh` (Linux/Mac)
-  - `scripts/clear-all-caches.bat` (Windows)
+  - `scripts/clear-all-caches.sh` (Raspberry Pi/Linux)
 - **Features**:
   - Complete Chromium profile cleanup
   - Service Worker cache removal
@@ -72,12 +70,10 @@ Your PWA was serving yesterday's files due to aggressive caching by the service 
 
 ```bash
 # Development with fresh content (guaranteed)
-npm run dev-fresh        # Linux/Mac
-npm run dev-fresh-win    # Windows
+npm run dev-fresh        # Raspberry Pi/Linux
 
 # Clear all caches manually
-npm run clear-cache      # Linux/Mac
-npm run clear-cache-win  # Windows
+npm run clear-cache      # Raspberry Pi/Linux
 
 # Standard development
 npm run dev              # With enhanced caching headers
@@ -90,8 +86,7 @@ npm run kiosk            # Kiosk mode with disposable profile
 ### For Development (Always Fresh Content)
 ```bash
 # Option 1: Use the fresh development script
-npm run dev-fresh        # Linux/Mac
-npm run dev-fresh-win    # Windows
+npm run dev-fresh        # Raspberry Pi/Linux
 
 # Option 2: Clear caches first, then start normally
 npm run clear-cache      # Clear everything
@@ -107,8 +102,7 @@ npm run kiosk            # Fresh profile every time
 ### Manual Cache Clearing
 ```bash
 # When you need to force fresh content
-npm run clear-cache      # Linux/Mac
-npm run clear-cache-win  # Windows
+npm run clear-cache      # Raspberry Pi/Linux
 ```
 
 ## Technical Details
