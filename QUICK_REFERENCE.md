@@ -177,4 +177,4 @@ window.appLifecycle = {
 
 ---
 
-**Remember**: Each mini app should be completely self-contained and not interfere with any other app in the showcase!
+**Remember**: Each mini app or html page should be completely self-contained and not interfere with any other app in the showcase!

@@ -1,19 +1,29 @@
 <section id="screen-game" class="screen">
-  <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo matrix-logo" />
-  <button id="btnHome" class="home-button">🏠</button>
-  <div class="game-header">
+  <!-- Header with logo and navigation -->
+  <header class="header">
+    <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo matrix-logo" />
+    <button id="btnHome" class="home-button" aria-label="Home">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+    </button>
+  </header>
+  
+  <div class="panel">
     <h2>Tic-Tac-Toe</h2>
-    <p>Play against the computer or a friend!</p>
-  </div>
-  
-  <div id="board" class="board"></div>
-  
-  <div class="toolbar center">
-    <div id="status" class="chip">Your move</div>
-    <button id="btnReset" class="chip">Reset</button>
-  </div>
-  
-  <div class="game-info">
+    <p class="game-description">Play against the computer or a friend!</p>
+    
+    <div id="board" class="board"></div>
+    
+    <div class="status-bar">
+      <div id="status" class="status">Your move</div>
+    </div>
+    
+    <div class="toolbar">
+      <button id="btnReset" class="btn">Reset Game</button>
+    </div>
+    
     <div class="score-board">
       <div class="score-item">
         <span class="player-label">You</span>
@@ -33,263 +43,341 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-    color: white;
-    font-family: 'Arial', sans-serif;
-    padding: 20px;
-    align-items: center;
+    width: 100%;
+    max-height: 100vh;
+    max-width: 100vw;
+    overflow: hidden;
+    background: #1a1e2e; /* Dark blue-gray background */
+    color: #e4e6f1; /* Light gray text for better readability */
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 0;
     position: relative;
+    box-sizing: border-box;
+  }
+  
+  /* Header styles */
+  #screen-game .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 100;
   }
   
   /* Home button styles */
   #screen-game .home-button {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    padding: 10px 15px;
-    background: rgba(255,255,255,0.2);
-    border: 2px solid rgba(255,255,255,0.3);
-    border-radius: 50%;
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    z-index: 100;
     width: 40px;
     height: 40px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e4e6f1;
+    cursor: pointer;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0;
   }
   
   #screen-game .home-button:hover {
-    background: rgba(255,255,255,0.3);
-    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  #screen-game .home-button:active {
+    transform: scale(0.95);
   }
   
   /* Matrix logo styles */
   #screen-game .matrix-logo {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    height: 40px;
+    height: 36px;
     width: auto;
-    z-index: 100;
-    animation: pulse 2s infinite;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
   }
   
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+  #screen-game .matrix-logo:hover {
+    opacity: 1;
   }
   
-  /* Responsive design - optimized for Raspberry Pi 5" screen */
-  @media (max-width: 800px) {
-    #screen-game {
-      padding: 10px;
-    }
-    
-    #screen-game .home-button,
-    #screen-game .matrix-logo {
-      height: 35px;
-      width: 35px;
-    }
-    
-    #screen-game .game-header {
-      margin-top: 30px;
-    }
-    
-    #screen-game h2 {
-      font-size: 1.8em;
-    }
-  }
-  
-  /* Extra small screens - like Raspberry Pi 5" display */
-  @media (max-width: 480px) {
-    #screen-game {
-      padding: 8px;
-    }
-    
-    #screen-game .home-button,
-    #screen-game .matrix-logo {
-      height: 30px;
-      width: 30px;
-      top: 8px;
-    }
-    
-    #screen-game .matrix-logo {
-      left: 8px;
-    }
-    
-    #screen-game .home-button {
-      right: 8px;
-    }
-    
-    #screen-game h2 {
-      font-size: 1.5em;
-    }
-    
-    #screen-game .game-header {
-      margin-top: 35px;
-    }
-    
-    #screen-game .board {
-      width: 250px;
-      height: 250px;
-      margin: 10px 0;
-    }
-  }
-  
-  #screen-game .game-header {
-    text-align: center;
-    margin-bottom: 20px;
+  /* Panel styles */
+  #screen-game .panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 20px;
+    gap: 20px;
+    width: 100%;
+    max-height: calc(100vh - 64px); /* Ensure panel fits in viewport */
+    overflow: hidden;
+    box-sizing: border-box;
   }
   
   #screen-game h2 {
-    font-size: 2.5em;
-    margin: 0 0 10px 0;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-  }
-  
-  #screen-game p {
-    font-size: 16px;
+    font-size: 28px;
+    font-weight: 600;
     margin: 0;
-    opacity: 0.9;
+    color: #ffffff;
+    text-align: center;
+    letter-spacing: -0.5px;
   }
   
+  #screen-game .game-description {
+    font-size: 16px;
+    margin: -10px 0 0;
+    color: #e4e6f1;
+    text-align: center;
+  }
+  
+  /* Board styles */
   #screen-game .board {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 5px;
+    gap: 8px;
     width: 300px;
     height: 300px;
-    margin: 20px 0;
-    background: rgba(255,255,255,0.1);
-    padding: 10px;
-    border-radius: 15px;
-    border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
   
   #screen-game .cell {
-    background: rgba(255,255,255,0.1);
-    border: 2px solid rgba(255,255,255,0.3);
-    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 3em;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
   
   #screen-game .cell:hover {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.5);
-    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  #screen-game .cell:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   }
   
   #screen-game .cell.x {
-    color: #e74c3c;
-    text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+    color: #ff6b6b;
   }
   
   #screen-game .cell.o {
-    color: #3498db;
-    text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+    color: #3a6df0;
   }
   
   #screen-game .cell.winning {
-    background: rgba(46, 204, 113, 0.3);
-    border-color: #2ecc71;
+    background: rgba(58, 109, 240, 0.15);
+    border-color: rgba(58, 109, 240, 0.3);
     animation: gameWinnerPulse 1s ease-in-out infinite alternate;
   }
   
   @keyframes gameWinnerPulse {
     0% { transform: scale(1); }
-    100% { transform: scale(1.1); }
+    100% { transform: scale(1.05); }
   }
   
+  /* Status bar styles */
+  #screen-game .status-bar {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  #screen-game .status {
+    font-size: 16px;
+    font-weight: 500;
+    color: #ffffff;
+  }
+  
+  /* Toolbar styles */
   #screen-game .toolbar {
     display: flex;
-    gap: 15px;
-    margin: 20px 0;
+    gap: 12px;
+    margin: 4px 0;
     flex-wrap: wrap;
     justify-content: center;
+    width: 100%;
   }
   
-  #screen-game .chip {
-    padding: 12px 24px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-radius: 25px;
-    background: rgba(255,255,255,0.1);
+  #screen-game .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    background: #3a6df0; /* Primary blue */
     color: white;
-    font-size: 16px;
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     font-family: inherit;
+    box-shadow: 0 2px 6px rgba(58, 109, 240, 0.3);
   }
   
-  #screen-game .chip:hover {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.5);
+  #screen-game .btn:hover {
+    background: #4a7bf7;
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(58, 109, 240, 0.4);
   }
   
-  #screen-game .game-info {
-    margin-top: 20px;
+  #screen-game .btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(58, 109, 240, 0.3);
   }
   
+  /* Score board styles */
   #screen-game .score-board {
     display: flex;
     gap: 30px;
-    background: rgba(255,255,255,0.1);
-    padding: 20px;
-    border-radius: 15px;
-    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 16px 24px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
   
   #screen-game .score-item {
     text-align: center;
+    min-width: 80px;
   }
   
   #screen-game .player-label {
     display: block;
     font-size: 14px;
-    opacity: 0.8;
-    margin-bottom: 5px;
+    color: #e4e6f1;
+    margin-bottom: 6px;
+    font-weight: 500;
   }
   
   #screen-game .score-value {
     display: block;
     font-size: 24px;
-    font-weight: bold;
+    font-weight: 600;
+    color: #3a6df0;
   }
   
-  /* Responsive design */
-  @media (max-width: 768px) {
+  /* Responsive design - optimized for Raspberry Pi 5" screen */
+  @media (max-width: 800px) {
+    #screen-game .header {
+      padding: 10px 14px;
+    }
+    
+    #screen-game .panel {
+      padding: 16px;
+      gap: 16px;
+    }
+    
+    #screen-game h2 {
+      font-size: 24px;
+    }
+    
     #screen-game .board {
-      width: 250px;
-      height: 250px;
+      width: 280px;
+      height: 280px;
+      padding: 10px;
     }
     
     #screen-game .cell {
       font-size: 2.5em;
     }
     
+    #screen-game .status-bar {
+      padding: 10px 16px;
+    }
+    
+    #screen-game .score-board {
+      padding: 14px 20px;
+    }
+  }
+  
+  /* Extra small screens - like Raspberry Pi 5" display */
+  @media (max-width: 480px) {
+    #screen-game .header {
+      padding: 8px 12px;
+    }
+    
+    #screen-game .home-button {
+      width: 36px;
+      height: 36px;
+    }
+    
+    #screen-game .matrix-logo {
+      height: 32px;
+    }
+    
+    #screen-game .panel {
+      padding: 12px;
+      gap: 12px;
+    }
+    
     #screen-game h2 {
-      font-size: 2em;
+      font-size: 22px;
     }
     
-    #screen-game .toolbar {
-      gap: 10px;
-    }
-    
-    #screen-game .chip {
-      padding: 10px 20px;
+    #screen-game .game-description {
       font-size: 14px;
+      margin-top: -6px;
+    }
+    
+    #screen-game .board {
+      width: 240px;
+      height: 240px;
+      padding: 8px;
+      gap: 6px;
+    }
+    
+    #screen-game .cell {
+      font-size: 2.2em;
+      border-radius: 6px;
+    }
+    
+    #screen-game .status {
+      font-size: 15px;
+    }
+    
+    #screen-game .btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      border-radius: 6px;
+    }
+    
+    #screen-game .score-board {
+      padding: 12px 16px;
+      gap: 20px;
+    }
+    
+    #screen-game .score-item {
+      min-width: 70px;
+    }
+    
+    #screen-game .player-label {
+      font-size: 13px;
+    }
+    
+    #screen-game .score-value {
+      font-size: 20px;
     }
   }
 </style>
