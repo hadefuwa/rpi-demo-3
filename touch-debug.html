@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Touch Demo Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0d0f14;
+            color: #e6e8ec;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .debug-info {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        #paint {
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            border: 2px solid #fff;
+            background: #0b0e13;
+            touch-action: none;
+            cursor: crosshair;
+        }
+        
+        .controls {
+            margin: 10px 0;
+        }
+        
+        button {
+            margin: 5px;
+            padding: 10px;
+            background: #333;
+            color: white;
+            border: 1px solid #666;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Touch Demo Debug Page</h1>
+    
+    <div class="debug-info" id="debug-info">
+        Debug info will appear here...
+    </div>
+    
+    <div class="controls">
+        <button onclick="testCanvasDrawing()">Test Canvas Drawing</button>
+        <button onclick="clearCanvas()">Clear Canvas</button>
+        <button onclick="logCanvasInfo()">Log Canvas Info</button>
+    </div>
+    
+    <canvas id="paint"></canvas>
+    
+    <div class="debug-info" id="event-log">
+        Event log:
+    </div>
+
+    <script>
+        const canvas = document.getElementById('paint');
+        const ctx = canvas.getContext('2d');
+        const debugInfo = document.getElementById('debug-info');
+        const eventLog = document.getElementById('event-log');
+        
+        let painting = false;
+        let lastPos = null;
+        
+        function log(message) {
+            console.log(message);
+            debugInfo.innerHTML = message + '<br>' + debugInfo.innerHTML;
+        }
+        
+        function logEvent(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            eventLog.innerHTML += '<br>' + timestamp + ': ' + message;
+        }
+        
+        function setupCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            log(`Setting up canvas - rect: ${rect.width}x${rect.height}, dpr: ${dpr}`);
+            
+            // Set canvas size
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            
+            // Scale context
+            ctx.scale(dpr, dpr);
+            
+            // Set styles
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            
+            log(`Canvas setup complete - actual: ${canvas.width}x${canvas.height}, display: ${canvas.style.width}x${canvas.style.height}`);
+        }
+        
+        function testCanvasDrawing() {
+            log('Testing canvas drawing...');
+            ctx.fillStyle = '#ff0000';
+            ctx.beginPath();
+            ctx.arc(100, 100, 20, 0, Math.PI * 2);
+            ctx.fill();
+            log('Test circle drawn at (100, 100)');
+        }
+        
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            log('Canvas cleared');
+        }
+        
+        function logCanvasInfo() {
+            const rect = canvas.getBoundingClientRect();
+            log(`Canvas info:
+                - Actual size: ${canvas.width} x ${canvas.height}
+                - Display size: ${canvas.offsetWidth} x ${canvas.offsetHeight}
+                - Bounding rect: ${rect.width} x ${rect.height}
+                - Position: ${rect.left}, ${rect.top}
+                - Device pixel ratio: ${window.devicePixelRatio || 1}`);
+        }
+        
+        // Drawing functions
+        function start(e) {
+            logEvent('Start: ' + e.type);
+            e.preventDefault();
+            painting = true;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+            lastPos = { x, y };
+            
+            logEvent(`Drawing start at (${x.toFixed(1)}, ${y.toFixed(1)})`);
+            
+            ctx.fillStyle = '#00ff00';
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        function draw(e) {
+            if (!painting || !lastPos) return;
+            e.preventDefault();
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+            
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(lastPos.x, lastPos.y);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            
+            lastPos = { x, y };
+        }
+        
+        function end(e) {
+            logEvent('End: ' + e.type);
+            e.preventDefault();
+            painting = false;
+            lastPos = null;
+        }
+        
+        // Event listeners
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', end);
+        canvas.addEventListener('mouseleave', end);
+        
+        canvas.addEventListener('touchstart', start, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', end, { passive: false });
+        
+        // Also log when events are triggered
+        ['mousedown', 'mousemove', 'mouseup', 'mouseleave', 'touchstart', 'touchmove', 'touchend'].forEach(eventType => {
+            canvas.addEventListener(eventType, (e) => {
+                if (eventType.includes('move') && !painting) return; // Don't log every move when not painting
+                logEvent(`Event: ${eventType} at target: ${e.target.tagName}`);
+            });
+        });
+        
+        // Initialize
+        window.addEventListener('load', setupCanvas);
+        window.addEventListener('resize', setupCanvas);
+        setupCanvas();
+        
+        log('Debug page loaded and canvas initialized');
+    </script>
+</body>
+</html>

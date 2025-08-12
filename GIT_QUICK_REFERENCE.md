@@ -14,8 +14,8 @@ Pull
 ```bash
 cd ~/RPI-5Inch
 git fetch origin
-git pull --rebase origin main
+git reset --hard origin/main
+git clean -fd
 npm install
-npm start
 DISPLAY=:0 npm start
 

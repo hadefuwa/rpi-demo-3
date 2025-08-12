@@ -967,26 +967,39 @@
       const width = Math.min(rect.width, 1024);
       const height = Math.min(rect.height, 400);
       resizeCanvas(canvas, width, height);
+      
+      // Re-get the context after resize since resizeCanvas may have modified it
+      touchDemoState.ctx = canvas.getContext('2d');
     }
     
-    // Configure the context
-    ctx.fillStyle = touchDemoState.brushColor;
-    ctx.strokeStyle = touchDemoState.brushColor;
-    ctx.lineWidth = touchDemoState.brushSize;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    // Configure the context AFTER resizing
+    touchDemoState.ctx.fillStyle = touchDemoState.brushColor;
+    touchDemoState.ctx.strokeStyle = touchDemoState.brushColor;
+    touchDemoState.ctx.lineWidth = touchDemoState.brushSize;
+    touchDemoState.ctx.lineCap = 'round';
+    touchDemoState.ctx.lineJoin = 'round';
     
     // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    touchDemoState.ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw a test dot to verify canvas is working
+    touchDemoState.ctx.fillStyle = '#ff6b6b';
+    touchDemoState.ctx.beginPath();
+    touchDemoState.ctx.arc(50, 50, 10, 0, Math.PI * 2);
+    touchDemoState.ctx.fill();
+    console.log('Test dot drawn at (50, 50) - if you see a red dot, canvas is working');
     
     // Drawing functions
     function start(e) {
+      console.log('Drawing start event triggered:', e.type, 'at target:', e.target);
       e.preventDefault();
       touchDemoState.painting = true;
       const rect = canvas.getBoundingClientRect();
       const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
       const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
       touchDemoState.lastPos = { x, y };
+      
+      console.log('Starting draw at coordinates:', touchDemoState.lastPos, 'rect:', rect);
       
       touchDemoState.ctx.fillStyle = touchDemoState.brushColor;
       touchDemoState.ctx.beginPath();
@@ -1016,12 +1029,14 @@
     }
     
     function end(e) {
+      console.log('Drawing end event triggered:', e.type);
       e.preventDefault();
       touchDemoState.painting = false;
       touchDemoState.lastPos = null;
     }
     
     // Bind events
+    console.log('Binding events to canvas:', canvas);
     addTouchEventListener(canvas, 'mousedown', start);
     addTouchEventListener(canvas, 'mousemove', draw);
     addTouchEventListener(canvas, 'mouseup', end);
@@ -1029,29 +1044,38 @@
     addTouchEventListener(canvas, 'touchstart', start, { passive: false });
     addTouchEventListener(canvas, 'touchmove', draw, { passive: false });
     addTouchEventListener(canvas, 'touchend', end, { passive: false });
+    console.log('Events bound. Total event listeners:', touchDemoState.eventListeners.length);
     
     // Bind control buttons
-    document.querySelectorAll('.swatch').forEach(btn => {
+    const swatches = document.querySelectorAll('.swatch');
+    console.log('Found swatch buttons:', swatches.length, swatches);
+    swatches.forEach(btn => {
       const colorHandler = () => {
         touchDemoState.brushColor = btn.getAttribute('data-color');
         touchDemoState.ctx.strokeStyle = touchDemoState.brushColor;
         touchDemoState.ctx.fillStyle = touchDemoState.brushColor;
+        console.log('Color changed to:', touchDemoState.brushColor);
       };
       addTouchEventListener(btn, 'click', colorHandler);
     });
     
-    document.querySelectorAll('.brush').forEach(btn => {
+    const brushes = document.querySelectorAll('.brush');
+    console.log('Found brush buttons:', brushes.length, brushes);
+    brushes.forEach(btn => {
       const brushHandler = () => {
         touchDemoState.brushSize = parseInt(btn.getAttribute('data-size'), 10);
         touchDemoState.ctx.lineWidth = touchDemoState.brushSize;
+        console.log('Brush size changed to:', touchDemoState.brushSize);
       };
       addTouchEventListener(btn, 'click', brushHandler);
     });
     
     const clearBtn = document.getElementById('btnClear');
+    console.log('Found clear button:', clearBtn);
     if (clearBtn) {
       const clearHandler = () => {
         touchDemoState.ctx.clearRect(0, 0, touchDemoState.canvas.width, touchDemoState.canvas.height);
+        console.log('Canvas cleared');
       };
       addTouchEventListener(clearBtn, 'click', clearHandler);
     }
