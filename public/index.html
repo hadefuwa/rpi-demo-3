@@ -30,7 +30,51 @@
       <main id="main-content">
         <!-- Screen container for dynamic app loading -->
         <div id="screen-container">
-          <!-- Home screen will be loaded here by default -->
+          <!-- Fallback home screen content in case dynamic loading fails -->
+          <section id="screen-home" class="screen active">
+            <div class="grid">
+              <button type="button" class="card fancy theme-cyan" data-target="screen-touch">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">Touch Demo</span>
+              </button>
+              <button type="button" class="card fancy theme-purple" data-target="screen-info">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">System Info</span>
+              </button>
+              <button type="button" class="card fancy theme-gold" data-target="screen-games">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">Games Hub</span>
+              </button>
+              <button type="button" class="card fancy theme-white" data-target="screen-scroll">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">Scroll Test</span>
+              </button>
+              <button type="button" class="card fancy theme-lime" data-target="screen-visuals">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">Visuals</span>
+              </button>
+              <button type="button" class="card fancy theme-orange" data-target="screen-stl">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">3D Model</span>
+              </button>
+              <button type="button" class="card fancy theme-blue" data-target="screen-settings">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">Settings</span>
+              </button>
+              <button type="button" class="card fancy theme-silver" data-target="screen-about">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">About</span>
+              </button>
+            </div>
+          </section>
         </div>
       </main>
     </div>
@@ -136,6 +180,8 @@
         justify-content: center;
         padding: 40px 20px;
         background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        height: 100%;
+        width: 100%;
       }
       
       #screen-home .grid {
@@ -161,6 +207,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        z-index: 2;
       }
       
       .card:hover {
@@ -197,6 +244,8 @@
         border-radius: 15px;
         background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
         animation: borderFlow 3s linear infinite;
+        pointer-events: none;
+        z-index: 1;
       }
       
       @keyframes borderFlow {
@@ -256,29 +305,39 @@
               this.hideApp(this.currentApp);
             }
             
-            // Load new app
-            fetch(`./src/screens/${appId}.html`)
-              .then(response => {
-                if (!response.ok) {
-                  throw new Error(`Failed to load app: ${response.status}`);
-                }
-                return response.text();
-              })
-              .then(html => {
-                // Insert app HTML
-                document.getElementById('screen-container').innerHTML = html;
-                
-                // Activate app
-                this.currentApp = appId;
-                this.activateApp(appId);
-                
-                console.log(`App ${appId} loaded successfully`);
-              })
-              .catch(error => {
-                console.error('Failed to load app:', error);
-                // Fallback to home
-                this.goHome();
-              });
+                      // Load new app
+          console.log(`Attempting to load app from: ./src/screens/${appId}.html`);
+          fetch(`./src/screens/${appId}.html`)
+            .then(response => {
+              console.log(`Fetch response status: ${response.status}`);
+              if (!response.ok) {
+                throw new Error(`Failed to load app: ${response.status}`);
+              }
+              return response.text();
+            })
+            .then(html => {
+              console.log(`App HTML loaded, length: ${html.length} characters`);
+              // Insert app HTML
+              document.getElementById('screen-container').innerHTML = html;
+              
+              // Activate app
+              this.currentApp = appId;
+              this.activateApp(appId);
+              
+              console.log(`App ${appId} loaded successfully`);
+            })
+            .catch(error => {
+              console.error('Failed to load app:', error);
+              // Show error in the container
+              document.getElementById('screen-container').innerHTML = `
+                <div style="color: white; text-align: center; padding: 50px;">
+                  <h2>Error Loading App: ${appId}</h2>
+                  <p>${error.message}</p>
+                  <p>Path attempted: ./src/screens/${appId}.html</p>
+                  <button onclick="showcaseFramework.goHome()" style="padding: 10px 20px; margin: 20px;">Go Home</button>
+                </div>
+              `;
+            });
           },
           
           // Hide an app
@@ -358,8 +417,18 @@
             showcaseFramework.goHome();
           });
           
-          // Note: Each screen handles its own navigation events
-          // This follows the architecture rule of embedding all JS within each HTML file
+          // Handle card clicks for the fallback home screen
+          document.addEventListener('click', function(e) {
+            if (e.target.closest('.card')) {
+              const card = e.target.closest('.card');
+              const target = card.dataset.target;
+              if (target) {
+                console.log('Card clicked:', target);
+                const appId = target.replace('screen-', '');
+                showcaseFramework.navigateTo(appId);
+              }
+            }
+          });
         }
         
         // Setup service worker
