@@ -14,10 +14,6 @@ cd /home/pi/rpi-demo-3
 LOG_FILE="/home/pi/rpi-demo-3/simple-autostart.log"
 echo "$(date): Simple autostart starting..." >> "$LOG_FILE"
 
-# Wait for basic system readiness
-echo "⏳ Waiting 20 seconds for system to be ready..."
-sleep 20
-
 # Kill any existing processes
 echo "🧹 Cleaning up existing processes..."
 pkill -f chromium &>/dev/null || true
