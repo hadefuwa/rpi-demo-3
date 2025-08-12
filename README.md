@@ -162,10 +162,10 @@ The PWA manifest (`public/manifest.json`) includes:
 
 ## 🎯 Target Platforms
 
-- **Primary**: Raspberry Pi with 5-inch touchscreen
-- **Secondary**: Desktop browsers
-- **Mobile**: Touch-enabled mobile devices
-- **Kiosk**: Public display systems
+- **Primary**: Raspberry Pi with touchscreen displays
+- **Secondary**: Desktop browsers (Chrome, Firefox, Safari)
+- **Mobile**: Touch-enabled mobile devices and tablets
+- **Kiosk**: Public display systems and embedded applications
 
 ## 🚀 Deployment
 
@@ -181,10 +181,27 @@ npm run serve
 ```
 
 ### Raspberry Pi Deployment
-1. Transfer files to Pi
-2. Install dependencies: `npm install --production`
-3. Start service: `npm run install-service`
-4. Enable kiosk mode: `npm run kiosk`
+1. Clone repository to Pi: `git clone https://github.com/hadefuwa/rpi-demo-3.git`
+2. Navigate to directory: `cd rpi-demo-3`
+3. Install dependencies: `npm install --production`
+4. Set permissions: `chmod +x scripts/*.sh`
+5. Start kiosk mode: `npm run kiosk`
+
+### Git Workflow
+```bash
+# Push changes
+git add .
+git commit -m "Update message here"
+git push origin main
+
+# Pull latest changes
+git fetch origin
+git reset --hard origin/main
+git clean -fd
+npm install
+chmod +x scripts/*.sh
+npm run kiosk
+```
 
 ## 🔍 Troubleshooting
 
