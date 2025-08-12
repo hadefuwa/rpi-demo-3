@@ -164,17 +164,86 @@ button:focus { outline: 2px solid var(--brand); outline-offset: 2px; }
 #status, #memoryStatus { background: rgba(107,203,239,0.2); border-color: rgba(107,203,239,0.4); color: var(--brand); min-width: 120px; text-align: center; }
 
 /* ===== Shared theme color helpers (used by Home cards and Games) ===== */
-.theme-cyan { border-color: #00ffff; background: linear-gradient(135deg, rgba(0, 255, 255, 0.95) 0%, rgba(107, 203, 239, 0.95) 50%, rgba(0, 255, 255, 0.95) 100%) !important; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(0, 255, 255, 1), 0 0 40px rgba(0, 255, 255, 0.8), inset 0 2px 0 rgba(255, 255, 255, 1); }
-.theme-purple { border-color: #9d7cf3; background: linear-gradient(135deg, rgba(157, 124, 243, 0.95) 0%, rgba(138, 43, 226, 0.95) 50%, rgba(157, 124, 243, 0.95) 100%) !important; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(157, 124, 243, 1), 0 0 45px rgba(157, 124, 243, 0.8), inset 0 2px 0 rgba(255, 255, 255, 1); }
-.theme-gold { border-color: #ffd700; background: linear-gradient(135deg, rgba(255, 215, 0, 0.95) 0%, rgba(255, 217, 61, 0.95) 50%, rgba(255, 165, 0, 0.95) 100%) !important; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(255, 215, 0, 1), 0 0 50px rgba(255, 215, 0, 0.9), inset 0 2px 0 rgba(255, 255, 255, 1); }
-.theme-teal { border-color: #00ffd0; background: linear-gradient(135deg, rgba(0, 255, 208, 0.95) 0%, rgba(64, 224, 208, 0.95) 50%, rgba(0, 255, 208, 0.95) 100%) !important; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(0, 255, 208, 1), 0 0 45px rgba(0, 255, 208, 0.8), inset 0 2px 0 rgba(255, 255, 255, 1); }
-.theme-pink { border-color: #ff8ad4; background: linear-gradient(135deg, rgba(255, 138, 212, 0.95) 0%, rgba(255, 20, 147, 0.95) 50%, rgba(255, 138, 212, 0.95) 100%) !important; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(255, 138, 212, 1), 0 0 50px rgba(255, 138, 212, 0.9), inset 0 2px 0 rgba(255, 255, 255, 1); }
-.theme-red { border-color: #ff6b6b; background: linear-gradient(135deg, rgba(255, 107, 107, 0.95) 0%, rgba(255, 20, 147, 0.95) 50%, rgba(255, 107, 107, 0.95) 100%) !important; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(255, 107, 107, 1), 0 0 50px rgba(255, 107, 107, 0.9), inset 0 2px 0 rgba(255, 255, 255, 1); }
-.theme-white { border-color: #ffffff; background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 240, 240, 0.95) 50%, rgba(255, 255, 255, 0.95) 100%) !important; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(255, 255, 255, 1), 0 0 50px rgba(255, 255, 255, 0.9), inset 0 2px 0 rgba(255, 255, 255, 1); }
-.theme-lime { border-color: #adff2f; background: linear-gradient(135deg, rgba(173, 255, 47, 0.95) 0%, rgba(50, 205, 50, 0.95) 50%, rgba(173, 255, 47, 0.95) 100%) !important; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(173, 255, 47, 1), 0 0 45px rgba(173, 255, 47, 0.8), inset 0 2px 0 rgba(255, 255, 255, 1); }
-.theme-orange { border-color: #ffa500; background: linear-gradient(135deg, rgba(255, 165, 0, 0.95) 0%, rgba(255, 140, 0, 0.95) 50%, rgba(255, 69, 0, 0.95) 100%) !important; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(255, 165, 0, 1), 0 0 50px rgba(255, 165, 0, 0.9), inset 0 2px 0 rgba(255, 255, 255, 1); }
-.theme-blue { border-color: #1e90ff; background: linear-gradient(135deg, rgba(30, 144, 255, 0.95) 0%, rgba(0, 191, 255, 0.95) 50%, rgba(30, 144, 255, 0.95) 100%) !important; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(30, 144, 255, 1), 0 0 45px rgba(30, 144, 255, 0.8), inset 0 2px 0 rgba(255, 255, 255, 1); }
-.theme-silver { border-color: #c0c0c0; background: linear-gradient(135deg, rgba(192, 192, 192, 0.95) 0%, rgba(169, 169, 169, 0.95) 50%, rgba(192, 192, 192, 0.95) 100%) !important; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(192, 192, 192, 1), 0 0 45px rgba(192, 192, 192, 0.8), inset 0 2px 0 rgba(255, 255, 255, 1); }
+/* ===== Shared theme color helpers (used by Home cards and Games) ===== */
+.theme-cyan { 
+  border-color: rgba(107, 203, 239, 0.3); 
+  background: linear-gradient(135deg, rgba(107, 203, 239, 0.08) 0%, rgba(107, 203, 239, 0.04) 100%) !important; 
+}
+.theme-cyan:hover {
+  background: linear-gradient(135deg, rgba(107, 203, 239, 0.12) 0%, rgba(107, 203, 239, 0.06) 100%) !important;
+  border-color: rgba(107, 203, 239, 0.4);
+  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(107, 203, 239, 0.1);
+}
+
+.theme-purple { 
+  border-color: rgba(157, 124, 243, 0.3); 
+  background: linear-gradient(135deg, rgba(157, 124, 243, 0.08) 0%, rgba(157, 124, 243, 0.04) 100%) !important; 
+}
+.theme-purple:hover {
+  background: linear-gradient(135deg, rgba(157, 124, 243, 0.12) 0%, rgba(157, 124, 243, 0.06) 100%) !important;
+  border-color: rgba(157, 124, 243, 0.4);
+  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(157, 124, 243, 0.1);
+}
+
+.theme-gold { 
+  border-color: rgba(255, 215, 0, 0.3); 
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.08) 0%, rgba(255, 165, 0, 0.04) 100%) !important; 
+}
+.theme-gold:hover {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(255, 165, 0, 0.06) 100%) !important;
+  border-color: rgba(255, 215, 0, 0.4);
+  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.1);
+}
+
+.theme-white { 
+  border-color: rgba(255, 255, 255, 0.2); 
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.03) 100%) !important; 
+}
+.theme-white:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.05);
+}
+
+.theme-lime { 
+  border-color: rgba(124, 252, 0, 0.3); 
+  background: linear-gradient(135deg, rgba(124, 252, 0, 0.08) 0%, rgba(50, 205, 50, 0.04) 100%) !important; 
+}
+.theme-lime:hover {
+  background: linear-gradient(135deg, rgba(124, 252, 0, 0.12) 0%, rgba(50, 205, 50, 0.06) 100%) !important;
+  border-color: rgba(124, 252, 0, 0.4);
+  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(124, 252, 0, 0.1);
+}
+
+.theme-orange { 
+  border-color: rgba(255, 165, 0, 0.3); 
+  background: linear-gradient(135deg, rgba(255, 165, 0, 0.08) 0%, rgba(255, 140, 0, 0.04) 100%) !important; 
+}
+.theme-orange:hover {
+  background: linear-gradient(135deg, rgba(255, 165, 0, 0.12) 0%, rgba(255, 140, 0, 0.06) 100%) !important;
+  border-color: rgba(255, 165, 0, 0.4);
+  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 165, 0, 0.1);
+}
+
+.theme-blue { 
+  border-color: rgba(30, 144, 255, 0.3); 
+  background: linear-gradient(135deg, rgba(30, 144, 255, 0.08) 0%, rgba(0, 191, 255, 0.04) 100%) !important; 
+}
+.theme-blue:hover {
+  background: linear-gradient(135deg, rgba(30, 144, 255, 0.12) 0%, rgba(0, 191, 255, 0.06) 100%) !important;
+  border-color: rgba(30, 144, 255, 0.4);
+  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(30, 144, 255, 0.1);
+}
+
+.theme-silver { 
+  border-color: rgba(192, 192, 192, 0.3); 
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.08) 0%, rgba(169, 169, 169, 0.04) 100%) !important; 
+}
+.theme-silver:hover {
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.12) 0%, rgba(169, 169, 169, 0.06) 100%) !important;
+  border-color: rgba(192, 192, 192, 0.4);
+  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(192, 192, 192, 0.1);
+}
 
 /* Shared keyframes used by themed elements */
 @keyframes spin { to { transform: rotate(360deg); } }
