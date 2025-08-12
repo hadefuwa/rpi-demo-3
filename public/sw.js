@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rpi-5inch-showcase-v2';
+const CACHE_NAME = 'rpi-5inch-showcase-v3';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -11,44 +11,24 @@ const urlsToCache = [
   '/assets/cad3.stl'
 ];
 
-// Cache CSS files
-const cssFiles = [
-  '/styles/base.css',
-  '/styles/home.css',
-  '/styles/about.css',
-  '/styles/games.css',
-  '/styles/game.css',
-  '/styles/memory.css',
-  '/styles/pingpong.css',
-  '/styles/snake.css',
-  '/styles/stl.css',
-  '/styles/touch.css',
-  '/styles/visuals.css',
-  '/styles/scroll.css',
-  '/styles/settings.css',
-  '/styles/info.css'
-];
-
-// Cache HTML screen files
+// Cache HTML screen files (new architecture)
 const htmlFiles = [
-  '/screens/',
-  '/screens/home.html',
-  '/screens/about.html',
-  '/screens/games.html',
-  '/screens/game.html',
-  '/screens/memory.html',
-  '/screens/pingpong.html',
-  '/screens/snake.html',
-  '/screens/stl.html',
-  '/screens/touch.html',
-  '/screens/visuals.html',
-  '/screens/scroll.html',
-  '/screens/settings.html',
-  '/screens/info.html'
+  '/src/screens/touch.html',
+  '/src/screens/info.html',
+  '/src/screens/games.html',
+  '/src/screens/scroll.html',
+  '/src/screens/visuals.html',
+  '/src/screens/stl.html',
+  '/src/screens/settings.html',
+  '/src/screens/about.html',
+  '/src/screens/game.html',
+  '/src/screens/memory.html',
+  '/src/screens/pingpong.html',
+  '/src/screens/snake.html'
 ];
 
 // Combine all files to cache
-const allFilesToCache = [...urlsToCache, ...cssFiles, ...htmlFiles];
+const allFilesToCache = [...urlsToCache, ...htmlFiles];
 
 self.addEventListener('install', (event) => {
   console.log('Service Worker installing...');
@@ -65,6 +45,18 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Skip caching for development - always fetch fresh content
+  if (event.request.url.includes('localhost') || event.request.url.includes('127.0.0.1')) {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          // Fallback to cache only if network fails
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {

@@ -21,10 +21,98 @@
     <link rel="apple-touch-icon" sizes="167x167" href="./assets/Matrix.png" />
   </head>
   <body>
+    <!-- Automatic cache clearing script -->
+    <script>
+      (function() {
+        'use strict';
+        
+        // Clear all caches on startup
+        async function clearOldCaches() {
+          try {
+            if ('caches' in window) {
+              const cacheNames = await caches.keys();
+              const oldCaches = cacheNames.filter(name => 
+                name.includes('rpi-5inch-showcase') && !name.includes('v3')
+              );
+              
+              if (oldCaches.length > 0) {
+                console.log('🧹 Clearing old caches:', oldCaches);
+                await Promise.all(
+                  oldCaches.map(cacheName => caches.delete(cacheName))
+                );
+                console.log('✅ Old caches cleared');
+              }
+            }
+          } catch (error) {
+            console.log('⚠️ Cache clearing error:', error);
+          }
+        }
+        
+        // Update service worker if needed
+        async function updateServiceWorker() {
+          try {
+            if ('serviceWorker' in navigator) {
+              const registration = await navigator.serviceWorker.getRegistration();
+              if (registration) {
+                // Force update check
+                await registration.update();
+                console.log('🔄 Service worker update check completed');
+              }
+            }
+          } catch (error) {
+            console.log('⚠️ Service worker update error:', error);
+          }
+        }
+        
+        // Run cache clearing on startup
+        clearOldCaches();
+        updateServiceWorker();
+        
+        // Add cache clear button handler
+        document.addEventListener('DOMContentLoaded', function() {
+          const cacheBtn = document.getElementById('btnClearCache');
+          if (cacheBtn) {
+            cacheBtn.addEventListener('click', async function() {
+              try {
+                // Clear ALL caches (more aggressive)
+                if ('caches' in window) {
+                  const cacheNames = await caches.keys();
+                  if (cacheNames.length > 0) {
+                    await Promise.all(
+                      cacheNames.map(cacheName => caches.delete(cacheName))
+                    );
+                    console.log('🧹 All caches cleared!');
+                    
+                    // Show feedback
+                    cacheBtn.textContent = '✅';
+                    setTimeout(() => {
+                      cacheBtn.textContent = '🧹';
+                    }, 2000);
+                    
+                    // Force page reload to get fresh content
+                    setTimeout(() => {
+                      window.location.reload(true);
+                    }, 1000);
+                  }
+                }
+              } catch (error) {
+                console.log('⚠️ Cache clearing error:', error);
+                cacheBtn.textContent = '❌';
+                setTimeout(() => {
+                  cacheBtn.textContent = '🧹';
+                }, 2000);
+              }
+            });
+          }
+        });
+      })();
+    </script>
+    
     <div id="app">
       <header class="topbar">
         <img src="./assets/Matrix.png" alt="Matrix TSL" class="logo top-logo animated-logo2" />
         <h1 class="title">RPI Showcase</h1>
+        <button id="btnClearCache" class="cache-btn" title="Clear Cache">🧹</button>
       </header>
 
       <main id="main-content">
@@ -126,6 +214,27 @@
         font-weight: 600;
         color: white;
         margin: 0;
+      }
+      
+      .cache-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .cache-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: scale(1.1);
       }
       
       @keyframes pulse {
