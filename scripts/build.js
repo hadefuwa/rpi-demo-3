@@ -37,11 +37,12 @@ publicFiles.forEach(file => {
   copyRecursive(src, dest);
 });
 
-// Copy source files
-const srcDir = path.join(__dirname, '..', 'src');
-if (fs.existsSync(srcDir)) {
-  copyRecursive(srcDir, path.join(distDir, 'src'));
-}
+// Note: No longer copying src/ directory since all files are now in public/
+// The public/ directory copy above includes everything we need
+
+// Create .nojekyll file to prevent GitHub Pages Jekyll processing
+fs.writeFileSync(path.join(distDir, '.nojekyll'), '');
+console.log('📄 Created .nojekyll file');
 
 console.log('✅ Build complete! Files are ready in the dist/ directory.');
 console.log('🚀 Ready for GitHub Pages deployment!');

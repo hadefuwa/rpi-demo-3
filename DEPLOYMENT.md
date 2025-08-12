@@ -47,8 +47,8 @@ If automatic deployment isn't working:
 
 1. **Enable GitHub Pages**:
    - Go to repository Settings → Pages
-   - Source: Deploy from a branch
-   - Branch: `gh-pages` (created by GitHub Actions)
+   - Source: GitHub Actions (recommended)
+   - If using branch: Branch: `gh-pages` (created by GitHub Actions)
    - Folder: `/ (root)`
 
 2. **Check Actions**:
@@ -88,6 +88,22 @@ If automatic deployment isn't working:
 - Verify `sw.js` is in root of `dist/`
 - Check service worker registration in `index.html`
 - Clear browser service worker cache
+
+#### 5. GitHub Pages Shows README Instead of App
+**Error**: GitHub Pages displays README.md instead of index.html
+**Solution**:
+- Go to Settings → Pages
+- Change Source from "Deploy from a branch" to "GitHub Actions"
+- If using branch deployment, ensure `gh-pages` branch exists and has index.html
+- Check that `.nojekyll` file exists in deployed files
+
+#### 6. GitHub Actions Deployment Errors
+**Error**: "Looks like something went wrong!" in Actions
+**Solution**:
+- Check Actions tab for specific error messages
+- Ensure GITHUB_TOKEN has proper permissions
+- Verify all files exist in `dist/` after build
+- Check that `index.html` is in root of `dist/`
 
 ### Debug Steps
 
