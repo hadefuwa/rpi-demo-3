@@ -655,6 +655,10 @@
   document.addEventListener('click', (e) => {
     const card = e.target.closest('#screen-home .card');
     if (!card) return;
+
+    // Prevent default button behavior and stop bubbling to avoid double handling
+    if (typeof e.preventDefault === 'function') e.preventDefault();
+    if (typeof e.stopPropagation === 'function') e.stopPropagation();
     
     console.log('Button clicked:', card);
     const target = card.getAttribute('data-target'); // e.g. 'screen-touch'
@@ -670,24 +674,27 @@
         goHome();
       }
     }
-  });
+  }, { passive: false });
 
   // Games Hub navigation
   document.addEventListener('click', (e) => {
-    if (e.target.closest('.game-card')) {
-      const gameCard = e.target.closest('.game-card');
-      const target = gameCard.getAttribute('data-target');
-      if (target) {
-        try {
-          showScreen(target, true);
-        } catch (error) {
-          console.error('Failed to navigate to game screen:', target, error);
-          // Fallback to home if navigation fails
-          goHome();
-        }
+    const gameCard = e.target.closest('.game-card');
+    if (!gameCard) return;
+
+    if (typeof e.preventDefault === 'function') e.preventDefault();
+    if (typeof e.stopPropagation === 'function') e.stopPropagation();
+
+    const target = gameCard.getAttribute('data-target');
+    if (target) {
+      try {
+        showScreen(target, true);
+      } catch (error) {
+        console.error('Failed to navigate to game screen:', target, error);
+        // Fallback to home if navigation fails
+        goHome();
       }
     }
-  });
+  }, { passive: false });
 
   // Expose history helper so ScreenLoader can push entries
   window.addToNavigationHistory = function(id) {
