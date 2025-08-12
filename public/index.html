@@ -4,18 +4,35 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
     <title>RPI 5" Showcase</title>
+    
+    <!-- PWA Meta Tags -->
     <link rel="manifest" href="./manifest.json" />
     <meta name="theme-color" content="#000000" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="RPI Showcase" />
+    <meta name="msapplication-TileColor" content="#000000" />
+    <meta name="msapplication-config" content="none" />
+    
+    <!-- Preload critical resources -->
     <link rel="preload" href="./styles/base.css" as="style" />
+    <link rel="preload" href="./styles/home.css" as="style" />
+    <link rel="preload" href="./assets/Matrix.png" as="image" />
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="./styles/base.css" />
     <link rel="stylesheet" href="./styles/home.css" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="./assets/Matrix.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="./assets/Matrix.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./assets/Matrix.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="./assets/Matrix.png" />
   </head>
   <body>
     <div id="app">
       <header class="topbar">
-        <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo top-logo animated-logo2" />
+        <img src="./assets/Matrix.png" alt="Matrix TSL" class="logo top-logo animated-logo2" />
         <button id="btnHome" class="chip">Home</button>
       </header>
 
@@ -76,15 +93,42 @@
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('./sw.js')
             .then((registration) => {
-              console.log('SW registered: ', registration);
+              console.log('Service Worker registered successfully:', registration);
+              
+              // Check for updates
+              registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // New content is available, refresh the page
+                    if (confirm('New version available! Reload to update?')) {
+                      window.location.reload();
+                    }
+                  }
+                });
+              });
             })
             .catch((registrationError) => {
-              console.log('SW registration failed: ', registrationError);
+              console.log('Service Worker registration failed:', registrationError);
             });
         });
       }
+      
+      // PWA Install prompt
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('PWA install prompt ready');
+      });
+      
+      // Handle PWA installation
+      window.addEventListener('appinstalled', () => {
+        console.log('PWA was installed');
+        deferredPrompt = null;
+      });
     </script>
   </body>
-  </html>
+</html>
 
 

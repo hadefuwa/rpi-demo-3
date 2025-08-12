@@ -2,20 +2,35 @@
   "name": "rpi-5inch-showcase",
   "version": "0.2.0",
   "description": "Beautiful 5-inch Raspberry Pi showcase PWA",
-  "main": "renderer/index.html",
+  "main": "public/index.html",
   "author": "hadefuwa",
   "license": "MIT",
   "scripts": {
-    "start": "npx http-server renderer -p 3000 -o",
-    "dev": "npx http-server renderer -p 3000 -o --cors",
+    "start": "npx http-server public -p 3000 -o",
+    "dev": "npx http-server public -p 3000 -o --cors",
     "build": "echo 'PWA is ready to deploy'",
-    "serve": "npx http-server renderer -p 3000",
+    "serve": "npx http-server public -p 3000",
     "kiosk": "./scripts/start-kiosk.sh",
     "install-service": "./scripts/install-autostart.sh",
-    "uninstall-service": "./scripts/uninstall-autostart.sh"
+    "uninstall-service": "./scripts/uninstall-autostart.sh",
+    "clean": "rm -rf node_modules package-lock.json",
+    "reinstall": "npm run clean && npm install",
+    "validate": "node scripts/validate-pwa.js"
   },
   "devDependencies": {
     "http-server": "^14.1.1"
+  },
+  "keywords": [
+    "pwa",
+    "raspberry-pi",
+    "showcase",
+    "touch",
+    "games",
+    "kiosk"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hadefuwa/rpi-5inch-showcase.git"
   }
 }
 
