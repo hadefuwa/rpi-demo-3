@@ -1,4 +1,0 @@
-fix memory game
-fix home buttons
-reogrganise home buttons
-increased zooms on all cad models

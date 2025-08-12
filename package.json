@@ -1,15 +1,18 @@
 {
   "name": "rpi-5inch-showcase",
   "version": "0.2.0",
-  "description": "Beautiful 5-inch Raspberry Pi Electron showcase app",
-  "main": "main.js",
-  "author": "",
+  "description": "Beautiful 5-inch Raspberry Pi showcase PWA",
+  "main": "renderer/index.html",
+  "author": "hadefuwa",
   "license": "MIT",
   "scripts": {
-    "start": "electron ."
+    "start": "npx http-server renderer -p 3000 -o",
+    "dev": "npx http-server renderer -p 3000 -o --cors",
+    "build": "echo 'PWA is ready to deploy'",
+    "serve": "npx http-server renderer -p 3000"
   },
   "devDependencies": {
-    "electron": "^30.0.0"
+    "http-server": "^14.1.1"
   }
 }
 

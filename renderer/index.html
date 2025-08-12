@@ -4,9 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
     <title>RPI 5" Showcase</title>
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="preload" href="./styles/base.css" as="style" />
     <link rel="stylesheet" href="./styles/base.css" />
-    <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="./styles/home.css" />
   </head>
   <body>
     <div id="app">
@@ -16,16 +20,70 @@
       </header>
 
       <main id="main-content">
-        <!-- Screen container - screens will be loaded here dynamically -->
+        <!-- Screen container with home screen loaded directly -->
         <div id="screen-container">
-          <!-- Home screen is loaded by default -->
+          <section id="screen-home" class="screen active">
+            <div class="grid">
+              <button type="button" class="card fancy theme-cyan" data-target="screen-touch">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">Touch Demo</span>
+              </button>
+              <button type="button" class="card fancy theme-purple" data-target="screen-info">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">System Info</span>
+              </button>
+              <button type="button" class="card fancy theme-gold" data-target="screen-games">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">Games Hub</span>
+              </button>
+              <button type="button" class="card fancy theme-white" data-target="screen-scroll">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">Scroll Test</span>
+              </button>
+              <button type="button" class="card fancy theme-lime" data-target="screen-visuals">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">Visuals</span>
+              </button>
+              <button type="button" class="card fancy theme-orange" data-target="screen-stl">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">3D Model</span>
+              </button>
+              <button type="button" class="card fancy theme-blue" data-target="screen-settings">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">Settings</span>
+              </button>
+              <button type="button" class="card fancy theme-silver" data-target="screen-about">
+                <div class="border-animation"></div>
+                <div class="icon"></div>
+                <span class="label">About</span>
+              </button>
+            </div>
+          </section>
         </div>
       </main>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="./js/screen-loader.js"></script>
-    <script src="./app.js"></script>
+    
+    <script>
+      // Register service worker for PWA functionality
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
   </body>
   </html>
 

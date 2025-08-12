@@ -72,7 +72,7 @@
   flex-shrink: 0;
 }
 
-/* Responsive Chart.js canvas */
+  /* Responsive chart canvas */
 .chart-container canvas { 
   width: 100% !important; 
   height: 100% !important; 
