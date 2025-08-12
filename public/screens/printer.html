@@ -77,13 +77,7 @@
       <div class="fps" id="fps">FPS —</div>
     </footer>
   
-    <!-- Hidden debug toggles for demos -->
-    <details class="dbg">
-      <summary>Demo events</summary>
-      <button class="btn btn-small" data-demo="filament-out">Filament out</button>
-      <button class="btn btn-small" data-demo="temp-fault">Temp fault</button>
-      <button class="btn btn-small" data-demo="new-job">Start job</button>
-    </details>
+    <!-- Debug controls removed -->
   </section>
   
   <style>
@@ -270,9 +264,6 @@
       background:#e24c4c; 
     }
     #screen-printer .btn-back { background:#38435f; }
-    /* Debug */
-    #screen-printer .dbg { position:absolute; right:6px; top:42px; z-index:5; }
-    #screen-printer .dbg summary { cursor:pointer; font-size:12px; color:#aab2c5; }
   </style>
   
   <script>
@@ -653,11 +644,17 @@
       cleanup
     };
   
-    // Auto-init: start idle UI, do not start job until user triggers
+    // Auto-init: start UI and immediately begin job simulation
     // If your framework calls activate/deactivate, remove this auto-activation.
     // For standalone testing:
     if (!window.showcaseFramework) {
       activate();
+      // Start the job automatically after a short delay to allow UI to initialize
+      setTimeout(() => {
+        if (worker) {
+          worker.postMessage({ type: 'cmd', data: 'start' });
+        }
+      }, 500);
     }
   })();
   </script>

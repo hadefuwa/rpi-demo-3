@@ -129,8 +129,8 @@
     display: flex;
     flex-direction: column;
     height: calc(100vh - 72px);
-    padding: 16px;
-    gap: 16px;
+    padding: 8px;
+    gap: 8px;
     box-sizing: border-box;
     overflow: hidden;
     flex: 1;
@@ -138,50 +138,52 @@
 
   #screen-touch .touch-header {
     text-align: center;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     flex-shrink: 0;
   }
 
   #screen-touch .touch-header h2 {
-    margin: 0 0 8px 0;
+    margin: 0 0 4px 0;
     color: #ffffff;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 600;
   }
 
   #screen-touch .touch-header p {
     margin: 0;
     color: rgba(255, 255, 255, 0.7);
-    font-size: 16px;
+    font-size: 14px;
   }
 
-  /* Controls palette at the top */
+  /* Controls palette at the top - made more compact and responsive */
   #screen-touch .touch-controls {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    gap: 20px;
-    padding: 20px;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
+    border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
   }
 
   #screen-touch .color-palette {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     justify-content: center;
     flex-wrap: wrap;
+    order: 1;
   }
 
   #screen-touch .color-swatch {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    border: 3px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
@@ -195,7 +197,7 @@
 
   #screen-touch .color-swatch.active {
     border-color: #fff;
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
     transform: scale(1.1);
   }
 
@@ -207,36 +209,36 @@
     transform: translate(-50%, -50%);
     color: #000;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 10px;
     text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
   }
 
   #screen-touch .brush-controls {
     display: flex;
     align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-    justify-content: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    order: 2;
   }
 
   #screen-touch .brush-controls label {
     color: #ffffff;
     font-weight: 500;
-    font-size: 16px;
+    font-size: 14px;
     white-space: nowrap;
   }
 
   #screen-touch .brush-sizes {
     display: flex;
-    gap: 12px;
+    gap: 6px;
   }
 
   #screen-touch .brush-size {
     background: rgba(255, 255, 255, 0.1);
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 50%;
-    width: 56px;
-    height: 56px;
+    width: 36px;
+    height: 36px;
     color: #e4e6f1;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -244,7 +246,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-size: 16px;
+    font-size: 12px;
   }
 
   #screen-touch .brush-size:hover {
@@ -258,27 +260,28 @@
     color: #3a6df0;
   }
 
-  #screen-touch .brush-size[data-size="2"] { font-size: 12px; }
-  #screen-touch .brush-size[data-size="5"] { font-size: 16px; }
-  #screen-touch .brush-size[data-size="10"] { font-size: 20px; }
-  #screen-touch .brush-size[data-size="20"] { font-size: 24px; }
+  #screen-touch .brush-size[data-size="2"] { font-size: 8px; }
+  #screen-touch .brush-size[data-size="5"] { font-size: 12px; }
+  #screen-touch .brush-size[data-size="10"] { font-size: 16px; }
+  #screen-touch .brush-size[data-size="20"] { font-size: 20px; }
 
   #screen-touch .action-buttons {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     justify-content: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    order: 3;
   }
 
   #screen-touch .action-btn {
-    padding: 12px 24px;
+    padding: 8px 16px;
     background: #3a6df0;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     color: white;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
     white-space: nowrap;
     box-shadow: 0 2px 6px rgba(58, 109, 240, 0.3);
@@ -295,7 +298,7 @@
     box-shadow: 0 1px 3px rgba(58, 109, 240, 0.3);
   }
 
-  /* Canvas container at the bottom */
+  /* Canvas container at the bottom - much bigger now */
   #screen-touch .canvas-container {
     flex: 1;
     display: flex;
@@ -303,81 +306,53 @@
     align-items: center;
     min-height: 0;
     overflow: hidden;
-    padding: 8px;
+    padding: 4px;
     box-sizing: border-box;
   }
 
   #screen-touch #drawing-canvas {
     background: #2a2f3a;
-    border: 3px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
     cursor: crosshair;
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
+    width: 100%;
+    height: 100%;
     max-width: 100%;
     max-height: 100%;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   }
 
   /* Responsive design - optimized for Raspberry Pi touchscreen */
   @media (max-width: 800px) {
     #screen-touch .touch-demo-container {
-      padding: 12px;
-      gap: 12px;
+      padding: 6px;
+      gap: 6px;
     }
     
     #screen-touch .touch-controls {
-      padding: 16px;
-      gap: 16px;
+      padding: 10px 12px;
+      gap: 10px;
+      flex-direction: column;
+      align-items: center;
     }
     
-    #screen-touch .color-swatch {
-      width: 44px;
-      height: 44px;
+    #screen-touch .color-palette {
+      order: 1;
+      width: 100%;
+      justify-content: center;
     }
     
-    #screen-touch .brush-size {
-      width: 52px;
-      height: 52px;
+    #screen-touch .brush-controls {
+      order: 2;
+      justify-content: center;
     }
     
-    #screen-touch .action-btn {
-      padding: 10px 20px;
-      font-size: 15px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    #screen-touch .header {
-      padding: 8px 12px;
-    }
-    
-    #screen-touch .home-button {
-      width: 44px;
-      height: 44px;
-    }
-    
-    #screen-touch .matrix-logo {
-      height: 32px;
-    }
-    
-    #screen-touch .touch-demo-container {
-      padding: 8px;
-      gap: 8px;
-    }
-    
-    #screen-touch .touch-controls {
-      padding: 12px;
-      gap: 12px;
-    }
-    
-    #screen-touch .touch-header h2 {
-      font-size: 20px;
-    }
-    
-    #screen-touch .touch-header p {
-      font-size: 14px;
+    #screen-touch .action-buttons {
+      order: 3;
+      justify-content: center;
     }
     
     #screen-touch .color-swatch {
@@ -386,31 +361,118 @@
     }
     
     #screen-touch .brush-size {
-      width: 48px;
-      height: 48px;
+      width: 40px;
+      height: 40px;
     }
     
     #screen-touch .action-btn {
-      padding: 8px 16px;
+      padding: 10px 18px;
       font-size: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    #screen-touch .header {
+      padding: 6px 10px;
+    }
+    
+    #screen-touch .home-button {
+      width: 40px;
+      height: 40px;
+    }
+    
+    #screen-touch .matrix-logo {
+      height: 28px;
+    }
+    
+    #screen-touch .touch-demo-container {
+      padding: 4px;
+      gap: 4px;
+    }
+    
+    #screen-touch .touch-controls {
+      padding: 8px;
+      gap: 8px;
+      flex-direction: column;
+    }
+    
+    #screen-touch .touch-header h2 {
+      font-size: 18px;
+    }
+    
+    #screen-touch .touch-header p {
+      font-size: 12px;
+    }
+    
+    #screen-touch .color-palette {
+      gap: 6px;
+    }
+    
+    #screen-touch .color-swatch {
+      width: 32px;
+      height: 32px;
+    }
+    
+    #screen-touch .brush-size {
+      width: 36px;
+      height: 36px;
+    }
+    
+    #screen-touch .brush-controls label {
+      font-size: 12px;
+    }
+    
+    #screen-touch .action-btn {
+      padding: 8px 14px;
+      font-size: 12px;
+    }
+    
+    #screen-touch .canvas-container {
+      padding: 2px;
     }
   }
   
   /* Touch-friendly sizing for all devices */
   @media (pointer: coarse) {
     #screen-touch .color-swatch {
-      width: 48px;
-      height: 48px;
+      width: 40px;
+      height: 40px;
     }
     
     #screen-touch .brush-size {
-      width: 60px;
-      height: 60px;
+      width: 44px;
+      height: 44px;
     }
     
     #screen-touch .action-btn {
-      padding: 14px 24px;
-      font-size: 16px;
+      padding: 12px 20px;
+      font-size: 14px;
+    }
+  }
+  
+  /* Landscape orientation - optimize for more horizontal space */
+  @media (orientation: landscape) {
+    #screen-touch .touch-controls {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+    }
+    
+    #screen-touch .color-palette {
+      order: 1;
+      flex: 1;
+      max-width: 50%;
+    }
+    
+    #screen-touch .brush-controls {
+      order: 2;
+      flex-shrink: 0;
+    }
+    
+    #screen-touch .action-buttons {
+      order: 3;
+      flex-shrink: 0;
     }
   }
 </style>
@@ -616,23 +678,11 @@
       const container = document.querySelector('.canvas-container');
       const containerRect = container.getBoundingClientRect();
       
-      // Calculate maximum size while maintaining aspect ratio
-      const maxWidth = containerRect.width - 16; // Account for padding
-      const maxHeight = containerRect.height - 16;
+      // Use almost the full container size with minimal padding
+      const canvasWidth = Math.max(containerRect.width - 8, 200);
+      const canvasHeight = Math.max(containerRect.height - 8, 150);
       
-      // Set a reasonable aspect ratio (4:3)
-      let canvasWidth = Math.min(maxWidth, 800);
-      let canvasHeight = Math.min(maxHeight, 600);
-      
-      // Maintain aspect ratio
-      const aspectRatio = 4 / 3;
-      if (canvasWidth / canvasHeight > aspectRatio) {
-        canvasWidth = canvasHeight * aspectRatio;
-      } else {
-        canvasHeight = canvasWidth / aspectRatio;
-      }
-      
-      // Set canvas size
+      // Set canvas size to fill the container
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
       
