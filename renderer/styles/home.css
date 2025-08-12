@@ -1,9 +1,19 @@
 /* Home screen grid and cards */
+#screen-home {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 #screen-home .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-lg);
-  padding: var(--spacing-lg);
+  gap: clamp(8px, 2vw, 16px);
+  padding: clamp(8px, 2vw, 16px);
+  height: 100%;
+  flex: 1;
+  overflow: hidden;
 }
 
 #screen-home .card.fancy {
@@ -12,18 +22,21 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  min-height: clamp(110px, 18vh, 170px);
-  padding: var(--spacing-lg) var(--spacing-lg);
+  height: 100%;
+  min-height: clamp(80px, 12vh, 120px);
+  max-height: clamp(120px, 18vh, 160px);
+  padding: clamp(8px, 2vw, 16px);
   border-radius: var(--radius-xl);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 8px 32px rgba(0, 0, 0, 0.4),
     0 1px 0 rgba(255, 255, 255, 0.1) inset,
-    0 -1px 0 rgba(0, 0, 0, 0.1) inset;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    0 -1px 0 rgba(0, 0, 0, 0.1) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   cursor: pointer;
   transform-style: preserve-3d;
@@ -31,38 +44,40 @@
 
 /* Add icon placeholder */
 #screen-home .card.fancy .icon {
-  width: 40px;
-  height: 40px;
-  margin-bottom: var(--spacing-sm);
+  width: clamp(32px, 8vw, 48px);
+  height: clamp(32px, 8vw, 48px);
+  margin-bottom: clamp(4px, 1vw, 8px);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 0.4s ease;
   position: relative;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
 #screen-home .card.fancy .icon::before {
   content: '◆';
-  font-size: 20px;
+  font-size: clamp(16px, 4vw, 24px);
   color: rgba(255, 255, 255, 0.8);
-  transition: all 0.3s ease;
+  transition: all 0.4s ease;
 }
 
 /* Specific icons for each theme */
-#screen-home .card.fancy.theme-cyan .icon::before { content: '⊹'; font-size: 24px; }
-#screen-home .card.fancy.theme-purple .icon::before { content: '▣'; font-size: 20px; }
-#screen-home .card.fancy.theme-gold .icon::before { content: '♦'; font-size: 22px; }
-#screen-home .card.fancy.theme-white .icon::before { content: '⟐'; font-size: 20px; }
-#screen-home .card.fancy.theme-lime .icon::before { content: '◈'; font-size: 22px; }
-#screen-home .card.fancy.theme-orange .icon::before { content: '◯'; font-size: 22px; }
-#screen-home .card.fancy.theme-blue .icon::before { content: '⚙'; font-size: 20px; }
-#screen-home .card.fancy.theme-silver .icon::before { content: 'ⓘ'; font-size: 20px; }
+#screen-home .card.fancy.theme-cyan .icon::before { content: '⊹'; font-size: clamp(18px, 4.5vw, 28px); }
+#screen-home .card.fancy.theme-purple .icon::before { content: '▣'; font-size: clamp(16px, 4vw, 24px); }
+#screen-home .card.fancy.theme-gold .icon::before { content: '♦'; font-size: clamp(16px, 4vw, 26px); }
+#screen-home .card.fancy.theme-white .icon::before { content: '⟐'; font-size: clamp(16px, 4vw, 24px); }
+#screen-home .card.fancy.theme-lime .icon::before { content: '◈'; font-size: clamp(16px, 4vw, 26px); }
+#screen-home .card.fancy.theme-orange .icon::before { content: '◯'; font-size: clamp(16px, 4vw, 26px); }
+#screen-home .card.fancy.theme-blue .icon::before { content: '⚙'; font-size: clamp(16px, 4vw, 24px); }
+#screen-home .card.fancy.theme-silver .icon::before { content: 'ⓘ'; font-size: clamp(16px, 4vw, 24px); }
 
 #screen-home .card.fancy:hover .icon {
-  transform: scale(1.1) rotate(180deg);
+  transform: scale(1.2) rotate(360deg);
   background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
 }
 
 #screen-home .card.fancy:hover .icon::before {
@@ -74,7 +89,7 @@
   position: absolute;
   inset: 0;
   border-radius: var(--radius-xl);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transform: translateX(-100%);
   transition: transform 0.8s ease;
   pointer-events: none;
@@ -84,8 +99,55 @@
   transform: translateX(100%);
 }
 
+/* Add subtle pulsing glow animation */
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1); 
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.2); 
+  }
+}
+
+#screen-home .card.fancy .icon {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Add floating animation for extra flair */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+#screen-home .card.fancy:not(:hover) {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Add shimmer effect on the card itself */
+#screen-home .card.fancy::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(45deg, 
+    transparent 30%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    transparent 70%
+  );
+  transform: translateX(-100%) skewX(-15deg);
+  transition: transform 0.8s ease;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+}
+
+#screen-home .card.fancy:hover::after {
+  transform: translateX(200%) skewX(-15deg);
+  opacity: 1;
+}
+
 #screen-home .card.fancy .label {
-  font-size: var(--font-xl);
+  font-size: clamp(12px, 3vw, 18px);
   font-weight: 600;
   text-align: center;
   color: rgba(255, 255, 255, 0.9);
@@ -93,24 +155,29 @@
   letter-spacing: 0.5px;
   position: relative;
   z-index: 10;
-  transition: all 0.3s ease;
+  transition: all 0.4s ease;
+  line-height: 1.2;
 }
 
 #screen-home .card.fancy:hover { 
-  transform: translateY(-8px) scale(1.02); 
+  transform: translateY(-12px) scale(1.05); 
   box-shadow: 
-    0 20px 64px rgba(0, 0, 0, 0.4),
+    0 25px 80px rgba(0, 0, 0, 0.6),
     0 1px 0 rgba(255, 255, 255, 0.2) inset,
-    0 -1px 0 rgba(0, 0, 0, 0.1) inset;
-  border-color: rgba(255, 255, 255, 0.2);
+    0 -1px 0 rgba(0, 0, 0, 0.1) inset,
+    0 0 0 2px rgba(255, 255, 255, 0.1),
+    0 0 40px rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 #screen-home .card.fancy:hover .label { 
-  transform: translateY(-2px); 
+  transform: translateY(-4px) scale(1.05); 
   color: rgba(255, 255, 255, 1);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(255, 255, 255, 0.3);
 }
 #screen-home .card.fancy:active { 
-  transform: translateY(-4px) scale(0.99); 
+  transform: translateY(-6px) scale(1.02); 
   transition: all 0.1s ease; 
 }
 
@@ -146,31 +213,87 @@
 
 /* Responsive tweaks for home */
 @media (max-width: 480px) {
-  #screen-home .grid { grid-template-columns: 1fr; gap: var(--spacing-sm); padding: var(--spacing-sm); }
-  #screen-home .card.fancy { min-height: 110px; padding: var(--spacing-md); }
-  #screen-home .card.fancy .label { font-size: var(--font-lg); }
+  #screen-home .grid { 
+    grid-template-columns: 1fr; 
+    gap: clamp(6px, 1.5vw, 12px); 
+    padding: clamp(6px, 1.5vw, 12px); 
+  }
+  #screen-home .card.fancy { 
+    min-height: clamp(70px, 10vh, 100px); 
+    max-height: clamp(100px, 15vh, 130px);
+  }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
-  #screen-home .grid { grid-template-columns: repeat(2, 1fr); gap: var(--spacing-md); padding: var(--spacing-md); }
-  #screen-home .card.fancy { min-height: 140px; }
+  #screen-home .grid { 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: clamp(8px, 2vw, 14px); 
+    padding: clamp(8px, 2vw, 14px); 
+  }
+  #screen-home .card.fancy { 
+    min-height: clamp(80px, 12vh, 110px); 
+    max-height: clamp(110px, 16vh, 140px);
+  }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
-  #screen-home .grid { grid-template-columns: repeat(2, 1fr); gap: var(--spacing-md); padding: var(--spacing-lg); }
-  #screen-home .card.fancy { min-height: 160px; }
+  #screen-home .grid { 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: clamp(10px, 2.5vw, 16px); 
+    padding: clamp(10px, 2.5vw, 16px); 
+  }
+  #screen-home .card.fancy { 
+    min-height: clamp(90px, 14vh, 120px); 
+    max-height: clamp(120px, 17vh, 150px);
+  }
 }
 
 @media (min-width: 1025px) {
-  #screen-home .grid { grid-template-columns: repeat(2, 1fr); gap: var(--spacing-lg); padding: var(--spacing-xl); }
-  #screen-home .card.fancy { min-height: 170px; }
+  #screen-home .grid { 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: clamp(12px, 3vw, 20px); 
+    padding: clamp(12px, 3vw, 20px); 
+  }
+  #screen-home .card.fancy { 
+    min-height: clamp(100px, 15vh, 130px); 
+    max-height: clamp(130px, 18vh, 160px);
+  }
 }
 
 /* Extra-compact mode for very short displays */
 @media (max-height: 600px) {
-  #screen-home .grid { gap: var(--spacing-md); padding: var(--spacing-md); }
-  #screen-home .card.fancy { min-height: 100px; padding: var(--spacing-md); }
-  #screen-home .card.fancy .label { font-size: var(--font-base); }
+  #screen-home .grid { 
+    gap: clamp(4px, 1vw, 8px); 
+    padding: clamp(4px, 1vw, 8px); 
+  }
+  #screen-home .card.fancy { 
+    min-height: clamp(60px, 8vh, 80px); 
+    max-height: clamp(80px, 12vh, 100px);
+  }
+  #screen-home .card.fancy .label { 
+    font-size: clamp(10px, 2.5vw, 14px); 
+  }
+  #screen-home .card.fancy .icon {
+    width: clamp(24px, 6vw, 32px);
+    height: clamp(24px, 6vw, 32px);
+    margin-bottom: clamp(2px, 0.5vw, 4px);
+  }
+  #screen-home .card.fancy .icon::before {
+    font-size: clamp(12px, 3vw, 16px);
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 500px) {
+  #screen-home .grid { 
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(4px, 1vw, 8px); 
+    padding: clamp(4px, 1vw, 8px); 
+  }
+  #screen-home .card.fancy { 
+    min-height: clamp(50px, 8vh, 70px); 
+    max-height: clamp(70px, 12vh, 90px);
+  }
 }
 
 

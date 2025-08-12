@@ -79,9 +79,25 @@ html, body {
 .headline { text-align: center; margin: var(--spacing-lg) 0; opacity: 0.8; }
 .logo { width: 140px; height: auto; opacity: 0.92; filter: drop-shadow(0 6px 18px rgba(0,0,0,0.45)); }
 
-main { flex: 1; padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md); overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.screen { display: none; width: 100%; height: 100%; }
-.screen.active { display: block; }
+main { 
+  flex: 1; 
+  padding: 0; 
+  overflow: hidden; 
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px); /* Subtract topbar height */
+}
+.screen { 
+  display: none; 
+  width: 100%; 
+  height: 100%; 
+  flex: 1;
+  overflow: hidden;
+}
+.screen.active { 
+  display: flex;
+  flex-direction: column;
+}
 
 /* ===== Shared components ===== */
 .chip {
@@ -166,83 +182,115 @@ button:focus { outline: 2px solid var(--brand); outline-offset: 2px; }
 /* ===== Shared theme color helpers (used by Home cards and Games) ===== */
 /* ===== Shared theme color helpers (used by Home cards and Games) ===== */
 .theme-cyan { 
-  border-color: rgba(107, 203, 239, 0.5); 
-  background: linear-gradient(135deg, rgba(107, 203, 239, 0.15) 0%, rgba(107, 203, 239, 0.08) 100%) !important; 
+  border-color: rgba(107, 203, 239, 0.6); 
+  background: linear-gradient(135deg, rgba(107, 203, 239, 0.2) 0%, rgba(107, 203, 239, 0.1) 100%) !important; 
 }
 .theme-cyan:hover {
-  background: linear-gradient(135deg, rgba(107, 203, 239, 0.25) 0%, rgba(107, 203, 239, 0.12) 100%) !important;
-  border-color: rgba(107, 203, 239, 0.7);
-  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(107, 203, 239, 0.2);
+  background: linear-gradient(135deg, rgba(107, 203, 239, 0.35) 0%, rgba(107, 203, 239, 0.15) 100%) !important;
+  border-color: rgba(107, 203, 239, 0.9);
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.6), 
+    0 0 60px rgba(107, 203, 239, 0.4),
+    0 0 20px rgba(107, 203, 239, 0.6),
+    0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .theme-purple { 
-  border-color: rgba(157, 124, 243, 0.5); 
-  background: linear-gradient(135deg, rgba(157, 124, 243, 0.15) 0%, rgba(157, 124, 243, 0.08) 100%) !important; 
+  border-color: rgba(157, 124, 243, 0.6); 
+  background: linear-gradient(135deg, rgba(157, 124, 243, 0.2) 0%, rgba(157, 124, 243, 0.1) 100%) !important; 
 }
 .theme-purple:hover {
-  background: linear-gradient(135deg, rgba(157, 124, 243, 0.25) 0%, rgba(157, 124, 243, 0.12) 100%) !important;
-  border-color: rgba(157, 124, 243, 0.7);
-  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(157, 124, 243, 0.2);
+  background: linear-gradient(135deg, rgba(157, 124, 243, 0.35) 0%, rgba(157, 124, 243, 0.15) 100%) !important;
+  border-color: rgba(157, 124, 243, 0.9);
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.6), 
+    0 0 60px rgba(157, 124, 243, 0.4),
+    0 0 20px rgba(157, 124, 243, 0.6),
+    0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .theme-gold { 
-  border-color: rgba(255, 215, 0, 0.5); 
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 165, 0, 0.08) 100%) !important; 
+  border-color: rgba(255, 215, 0, 0.6); 
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 165, 0, 0.1) 100%) !important; 
 }
 .theme-gold:hover {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.25) 0%, rgba(255, 165, 0, 0.12) 100%) !important;
-  border-color: rgba(255, 215, 0, 0.7);
-  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.2);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.35) 0%, rgba(255, 165, 0, 0.15) 100%) !important;
+  border-color: rgba(255, 215, 0, 0.9);
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.6), 
+    0 0 60px rgba(255, 215, 0, 0.4),
+    0 0 20px rgba(255, 215, 0, 0.6),
+    0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .theme-white { 
-  border-color: rgba(255, 255, 255, 0.3); 
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%) !important; 
+  border-color: rgba(255, 255, 255, 0.4); 
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%) !important; 
 }
 .theme-white:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%) !important;
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.12) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.6), 
+    0 0 60px rgba(255, 255, 255, 0.2),
+    0 0 20px rgba(255, 255, 255, 0.4),
+    0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .theme-lime { 
-  border-color: rgba(124, 252, 0, 0.5); 
-  background: linear-gradient(135deg, rgba(124, 252, 0, 0.15) 0%, rgba(50, 205, 50, 0.08) 100%) !important; 
+  border-color: rgba(124, 252, 0, 0.6); 
+  background: linear-gradient(135deg, rgba(124, 252, 0, 0.2) 0%, rgba(50, 205, 50, 0.1) 100%) !important; 
 }
 .theme-lime:hover {
-  background: linear-gradient(135deg, rgba(124, 252, 0, 0.25) 0%, rgba(50, 205, 50, 0.12) 100%) !important;
-  border-color: rgba(124, 252, 0, 0.7);
-  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(124, 252, 0, 0.2);
+  background: linear-gradient(135deg, rgba(124, 252, 0, 0.35) 0%, rgba(50, 205, 50, 0.15) 100%) !important;
+  border-color: rgba(124, 252, 0, 0.9);
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.6), 
+    0 0 60px rgba(124, 252, 0, 0.4),
+    0 0 20px rgba(124, 252, 0, 0.6),
+    0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .theme-orange { 
-  border-color: rgba(255, 165, 0, 0.5); 
-  background: linear-gradient(135deg, rgba(255, 165, 0, 0.15) 0%, rgba(255, 140, 0, 0.08) 100%) !important; 
+  border-color: rgba(255, 165, 0, 0.6); 
+  background: linear-gradient(135deg, rgba(255, 165, 0, 0.2) 0%, rgba(255, 140, 0, 0.1) 100%) !important; 
 }
 .theme-orange:hover {
-  background: linear-gradient(135deg, rgba(255, 165, 0, 0.25) 0%, rgba(255, 140, 0, 0.12) 100%) !important;
-  border-color: rgba(255, 165, 0, 0.7);
-  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 165, 0, 0.2);
+  background: linear-gradient(135deg, rgba(255, 165, 0, 0.35) 0%, rgba(255, 140, 0, 0.15) 100%) !important;
+  border-color: rgba(255, 165, 0, 0.9);
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.6), 
+    0 0 60px rgba(255, 165, 0, 0.4),
+    0 0 20px rgba(255, 165, 0, 0.6),
+    0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .theme-blue { 
-  border-color: rgba(30, 144, 255, 0.5); 
-  background: linear-gradient(135deg, rgba(30, 144, 255, 0.15) 0%, rgba(0, 191, 255, 0.08) 100%) !important; 
+  border-color: rgba(30, 144, 255, 0.6); 
+  background: linear-gradient(135deg, rgba(30, 144, 255, 0.2) 0%, rgba(0, 191, 255, 0.1) 100%) !important; 
 }
 .theme-blue:hover {
-  background: linear-gradient(135deg, rgba(30, 144, 255, 0.25) 0%, rgba(0, 191, 255, 0.12) 100%) !important;
-  border-color: rgba(30, 144, 255, 0.7);
-  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(30, 144, 255, 0.2);
+  background: linear-gradient(135deg, rgba(30, 144, 255, 0.35) 0%, rgba(0, 191, 255, 0.15) 100%) !important;
+  border-color: rgba(30, 144, 255, 0.9);
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.6), 
+    0 0 60px rgba(30, 144, 255, 0.4),
+    0 0 20px rgba(30, 144, 255, 0.6),
+    0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .theme-silver { 
-  border-color: rgba(192, 192, 192, 0.5); 
-  background: linear-gradient(135deg, rgba(192, 192, 192, 0.15) 0%, rgba(169, 169, 169, 0.08) 100%) !important; 
+  border-color: rgba(192, 192, 192, 0.6); 
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.2) 0%, rgba(169, 169, 169, 0.1) 100%) !important; 
 }
 .theme-silver:hover {
-  background: linear-gradient(135deg, rgba(192, 192, 192, 0.25) 0%, rgba(169, 169, 169, 0.12) 100%) !important;
-  border-color: rgba(192, 192, 192, 0.7);
-  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.4), 0 0 20px rgba(192, 192, 192, 0.2);
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.35) 0%, rgba(169, 169, 169, 0.15) 100%) !important;
+  border-color: rgba(192, 192, 192, 0.9);
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.6), 
+    0 0 60px rgba(192, 192, 192, 0.4),
+    0 0 20px rgba(192, 192, 192, 0.6),
+    0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 /* Shared keyframes used by themed elements */
