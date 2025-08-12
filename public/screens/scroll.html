@@ -1,54 +1,481 @@
 <section id="screen-scroll" class="screen">
+  <!-- Header with logo and navigation -->
+  <header class="header">
+    <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo matrix-logo" />
+    <button id="btnHome" class="home-button" aria-label="Home">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+    </button>
+  </header>
+  
+  <!-- Main content -->
   <div class="panel">
-    <h2>Scroll Test</h2>
-    <div id="scrollbox" class="scrollbox">
-      <!-- Items will be generated dynamically -->
-    </div>
-    <p class="note">Try dragging up/down inside the list. Inertial touch scroll should work.</p>
+    <h2>🎢 Scroll Animation Test</h2>
     
-    <div class="toolbar center">
-      <button id="btnHome" class="chip">Home</button>
+    <div class="content">
+      <p class="note">Try scrolling with touch or mouse wheel. Watch the smooth animations!</p>
+      
+      <div id="scrollbox" class="scrollbox">
+        <!-- Items will be generated dynamically -->
+      </div>
+      
+      <div class="scroll-controls">
+        <button id="btnAddItems" class="btn">Add More Items</button>
+        <button id="btnClearItems" class="btn-secondary">Clear All</button>
+      </div>
     </div>
   </div>
 </section>
 
 <style>
-  /* Scroll screen toolbar styles */
-  #screen-scroll .toolbar {
+  /* Page Specific Styles - All scoped to #screen-scroll */
+  #screen-scroll {
     display: flex;
-    gap: 15px;
-    margin: 20px 0;
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    max-height: 100vh;
+    max-width: 100vw;
+    overflow: hidden;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #e4e6f1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 0;
+    position: relative;
+    box-sizing: border-box;
   }
   
-  #screen-scroll .chip {
-    padding: 12px 24px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-radius: 25px;
-    background: rgba(255,255,255,0.1);
-    color: white;
-    font-size: 16px;
+  /* Animated background particles */
+  #screen-scroll::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+    animation: backgroundShift 15s ease-in-out infinite;
+    z-index: 1;
+  }
+  
+  @keyframes backgroundShift {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+  }
+  
+  /* Header styles */
+  #screen-scroll .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 100;
+    position: relative;
+  }
+  
+  /* Home button styles */
+  #screen-scroll .home-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: inherit;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   }
   
-  #screen-scroll .chip:hover {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.5);
-    transform: translateY(-2px);
+  #screen-scroll .home-button:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   }
-
-  /* Responsive design */
-  @media (max-width: 768px) {
-    #screen-scroll .toolbar {
-      gap: 10px;
+  
+  #screen-scroll .home-button:active {
+    transform: translateY(0) scale(0.98);
+  }
+  
+  /* Matrix logo styles */
+  #screen-scroll .matrix-logo {
+    height: 36px;
+    width: auto;
+    opacity: 0.95;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+  
+  #screen-scroll .matrix-logo:hover {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  
+  /* Panel styles */
+  #screen-scroll .panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 20px;
+    gap: 24px;
+    width: 100%;
+    max-height: calc(100vh - 64px);
+    overflow: hidden;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 2;
+  }
+  
+  #screen-scroll h2 {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0;
+    color: #ffffff;
+    text-align: center;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    animation: titlePulse 3s ease-in-out infinite;
+  }
+  
+  @keyframes titlePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+  
+  #screen-scroll .content {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 24px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+    max-height: calc(100vh - 140px);
+  }
+  
+  #screen-scroll .note {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    margin: 0;
+    animation: fadeInUp 0.8s ease-out;
+  }
+  
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Scrollbox styles */
+  #screen-scroll .scrollbox {
+    flex: 1;
+    min-height: 200px;
+    max-height: calc(100vh - 300px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+  }
+  
+  /* Custom scrollbar */
+  #screen-scroll .scrollbox::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  #screen-scroll .scrollbox::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+  
+  #screen-scroll .scrollbox::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+  }
+  
+  #screen-scroll .scrollbox::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
+  
+  /* Scroll items */
+  #screen-scroll .scroll-item {
+    padding: 16px;
+    margin: 12px 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideInUp 0.6s ease-out forwards;
+  }
+  
+  #screen-scroll .scroll-item:nth-child(even) {
+    animation-delay: 0.1s;
+  }
+  
+  #screen-scroll .scroll-item:nth-child(3n) {
+    animation-delay: 0.2s;
+  }
+  
+  @keyframes slideInUp {
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  #screen-scroll .scroll-item:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+  
+  #screen-scroll .scroll-item:active {
+    transform: translateY(-2px) scale(0.98);
+  }
+  
+  #screen-scroll .scroll-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+  
+  #screen-scroll .scroll-item:hover::before {
+    left: 100%;
+  }
+  
+  #screen-scroll .item-number {
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 18px;
+  }
+  
+  #screen-scroll .item-text {
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 4px;
+    font-size: 14px;
+  }
+  
+  /* Scroll controls */
+  #screen-scroll .scroll-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  
+  #screen-scroll .btn,
+  #screen-scroll .btn-secondary {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  #screen-scroll .btn {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+  }
+  
+  #screen-scroll .btn:hover {
+    background: linear-gradient(135deg, #ff5252 0%, #d63031 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+  }
+  
+  #screen-scroll .btn-secondary {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  #screen-scroll .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  #screen-scroll .btn:active,
+  #screen-scroll .btn-secondary:active {
+    transform: translateY(-1px);
+  }
+  
+  /* Empty state */
+  #screen-scroll .empty-state {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+    padding: 40px 20px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 0.8; }
+  }
+  
+  /* Responsive design - optimized for Raspberry Pi screens */
+  @media (max-width: 800px) {
+    #screen-scroll .header {
+      padding: 10px 14px;
     }
     
-    #screen-scroll .chip {
+    #screen-scroll .panel {
+      padding: 16px;
+      gap: 16px;
+    }
+    
+    #screen-scroll h2 {
+      font-size: 28px;
+    }
+    
+    #screen-scroll .content {
+      padding: 20px;
+      border-radius: 16px;
+      max-height: calc(100vh - 120px);
+    }
+    
+    #screen-scroll .scrollbox {
+      max-height: calc(100vh - 260px);
+      min-height: 150px;
+    }
+    
+    #screen-scroll .scroll-item {
+      padding: 14px;
+      margin: 10px 0;
+    }
+    
+    #screen-scroll .btn,
+    #screen-scroll .btn-secondary {
       padding: 10px 20px;
       font-size: 14px;
+    }
+  }
+  
+  /* Extra small screens - like Raspberry Pi 5" display */
+  @media (max-width: 480px) {
+    #screen-scroll .header {
+      padding: 8px 12px;
+    }
+    
+    #screen-scroll .home-button {
+      width: 36px;
+      height: 36px;
+    }
+    
+    #screen-scroll .matrix-logo {
+      height: 32px;
+    }
+    
+    #screen-scroll .panel {
+      padding: 12px;
+      gap: 12px;
+    }
+    
+    #screen-scroll h2 {
+      font-size: 24px;
+    }
+    
+    #screen-scroll .content {
+      padding: 16px;
+      border-radius: 14px;
+      max-height: calc(100vh - 100px);
+    }
+    
+    #screen-scroll .scrollbox {
+      max-height: calc(100vh - 240px);
+      min-height: 120px;
+      padding: 12px;
+    }
+    
+    #screen-scroll .scroll-item {
+      padding: 12px;
+      margin: 8px 0;
+    }
+    
+    #screen-scroll .item-number {
+      font-size: 16px;
+    }
+    
+    #screen-scroll .item-text {
+      font-size: 13px;
+    }
+    
+    #screen-scroll .btn,
+    #screen-scroll .btn-secondary {
+      padding: 9px 18px;
+      font-size: 13px;
+      border-radius: 10px;
+    }
+    
+    #screen-scroll .scroll-controls {
+      gap: 8px;
+    }
+    
+    #screen-scroll .note {
+      font-size: 14px;
+    }
+  }
+  
+  /* Touch-specific optimizations */
+  @media (pointer: coarse) {
+    #screen-scroll .scroll-item {
+      min-height: 44px; /* Touch target size */
+    }
+    
+    #screen-scroll .btn,
+    #screen-scroll .btn-secondary {
+      min-height: 44px;
+      min-width: 44px;
     }
   }
 </style>
@@ -57,16 +484,232 @@
   (function() {
     'use strict';
     
+    let itemCounter = 0;
+    const scrollBox = document.querySelector('#scrollbox');
+    
     function initApp() {
       console.log('Scroll Test app initialized');
       setupEventListeners();
+      generateInitialItems();
     }
     
     function setupEventListeners() {
+      // Home button
       const homeButton = document.querySelector('#btnHome');
       if (homeButton) {
         homeButton.addEventListener('click', goHome);
       }
+      
+      // Add items button
+      const addButton = document.querySelector('#btnAddItems');
+      if (addButton) {
+        addButton.addEventListener('click', addMoreItems);
+      }
+      
+      // Clear items button
+      const clearButton = document.querySelector('#btnClearItems');
+      if (clearButton) {
+        clearButton.addEventListener('click', clearAllItems);
+      }
+      
+      // Add scroll event listener for dynamic effects
+      if (scrollBox) {
+        scrollBox.addEventListener('scroll', handleScroll);
+        
+        // Add touch event listeners for better mobile experience
+        scrollBox.addEventListener('touchstart', handleTouchStart, { passive: true });
+        scrollBox.addEventListener('touchmove', handleTouchMove, { passive: true });
+      }
+    }
+    
+    function generateInitialItems() {
+      const messages = [
+        "🚀 Welcome to the scroll test!",
+        "📱 Touch and drag to scroll",
+        "🎨 Watch the smooth animations",
+        "⚡ Optimized for Raspberry Pi",
+        "🌈 Beautiful gradient backgrounds",
+        "🔥 Smooth 60fps scrolling",
+        "✨ Modern glassmorphism design",
+        "🎯 Perfect touch targets",
+        "📐 100% responsive layout",
+        "🎪 Interactive hover effects"
+      ];
+      
+      messages.forEach((message, index) => {
+        createScrollItem(message, index);
+      });
+    }
+    
+    function createScrollItem(text, index = null) {
+      if (!scrollBox) return;
+      
+      const itemNumber = index !== null ? index + 1 : ++itemCounter + 10;
+      const item = document.createElement('div');
+      item.className = 'scroll-item';
+      item.innerHTML = `
+        <div class="item-number">Item #${itemNumber}</div>
+        <div class="item-text">${text}</div>
+      `;
+      
+      // Add click handler for interaction
+      item.addEventListener('click', function() {
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          this.style.transform = '';
+          showToast(`Clicked item #${itemNumber}!`);
+        }, 150);
+      });
+      
+      scrollBox.appendChild(item);
+      
+      // Trigger reflow for animation
+      requestAnimationFrame(() => {
+        item.style.animationDelay = '0s';
+      });
+    }
+    
+    function addMoreItems() {
+      const funFacts = [
+        "🧠 Your brain uses 20% of your body's energy",
+        "🌊 The ocean contains 99% of Earth's living space",
+        "🦋 Butterflies taste with their feet",
+        "⚡ Lightning strikes Earth 100 times per second",
+        "🌟 A day on Venus is longer than its year",
+        "🐙 Octopuses have three hearts",
+        "🌍 Honey never spoils - ever!",
+        "🦒 Giraffes only sleep 5-30 minutes per day",
+        "🧬 Bananas share 50% of human DNA",
+        "🌙 One day on the Moon equals 29.5 Earth days"
+      ];
+      
+      const randomFacts = funFacts.sort(() => 0.5 - Math.random()).slice(0, 5);
+      
+      randomFacts.forEach(fact => {
+        createScrollItem(fact);
+      });
+      
+      // Scroll to show new items
+      setTimeout(() => {
+        if (scrollBox) {
+          scrollBox.scrollTop = scrollBox.scrollHeight;
+        }
+      }, 300);
+      
+      showToast('Added 5 new items!');
+    }
+    
+    function clearAllItems() {
+      if (!scrollBox) return;
+      
+      const items = scrollBox.querySelectorAll('.scroll-item');
+      
+      if (items.length === 0) {
+        showToast('No items to clear!');
+        return;
+      }
+      
+      // Animate out
+      items.forEach((item, index) => {
+        setTimeout(() => {
+          item.style.opacity = '0';
+          item.style.transform = 'translateX(-100px) scale(0.8)';
+        }, index * 50);
+      });
+      
+      // Clear after animation
+      setTimeout(() => {
+        scrollBox.innerHTML = '<div class="empty-state">🎭 No items to display. Click "Add More Items" to get started!</div>';
+        itemCounter = 0;
+        showToast('All items cleared!');
+      }, items.length * 50 + 300);
+    }
+    
+    function handleScroll() {
+      if (!scrollBox) return;
+      
+      const items = scrollBox.querySelectorAll('.scroll-item');
+      const scrollBoxRect = scrollBox.getBoundingClientRect();
+      
+      items.forEach(item => {
+        const itemRect = item.getBoundingClientRect();
+        const itemCenter = itemRect.top + itemRect.height / 2;
+        const scrollBoxCenter = scrollBoxRect.top + scrollBoxRect.height / 2;
+        const distance = Math.abs(itemCenter - scrollBoxCenter);
+        const maxDistance = scrollBoxRect.height / 2;
+        const proximity = Math.max(0, 1 - distance / maxDistance);
+        
+        // Apply dynamic scaling based on proximity to center
+        const scale = 0.95 + (proximity * 0.05);
+        const opacity = 0.7 + (proximity * 0.3);
+        
+        item.style.transform = `scale(${scale})`;
+        item.style.opacity = opacity;
+      });
+    }
+    
+    let touchStartY = 0;
+    function handleTouchStart(e) {
+      touchStartY = e.touches[0].clientY;
+    }
+    
+    function handleTouchMove(e) {
+      // Add some visual feedback for touch scrolling
+      const touchY = e.touches[0].clientY;
+      const deltaY = touchY - touchStartY;
+      
+      // Add subtle visual feedback
+      if (scrollBox) {
+        const intensity = Math.min(Math.abs(deltaY) / 100, 1);
+        scrollBox.style.filter = `brightness(${1 + intensity * 0.1})`;
+        
+        setTimeout(() => {
+          scrollBox.style.filter = '';
+        }, 100);
+      }
+    }
+    
+    function showToast(message) {
+      // Create toast notification
+      const toast = document.createElement('div');
+      toast.textContent = message;
+      toast.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.8);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 500;
+        z-index: 1000;
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        pointer-events: none;
+      `;
+      
+      document.body.appendChild(toast);
+      
+      // Animate in
+      requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translate(-50%, -50%) scale(1)';
+      });
+      
+      // Animate out and remove
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translate(-50%, -50%) scale(0.8)';
+        setTimeout(() => {
+          if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+          }
+        }, 300);
+      }, 2000);
     }
     
     function goHome() {
