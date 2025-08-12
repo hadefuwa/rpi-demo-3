@@ -5,6 +5,30 @@ All notable changes to the RPI-5Inch Showcase project will be documented in this
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-08-15
+
+### 🔄 **UI Consistency & Raspberry Pi Optimization**
+
+#### **Added**
+- **Consistent Home Navigation**: Added home button in top-right corner across all pages
+- **Matrix Logo**: Added glowing Matrix.png logo in top-left corner of all pages
+- **Template File**: Created template.html for consistent new page development
+- **Raspberry Pi Optimization**: Specialized layout for 5-inch touchscreen display
+
+#### **Changed**
+- **Navigation Pattern**: Standardized home button placement and behavior
+- **Responsive Design**: Enhanced for small screens with no scrollbars
+- **Touch Interaction**: Optimized button sizes and positioning for touch input
+- **Layout Structure**: Adjusted content layout to fit Raspberry Pi 5-inch screen
+
+#### **Technical Improvements**
+- **Viewport Optimization**: Eliminated scrollbars on small screens
+- **Responsive Media Queries**: Added specific breakpoints for 480px displays
+- **Touch Target Sizing**: Adjusted interactive elements for better touch experience
+- **Self-Contained Components**: Ensured all pages maintain isolation while sharing UI patterns
+
+---
+
 ## [0.2.0] - 2025-08-12
 
 ### 🎯 **Major Architecture Overhaul: Embedded Mini-App System**
@@ -104,13 +128,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## **Future Roadmap**
 
-### **v0.3.0 (Planned)**
+### **v0.4.0 (Planned)**
 - **Additional Mini-Apps**: More showcase applications
 - **Enhanced PWA Features**: Offline support and advanced caching
 - **Performance Optimizations**: Lazy loading and code splitting
 - **Accessibility Improvements**: Screen reader support and keyboard navigation
 
-### **v0.4.0 (Planned)**
+### **v0.5.0 (Planned)**
 - **Plugin System**: Dynamic mini-app loading from external sources
 - **Configuration Management**: User-customizable app layouts
 - **Analytics Dashboard**: Usage statistics and performance metrics

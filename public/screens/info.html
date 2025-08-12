@@ -1,4 +1,6 @@
 <section id="screen-info" class="screen">
+  <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo matrix-logo" />
+  <button id="btnHome" class="home-button">🏠</button>
   <div class="panel">
     <h2>System Info</h2>
     <div class="info-description">
@@ -111,7 +113,6 @@
     
     <div class="toolbar center">
       <button id="btnInfoRefresh" class="chip">Refresh Info</button>
-      <button id="btnHome" class="chip">Home</button>
     </div>
   </div>
 </section>
@@ -127,6 +128,49 @@
     font-family: 'Arial', sans-serif;
     padding: 20px;
     overflow-y: auto;
+    position: relative;
+  }
+  
+  /* Home button styles */
+  #screen-info .home-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 10px 15px;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 100;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  #screen-info .home-button:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
+  }
+  
+  /* Matrix logo styles */
+  #screen-info .matrix-logo {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    height: 40px;
+    width: auto;
+    z-index: 100;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
   }
   
   #screen-info .panel {

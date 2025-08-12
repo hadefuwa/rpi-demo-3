@@ -1,56 +1,83 @@
 <section id="screen-about" class="screen">
+  <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo matrix-logo" />
+  <button id="btnHome" class="home-button">🏠</button>
   <div class="panel">
-    <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo about-logo" />
     <h2>About</h2>
     <div class="version-row">
       <span class="version-label">Version</span>
       <span id="version" class="version-badge">—</span>
     </div>
     <p>Beautiful 5" showcase for Raspberry Pi.</p>
-    
-    <div class="toolbar center">
-      <button id="btnHome" class="chip">Home</button>
-    </div>
   </div>
 </section>
 
 <style>
-  /* About screen toolbar styles */
-  #screen-about .toolbar {
+  /* Home button styles */
+  #screen-about .home-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 10px 15px;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 100;
+    width: 40px;
+    height: 40px;
     display: flex;
-    gap: 15px;
-    margin: 20px 0;
-    flex-wrap: wrap;
+    align-items: center;
     justify-content: center;
   }
   
-  #screen-about .chip {
-    padding: 12px 24px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-radius: 25px;
-    background: rgba(255,255,255,0.1);
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: inherit;
+  #screen-about .home-button:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
   }
   
-  #screen-about .chip:hover {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.5);
-    transform: translateY(-2px);
+  /* Matrix logo styles */
+  #screen-about .matrix-logo {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    height: 40px;
+    width: auto;
+    z-index: 100;
+    animation: pulse 2s infinite;
   }
   
-  /* Responsive design */
-  @media (max-width: 768px) {
-    #screen-about .toolbar {
-      gap: 10px;
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  
+  /* Responsive design - optimized for Raspberry Pi 5" screen */
+  @media (max-width: 800px) {
+    #screen-about .home-button,
+    #screen-about .matrix-logo {
+      height: 35px;
+      width: 35px;
+    }
+  }
+  
+  /* Extra small screens - like Raspberry Pi 5" display */
+  @media (max-width: 480px) {
+    #screen-about .home-button,
+    #screen-about .matrix-logo {
+      height: 30px;
+      width: 30px;
+      top: 8px;
     }
     
-    #screen-about .chip {
-      padding: 10px 20px;
-      font-size: 14px;
+    #screen-about .matrix-logo {
+      left: 8px;
+    }
+    
+    #screen-about .home-button {
+      right: 8px;
     }
   }
 </style>

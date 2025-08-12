@@ -1,0 +1,255 @@
+<section id="screen-template" class="screen">
+  <!-- Matrix logo in top left -->
+  <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo matrix-logo" />
+  
+  <!-- Home button in top right -->
+  <button id="btnHome" class="home-button">🏠</button>
+  
+  <!-- Main content -->
+  <div class="panel">
+    <h2>Page Title</h2>
+    
+    <!-- Your page content goes here -->
+    <div class="content">
+      <p>Replace this with your page content.</p>
+    </div>
+    
+    <!-- Optional toolbar at bottom -->
+    <div class="toolbar center">
+      <button id="btnAction" class="chip">Action Button</button>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Page Specific Styles - All scoped to #screen-template */
+  #screen-template {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    max-height: 100vh;
+    max-width: 100vw;
+    overflow: hidden;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Change gradient as needed */
+    color: white;
+    font-family: 'Arial', sans-serif;
+    padding: 15px;
+    position: relative; /* Important for absolute positioning of logo and home button */
+    box-sizing: border-box;
+  }
+  
+  /* Home button styles */
+  #screen-template .home-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 10px 15px;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 100;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  #screen-template .home-button:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
+  }
+  
+  /* Matrix logo styles */
+  #screen-template .matrix-logo {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    height: 40px;
+    width: auto;
+    z-index: 100;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  
+  /* Panel styles */
+  #screen-template .panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 50px; /* Add margin to avoid overlap with logo and home button */
+    width: 100%;
+    max-height: calc(100vh - 65px); /* Ensure panel fits in viewport */
+    overflow: hidden;
+  }
+  
+  #screen-template h2 {
+    font-size: 2.5em;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    text-align: center;
+  }
+  
+  #screen-template .content {
+    background: rgba(255,255,255,0.1);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.2);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  
+  /* Toolbar styles */
+  #screen-template .toolbar {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  #screen-template .chip {
+    padding: 12px 24px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 25px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+  }
+  
+  #screen-template .chip:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-2px);
+  }
+  
+  /* Responsive design - optimized for Raspberry Pi 5" screen */
+  @media (max-width: 800px) {
+    #screen-template {
+      padding: 10px;
+    }
+    
+    #screen-template h2 {
+      font-size: 1.8em;
+      margin-bottom: 5px;
+    }
+    
+    #screen-template .panel {
+      gap: 10px;
+      margin-top: 45px;
+    }
+    
+    #screen-template .home-button,
+    #screen-template .matrix-logo {
+      height: 35px;
+      width: 35px;
+    }
+    
+    #screen-template .toolbar {
+      gap: 8px;
+      margin: 10px 0;
+    }
+    
+    #screen-template .chip {
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+    
+    #screen-template .content {
+      padding: 10px;
+    }
+  }
+  
+  /* Extra small screens - like Raspberry Pi 5" display */
+  @media (max-width: 480px) {
+    #screen-template {
+      padding: 8px;
+    }
+    
+    #screen-template h2 {
+      font-size: 1.5em;
+    }
+    
+    #screen-template .panel {
+      gap: 8px;
+      margin-top: 40px;
+    }
+    
+    #screen-template .home-button,
+    #screen-template .matrix-logo {
+      height: 30px;
+      width: 30px;
+      top: 8px;
+    }
+    
+    #screen-template .matrix-logo {
+      left: 8px;
+    }
+    
+    #screen-template .home-button {
+      right: 8px;
+    }
+    
+    #screen-template .chip {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 15px;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    'use strict';
+    
+    function initApp() {
+      console.log('Template page initialized');
+      setupEventListeners();
+    }
+    
+    function setupEventListeners() {
+      // Home button
+      const homeButton = document.querySelector('#btnHome');
+      if (homeButton) {
+        homeButton.addEventListener('click', goHome);
+      }
+      
+      // Action button (example)
+      const actionButton = document.querySelector('#btnAction');
+      if (actionButton) {
+        actionButton.addEventListener('click', function() {
+          console.log('Action button clicked');
+          // Add your action here
+        });
+      }
+    }
+    
+    function goHome() {
+      // Direct navigation back to home
+      window.location.href = '../index.html';
+    }
+    
+    // Initialize app
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  })();
+</script>
