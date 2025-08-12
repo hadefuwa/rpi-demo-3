@@ -45,24 +45,55 @@ npm run kiosk
 ```bash
 # Install autostart service (run once)
 cd ~/rpi-demo-3
+chmod +x scripts/*.sh
 ./scripts/install-autostart.sh
 
 # Check service status
 sudo systemctl status rpi-showcase.service
 
-# View service logs
+# View service logs (live)
 sudo journalctl -u rpi-showcase.service -f
+
+# View service logs (recent)
+sudo journalctl -u rpi-showcase.service --since "5 minutes ago"
+
+# View autostart log file
+tail -f ~/rpi-demo-3/autostart.log
 
 # Manually start/stop/restart service
 sudo systemctl start rpi-showcase.service
 sudo systemctl stop rpi-showcase.service
 sudo systemctl restart rpi-showcase.service
 
+# Test autostart manually (without reboot)
+sudo systemctl stop rpi-showcase.service
+sudo systemctl start rpi-showcase.service
+
 # Disable autostart
 sudo systemctl disable rpi-showcase.service
 
 # Uninstall autostart service
 ./scripts/uninstall-autostart.sh
+```
+
+## Autostart Troubleshooting
+```bash
+# Check if desktop environment is running
+ps aux | grep -E "lxsession|startlxde|openbox|xfce4"
+
+# Check if X server is available
+xset q
+
+# Check what processes are running
+ps aux | grep -E "http-server|chromium"
+
+# Kill all processes and restart
+pkill -f http-server
+pkill -f chromium
+sudo systemctl restart rpi-showcase.service
+
+# Check autostart log
+cat ~/rpi-demo-3/autostart.log
 ```
 
 

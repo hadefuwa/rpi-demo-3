@@ -1,19 +1,22 @@
 [Unit]
 Description=RPI Demo 3 Showcase PWA
-After=network.target graphical-session.target
+After=network.target graphical-session.target multi-user.target
 Wants=graphical-session.target
+Requires=network.target
 
 [Service]
-Type=simple
+Type=forking
 User=pi
 Group=pi
 Environment=DISPLAY=:0
 Environment=XAUTHORITY=/home/pi/.Xauthority
+Environment=HOME=/home/pi
 WorkingDirectory=/home/pi/rpi-demo-3
-ExecStartPre=/bin/bash -c 'sleep 15'
-ExecStart=/home/pi/rpi-demo-3/scripts/kiosk.sh
+ExecStartPre=/bin/bash -c 'sleep 30'
+ExecStartPre=/bin/bash -c 'until pgrep -x "lxsession|startlxde|lxde-session|openbox|xfce4-session" > /dev/null; do sleep 2; done'
+ExecStart=/home/pi/rpi-demo-3/scripts/autostart-wrapper.sh
 Restart=always
-RestartSec=15
+RestartSec=20
 StandardOutput=journal
 StandardError=journal
 
