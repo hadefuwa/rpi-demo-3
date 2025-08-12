@@ -8,7 +8,16 @@
   "scripts": {
     "start": "npx http-server public -p 3000 -o",
     "dev": "npx http-server public -p 3000 -o --cors --config scripts/http-server-config.json",
-    "build": "echo 'PWA is ready to deploy'",
+    "build": "node scripts/build.js",
+    "build:clean": "rm -rf dist",
+    "clean:build": "npm run build:clean && mkdir -p dist",
+    "copy:assets": "cp -r public/assets dist/",
+    "copy:styles": "cp -r src/styles dist/",
+    "copy:js": "cp -r src/js dist/",
+    "copy:screens": "cp -r src/screens dist/",
+    "copy:manifest": "cp public/manifest.json dist/",
+    "copy:sw": "cp public/sw.js dist/",
+    "copy:index": "cp public/index.html dist/",
     "serve": "npx http-server public -p 3000 --config scripts/http-server-config.json",
     "kiosk": "./scripts/kiosk.sh",
     "dev-fresh": "./scripts/dev-fresh.sh",
@@ -19,7 +28,8 @@
     "clean": "rm -rf node_modules package-lock.json",
     "reinstall": "npm run clean && npm install",
     "validate": "node scripts/validate-pwa.js",
-    "fresh": "npx http-server public -p 3000 -c-1 --cors"
+    "fresh": "npx http-server public -p 3000 -c-1 --cors",
+    "deploy": "npm run build && npm run copy:index"
   },
   "devDependencies": {
     "http-server": "^14.1.1"
