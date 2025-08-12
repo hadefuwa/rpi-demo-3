@@ -19,6 +19,28 @@ chmod +x scripts/*.sh
 npm run kiosk
 ```
 
+## Troubleshooting Kiosk Mode
+If you get "localhost:3000 can't be found" error:
+
+```bash
+# Method 1: Start server manually first
+cd ~/rpi-demo-3
+npm run serve &
+sleep 5
+npm run kiosk
+
+# Method 2: Use development server
+npm run dev
+
+# Method 3: Check if http-server is installed
+npm install http-server
+
+# Method 4: Kill existing processes and restart
+pkill -f http-server
+pkill -f chromium
+npm run kiosk
+```
+
 
 #Create and push your first revision tag
 git tag -a rev1 -m "Rev 1 released"

@@ -6,8 +6,34 @@ echo "🖥️  Starting RPI 5Inch Showcase in Kiosk Mode..."
 pkill -f chromium || true
 pkill -f chrome || true
 
+# Kill any existing http-server processes
+pkill -f http-server || true
+
 # Wait a moment for processes to fully terminate
-sleep 2
+sleep 3
+
+# Start the HTTP server in the background
+echo "🌐 Starting HTTP server..."
+cd "$(dirname "$0")/.."
+npx http-server public -p 3000 --config scripts/http-server-config.json &
+SERVER_PID=$!
+
+# Wait for server to start
+echo "⏳ Waiting for server to start..."
+sleep 5
+
+# Check if server is running
+if ! curl -s http://localhost:3000 > /dev/null; then
+    echo "❌ Server failed to start. Retrying..."
+    sleep 3
+    if ! curl -s http://localhost:3000 > /dev/null; then
+        echo "❌ Server still not responding. Check logs and try manual start:"
+        echo "   cd $(pwd) && npm run serve"
+        exit 1
+    fi
+fi
+
+echo "✅ HTTP server is running on port 3000"
 
 # Create a unique cache-busting timestamp
 STAMP=$(date +%s)
@@ -51,6 +77,8 @@ echo "✅ Kiosk mode started!"
 echo "🔄 To exit kiosk mode: Press Alt+F4 or Ctrl+Shift+Q"
 echo "🌐 PWA is running at: http://localhost:3000?v=${STAMP}"
 echo "📁 Profile directory: $PROFILE"
+echo "🔧 Server PID: $SERVER_PID"
 echo ""
 echo "💡 This profile will be automatically cleaned up on exit"
 echo "🔧 For development, use: npm run dev"
+echo "🛑 To stop everything: pkill -f http-server && pkill -f chromium"
