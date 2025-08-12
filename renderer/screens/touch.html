@@ -1,18 +1,44 @@
 <section id="screen-touch" class="screen">
-  <div class="toolbar">
-    <div class="swatches">
-      <button class="swatch" data-color="#ff6b6b" style="background:#ff6b6b"></button>
-      <button class="swatch" data-color="#ffd93d" style="background:#ffd93d"></button>
-      <button class="swatch" data-color="#6bcBef" style="background:#6bcBef"></button>
-      <button class="swatch" data-color="#9d7cf3" style="background:#9d7cf3"></button>
-      <button class="swatch" data-color="#ffffff" style="background:#ffffff"></button>
+  <div class="touch-demo-container">
+    <div class="touch-header">
+      <h2>Touch Drawing Demo</h2>
+      <p>Draw with your finger or mouse!</p>
     </div>
-    <div class="brushes">
-      <button class="brush" data-size="4">Small</button>
-      <button class="brush" data-size="8">Med</button>
-      <button class="brush" data-size="14">Large</button>
+    
+    <div class="touch-controls">
+      <div class="color-palette">
+        <div class="color-swatch active" data-color="#ff6b6b" style="background-color: #ff6b6b;"></div>
+        <div class="color-swatch" data-color="#4ecdc4" style="background-color: #4ecdc4;"></div>
+        <div class="color-swatch" data-color="#45b7d1" style="background-color: #45b7d1;"></div>
+        <div class="color-swatch" data-color="#96ceb4" style="background-color: #96ceb4;"></div>
+        <div class="color-swatch" data-color="#ffeaa7" style="background-color: #ffeaa7;"></div>
+        <div class="color-swatch" data-color="#dda0dd" style="background-color: #dda0dd;"></div>
+        <div class="color-swatch" data-color="#98d8c8" style="background-color: #98d8c8;"></div>
+        <div class="color-swatch" data-color="#ffffff" style="background-color: #ffffff;"></div>
+      </div>
+      
+      <div class="brush-controls">
+        <label>Brush Size:</label>
+        <div class="brush-sizes">
+          <button class="brush-size active" data-size="2">●</button>
+          <button class="brush-size" data-size="5">●</button>
+          <button class="brush-size" data-size="10">●</button>
+          <button class="brush-size" data-size="20">●</button>
+        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <button id="clear-canvas" class="action-btn">Clear Canvas</button>
+        <button id="save-drawing" class="action-btn">Save Drawing</button>
+      </div>
     </div>
-    <button id="btnClear" class="chip">Clear</button>
+    
+    <div class="canvas-container">
+      <canvas id="drawing-canvas"></canvas>
+    </div>
+    
+    <div class="touch-status">
+      <span id="status-text">Ready to draw!</span>
+    </div>
   </div>
-  <canvas id="paint"></canvas>
 </section>

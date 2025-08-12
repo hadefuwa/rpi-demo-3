@@ -1,12 +1,222 @@
-/* Touch paint toolbar and canvas */
-.swatches, .brushes { display: flex; gap: var(--spacing-xs); flex-wrap: wrap; } 
-.swatch { width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer; transition: all 0.2s ease; }
-.swatch:hover { border-color: rgba(255,255,255,0.8); transform: scale(1.1); }   
-.brush { padding: var(--spacing-xs) var(--spacing-sm); background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius-sm); color: var(--fg); cursor: pointer; transition: all 0.2s ease; }
-.brush:hover { background: rgba(255,255,255,0.2); }
+/* Touch Drawing Demo Styles */
 
-#paint { width: 100%; height: clamp(260px, 60vh, 600px); border-radius: var(--radius-lg); background: #0b0e13; border: 6px solid rgba(255, 255, 255, 0.18); touch-action: none; -webkit-user-select: none; user-select: none; max-width: 100%; box-sizing: border-box; }
+.touch-demo-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px;
+  gap: 20px;
+}
 
-@media (pointer: coarse) { .swatch { width: 40px; height: 40px; } .brush { min-height: 44px; min-width: 80px; } }
+.touch-header {
+  text-align: center;
+  margin-bottom: 10px;
+}
 
+.touch-header h2 {
+  margin: 0 0 8px 0;
+  color: var(--fg);
+  font-size: 1.5rem;
+}
 
+.touch-header p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.touch-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.color-palette {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.color-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.color-swatch:hover {
+  transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.color-swatch.active {
+  border-color: #fff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+.color-swatch.active::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #000;
+  font-weight: bold;
+  font-size: 14px;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+.brush-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.brush-controls label {
+  color: var(--fg);
+  font-weight: 500;
+}
+
+.brush-sizes {
+  display: flex;
+  gap: 8px;
+}
+
+.brush-size {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  color: var(--fg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brush-size:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.brush-size.active {
+  background: rgba(107, 203, 239, 0.3);
+  border-color: #6bcbef;
+  color: #6bcbef;
+}
+
+.brush-size[data-size="2"] { font-size: 8px; }
+.brush-size[data-size="5"] { font-size: 12px; }
+.brush-size[data-size="10"] { font-size: 16px; }
+.brush-size[data-size="20"] { font-size: 20px; }
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.action-btn {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: var(--fg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.action-btn:active {
+  transform: translateY(0);
+}
+
+.canvas-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+#drawing-canvas {
+  background: #1a1d23;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.touch-status {
+  text-align: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#status-text {
+  color: var(--fg);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .touch-demo-container {
+    padding: 15px;
+    gap: 15px;
+  }
+  
+  .touch-controls {
+    padding: 12px;
+  }
+  
+  .color-swatch {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .brush-size {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (pointer: coarse) {
+  .color-swatch {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .brush-size {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .action-btn {
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
+}

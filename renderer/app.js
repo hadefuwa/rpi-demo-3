@@ -881,208 +881,261 @@
   
   // No clock on home screen anymore
 
-  // ===== ORIGINAL TOUCH DEMO IMPLEMENTATION =====
+  // ===== TOUCH DRAWING DEMO =====
   
-  // Touch demo state management
-  let touchDemoInitialized = false;
-  let touchDemoState = {
-    canvas: null,
-    ctx: null,
-    painting: false,
-    brushColor: '#ff6b6b',
-    brushSize: 8,
-    lastPos: null,
-    eventListeners: []
-  };
-
-  function cleanupTouchDemo() {
-    console.log('Cleaning up touch demo...');
-    console.log('Cleanup state:', {
-      initialized: touchDemoInitialized,
-      listenerCount: touchDemoState.eventListeners.length,
-      canvas: !!touchDemoState.canvas,
-      ctx: !!touchDemoState.ctx
-    });
+  class TouchDrawingDemo {
+    constructor() {
+      this.canvas = null;
+      this.ctx = null;
+      this.isDrawing = false;
+      this.currentColor = '#ff6b6b';
+      this.currentBrushSize = 2;
+      this.lastPosition = null;
+      this.eventListeners = [];
+      this.statusElement = null;
+      this.isInitialized = false;
+    }
     
-    touchDemoState.eventListeners.forEach(({ element, event, handler, options }) => {
-      if (element && element.removeEventListener) {
-        element.removeEventListener(event, handler, options);
+    init() {
+      if (this.isInitialized) {
+        console.log('Touch demo already initialized');
+        return;
       }
-    });
-    
-    touchDemoState.eventListeners = [];
-    touchDemoState.painting = false;
-    touchDemoState.lastPos = null;
-    touchDemoState.canvas = null;
-    touchDemoState.ctx = null;
-    touchDemoInitialized = false;
-    
-    console.log('Touch demo cleanup completed');
-  }
-
-  function addTouchEventListener(element, event, handler, options = undefined) {
-    element.addEventListener(event, handler, options);
-    touchDemoState.eventListeners.push({ element, event, handler, options });
-  }
-
-  function initTouchDemo() {
-    if (touchDemoInitialized) {
-      console.log('Touch demo already initialized, skipping...');
-      return;
-    }
-    
-    console.log('Initializing touch demo...');
-    
-    // Find the canvas
-    const canvas = document.getElementById('paint');
-    if (!canvas) {
-      console.log('Canvas not found, will retry when screen is ready');
-      if (!touchDemoInitialized) {
-        setTimeout(initTouchDemo, 200);
+      
+      // Find elements
+      this.canvas = document.getElementById('drawing-canvas');
+      this.statusElement = document.getElementById('status-text');
+      
+      if (!this.canvas) {
+        console.log('Canvas not found, retrying...');
+        setTimeout(() => this.init(), 200);
+        return;
       }
-      return;
-    }
-    
-    // Wait for the canvas to have proper dimensions
-    if (canvas.offsetWidth < 100 || canvas.offsetHeight < 100) {
-      console.log('Canvas dimensions too small, waiting for proper sizing...');
-      setTimeout(initTouchDemo, 200);
-      return;
-    }
-    
-    // Get the context
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      console.error('Failed to get canvas context');
-      return;
-    }
-    
-    // Set up the canvas
-    touchDemoState.canvas = canvas;
-    touchDemoState.ctx = ctx;
-    
-    // Ensure canvas is properly sized
-    const rect = canvas.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0) {
-      const width = Math.min(rect.width, 1024);
-      const height = Math.min(rect.height, 400);
-      resizeCanvas(canvas, width, height);
       
-      // Re-get the context after resize since resizeCanvas may have modified it
-      touchDemoState.ctx = canvas.getContext('2d');
+      this.ctx = this.canvas.getContext('2d');
+      this.setupCanvas();
+      this.bindEvents();
+      this.updateStatus('Ready to draw!');
+      this.isInitialized = true;
+      
+      console.log('Touch drawing demo initialized successfully');
     }
     
-    // Configure the context AFTER resizing
-    touchDemoState.ctx.fillStyle = touchDemoState.brushColor;
-    touchDemoState.ctx.strokeStyle = touchDemoState.brushColor;
-    touchDemoState.ctx.lineWidth = touchDemoState.brushSize;
-    touchDemoState.ctx.lineCap = 'round';
-    touchDemoState.ctx.lineJoin = 'round';
-    
-    // Clear the canvas
-    touchDemoState.ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw a test dot to verify canvas is working
-    touchDemoState.ctx.fillStyle = '#ff6b6b';
-    touchDemoState.ctx.beginPath();
-    touchDemoState.ctx.arc(50, 50, 10, 0, Math.PI * 2);
-    touchDemoState.ctx.fill();
-    console.log('Test dot drawn at (50, 50) - if you see a red dot, canvas is working');
-    
-    // Drawing functions
-    function start(e) {
-      console.log('Drawing start event triggered:', e.type, 'at target:', e.target);
-      e.preventDefault();
-      touchDemoState.painting = true;
-      const rect = canvas.getBoundingClientRect();
-      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-      touchDemoState.lastPos = { x, y };
+    setupCanvas() {
+      // Set canvas size to fit container
+      const container = this.canvas.parentElement;
+      const containerRect = container.getBoundingClientRect();
       
-      console.log('Starting draw at coordinates:', touchDemoState.lastPos, 'rect:', rect);
+      const maxWidth = Math.min(containerRect.width - 40, 800);
+      const maxHeight = Math.min(containerRect.height - 40, 500);
       
-      touchDemoState.ctx.fillStyle = touchDemoState.brushColor;
-      touchDemoState.ctx.beginPath();
-      touchDemoState.ctx.arc(touchDemoState.lastPos.x, touchDemoState.lastPos.y, touchDemoState.brushSize / 2, 0, Math.PI * 2);    
-      touchDemoState.ctx.fill();
+      // Set display size
+      this.canvas.style.width = maxWidth + 'px';
+      this.canvas.style.height = maxHeight + 'px';
+      
+      // Set actual canvas size (with device pixel ratio for crisp rendering)
+      const dpr = window.devicePixelRatio || 1;
+      this.canvas.width = maxWidth * dpr;
+      this.canvas.height = maxHeight * dpr;
+      
+      // Scale the context to match the device pixel ratio
+      this.ctx.scale(dpr, dpr);
+      
+      // Set default drawing properties
+      this.ctx.lineCap = 'round';
+      this.ctx.lineJoin = 'round';
+      this.ctx.strokeStyle = this.currentColor;
+      this.ctx.lineWidth = this.currentBrushSize;
+      
+      console.log(`Canvas setup: ${maxWidth}x${maxHeight} (display), ${this.canvas.width}x${this.canvas.height} (actual)`);
     }
     
-    function draw(e) {
-      if (!touchDemoState.painting || !touchDemoState.lastPos) return;
-      e.preventDefault();
+    bindEvents() {
+      // Canvas drawing events
+      this.addEventListener(this.canvas, 'mousedown', (e) => this.startDrawing(e));
+      this.addEventListener(this.canvas, 'mousemove', (e) => this.draw(e));
+      this.addEventListener(this.canvas, 'mouseup', (e) => this.stopDrawing(e));
+      this.addEventListener(this.canvas, 'mouseleave', (e) => this.stopDrawing(e));
       
-      const rect = canvas.getBoundingClientRect();
-      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-      const pos = { x, y };
+      // Touch events
+      this.addEventListener(this.canvas, 'touchstart', (e) => this.startDrawing(e), { passive: false });
+      this.addEventListener(this.canvas, 'touchmove', (e) => this.draw(e), { passive: false });
+      this.addEventListener(this.canvas, 'touchend', (e) => this.stopDrawing(e), { passive: false });
+      this.addEventListener(this.canvas, 'touchcancel', (e) => this.stopDrawing(e), { passive: false });
       
-      touchDemoState.ctx.strokeStyle = touchDemoState.brushColor;
-      touchDemoState.ctx.lineWidth = touchDemoState.brushSize;
-      touchDemoState.ctx.lineCap = 'round';
-      touchDemoState.ctx.lineJoin = 'round';
-      touchDemoState.ctx.beginPath();
-      touchDemoState.ctx.moveTo(touchDemoState.lastPos.x, touchDemoState.lastPos.y);
-      touchDemoState.ctx.lineTo(pos.x, pos.y);
-      touchDemoState.ctx.stroke();
+      // Color palette events
+      document.querySelectorAll('.color-swatch').forEach(swatch => {
+        this.addEventListener(swatch, 'click', (e) => this.selectColor(e));
+      });
       
-      touchDemoState.lastPos = pos;
+      // Brush size events
+      document.querySelectorAll('.brush-size').forEach(button => {
+        this.addEventListener(button, 'click', (e) => this.selectBrushSize(e));
+      });
+      
+      // Action button events
+      const clearButton = document.getElementById('clear-canvas');
+      const saveButton = document.getElementById('save-drawing');
+      
+      if (clearButton) {
+        this.addEventListener(clearButton, 'click', () => this.clearCanvas());
+      }
+      
+      if (saveButton) {
+        this.addEventListener(saveButton, 'click', () => this.saveDrawing());
+      }
     }
     
-    function end(e) {
-      console.log('Drawing end event triggered:', e.type);
-      e.preventDefault();
-      touchDemoState.painting = false;
-      touchDemoState.lastPos = null;
+    addEventListener(element, event, handler, options = undefined) {
+      element.addEventListener(event, handler, options);
+      this.eventListeners.push({ element, event, handler, options });
     }
     
-    // Bind events
-    console.log('Binding events to canvas:', canvas);
-    addTouchEventListener(canvas, 'mousedown', start);
-    addTouchEventListener(canvas, 'mousemove', draw);
-    addTouchEventListener(canvas, 'mouseup', end);
-    addTouchEventListener(canvas, 'mouseleave', end);
-    addTouchEventListener(canvas, 'touchstart', start, { passive: false });
-    addTouchEventListener(canvas, 'touchmove', draw, { passive: false });
-    addTouchEventListener(canvas, 'touchend', end, { passive: false });
-    console.log('Events bound. Total event listeners:', touchDemoState.eventListeners.length);
-    
-    // Bind control buttons
-    const swatches = document.querySelectorAll('.swatch');
-    console.log('Found swatch buttons:', swatches.length, swatches);
-    swatches.forEach(btn => {
-      const colorHandler = () => {
-        touchDemoState.brushColor = btn.getAttribute('data-color');
-        touchDemoState.ctx.strokeStyle = touchDemoState.brushColor;
-        touchDemoState.ctx.fillStyle = touchDemoState.brushColor;
-        console.log('Color changed to:', touchDemoState.brushColor);
+    getEventPosition(e) {
+      const rect = this.canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
       };
-      addTouchEventListener(btn, 'click', colorHandler);
-    });
-    
-    const brushes = document.querySelectorAll('.brush');
-    console.log('Found brush buttons:', brushes.length, brushes);
-    brushes.forEach(btn => {
-      const brushHandler = () => {
-        touchDemoState.brushSize = parseInt(btn.getAttribute('data-size'), 10);
-        touchDemoState.ctx.lineWidth = touchDemoState.brushSize;
-        console.log('Brush size changed to:', touchDemoState.brushSize);
-      };
-      addTouchEventListener(btn, 'click', brushHandler);
-    });
-    
-    const clearBtn = document.getElementById('btnClear');
-    console.log('Found clear button:', clearBtn);
-    if (clearBtn) {
-      const clearHandler = () => {
-        touchDemoState.ctx.clearRect(0, 0, touchDemoState.canvas.width, touchDemoState.canvas.height);
-        console.log('Canvas cleared');
-      };
-      addTouchEventListener(clearBtn, 'click', clearHandler);
     }
     
-    touchDemoInitialized = true;
-    console.log('Touch demo initialized successfully');
+    startDrawing(e) {
+      e.preventDefault();
+      this.isDrawing = true;
+      this.lastPosition = this.getEventPosition(e);
+      
+      // Draw a dot at the starting position
+      this.ctx.fillStyle = this.currentColor;
+      this.ctx.beginPath();
+      this.ctx.arc(this.lastPosition.x, this.lastPosition.y, this.currentBrushSize / 2, 0, Math.PI * 2);
+      this.ctx.fill();
+      
+      this.updateStatus(`Drawing with ${this.currentColor}`);
+    }
+    
+    draw(e) {
+      if (!this.isDrawing || !this.lastPosition) return;
+      e.preventDefault();
+      
+      const currentPosition = this.getEventPosition(e);
+      
+      this.ctx.strokeStyle = this.currentColor;
+      this.ctx.lineWidth = this.currentBrushSize;
+      this.ctx.beginPath();
+      this.ctx.moveTo(this.lastPosition.x, this.lastPosition.y);
+      this.ctx.lineTo(currentPosition.x, currentPosition.y);
+      this.ctx.stroke();
+      
+      this.lastPosition = currentPosition;
+    }
+    
+    stopDrawing(e) {
+      if (!this.isDrawing) return;
+      e.preventDefault();
+      
+      this.isDrawing = false;
+      this.lastPosition = null;
+      this.updateStatus('Ready to draw!');
+    }
+    
+    selectColor(e) {
+      const color = e.target.getAttribute('data-color');
+      if (!color) return;
+      
+      this.currentColor = color;
+      
+      // Update active state
+      document.querySelectorAll('.color-swatch').forEach(swatch => {
+        swatch.classList.remove('active');
+      });
+      e.target.classList.add('active');
+      
+      this.updateStatus(`Color changed to ${color}`);
+    }
+    
+    selectBrushSize(e) {
+      const size = parseInt(e.target.getAttribute('data-size'));
+      if (!size) return;
+      
+      this.currentBrushSize = size;
+      
+      // Update active state
+      document.querySelectorAll('.brush-size').forEach(button => {
+        button.classList.remove('active');
+      });
+      e.target.classList.add('active');
+      
+      this.updateStatus(`Brush size changed to ${size}px`);
+    }
+    
+    clearCanvas() {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.updateStatus('Canvas cleared!');
+    }
+    
+    saveDrawing() {
+      try {
+        const link = document.createElement('a');
+        link.download = `drawing-${Date.now()}.png`;
+        link.href = this.canvas.toDataURL();
+        link.click();
+        this.updateStatus('Drawing saved!');
+      } catch (error) {
+        console.error('Error saving drawing:', error);
+        this.updateStatus('Failed to save drawing');
+      }
+    }
+    
+    updateStatus(message) {
+      if (this.statusElement) {
+        this.statusElement.textContent = message;
+      }
+    }
+    
+    cleanup() {
+      console.log('Cleaning up touch drawing demo...');
+      
+      // Remove all event listeners
+      this.eventListeners.forEach(({ element, event, handler, options }) => {
+        if (element && element.removeEventListener) {
+          element.removeEventListener(event, handler, options);
+        }
+      });
+      
+      // Reset state
+      this.eventListeners = [];
+      this.isDrawing = false;
+      this.lastPosition = null;
+      this.canvas = null;
+      this.ctx = null;
+      this.statusElement = null;
+      this.isInitialized = false;
+      
+      console.log('Touch drawing demo cleanup completed');
+    }
   }
+  
+  // Global instance
+  let touchDemo = null;
+  
+  // Initialize touch demo when screen is shown
+  window.addEventListener('screenChanged', (e) => {
+    if (e?.detail?.screenName === 'touch') {
+      setTimeout(() => {
+        if (touchDemo) {
+          touchDemo.cleanup();
+        }
+        touchDemo = new TouchDrawingDemo();
+        touchDemo.init();
+      }, 100);
+    } else if (touchDemo) {
+      touchDemo.cleanup();
+      touchDemo = null;
+    }
+  });
 
   // System Dashboard
   let dashboardCharts = {};
@@ -2951,20 +3004,6 @@
     scrollBox.addEventListener('pointercancel', endDrag);
     scrollBox.addEventListener('pointerleave', endDrag);
   }
-
-  // Initialize touch demo when the touch screen is shown
-  window.addEventListener('screenChanged', (e) => {
-    if (e?.detail?.screenName === 'touch') {
-      // Initialize the original touch demo with a slight delay to ensure DOM is ready
-      setTimeout(() => {
-        cleanupTouchDemo(); // Clean up any existing state first
-        initTouchDemo();
-      }, 150);
-    } else if (touchDemoInitialized) {
-      // Clean up touch demo when leaving the screen
-      cleanupTouchDemo();
-    }
-  });
 
   // Snake game controls
   const btnSnakeEasy = document.getElementById('btnSnakeEasy');
