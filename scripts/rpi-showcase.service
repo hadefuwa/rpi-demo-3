@@ -1,5 +1,5 @@
 [Unit]
-Description=RPI 5Inch Showcase PWA
+Description=RPI Demo 3 Showcase PWA
 After=network.target graphical-session.target
 Wants=graphical-session.target
 
@@ -9,12 +9,11 @@ User=pi
 Group=pi
 Environment=DISPLAY=:0
 Environment=XAUTHORITY=/home/pi/.Xauthority
-WorkingDirectory=/home/pi/rpi-5inch-2
-ExecStartPre=/bin/bash -c 'sleep 10'
-ExecStart=/usr/bin/npm start
-ExecStartPost=/bin/bash -c 'sleep 5 && /home/pi/rpi-5inch-2/scripts/start-kiosk.sh'
+WorkingDirectory=/home/pi/rpi-demo-3
+ExecStartPre=/bin/bash -c 'sleep 15'
+ExecStart=/home/pi/rpi-demo-3/scripts/kiosk.sh
 Restart=always
-RestartSec=10
+RestartSec=15
 StandardOutput=journal
 StandardError=journal
 

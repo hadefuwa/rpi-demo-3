@@ -20,7 +20,7 @@ sudo cp "$SCRIPT_DIR/rpi-showcase.service" /etc/systemd/system/
 
 # Update the WorkingDirectory in the service file
 echo "🔧 Updating service configuration..."
-sudo sed -i "s|WorkingDirectory=/home/pi/rpi-5inch-2|WorkingDirectory=$PROJECT_DIR|g" /etc/systemd/system/rpi-showcase.service
+sudo sed -i "s|WorkingDirectory=/home/pi/rpi-demo-3|WorkingDirectory=$PROJECT_DIR|g" /etc/systemd/system/rpi-showcase.service
 
 # Reload systemd
 echo "🔄 Reloading systemd..."

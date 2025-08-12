@@ -15,27 +15,409 @@
   </div>
 </section>
 
+<style>
+  /* All styles STRICTLY scoped to #screen-visuals */
+  #screen-visuals {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    max-height: 100vh;
+    max-width: 100vw;
+    overflow: hidden;
+    background: #0f1424;
+    color: #e4e6f1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  #screen-visuals .panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    box-sizing: border-box;
+    align-items: center;
+  }
+
+  #screen-visuals h2 {
+    margin: 4px 0 0;
+    font-size: 24px;
+    color: #fff;
+  }
+
+  #screen-visuals .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  #screen-visuals .chip {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  }
+  #screen-visuals .chip:hover { background: rgba(255,255,255,0.14); transform: translateY(-1px); }
+  #screen-visuals .chip:active { transform: translateY(0); }
+  #screen-visuals .visual-mode.active { background: #3a6df0; color: #fff; }
+
+  #screen-visuals #visualsCanvas {
+    width: 100%;
+    height: clamp(260px, 48vh, 430px);
+    border-radius: 12px;
+    background: radial-gradient(800px 400px at 50% 50%, rgba(255,255,255,0.06), rgba(0,0,0,0.15));
+    border: 6px solid rgba(255,255,255,0.18);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25) inset, 0 6px 18px rgba(0,0,0,0.25);
+  }
+
+  #screen-visuals .note {
+    font-size: 12px;
+    opacity: 0.8;
+    text-align: center;
+  }
+
+  @media (max-width: 480px) {
+    #screen-visuals .chip { padding: 6px 10px; font-size: 13px; }
+    #screen-visuals h2 { font-size: 20px; }
+  }
+</style>
+
 <script>
   (function() {
     'use strict';
     
+    // Local state (kept inside IIFE)
+    let canvas, ctx, rafId = null;
+    let mode = 'particles';
+    let dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    let lastTime = 0;
+    const pointer = { x: 0, y: 0, down: false, has: false };
+
+    // Mode data stores
+    let particles = [];
+    let ripples = [];
+    let stars = [];
+    let fireworks = [];
+    let eqPhase = 0;
+
     function initApp() {
-      console.log('Visuals app initialized');
-      setupEventListeners();
+      setupDOM();
+      setupUI();
+      setupCanvas();
+      switchMode('particles');
+      start();
     }
-    
-    function setupEventListeners() {
+
+    function setupDOM() {
+      canvas = document.querySelector('#visualsCanvas');
+      ctx = canvas.getContext('2d');
+    }
+
+    function setupUI() {
+      // Mode buttons
+      document.querySelectorAll('#screen-visuals .visual-mode').forEach(btn => {
+        btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+      });
+      setActiveButton();
+
       const homeButton = document.querySelector('#btnHome');
       if (homeButton) {
         homeButton.addEventListener('click', goHome);
       }
+
+      // Pointer interactions on canvas
+      const onDown = (e) => {
+        pointer.down = true; pointer.has = true;
+        const p = getPos(e);
+        pointer.x = p.x; pointer.y = p.y;
+        if (mode === 'ripples') addRipple(pointer.x, pointer.y);
+        if (mode === 'fireworks') spawnFirework(pointer.x, pointer.y);
+      };
+      const onMove = (e) => {
+        const p = getPos(e);
+        pointer.x = p.x; pointer.y = p.y; pointer.has = true;
+        if (pointer.down && mode === 'ripples') addRipple(pointer.x, pointer.y);
+      };
+      const onUp = () => { pointer.down = false; };
+      canvas.addEventListener('pointerdown', onDown);
+      canvas.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+
+      // Store for cleanup
+      cleanupFns.push(() => {
+        canvas.removeEventListener('pointerdown', onDown);
+        canvas.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+      });
     }
-    
+
+    function setActiveButton() {
+      document.querySelectorAll('#screen-visuals .visual-mode').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+      });
+    }
+
+    function setupCanvas() {
+      const resize = () => {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+        canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      };
+      resize();
+      window.addEventListener('resize', resize);
+      cleanupFns.push(() => window.removeEventListener('resize', resize));
+    }
+
+    function switchMode(next) {
+      mode = next;
+      setActiveButton();
+      // Reset mode-specific state
+      particles = [];
+      ripples = [];
+      stars = [];
+      fireworks = [];
+      eqPhase = 0;
+
+      if (mode === 'particles') initParticles();
+      if (mode === 'starfield') initStarfield();
+    }
+
+    function start() {
+      cancel();
+      lastTime = performance.now();
+      const loop = (t) => {
+        rafId = requestAnimationFrame(loop);
+        const dt = Math.min(0.05, (t - lastTime) / 1000);
+        lastTime = t;
+        render(dt);
+      };
+      rafId = requestAnimationFrame(loop);
+    }
+
+    function cancel() { if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
+
+    function clear() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function render(dt) {
+      clear();
+      switch (mode) {
+        case 'particles': renderParticles(dt); break;
+        case 'ripples': renderRipples(dt); break;
+        case 'clock': renderClock(dt); break;
+        case 'equalizer': renderEqualizer(dt); break;
+        case 'starfield': renderStarfield(dt); break;
+        case 'fireworks': renderFireworks(dt); break;
+      }
+    }
+
+    // -------- Particles --------
+    function initParticles() {
+      const count = Math.floor((canvas.width / dpr) * (canvas.height / dpr) / 800);
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * canvas.width / dpr,
+          y: Math.random() * canvas.height / dpr,
+          vx: (Math.random() - 0.5) * 50,
+          vy: (Math.random() - 0.5) * 50,
+          r: 1.5 + Math.random() * 2.5,
+        });
+      }
+    }
+    function renderParticles(dt) {
+      const w = canvas.width / dpr, h = canvas.height / dpr;
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      for (const p of particles) {
+        // Simple attraction to pointer when present
+        if (pointer.has) {
+          const dx = pointer.x - p.x, dy = pointer.y - p.y;
+          const dist2 = dx*dx + dy*dy + 1;
+          const force = Math.min(1200 / dist2, 40);
+          p.vx += (dx / Math.sqrt(dist2)) * force * dt;
+          p.vy += (dy / Math.sqrt(dist2)) * force * dt;
+        }
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        // Dampen
+        p.vx *= 0.98; p.vy *= 0.98;
+        // Wrap
+        if (p.x < -5) p.x = w + 5; if (p.x > w + 5) p.x = -5;
+        if (p.y < -5) p.y = h + 5; if (p.y > h + 5) p.y = -5;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+      }
+      // Link lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i], b = particles[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const d2 = dx*dx + dy*dy;
+          if (d2 < 100*100) {
+            const alpha = 1 - Math.sqrt(d2) / 100;
+            ctx.globalAlpha = alpha * 0.6;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          }
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // -------- Ripples --------
+    function addRipple(x, y) {
+      ripples.push({ x, y, r: 0, alpha: 0.6 });
+    }
+    function renderRipples(dt) {
+      // Faint background trail
+      ctx.fillStyle = 'rgba(15,20,36,0.25)';
+      ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+      ctx.strokeStyle = 'rgba(90,150,255,0.8)';
+      ripples.forEach(r => {
+        r.r += 120 * dt; r.alpha *= 0.985;
+        ctx.globalAlpha = Math.max(0, r.alpha);
+        ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2); ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+      ripples = ripples.filter(r => r.alpha > 0.02);
+    }
+
+    // -------- Analog Clock --------
+    function renderClock() {
+      const w = canvas.width / dpr, h = canvas.height / dpr;
+      const cx = w / 2, cy = h / 2; const r = Math.min(cx, cy) * 0.8;
+      const now = new Date();
+      const sec = now.getSeconds() + now.getMilliseconds() / 1000;
+      const min = now.getMinutes() + sec / 60;
+      const hr = (now.getHours() % 12) + min / 60;
+      ctx.save();
+      ctx.translate(cx, cy);
+      // face
+      ctx.fillStyle = '#0f1424';
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2); ctx.stroke();
+      // marks
+      for (let i = 0; i < 60; i++) {
+        const angle = (i / 60) * Math.PI * 2;
+        const len = i % 5 === 0 ? 10 : 5;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(angle) * (r - len), Math.sin(angle) * (r - len));
+        ctx.lineTo(Math.cos(angle) * r, Math.sin(angle) * r);
+        ctx.lineWidth = i % 5 === 0 ? 3 : 1; ctx.stroke();
+      }
+      // hands
+      const drawHand = (ang, len, w, color) => {
+        ctx.save(); ctx.rotate(ang); ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -len); ctx.stroke(); ctx.restore();
+      };
+      drawHand((hr / 12) * Math.PI*2, r*0.55, 6, '#fff');
+      drawHand((min / 60) * Math.PI*2, r*0.75, 4, '#a0c4ff');
+      drawHand((sec / 60) * Math.PI*2, r*0.85, 2, '#ff6b6b');
+      ctx.restore();
+    }
+
+    // -------- Equalizer --------
+    function renderEqualizer(dt) {
+      eqPhase += dt * 2.4;
+      const w = canvas.width / dpr, h = canvas.height / dpr;
+      const bars = 32;
+      const gap = 4; const bw = (w - (bars - 1) * gap) / bars;
+      for (let i = 0; i < bars; i++) {
+        const x = i * (bw + gap);
+        const amp = 0.5 + 0.5 * Math.sin(eqPhase + i * 0.4) + Math.random() * 0.1;
+        const bh = Math.max(6, amp * (h * 0.8));
+        const y = h - bh;
+        const grd = ctx.createLinearGradient(0, y, 0, y + bh);
+        grd.addColorStop(0, '#3a6df0');
+        grd.addColorStop(1, '#7f53f3');
+        ctx.fillStyle = grd;
+        ctx.fillRect(x, y, bw, bh);
+      }
+    }
+
+    // -------- Starfield --------
+    function initStarfield() {
+      const count = Math.floor((canvas.width / dpr) * (canvas.height / dpr) / 250);
+      for (let i = 0; i < count; i++) {
+        stars.push({ x: (Math.random()-0.5)*2, y: (Math.random()-0.5)*2, z: Math.random()*1 + 0.1 });
+      }
+    }
+    function renderStarfield(dt) {
+      const w = canvas.width / dpr, h = canvas.height / dpr; const cx = w/2, cy = h/2;
+      ctx.fillStyle = '#0b1020'; ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+      stars.forEach(s => {
+        s.z -= dt * 0.35; if (s.z <= 0.05) { s.x = (Math.random()-0.5)*2; s.y=(Math.random()-0.5)*2; s.z = 1; }
+        const px = cx + s.x / s.z * 120;
+        const py = cy + s.y / s.z * 120;
+        const size = (1 - s.z) * 2 + 0.2;
+        ctx.beginPath(); ctx.arc(px, py, size, 0, Math.PI*2); ctx.fillStyle = 'white'; ctx.fill();
+      });
+    }
+
+    // -------- Fireworks --------
+    function spawnFirework(x, y) {
+      const burst = [];
+      const n = 40 + Math.floor(Math.random()*30);
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2;
+        const sp = 60 + Math.random() * 120;
+        burst.push({ x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, life: 1, col: `hsl(${Math.random()*360},80%,60%)` });
+      }
+      fireworks.push(burst);
+    }
+    function renderFireworks(dt) {
+      // trail
+      ctx.fillStyle = 'rgba(15,20,36,0.2)'; ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+      fireworks.forEach(burst => {
+        burst.forEach(p => {
+          p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 50 * dt; // gravity
+          p.life -= dt * 0.6;
+          ctx.globalAlpha = Math.max(0, p.life);
+          ctx.fillStyle = p.col; ctx.fillRect(p.x, p.y, 2, 2);
+        });
+      });
+      ctx.globalAlpha = 1;
+      fireworks = fireworks.map(b => b.filter(p => p.life > 0)).filter(b => b.length);
+    }
+
+    // Utilities
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      if (e.touches && e.touches[0]) e = e.touches[0];
+      return { x: (e.clientX - rect.left), y: (e.clientY - rect.top) };
+    }
+
     function goHome() {
-      // Direct navigation back to home
-      window.location.href = '../index.html';
+      if (window.showcaseFramework && window.showcaseFramework.goHome) {
+        window.showcaseFramework.goHome();
+      } else {
+        // Fallback if opened directly
+        window.location.href = '../index.html';
+      }
     }
-    
+
+    // Lifecycle management and cleanup
+    const cleanupFns = [];
+    window.appLifecycle = {
+      activate: function() {
+        // Resume animation if needed
+        if (!rafId) start();
+      },
+      deactivate: function() {
+        // Pause animation when switching away
+        cancel();
+      },
+      cleanup: function() {
+        cancel();
+        while (cleanupFns.length) { try { cleanupFns.pop()(); } catch (_) {} }
+      }
+    };
+
     // Initialize app
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initApp);

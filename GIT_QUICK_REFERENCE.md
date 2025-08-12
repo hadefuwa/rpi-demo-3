@@ -41,6 +41,30 @@ pkill -f chromium
 npm run kiosk
 ```
 
+## Autostart Service Management
+```bash
+# Install autostart service (run once)
+cd ~/rpi-demo-3
+./scripts/install-autostart.sh
+
+# Check service status
+sudo systemctl status rpi-showcase.service
+
+# View service logs
+sudo journalctl -u rpi-showcase.service -f
+
+# Manually start/stop/restart service
+sudo systemctl start rpi-showcase.service
+sudo systemctl stop rpi-showcase.service
+sudo systemctl restart rpi-showcase.service
+
+# Disable autostart
+sudo systemctl disable rpi-showcase.service
+
+# Uninstall autostart service
+./scripts/uninstall-autostart.sh
+```
+
 
 #Create and push your first revision tag
 git tag -a rev1 -m "Rev 1 released"
