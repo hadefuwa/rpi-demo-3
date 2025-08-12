@@ -7,15 +7,16 @@
   "license": "MIT",
   "scripts": {
     "start": "npx http-server public -p 3000 -o",
-    "dev": "npx http-server public -p 3000 -o --cors",
+    "dev": "npx http-server public -p 3000 -o --cors --config scripts/http-server-config.json",
     "build": "echo 'PWA is ready to deploy'",
-    "serve": "npx http-server public -p 3000",
-    "kiosk": "./scripts/start-kiosk.sh",
+    "serve": "npx http-server public -p 3000 --config scripts/http-server-config.json",
+    "kiosk": "./scripts/kiosk.sh",
     "install-service": "./scripts/install-autostart.sh",
     "uninstall-service": "./scripts/uninstall-autostart.sh",
     "clean": "rm -rf node_modules package-lock.json",
     "reinstall": "npm run clean && npm install",
-    "validate": "node scripts/validate-pwa.js"
+    "validate": "node scripts/validate-pwa.js",
+    "fresh": "npx http-server public -p 3000 -c-1 --cors"
   },
   "devDependencies": {
     "http-server": "^14.1.1"
