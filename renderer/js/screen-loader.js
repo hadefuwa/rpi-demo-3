@@ -28,13 +28,18 @@ class ScreenLoader {
    * @param {boolean} addToHistory - Whether to add to navigation history
    */
   async loadScreen(screenName, addToHistory = true) {
+    console.log('ScreenLoader.loadScreen called with:', screenName, 'addToHistory:', addToHistory);
+    
     try {
       // Check if screen is already loaded
       if (this.screens.has(screenName)) {
+        console.log('Screen already loaded, just showing:', screenName);
         this.showScreen(screenName);
         return;
       }
 
+      console.log('Loading screen HTML file for:', screenName);
+      
       // Load the screen HTML file
       const response = await fetch(`./screens/${screenName}.html`);
       if (!response.ok) {
@@ -42,6 +47,7 @@ class ScreenLoader {
       }
 
       const html = await response.text();
+      console.log('Loaded HTML for screen:', screenName);
       
       // Create a temporary container to parse the HTML
       const temp = document.createElement('div');
@@ -55,12 +61,14 @@ class ScreenLoader {
 
       // Store the screen
       this.screens.set(screenName, screenElement);
+      console.log('Stored screen element for:', screenName);
       
       // Load screen-specific stylesheet (if present)
       this.loadScreenStyles(screenName);
 
       // Add to DOM
       this.screenContainer.appendChild(screenElement);
+      console.log('Added screen to DOM:', screenName);
       
       // Show the screen
       this.showScreen(screenName);
@@ -75,6 +83,7 @@ class ScreenLoader {
 
       // Initialize screen-specific functionality
       this.initializeScreen(screenName);
+      console.log('Screen loading complete for:', screenName);
       
     } catch (error) {
       console.error('Error loading screen:', error);
@@ -108,9 +117,12 @@ class ScreenLoader {
    * @param {string} screenName - The name of the screen to show
    */
   showScreen(screenName) {
+    console.log('ScreenLoader.showScreen called with:', screenName);
+    
     // Hide all screens
     this.screens.forEach((screen, name) => {
       screen.classList.remove('active');
+      console.log('Hid screen:', name);
     });
 
     // Show the requested screen
@@ -118,6 +130,7 @@ class ScreenLoader {
     if (targetScreen) {
       targetScreen.classList.add('active');
       this.currentScreen = screenName;
+      console.log('Activated screen:', screenName);
       
       // Update page title
       document.title = `RPI 5" Showcase - ${screenName.charAt(0).toUpperCase() + screenName.slice(1)}`;
@@ -141,6 +154,8 @@ class ScreenLoader {
           window.addToNavigationHistory(`screen-${screenName}`);
         }, 50);
       }
+    } else {
+      console.error('Could not find screen to show:', screenName);
     }
   }
 

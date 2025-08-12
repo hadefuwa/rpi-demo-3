@@ -593,6 +593,8 @@
   function showScreen(id, pushToStack = true) {
     if (isNavigating) return; // Prevent recursive navigation
     
+    console.log('showScreen called with:', id, 'pushToStack:', pushToStack);
+    
     // Validate screen ID
     if (!id || typeof id !== 'string') {
       console.error('Invalid screen ID:', id);
@@ -601,14 +603,18 @@
     
     // Delegate to dynamic ScreenLoader; map id like 'screen-info' -> 'info'
     const name = id && id.startsWith('screen-') ? id.slice(7) : id;
+    console.log('Mapped screen name:', name);
+    
     if (window.screenLoader && name) {
       isNavigating = true;
       try {
+        console.log('Calling screenLoader.loadScreen with:', name);
         // We manage history ourselves, so always pass false to loader
         window.screenLoader.loadScreen(name, false);
         if (pushToStack) {
           addToNavigationHistory(id);
         }
+        console.log('Screen loaded successfully:', name);
       } catch (error) {
         console.error('Failed to show screen:', id, error);
         // Don't add failed navigation to history
@@ -649,9 +655,14 @@
   document.addEventListener('click', (e) => {
     const card = e.target.closest('#screen-home .card');
     if (!card) return;
+    
+    console.log('Button clicked:', card);
     const target = card.getAttribute('data-target'); // e.g. 'screen-touch'
+    console.log('Target screen:', target);
+    
     if (target) {
       try {
+        console.log('Attempting to show screen:', target);
         showScreen(target, true);
       } catch (error) {
         console.error('Failed to navigate to screen:', target, error);
