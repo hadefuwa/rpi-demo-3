@@ -21,11 +21,14 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    max-height: 100vh;
+    overflow: hidden;
+    background: radial-gradient(1200px 600px at 50% 0%, rgba(255,255,255,0.06), rgba(0,0,0,0.2)), linear-gradient(135deg, #5b73e8 0%, #764ba2 100%);
     color: white;
-    font-family: 'Arial', sans-serif;
-    padding: 20px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 14px;
     position: relative;
+    box-sizing: border-box;
   }
   
   /* Home button styles */
@@ -75,74 +78,67 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    justify-content: space-between;
+    gap: 12px;
+    max-width: 100%;
+    box-sizing: border-box;
   }
   
   #screen-memory h2 {
-    font-size: 2.5em;
+    font-size: clamp(20px, 3.5vw, 28px);
     margin: 0;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    text-shadow: 0 6px 24px rgba(0,0,0,0.35);
     text-align: center;
   }
   
   #screen-memory .game-stats {
     display: flex;
-    gap: 30px;
-    background: rgba(255,255,255,0.1);
-    padding: 15px 25px;
-    border-radius: 25px;
-    border: 1px solid rgba(255,255,255,0.2);
+    gap: clamp(10px, 4vw, 24px);
+    background: rgba(255,255,255,0.08);
+    padding: 10px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.18);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25) inset;
   }
   
-  #screen-memory .stat-item {
-    font-size: 18px;
-    font-weight: bold;
-  }
+  #screen-memory .stat-item { font-size: clamp(12px, 2.6vw, 16px); font-weight: 600; }
   
   #screen-memory .memory-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    max-width: 500px;
+    grid-template-columns: repeat(auto-fit, minmax(min(85px, 22vw), 1fr));
+    gap: clamp(6px, 2vw, 12px);
+    max-width: 540px;
     width: 100%;
     perspective: 800px;
   }
   
   #screen-memory .memory-card {
     aspect-ratio: 1;
-    background: rgba(255,255,255,0.1);
-    border: 2px solid rgba(255,255,255,0.3);
-    border-radius: 10px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2em;
+    font-size: clamp(20px, 6.5vw, 28px);
     cursor: pointer;
-    transition: transform 0.35s ease, background 0.25s ease, border-color 0.25s ease;
+    transition: transform 0.35s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     position: relative;
     overflow: hidden;
     transform-style: preserve-3d;
     will-change: transform;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25), inset 0 6px 16px rgba(255,255,255,0.04);
   }
   
-  #screen-memory .memory-card:hover {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.5);
-    transform: scale(1.05);
-  }
+  #screen-memory .memory-card:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.32); transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.3); }
   
-  #screen-memory .memory-card.flipped {
-    background: rgba(255,255,255,0.9);
-    color: #333;
-    transform: rotateY(180deg);
+  /* 3D inner wrapper for flip */
+  #screen-memory .memory-card .card-inner {
+    position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 0.45s ease; border-radius: inherit;
   }
+  #screen-memory .memory-card.flipped .card-inner { transform: rotateY(180deg); }
   
-  #screen-memory .memory-card.matched {
-    background: rgba(76, 175, 80, 0.8);
-    border-color: #4CAF50;
-    transform: scale(1.1);
-    animation: memoryMatchedPulse 0.5s ease-in-out;
-  }
+  #screen-memory .memory-card.matched { background: rgba(76,175,80,0.18); border-color: rgba(76,175,80,0.45); animation: memoryMatchedPulse 0.6s ease-in-out; }
   
   @keyframes memoryMatchedPulse {
     0% { transform: scale(1); }
@@ -159,9 +155,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    font-size: 1.5em;
+    background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
+    color: #fff;
+    font-size: 1.3em;
     backface-visibility: hidden;
     transform: rotateY(0deg);
     transition: transform 0.3s ease;
@@ -180,8 +176,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,0.9);
-    color: #333;
+    background: rgba(255,255,255,0.96);
+    color: #2b2b2b;
     backface-visibility: hidden;
     transform: rotateY(180deg);
     transition: transform 0.3s ease;
@@ -191,25 +187,9 @@
     transform: rotateY(0deg);
   }
   
-  #screen-memory .toolbar {
-    display: flex;
-    gap: 15px;
-    margin: 20px 0;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+  #screen-memory .toolbar { display: flex; gap: 10px; margin: 6px 0 0; flex-wrap: wrap; justify-content: center; }
   
-  #screen-memory .chip {
-    padding: 12px 24px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-radius: 25px;
-    background: rgba(255,255,255,0.1);
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: inherit;
-  }
+  #screen-memory .chip { padding: 10px 16px; border: 1px solid rgba(255,255,255,0.22); border-radius: 12px; background: rgba(255,255,255,0.1); color: #fff; font-size: 14px; cursor: pointer; transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; font-family: inherit; }
   
   #screen-memory .chip:hover {
     background: rgba(255,255,255,0.2);
@@ -218,34 +198,7 @@
   }
   
   /* Responsive design */
-  @media (max-width: 768px) {
-    #screen-memory .memory-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-    
-    #screen-memory h2 {
-      font-size: 2em;
-    }
-    
-    #screen-memory .game-stats {
-      gap: 20px;
-      padding: 12px 20px;
-    }
-    
-    #screen-memory .stat-item {
-      font-size: 16px;
-    }
-    
-    #screen-memory .toolbar {
-      gap: 10px;
-    }
-    
-    #screen-memory .chip {
-      padding: 10px 20px;
-      font-size: 14px;
-    }
-  }
+  @media (max-width: 768px) { #screen-memory .game-stats { padding: 8px 12px; } }
 </style>
 
 <script>
@@ -293,8 +246,11 @@
           startNewGame();
         } else if (e.target.id === 'btnHome') {
           goHome();
-        } else if (e.target.classList && e.target.classList.contains('memory-card')) {
-          handleCardClick(e.target);
+        } else {
+          const cardEl = e.target.closest('.memory-card');
+          if (cardEl && container.contains(cardEl)) {
+            handleCardClick(cardEl);
+          }
         }
       });
       
@@ -343,25 +299,27 @@
       // Clear grid
       memoryGrid.innerHTML = '';
       
-      // Create card elements
+      // Create card elements with inner wrapper for flip
       cards = cardPairs.map((symbol, index) => {
         const card = document.createElement('div');
         card.className = 'memory-card';
         card.dataset.index = index;
         card.dataset.symbol = symbol;
+
+        const inner = document.createElement('div');
+        inner.className = 'card-inner';
         
-        // Create card back (hidden symbol)
         const cardBack = document.createElement('div');
         cardBack.className = 'card-back';
         cardBack.textContent = '?';
         
-        // Create card front (symbol)
         const cardFront = document.createElement('div');
         cardFront.className = 'card-front';
         cardFront.textContent = symbol;
-        
-        card.appendChild(cardBack);
-        card.appendChild(cardFront);
+
+        inner.appendChild(cardBack);
+        inner.appendChild(cardFront);
+        card.appendChild(inner);
         memoryGrid.appendChild(card);
         
         return card;
