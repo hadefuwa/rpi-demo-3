@@ -10,56 +10,52 @@
     </button>
   </header>
   
-  <div class="panel">
-    <h2>Touch Demo</h2>
-    <div class="touch-info">
-      <p>Test touch interactions and gestures on your device</p>
+  <div class="touch-demo-container">
+    <div class="touch-header">
+      <h2>Touch Drawing Demo</h2>
+      <p>Draw with your finger or mouse on the canvas below</p>
     </div>
     
-    <div class="touch-areas">
-      <div class="touch-area" id="touchArea1">
-        <span class="area-label">Tap Area 1</span>
-        <span class="touch-count">0</span>
+    <!-- Palette at the top -->
+    <div class="touch-controls">
+      <div class="color-palette">
+        <div class="color-swatch active" data-color="#ff0000" style="background-color: #ff0000;" title="Red"></div>
+        <div class="color-swatch" data-color="#00ff00" style="background-color: #00ff00;" title="Green"></div>
+        <div class="color-swatch" data-color="#0000ff" style="background-color: #0000ff;" title="Blue"></div>
+        <div class="color-swatch" data-color="#ffff00" style="background-color: #ffff00;" title="Yellow"></div>
+        <div class="color-swatch" data-color="#ff00ff" style="background-color: #ff00ff;" title="Magenta"></div>
+        <div class="color-swatch" data-color="#00ffff" style="background-color: #00ffff;" title="Cyan"></div>
+        <div class="color-swatch" data-color="#ffffff" style="background-color: #ffffff;" title="White"></div>
+        <div class="color-swatch" data-color="#000000" style="background-color: #000000;" title="Black"></div>
+        <div class="color-swatch" data-color="#ffa500" style="background-color: #ffa500;" title="Orange"></div>
+        <div class="color-swatch" data-color="#800080" style="background-color: #800080;" title="Purple"></div>
       </div>
-      <div class="touch-area" id="touchArea2">
-        <span class="area-label">Tap Area 2</span>
-        <span class="touch-count">0</span>
-      </div>
-      <div class="touch-area" id="touchArea3">
-        <span class="area-label">Tap Area 3</span>
-        <span class="touch-count">0</span>
-      </div>
-    </div>
-    
-    <div class="gesture-area" id="gestureArea">
-      <div class="gesture-content">
-        <span class="gesture-label">Gesture Area</span>
-        <div class="gesture-info">
-          <span id="gestureType">Swipe or pinch here</span>
-          <span id="gestureCoords">Coordinates: (0, 0)</span>
+      
+      <div class="brush-controls">
+        <label>Brush Size:</label>
+        <div class="brush-sizes">
+          <button class="brush-size" data-size="2" title="Small">●</button>
+          <button class="brush-size active" data-size="5" title="Medium">●</button>
+          <button class="brush-size" data-size="10" title="Large">●</button>
+          <button class="brush-size" data-size="20" title="Extra Large">●</button>
         </div>
       </div>
-    </div>
-    
-    <div class="touch-stats">
-      <div class="stat-item">
-        <span class="stat-label">Total Taps</span>
-        <span class="stat-value" id="totalTaps">0</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Last Touch</span>
-        <span class="stat-value" id="lastTouch">None</span>
+      
+      <div class="action-buttons">
+        <button class="action-btn" id="clear-canvas">Clear Canvas</button>
+        <button class="action-btn" id="save-drawing">Save Drawing</button>
       </div>
     </div>
     
-    <div class="toolbar">
-      <button id="btnTouchReset" class="btn">Reset</button>
+    <!-- Canvas area at the bottom -->
+    <div class="canvas-container">
+      <canvas id="drawing-canvas" width="800" height="600"></canvas>
     </div>
   </div>
 </section>
 
 <style>
-  /* Touch App Specific Styles - All scoped to #screen-touch */
+  /* Touch Drawing Demo Styles - All scoped to #screen-touch */
   #screen-touch {
     display: flex;
     flex-direction: column;
@@ -68,8 +64,8 @@
     max-height: 100vh;
     max-width: 100vw;
     overflow: hidden;
-    background: #1a1e2e; /* Dark blue-gray background */
-    color: #e4e6f1; /* Light gray text for better readability */
+    background: #1a1e2e;
+    color: #e4e6f1;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     padding: 0;
     position: relative;
@@ -89,12 +85,13 @@
     width: 100%;
     box-sizing: border-box;
     z-index: 100;
+    flex-shrink: 0;
   }
   
   /* Home button styles */
   #screen-touch .home-button {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -127,311 +124,293 @@
     opacity: 1;
   }
   
-  /* Panel styles */
-  #screen-touch .panel {
-    flex: 1;
+  /* Touch demo container */
+  #screen-touch .touch-demo-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 24px 20px;
-    gap: 24px;
-    width: 100%;
-    max-height: calc(100vh - 64px); /* Ensure panel fits in viewport */
-    overflow: hidden;
-    box-sizing: border-box;
-  }
-  
-  #screen-touch h2 {
-    font-size: 28px;
-    font-weight: 600;
-    margin: 0;
-    color: #ffffff;
-    text-align: center;
-    letter-spacing: -0.5px;
-  }
-  
-  /* Touch info styles */
-  #screen-touch .touch-info {
-    text-align: center;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 14px 20px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  }
-  
-  #screen-touch .touch-info p {
-    margin: 0;
-    font-size: 15px;
-    color: #e4e6f1;
-  }
-  
-  /* Touch areas grid */
-  #screen-touch .touch-areas {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    height: calc(100vh - 72px);
+    padding: 16px;
     gap: 16px;
-    width: 100%;
-    max-width: 600px;
-  }
-  
-  #screen-touch .touch-area {
-    aspect-ratio: 1;
-    background: rgba(58, 109, 240, 0.05);
-    border: 1px solid rgba(58, 109, 240, 0.2);
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
+    box-sizing: border-box;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    flex: 1;
   }
-  
-  #screen-touch .touch-area:hover {
-    background: rgba(58, 109, 240, 0.1);
-    border-color: rgba(58, 109, 240, 0.3);
-    transform: translateY(-2px);
-  }
-  
-  #screen-touch .touch-area:active {
-    background: rgba(58, 109, 240, 0.15);
-    transform: scale(0.98);
-  }
-  
-  #screen-touch .touch-area .area-label {
-    font-size: 15px;
-    font-weight: 500;
+
+  #screen-touch .touch-header {
+    text-align: center;
     margin-bottom: 8px;
-    color: #ffffff;
+    flex-shrink: 0;
   }
-  
-  #screen-touch .touch-area .touch-count {
+
+  #screen-touch .touch-header h2 {
+    margin: 0 0 8px 0;
+    color: #ffffff;
     font-size: 24px;
     font-weight: 600;
-    color: #3a6df0;
   }
-  
-  #screen-touch .touch-area.touched {
-    background: rgba(58, 109, 240, 0.2);
-    border-color: rgba(58, 109, 240, 0.5);
-    animation: touchTouchPulse 0.3s ease-in-out;
+
+  #screen-touch .touch-header p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 16px;
   }
-  
-  @keyframes touchTouchPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+
+  /* Controls palette at the top */
+  #screen-touch .touch-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
-  
-  /* Gesture area styles */
-  #screen-touch .gesture-area {
-    width: 100%;
-    max-width: 500px;
-    height: 180px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 10px;
+
+  #screen-touch .color-palette {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  #screen-touch .color-swatch {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  #screen-touch .color-swatch:hover {
+    transform: scale(1.1);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+
+  #screen-touch .color-swatch.active {
+    border-color: #fff;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+    transform: scale(1.1);
+  }
+
+  #screen-touch .color-swatch.active::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #000;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
+  }
+
+  #screen-touch .brush-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  #screen-touch .brush-controls label {
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  #screen-touch .brush-sizes {
+    display: flex;
+    gap: 12px;
+  }
+
+  #screen-touch .brush-size {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    color: #e4e6f1;
+    cursor: pointer;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  }
-  
-  #screen-touch .gesture-area .gesture-content {
-    text-align: center;
-  }
-  
-  #screen-touch .gesture-area .gesture-label {
-    display: block;
+    flex-shrink: 0;
     font-size: 16px;
-    font-weight: 500;
-    margin-bottom: 12px;
-    color: #ffffff;
   }
-  
-  #screen-touch .gesture-area .gesture-info {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    font-size: 14px;
-    color: #e4e6f1;
+
+  #screen-touch .brush-size:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
   }
-  
-  #screen-touch .gesture-area.gesturing {
-    background: rgba(58, 109, 240, 0.1);
-    border-color: rgba(58, 109, 240, 0.3);
-    animation: touchGesturePulse 0.5s ease-in-out;
-  }
-  
-  @keyframes touchGesturePulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.01); }
-    100% { transform: scale(1); }
-  }
-  
-  /* Stats styles */
-  #screen-touch .touch-stats {
-    display: flex;
-    gap: 24px;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 16px 20px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  }
-  
-  #screen-touch .stat-item {
-    text-align: center;
-  }
-  
-  #screen-touch .stat-label {
-    display: block;
-    font-size: 14px;
-    color: #e4e6f1;
-    margin-bottom: 5px;
-  }
-  
-  #screen-touch .stat-value {
-    display: block;
-    font-size: 20px;
-    font-weight: 600;
+
+  #screen-touch .brush-size.active {
+    background: rgba(58, 109, 240, 0.3);
+    border-color: #3a6df0;
     color: #3a6df0;
   }
-  
-  /* Toolbar styles */
-  #screen-touch .toolbar {
+
+  #screen-touch .brush-size[data-size="2"] { font-size: 12px; }
+  #screen-touch .brush-size[data-size="5"] { font-size: 16px; }
+  #screen-touch .brush-size[data-size="10"] { font-size: 20px; }
+  #screen-touch .brush-size[data-size="20"] { font-size: 24px; }
+
+  #screen-touch .action-buttons {
     display: flex;
     gap: 12px;
-    margin: 20px 0 0;
-    flex-wrap: wrap;
     justify-content: center;
-    width: 100%;
+    flex-wrap: wrap;
   }
-  
-  #screen-touch .btn {
-    padding: 10px 20px;
-    border-radius: 8px;
-    background: #3a6df0; /* Primary blue */
-    color: white;
-    font-size: 15px;
-    font-weight: 500;
+
+  #screen-touch .action-btn {
+    padding: 12px 24px;
+    background: #3a6df0;
     border: none;
+    border-radius: 8px;
+    color: white;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-family: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    white-space: nowrap;
     box-shadow: 0 2px 6px rgba(58, 109, 240, 0.3);
   }
-  
-  #screen-touch .btn:hover {
+
+  #screen-touch .action-btn:hover {
     background: #4a7bf7;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(58, 109, 240, 0.4);
   }
-  
-  #screen-touch .btn:active {
+
+  #screen-touch .action-btn:active {
     transform: translateY(0);
     box-shadow: 0 1px 3px rgba(58, 109, 240, 0.3);
   }
-  
-  /* Responsive design - optimized for Raspberry Pi 5" screen */
+
+  /* Canvas container at the bottom */
+  #screen-touch .canvas-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 0;
+    overflow: hidden;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+
+  #screen-touch #drawing-canvas {
+    background: #2a2f3a;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    cursor: crosshair;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    max-width: 100%;
+    max-height: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Responsive design - optimized for Raspberry Pi touchscreen */
   @media (max-width: 800px) {
-    #screen-touch .header {
-      padding: 10px 14px;
+    #screen-touch .touch-demo-container {
+      padding: 12px;
+      gap: 12px;
     }
     
-    #screen-touch .panel {
+    #screen-touch .touch-controls {
       padding: 16px;
       gap: 16px;
     }
     
-    #screen-touch h2 {
-      font-size: 24px;
+    #screen-touch .color-swatch {
+      width: 44px;
+      height: 44px;
     }
     
-    #screen-touch .touch-areas {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+    #screen-touch .brush-size {
+      width: 52px;
+      height: 52px;
     }
     
-    #screen-touch .gesture-area {
-      height: 150px;
-    }
-    
-    #screen-touch .touch-stats {
-      gap: 16px;
-      padding: 14px;
-    }
-    
-    #screen-touch .toolbar {
-      gap: 10px;
-    }
-    
-    #screen-touch .btn {
-      padding: 9px 18px;
+    #screen-touch .action-btn {
+      padding: 10px 20px;
+      font-size: 15px;
     }
   }
-  
-  /* Extra small screens - like Raspberry Pi 5" display */
+
   @media (max-width: 480px) {
     #screen-touch .header {
       padding: 8px 12px;
     }
     
     #screen-touch .home-button {
-      width: 36px;
-      height: 36px;
+      width: 44px;
+      height: 44px;
     }
     
     #screen-touch .matrix-logo {
       height: 32px;
     }
     
-    #screen-touch .panel {
+    #screen-touch .touch-demo-container {
+      padding: 8px;
+      gap: 8px;
+    }
+    
+    #screen-touch .touch-controls {
       padding: 12px;
       gap: 12px;
     }
     
-    #screen-touch h2 {
-      font-size: 22px;
+    #screen-touch .touch-header h2 {
+      font-size: 20px;
     }
     
-    #screen-touch .touch-areas {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-    
-    #screen-touch .touch-area .area-label {
+    #screen-touch .touch-header p {
       font-size: 14px;
     }
     
-    #screen-touch .touch-area .touch-count {
-      font-size: 22px;
+    #screen-touch .color-swatch {
+      width: 36px;
+      height: 36px;
     }
     
-    #screen-touch .gesture-area {
-      height: 120px;
+    #screen-touch .brush-size {
+      width: 48px;
+      height: 48px;
     }
     
-    #screen-touch .gesture-area .gesture-label {
-      font-size: 15px;
-      margin-bottom: 8px;
-    }
-    
-    #screen-touch .touch-stats {
-      padding: 12px;
-      gap: 16px;
-    }
-    
-    #screen-touch .btn {
+    #screen-touch .action-btn {
       padding: 8px 16px;
       font-size: 14px;
-      border-radius: 6px;
+    }
+  }
+  
+  /* Touch-friendly sizing for all devices */
+  @media (pointer: coarse) {
+    #screen-touch .color-swatch {
+      width: 48px;
+      height: 48px;
+    }
+    
+    #screen-touch .brush-size {
+      width: 60px;
+      height: 60px;
+    }
+    
+    #screen-touch .action-btn {
+      padding: 14px 24px;
+      font-size: 16px;
     }
   }
 </style>

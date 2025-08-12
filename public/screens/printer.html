@@ -99,44 +99,176 @@
     #screen-printer .home-button:hover { background: rgba(255, 255, 255, 0.1); }
     #screen-printer .home-button:active { transform: scale(0.95); }
     #screen-printer .net-dot.online { background:#28c76f; }
-    #screen-printer .grid { display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap:8px; padding:8px; height:236px; }
-    #screen-printer .card { background:#121420; border:1px solid #1c2030; border-radius:10px; padding:8px; position:relative; overflow:hidden; }
+    #screen-printer .grid { 
+      display:grid; 
+      grid-template-columns: 1fr 1fr; 
+      grid-template-rows: 1fr 1fr; 
+      gap:12px; 
+      padding:12px; 
+      height: calc(100vh - 86px); /* Adjust height to fill available space (100vh - header - footer) */
+    }
+    #screen-printer .card { 
+      background:#121420; 
+      border:1px solid #1c2030; 
+      border-radius:12px; 
+      padding:16px; 
+      position:relative; 
+      overflow:hidden;
+      display: flex;
+      flex-direction: column;
+    }
     /* Progress */
     #screen-printer .progress-card { display:flex; align-items:center; justify-content:center; gap:8px; }
-    #screen-printer .ring { width:110px; height:110px; transform: rotate(-90deg); }
+    #screen-printer .ring { 
+      width: min(140px, 30%); 
+      height: min(140px, 30%); 
+      transform: rotate(-90deg);
+    }
     #screen-printer .ring .bg { fill:none; stroke:#23283d; stroke-width:12; }
     #screen-printer .ring .fg { fill:none; stroke:#4f8cff; stroke-width:12; stroke-linecap:round; transition: stroke-dashoffset 120ms linear; }
     #screen-printer .progress-text { display:flex; flex-direction:column; gap:4px; min-width:120px; }
-    #screen-printer .job-name { font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    #screen-printer .eta, #screen-printer .layer { font-size:12px; color:#aab2c5; }
+    #screen-printer .job-name { 
+      font-size: clamp(14px, 2.5vmin, 18px); 
+      white-space:nowrap; 
+      overflow:hidden; 
+      text-overflow:ellipsis; 
+    }
+    #screen-printer .eta, #screen-printer .layer { 
+      font-size: clamp(12px, 2vmin, 16px); 
+      color:#aab2c5; 
+    }
     /* Temps */
-    #screen-printer .temps-card .temp { margin-bottom:8px; }
-    #screen-printer .temps-card .label { font-size:12px; color:#aab2c5; margin-bottom:2px; }
-    #screen-printer .temps-card .bar { width:100%; height:10px; background:#22263a; border-radius:6px; overflow:hidden; }
-    #screen-printer .temps-card .fill { height:100%; width:0%; background:#ffd166; transition: width 150ms linear; }
-    #screen-printer .temps-card .vals { font-size:12px; color:#cfd6e6; margin-top:2px; }
-    #screen-printer .speed { display:flex; align-items:center; gap:6px; }
-    #screen-printer .speed input[type="range"] { flex:1; }
-    #screen-printer .speed .speed-val { width:48px; text-align:right; font-size:12px; color:#cfd6e6; }
+    #screen-printer .temps-card { 
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+    }
+    #screen-printer .temps-card .temp { 
+      margin-bottom: clamp(12px, 3vh, 24px); 
+    }
+    #screen-printer .temps-card .label { 
+      font-size: clamp(12px, 2vmin, 16px); 
+      color:#aab2c5; 
+      margin-bottom:4px; 
+    }
+    #screen-printer .temps-card .bar { 
+      width:100%; 
+      height: clamp(12px, 2vh, 20px); 
+      background:#22263a; 
+      border-radius:8px; 
+      overflow:hidden; 
+    }
+    #screen-printer .temps-card .fill { 
+      height:100%; 
+      width:0%; 
+      background:#ffd166; 
+      transition: width 150ms linear; 
+    }
+    #screen-printer .temps-card .vals { 
+      font-size: clamp(12px, 2vmin, 16px); 
+      color:#cfd6e6; 
+      margin-top:4px; 
+    }
+    #screen-printer .speed { 
+      display:flex; 
+      align-items:center; 
+      gap:10px; 
+      margin-top: clamp(16px, 4vh, 32px);
+    }
+    #screen-printer .speed input[type="range"] { 
+      flex:1; 
+      height: clamp(16px, 2vh, 24px);
+    }
+    #screen-printer .speed .speed-val { 
+      width:48px; 
+      text-align:right; 
+      font-size: clamp(12px, 2vmin, 16px); 
+      color:#cfd6e6; 
+    }
     /* Camera */
-    #screen-printer .cam-wrap { position:relative; width:100%; height:120px; background:#0f111a; border-radius:8px; overflow:hidden; border:1px solid #1c2030; display:flex; align-items:center; justify-content:center; }
-    #screen-printer .cam-wrap img { max-width:100%; max-height:100%; object-fit:cover; }
+    #screen-printer .cam-wrap { 
+      position:relative; 
+      width:100%; 
+      height:100%; 
+      background:#0f111a; 
+      border-radius:8px; 
+      overflow:hidden; 
+      border:1px solid #1c2030; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center;
+    }
+    #screen-printer .cam-wrap img { 
+      width:100%; 
+      height:100%; 
+      object-fit:contain; /* Changed from cover to contain to preserve aspect ratio */
+      image-rendering: auto; /* Ensure smooth rendering */
+    }
     #screen-printer .cam-status { position:absolute; bottom:4px; right:4px; font-size:10px; background:#1d2233; padding:2px 6px; border-radius:6px; color:#aab2c5; }
     /* Materials + controls */
-    #screen-printer .ams { display:grid; grid-template-columns: repeat(4, 1fr); gap:6px; margin-bottom:6px; }
-    #screen-printer .slot { background:#0f111a; border:1px solid #1c2030; border-radius:8px; padding:6px; display:flex; gap:6px; align-items:center; }
-    #screen-printer .slot .chip { width:16px; height:16px; border-radius:4px; border:1px solid #0008; display:inline-block; }
-    #screen-printer .slot .meta { font-size:11px; color:#cfd6e6; line-height:1.1; }
-    #screen-printer .controls { display:flex; gap:6px; }
+    #screen-printer .ams { 
+      display:grid; 
+      grid-template-columns: repeat(4, 1fr); 
+      gap:10px; 
+      margin-bottom: clamp(12px, 3vh, 24px); 
+      flex: 1;
+    }
+    #screen-printer .slot { 
+      background:#0f111a; 
+      border:1px solid #1c2030; 
+      border-radius:8px; 
+      padding:8px; 
+      display:flex; 
+      gap:8px; 
+      align-items:center; 
+    }
+    #screen-printer .slot .chip { 
+      width: clamp(16px, 2.5vmin, 24px); 
+      height: clamp(16px, 2.5vmin, 24px); 
+      border-radius:4px; 
+      border:1px solid #0008; 
+      display:inline-block; 
+    }
+    #screen-printer .slot .meta { 
+      font-size: clamp(11px, 1.8vmin, 14px); 
+      color:#cfd6e6; 
+      line-height:1.2; 
+    }
+    #screen-printer .controls { 
+      display:flex; 
+      gap:10px; 
+      justify-content: space-between;
+      margin-top: auto;
+    }
     /* Footer */
     #screen-printer .footer { height:36px; padding:6px 8px; display:flex; align-items:center; justify-content:space-between; border-top:1px solid #1c2030; background:#101218; }
     #screen-printer .state-pill { font-size:12px; padding:4px 8px; border-radius:999px; background:#1d2233; color:#aab2c5; }
     #screen-printer .fps { font-size:12px; color:#aab2c5; }
     /* Buttons */
-    #screen-printer .btn { background:#2b60ff; color:#fff; border:none; padding:8px 10px; border-radius:8px; font-size:13px; }
-    #screen-printer .btn:active { transform: translateY(1px); }
-    #screen-printer .btn-small { padding:6px 8px; font-size:12px; background:#38435f; }
-    #screen-printer .btn-danger { background:#e24c4c; }
+    #screen-printer .btn { 
+      background:#2b60ff; 
+      color:#fff; 
+      border:none; 
+      padding: clamp(8px, 1.5vh, 12px) clamp(10px, 2vw, 16px); 
+      border-radius:8px; 
+      font-size: clamp(13px, 2vmin, 16px);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    #screen-printer .btn:active { 
+      transform: translateY(1px); 
+    }
+    #screen-printer .btn:hover {
+      filter: brightness(1.1);
+    }
+    #screen-printer .btn-small { 
+      padding: clamp(6px, 1vh, 10px) clamp(8px, 1.5vw, 14px); 
+      font-size: clamp(12px, 1.8vmin, 14px); 
+      background:#38435f; 
+    }
+    #screen-printer .btn-danger { 
+      background:#e24c4c; 
+    }
     #screen-printer .btn-back { background:#38435f; }
     /* Debug */
     #screen-printer .dbg { position:absolute; right:6px; top:42px; z-index:5; }
@@ -369,7 +501,25 @@
   
     function setCamera(url, isOnline) {
       camStatus.textContent = isOnline ? 'Live' : 'Camera offline';
-      if (isOnline && url) { cam.src = url; } else { cam.removeAttribute('src'); }
+      if (isOnline && url) { 
+        // Force reload the GIF to ensure it plays properly
+        if (cam.src === url) {
+          // If it's the same URL, add a cache-busting parameter
+          const timestamp = Date.now();
+          cam.src = `${url}?t=${timestamp}`; 
+        } else {
+          cam.src = url;
+        }
+        
+        // Prevent browser from caching the GIF frames
+        cam.style.willChange = 'transform';
+        
+        // Add specific attributes to ensure proper GIF playback
+        cam.setAttribute('loading', 'eager');
+        cam.setAttribute('decoding', 'sync');
+      } else { 
+        cam.removeAttribute('src'); 
+      }
     }
   
     function handleBanner(msg) {
