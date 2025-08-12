@@ -79,6 +79,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    z-index: 2;
   }
   
   #screen-home .card:hover {
@@ -115,6 +116,8 @@
     border-radius: 15px;
     background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
     animation: borderFlow 3s linear infinite;
+    pointer-events: none;
+    z-index: 1;
   }
   
   @keyframes borderFlow {
@@ -177,7 +180,10 @@
       cardElements.forEach(function(card) {
         var target = card.getAttribute('data-target');
         if (target) {
-          var listener = function() {
+          var listener = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Card clicked:', target);
             navigateToScreen(target);
           };
           
