@@ -15,10 +15,7 @@ git fetch origin
 git reset --hard origin/main
 git clean -fd
 npm install
-chmod +x scripts/*.sh
 
-# Install emoji fonts (run once, then reboot)
-./scripts/install-emoji-fonts.sh
 
 npm run kiosk
 ```
@@ -110,7 +107,9 @@ pkill -f http-server
 pkill -f chromium
 sudo systemctl restart rpi-showcase.service
 ```
-
+chmod +x scripts/*.sh
+./scripts/install-emoji-fonts.sh
+```
 
 #Create and push your first revision tag
 git tag -a rev1 -m "Rev 1 released"
@@ -118,8 +117,8 @@ git push origin main --tags
 
 #When ready for the next release
 git add -A
-git commit -m "Prepare for Rev 2 release"
-git tag -a rev2.1 -m "Rev 2 released"
+git commit -m "Prepare for Rev 2.5 release"
+git tag -a rev2.5 -m "Rev 2.5 released"
 git push origin main --tags
 
 

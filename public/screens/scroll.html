@@ -45,6 +45,18 @@
     padding: 0;
     position: relative;
     box-sizing: border-box;
+    cursor: none; /* Hide cursor for touchscreen experience */
+    -webkit-touch-callout: none; /* Disable iOS callout */
+    -webkit-user-select: none; /* Disable text selection */
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Hide cursor on all child elements */
+  #screen-scroll * {
+    cursor: none !important;
   }
   
   /* Animated background particles */
@@ -205,6 +217,9 @@
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     position: relative;
+    cursor: none; /* Hide cursor for touch experience */
+    touch-action: pan-y; /* Allow vertical panning only */
+    overscroll-behavior: contain; /* Prevent page bounce */
   }
   
   /* Custom scrollbar */
@@ -235,12 +250,16 @@
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
+    cursor: none; /* Hide cursor for touch experience */
     position: relative;
     overflow: hidden;
     transform: translateY(20px);
     opacity: 0;
     animation: slideInUp 0.6s ease-out forwards;
+    touch-action: manipulation; /* Optimize for touch */
+    user-select: none; /* Prevent text selection on touch */
+    -webkit-user-select: none;
+    -webkit-touch-callout: none; /* Disable iOS callout */
   }
   
   #screen-scroll .scroll-item:nth-child(even) {
@@ -265,8 +284,13 @@
     border-color: rgba(255, 255, 255, 0.4);
   }
   
-  #screen-scroll .scroll-item:active {
-    transform: translateY(-2px) scale(0.98);
+  /* Touch-specific active state (replaces hover on touch devices) */
+  #screen-scroll .scroll-item:active,
+  #screen-scroll .scroll-item.touch-active {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+    transform: scale(0.98);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
   }
   
   #screen-scroll .scroll-item::before {
@@ -312,11 +336,15 @@
     font-size: 15px;
     font-weight: 600;
     border: none;
-    cursor: pointer;
+    cursor: none; /* Hide cursor for touch experience */
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: inherit;
     position: relative;
     overflow: hidden;
+    touch-action: manipulation; /* Optimize for touch */
+    user-select: none; /* Prevent text selection */
+    -webkit-user-select: none;
+    -webkit-touch-callout: none; /* Disable iOS callout */
   }
   
   #screen-scroll .btn {
@@ -477,6 +505,17 @@
       min-height: 44px;
       min-width: 44px;
     }
+    
+    /* Hide all cursors on touch devices */
+    #screen-scroll * {
+      cursor: none !important;
+    }
+    
+    /* Improve touch scrolling performance */
+    #screen-scroll .scrollbox {
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: none; /* Disable snap scrolling for smooth experience */
+    }
   }
 </style>
 
@@ -516,9 +555,15 @@
       if (scrollBox) {
         scrollBox.addEventListener('scroll', handleScroll);
         
-        // Add touch event listeners for better mobile experience
-        scrollBox.addEventListener('touchstart', handleTouchStart, { passive: true });
-        scrollBox.addEventListener('touchmove', handleTouchMove, { passive: true });
+        // Enhanced touch event listeners for better mobile experience
+        scrollBox.addEventListener('touchstart', handleTouchStart, { passive: false });
+        scrollBox.addEventListener('touchmove', handleTouchMove, { passive: false });
+        scrollBox.addEventListener('touchend', handleTouchEnd, { passive: true });
+        
+        // Prevent context menu on long touch
+        scrollBox.addEventListener('contextmenu', function(e) {
+          e.preventDefault();
+        });
       }
     }
     
@@ -552,7 +597,7 @@
         <div class="item-text">${text}</div>
       `;
       
-      // Add click handler for interaction
+      // Add click handler for interaction with touch support
       item.addEventListener('click', function() {
         this.style.transform = 'scale(0.95)';
         setTimeout(() => {
@@ -560,6 +605,19 @@
           showToast(`Clicked item #${itemNumber}!`);
         }, 150);
       });
+      
+      // Enhanced touch support for scroll items
+      item.addEventListener('touchstart', function(e) {
+        this.classList.add('touch-active');
+      }, { passive: true });
+      
+      item.addEventListener('touchend', function(e) {
+        this.classList.remove('touch-active');
+      }, { passive: true });
+      
+      item.addEventListener('touchcancel', function(e) {
+        this.classList.remove('touch-active');
+      }, { passive: true });
       
       scrollBox.appendChild(item);
       
@@ -649,24 +707,56 @@
     }
     
     let touchStartY = 0;
+    let touchStartTime = 0;
+    let isScrolling = false;
+    
     function handleTouchStart(e) {
       touchStartY = e.touches[0].clientY;
+      touchStartTime = Date.now();
+      isScrolling = false;
+      
+      // Add visual feedback
+      if (scrollBox) {
+        scrollBox.style.transition = 'filter 0.1s ease';
+        scrollBox.style.filter = 'brightness(1.05)';
+      }
     }
     
     function handleTouchMove(e) {
-      // Add some visual feedback for touch scrolling
+      if (!scrollBox) return;
+      
       const touchY = e.touches[0].clientY;
       const deltaY = touchY - touchStartY;
+      const timeDelta = Date.now() - touchStartTime;
       
-      // Add subtle visual feedback
-      if (scrollBox) {
-        const intensity = Math.min(Math.abs(deltaY) / 100, 1);
-        scrollBox.style.filter = `brightness(${1 + intensity * 0.1})`;
-        
-        setTimeout(() => {
-          scrollBox.style.filter = '';
-        }, 100);
+      // Detect if user is scrolling (not just tapping)
+      if (Math.abs(deltaY) > 10 || timeDelta > 100) {
+        isScrolling = true;
       }
+      
+      // Add momentum-based visual feedback
+      if (isScrolling) {
+        const velocity = Math.abs(deltaY) / Math.max(timeDelta, 1);
+        const intensity = Math.min(velocity / 2, 0.2);
+        
+        scrollBox.style.filter = `brightness(${1 + intensity})`;
+        
+        // Don't prevent default - let native scrolling handle it
+        // This allows smooth momentum scrolling on Raspberry Pi
+      }
+    }
+    
+    function handleTouchEnd(e) {
+      if (!scrollBox) return;
+      
+      // Reset visual feedback
+      scrollBox.style.transition = 'filter 0.3s ease';
+      scrollBox.style.filter = '';
+      
+      // Reset scroll detection
+      setTimeout(() => {
+        isScrolling = false;
+      }, 100);
     }
     
     function showToast(message) {
