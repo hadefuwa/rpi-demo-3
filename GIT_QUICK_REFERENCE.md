@@ -78,22 +78,33 @@ sudo systemctl disable rpi-showcase.service
 
 ## Autostart Troubleshooting
 ```bash
-# Check if desktop environment is running
-ps aux | grep -E "lxsession|startlxde|openbox|xfce4"
+# Quick status check
+sudo systemctl status rpi-showcase.service
 
-# Check if X server is available
-xset q
-
-# Check what processes are running
+# Check what's actually running
 ps aux | grep -E "http-server|chromium"
 
-# Kill all processes and restart
+# Check if X server is available
+echo $DISPLAY
+xset q 2>/dev/null && echo "X server OK" || echo "X server NOT available"
+
+# Check autostart logs
+tail -f ~/rpi-demo-3/simple-autostart.log
+
+# Manual test (kill service first)
+sudo systemctl stop rpi-showcase.service
+cd ~/rpi-demo-3
+chmod +x scripts/simple-autostart.sh
+./scripts/simple-autostart.sh
+
+# Restart service with new config
+sudo systemctl daemon-reload
+sudo systemctl restart rpi-showcase.service
+
+# Kill all processes and restart clean
 pkill -f http-server
 pkill -f chromium
 sudo systemctl restart rpi-showcase.service
-
-# Check autostart log
-cat ~/rpi-demo-3/autostart.log
 ```
 
 
