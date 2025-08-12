@@ -881,388 +881,184 @@
   
   // No clock on home screen anymore
 
-  // ===== FRESH TOUCH DEMO IMPLEMENTATION =====
+  // ===== ORIGINAL TOUCH DEMO IMPLEMENTATION =====
   
   // Touch demo state management
-  const TouchDemo = {
-    isInitialized: false,
+  let touchDemoInitialized = false;
+  let touchDemoState = {
     canvas: null,
     ctx: null,
     painting: false,
-    brushColor: '#000000',
+    brushColor: '#ff6b6b',
     brushSize: 8,
-    lastPos: null,
-    eventListeners: [],
-    drawingHistory: [],
-    startTime: null,
-    currentHistoryIndex: -1,
+    eventListeners: []
+  };
+
+  function cleanupTouchDemo() {
+    console.log('Cleaning up touch demo...');
+    console.log('Cleanup state:', {
+      initialized: touchDemoInitialized,
+      listenerCount: touchDemoState.eventListeners.length,
+      canvas: !!touchDemoState.canvas,
+      ctx: !!touchDemoState.ctx
+    });
     
-    // Initialize the touch demo
-    init() {
-      if (this.isInitialized) {
-        console.log('Touch demo already initialized');
-        return;
+    touchDemoState.eventListeners.forEach(({ element, event, handler, options }) => {
+      if (element && element.removeEventListener) {
+        element.removeEventListener(event, handler, options);
       }
-      
-      console.log('Initializing fresh touch demo...');
-      
-      // Find the canvas
-      this.canvas = document.getElementById('paint');
-      if (!this.canvas) {
-        console.log('Canvas not found, will retry when screen is ready');
-        return false;
+    });
+    
+    touchDemoState.eventListeners = [];
+    touchDemoState.painting = false;
+    touchDemoState.canvas = null;
+    touchDemoState.ctx = null;
+    touchDemoInitialized = false;
+    
+    console.log('Touch demo cleanup completed');
+  }
+
+  function addTouchEventListener(element, event, handler, options = undefined) {
+    element.addEventListener(event, handler, options);
+    touchDemoState.eventListeners.push({ element, event, handler, options });
+  }
+
+  function initTouchDemo() {
+    console.log('initTouchDemo called - touchDemoInitialized:', touchDemoInitialized);
+    if (touchDemoInitialized) {
+      console.log('Touch demo already initialized, skipping...');
+      return;
+    }
+    
+    console.log('Initializing touch demo...');
+    
+    // Find the canvas
+    const canvas = document.getElementById('paint');
+    if (!canvas) {
+      console.log('Canvas not found, will retry when screen is ready');
+      if (!touchDemoInitialized) {
+        setTimeout(initTouchDemo, 200);
       }
+      return;
+    }
+    
+    // Wait for the canvas to have proper dimensions
+    if (canvas.offsetWidth < 100 || canvas.offsetHeight < 100) {
+      console.log('Canvas dimensions too small, waiting for proper sizing...');
+      setTimeout(initTouchDemo, 200);
+      return;
+    }
+    
+    // Get the context
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Failed to get canvas context');
+      return;
+    }
+    
+    // Set up the canvas
+    touchDemoState.canvas = canvas;
+    touchDemoState.ctx = ctx;
+    
+    console.log('Touch demo setup state:', {
+      painting: touchDemoState.painting,
+      brushColor: touchDemoState.brushColor,
+      brushSize: touchDemoState.brushSize,
+      canvasWidth: canvas.width,
+      canvasHeight: canvas.height,
+      offsetWidth: canvas.offsetWidth,
+      offsetHeight: canvas.offsetHeight
+    });
+    
+    // Configure the context
+    ctx.fillStyle = touchDemoState.brushColor;
+    ctx.strokeStyle = touchDemoState.brushColor;
+    ctx.lineWidth = touchDemoState.brushSize;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Drawing functions
+    function start(e) {
+      e.preventDefault();
+      touchDemoState.painting = true;
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      const lastPos = { x, y };
       
-      // Wait for the canvas to have proper dimensions
-      if (this.canvas.offsetWidth < 100 || this.canvas.offsetHeight < 100) {
-        console.log('Canvas dimensions too small, waiting for proper sizing...');
-        setTimeout(() => this.init(), 200);
-        return false;
-      }
+      touchDemoState.ctx.fillStyle = touchDemoState.brushColor;
+      touchDemoState.ctx.beginPath();
+      touchDemoState.ctx.arc(lastPos.x, lastPos.y, touchDemoState.brushSize / 2, 0, Math.PI * 2);    
+      touchDemoState.ctx.fill();
+    }
+    
+    function draw(e) {
+      if (!touchDemoState.painting) return;
+      e.preventDefault();
       
-      // Get the context
-      this.ctx = this.canvas.getContext('2d');
-      if (!this.ctx) {
-        console.error('Failed to get canvas context');
-        return false;
-      }
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      const pos = { x, y };
       
-          // Set up the canvas
-    this.setupCanvas();
+      touchDemoState.ctx.strokeStyle = touchDemoState.brushColor;
+      touchDemoState.ctx.lineWidth = touchDemoState.brushSize;
+      touchDemoState.ctx.lineCap = 'round';
+      touchDemoState.ctx.lineJoin = 'round';
+      touchDemoState.ctx.beginPath();
+      touchDemoState.ctx.moveTo(lastPos.x, lastPos.y);
+      touchDemoState.ctx.lineTo(pos.x, pos.y);
+      touchDemoState.ctx.stroke();
+      
+      lastPos = pos;
+    }
+    
+    function end(e) {
+      e.preventDefault();
+      touchDemoState.painting = false;
+    }
     
     // Bind events
-    this.bindEvents();
-    
-    // Initialize stats and timing
-    this.initializeStats();
-    
-    // Mark as initialized
-    this.isInitialized = true;
-    console.log('Touch demo initialized successfully');
-    return true;
-    },
-    
-    // Set up the canvas with proper sizing
-    setupCanvas() {
-      const rect = this.canvas.getBoundingClientRect();
-      const width = Math.min(rect.width, 1024);
-      const height = Math.min(rect.height, 400);
-      
-      // Use the existing resizeCanvas function
-      resizeCanvas(this.canvas, width, height);
-      
-      // Configure the context
-      this.ctx.fillStyle = this.brushColor;
-      this.ctx.strokeStyle = this.brushColor;
-      this.ctx.lineWidth = this.brushSize;
-      this.ctx.lineCap = 'round';
-      this.ctx.lineJoin = 'round';
-      
-      // Clear and draw initial content
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.drawWelcomeMessage();
-    },
-    
-    // Draw welcome message
-    drawWelcomeMessage() {
-      this.ctx.fillStyle = '#667eea';
-      this.ctx.fillRect(20, 20, 300, 80);
-      this.ctx.fillStyle = '#ffffff';
-      this.ctx.font = 'bold 24px Arial';
-      this.ctx.fillText('🎨 Touch Drawing Studio', 40, 55);
-      this.ctx.font = '16px Arial';
-      this.ctx.fillText('Start drawing anywhere on the canvas', 40, 80);
-      
-      // Save initial state
-      this.saveToHistory();
-    },
-    
-    // Bind all event listeners
-    bindEvents() {
-      // Mouse events
-      this.addListener(this.canvas, 'mousedown', this.start.bind(this));
-      this.addListener(this.canvas, 'mousemove', this.draw.bind(this));
-      this.addListener(this.canvas, 'mouseup', this.end.bind(this));
-      this.addListener(this.canvas, 'mouseleave', this.end.bind(this));
-      
-      // Touch events
-      this.addListener(this.canvas, 'touchstart', this.start.bind(this), { passive: false });
-      this.addListener(this.canvas, 'touchmove', this.draw.bind(this), { passive: false });
-      this.addListener(this.canvas, 'touchend', this.end.bind(this), { passive: false });
-      
-      // Control buttons
-      this.bindControls();
-    },
-    
-    // Add event listener and track it
-    addListener(element, event, handler, options) {
-      element.addEventListener(event, handler, options);
-      this.eventListeners.push({ element, event, handler, options });
-    },
+    addTouchEventListener(canvas, 'mousedown', start);
+    addTouchEventListener(canvas, 'mousemove', draw);
+    addTouchEventListener(canvas, 'mouseup', end);
+    addTouchEventListener(canvas, 'mouseleave', end);
+    addTouchEventListener(canvas, 'touchstart', start, { passive: false });
+    addTouchEventListener(canvas, 'touchmove', draw, { passive: false });
+    addTouchEventListener(canvas, 'touchend', end, { passive: false });
     
     // Bind control buttons
-    bindControls() {
-      // Color swatches
-      document.querySelectorAll('.swatch').forEach(btn => {
-        this.addListener(btn, 'click', () => {
-          // Remove active class from all swatches
-          document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
-          // Add active class to clicked swatch
-          btn.classList.add('active');
-          
-          this.brushColor = btn.getAttribute('data-color');
-          this.ctx.strokeStyle = this.brushColor;
-          this.ctx.fillStyle = this.brushColor;
-          
-          // Update stats
-          this.updateStats();
-        });
-      });
-      
-      // Brush sizes
-      document.querySelectorAll('.brush').forEach(btn => {
-        this.addListener(btn, 'click', () => {
-          // Remove active class from all brushes
-          document.querySelectorAll('.brush').forEach(b => b.classList.remove('active'));
-          // Add active class to clicked brush
-          btn.classList.add('active');
-          
-          this.brushSize = parseInt(btn.getAttribute('data-size'), 10);
-          this.ctx.lineWidth = this.brushSize;
-          
-          // Update stats
-          this.updateStats();
-        });
-      });
-      
-      // Clear button
-      const clearBtn = document.getElementById('btnClear');
-      if (clearBtn) {
-        this.addListener(clearBtn, 'click', () => {
-          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-          this.drawWelcomeMessage();
-        });
-      }
-      
-      // Save button
-      const saveBtn = document.getElementById('btnSave');
-      if (saveBtn) {
-        this.addListener(saveBtn, 'click', () => {
-          this.saveDrawing();
-        });
-      }
-      
-      // Undo button
-      const undoBtn = document.getElementById('btnUndo');
-      if (undoBtn) {
-        this.addListener(undoBtn, 'click', () => {
-          this.undo();
-        });
-      }
-      
-      // Navigation buttons
-      const homeBtn = document.getElementById('btnHome');
-      if (homeBtn) {
-        this.addListener(homeBtn, 'click', () => {
-          if (window.goHome) window.goHome();
-        });
-      }
-      
-      const backBtn = document.getElementById('btnBack');
-      if (backBtn) {
-        this.addListener(backBtn, 'click', () => {
-          if (window.goBack) window.goBack();
-        });
-      }
-      
-      const fullscreenBtn = document.getElementById('btnFullscreen');
-      if (fullscreenBtn) {
-        this.addListener(fullscreenBtn, 'click', () => {
-          this.toggleFullscreen();
-        });
-      }
-    },
-    
-    // Get position from event
-    getPos(e) {
-      const rect = this.canvas.getBoundingClientRect();
-      let clientX, clientY;
-      
-      if (e.touches && e.touches[0]) {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-      } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-      }
-      
-      return {
-        x: clientX - rect.left,
-        y: clientY - rect.top
+    document.querySelectorAll('.swatch').forEach(btn => {
+      const colorHandler = () => {
+        touchDemoState.brushColor = btn.getAttribute('data-color');
+        touchDemoState.ctx.strokeStyle = touchDemoState.brushColor;
+        touchDemoState.ctx.fillStyle = touchDemoState.brushColor;
       };
-    },
+      addTouchEventListener(btn, 'click', colorHandler);
+    });
     
-    // Start drawing
-    start(e) {
-      e.preventDefault();
-      this.painting = true;
-      this.lastPos = this.getPos(e);
-      
-      // Draw initial dot
-      this.ctx.beginPath();
-      this.ctx.arc(this.lastPos.x, this.lastPos.y, this.brushSize / 2, 0, Math.PI * 2);
-      this.ctx.fill();
-    },
+    document.querySelectorAll('.brush').forEach(btn => {
+      const brushHandler = () => {
+        touchDemoState.brushSize = parseInt(btn.getAttribute('data-size'), 10);
+        touchDemoState.ctx.lineWidth = touchDemoState.brushSize;
+      };
+      addTouchEventListener(btn, 'click', brushHandler);
+    });
     
-    // Draw line
-    draw(e) {
-      if (!this.painting) return;
-      e.preventDefault();
-      
-      const pos = this.getPos(e);
-      
-      this.ctx.beginPath();
-      this.ctx.moveTo(this.lastPos.x, this.lastPos.y);
-      this.ctx.lineTo(pos.x, pos.y);
-      this.ctx.stroke();
-      
-      this.lastPos = pos;
-    },
-    
-    // End drawing
-    end(e) {
-      e.preventDefault();
-      this.painting = false;
-      this.lastPos = null;
-      
-      // Save to history after each drawing session
-      if (this.drawingHistory.length > 0) {
-        this.saveToHistory();
-      }
-    },
-    
-    // Initialize stats and timing
-    initializeStats() {
-      this.startTime = Date.now();
-      this.updateStats();
-      
-      // Start timer for drawing time
-      this.timerInterval = setInterval(() => {
-        this.updateDrawingTime();
-      }, 1000);
-    },
-    
-    // Update stats display
-    updateStats() {
-      const currentColorEl = document.getElementById('currentColor');
-      const currentSizeEl = document.getElementById('currentSize');
-      
-      if (currentColorEl) {
-        currentColorEl.textContent = this.brushColor;
-        currentColorEl.style.color = this.brushColor;
-      }
-      
-      if (currentSizeEl) {
-        currentSizeEl.textContent = `${this.brushSize}px`;
-      }
-    },
-    
-    // Update drawing time
-    updateDrawingTime() {
-      if (!this.startTime) return;
-      
-      const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-      const minutes = Math.floor(elapsed / 60);
-      const seconds = elapsed % 60;
-      const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-      
-      const drawingTimeEl = document.getElementById('drawingTime');
-      if (drawingTimeEl) {
-        drawingTimeEl.textContent = timeString;
-      }
-    },
-    
-    // Save current canvas state to history
-    saveToHistory() {
-      const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-      this.drawingHistory.push(imageData);
-      this.currentHistoryIndex = this.drawingHistory.length - 1;
-      
-      // Limit history to prevent memory issues
-      if (this.drawingHistory.length > 20) {
-        this.drawingHistory.shift();
-        this.currentHistoryIndex--;
-      }
-    },
-    
-    // Undo last action
-    undo() {
-      if (this.currentHistoryIndex > 0) {
-        this.currentHistoryIndex--;
-        const imageData = this.drawingHistory[this.currentHistoryIndex];
-        this.ctx.putImageData(imageData, 0, 0);
-      } else if (this.currentHistoryIndex === 0) {
-        // Clear canvas and show welcome message
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawWelcomeMessage();
-      }
-    },
-    
-    // Save drawing as image
-    saveDrawing() {
-      try {
-        const link = document.createElement('a');
-        link.download = `touch-drawing-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.png`;
-        link.href = this.canvas.toDataURL();
-        link.click();
-      } catch (error) {
-        console.error('Failed to save drawing:', error);
-        alert('Failed to save drawing. Please try again.');
-      }
-    },
-    
-    // Toggle fullscreen
-    toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        this.canvas.requestFullscreen().catch(err => {
-          console.error('Error attempting to enable fullscreen:', err);
-        });
-      } else {
-        document.exitFullscreen();
-      }
-    },
-    
-    // Clean up all event listeners and reset state
-    cleanup() {
-      console.log('Cleaning up touch demo...');
-      
-      // Clear timer
-      if (this.timerInterval) {
-        clearInterval(this.timerInterval);
-        this.timerInterval = null;
-      }
-      
-      // Remove all event listeners
-      this.eventListeners.forEach(({ element, event, handler, options }) => {
-        if (element && element.removeEventListener) {
-          element.removeEventListener(event, handler, options);
-        }
-      });
-      
-      // Reset state
-      this.eventListeners = [];
-      this.painting = false;
-      this.lastPos = null;
-      this.canvas = null;
-      this.ctx = null;
-      this.isInitialized = false;
-      this.drawingHistory = [];
-      this.currentHistoryIndex = -1;
-      this.startTime = null;
-      
-      console.log('Touch demo cleanup completed');
+    const clearBtn = document.getElementById('btnClear');
+    if (clearBtn) {
+      const clearHandler = () => {
+        touchDemoState.ctx.clearRect(0, 0, touchDemoState.canvas.width, touchDemoState.canvas.height);
+      };
+      addTouchEventListener(clearBtn, 'click', clearHandler);
     }
-  };
+    
+    touchDemoInitialized = true;
+    console.log('Touch demo initialized successfully');
+  }
 
   // System Dashboard
   let dashboardCharts = {};
@@ -3107,11 +2903,11 @@
   // Initialize touch demo when the touch screen is shown
   window.addEventListener('screenChanged', (e) => {
     if (e?.detail?.screenName === 'touch') {
-      // Initialize the fresh touch demo
-      setTimeout(() => TouchDemo.init(), 100);
-    } else if (TouchDemo.isInitialized) {
+      // Initialize the original touch demo
+      setTimeout(() => initTouchDemo(), 100);
+    } else if (touchDemoInitialized) {
       // Clean up touch demo when leaving the screen
-      TouchDemo.cleanup();
+      cleanupTouchDemo();
     }
   });
 
