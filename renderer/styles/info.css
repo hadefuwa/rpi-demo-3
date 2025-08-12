@@ -19,7 +19,33 @@
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: var(--spacing-md); margin: var(--spacing-md) 0; }
 .stat-card { background: rgba(255,255,255,0.08); border-radius: var(--radius-md); padding: var(--spacing-md); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease; }
 .stat-card:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); }
+.stat-header { font-size: var(--font-sm); color: var(--muted); margin-bottom: var(--spacing-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 .stat-value { font-size: clamp(20px, 5vw, 28px); font-weight: bold; color: var(--brand); margin: var(--spacing-xs) 0; }
+.stat-subtitle { font-size: var(--font-xs); color: var(--muted); margin-top: var(--spacing-xs); }
+
+/* Progress bars for stats */
+.stat-bar { 
+  background: rgba(255,255,255,0.1); 
+  border-radius: var(--radius-sm); 
+  height: 8px; 
+  margin-top: var(--spacing-xs); 
+  overflow: hidden; 
+  position: relative;
+}
+
+.stat-fill { 
+  background: linear-gradient(90deg, var(--brand), #4ade80); 
+  height: 100%; 
+  border-radius: var(--radius-sm); 
+  transition: width 0.6s ease; 
+  width: 0%; 
+  min-width: 0;
+}
+
+/* Color variations for different stats */
+.stat-card:nth-child(1) .stat-fill { background: linear-gradient(90deg, #6bcbef, #4ade80); } /* CPU */
+.stat-card:nth-child(2) .stat-fill { background: linear-gradient(90deg, #9d7cf3, #6bcbef); } /* Memory */
+.stat-card:nth-child(3) .stat-fill { background: linear-gradient(90deg, #f87171, #fbbf24); } /* Temperature */
 
 .system-details { display: flex; gap: var(--spacing-md); margin: var(--spacing-md) 0; flex-wrap: wrap; }
 

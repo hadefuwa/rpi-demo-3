@@ -1166,6 +1166,8 @@
 
   // Initialize dashboard
   function initDashboard() {
+    console.log('Initializing dashboard...');
+    
     // Destroy existing charts if re-entering screen
     if (dashboardCharts.performance && typeof dashboardCharts.performance.destroy === 'function') {
       dashboardCharts.performance.destroy();
@@ -1183,9 +1185,15 @@
     // Set up event listeners without duplication
     if (btnRefreshStats) {
       btnRefreshStats.onclick = refreshDashboard;
+      console.log('Refresh button connected');
+    } else {
+      console.warn('Refresh button not found');
     }
     if (btnAutoRefresh) {
       btnAutoRefresh.onclick = toggleAutoRefresh;
+      console.log('Auto-refresh button connected');
+    } else {
+      console.warn('Auto-refresh button not found');
     }
 
     // Restart auto-refresh cleanly
@@ -1194,6 +1202,7 @@
 
     // Initial refresh
     refreshDashboard();
+    console.log('Dashboard initialization complete');
   }
 
   function initPerformanceChart() {
@@ -1293,31 +1302,41 @@
   }
 
   async function refreshDashboard() {
+    console.log('Refreshing dashboard data...');
     try {
       const info = await window.api.getSystemInfo();
-      if (!info) return;
+      console.log('System info received:', info);
+      
+      if (!info) {
+        console.warn('No system info returned');
+        return;
+      }
       
       // Update stat bars and values
       if (cpuValue && typeof info.cpuPercent === 'number') {
         const cpuPct = Math.min(100, Math.max(0, info.cpuPercent));
         cpuValue.textContent = `${cpuPct}%`;
         if (cpuBar) cpuBar.style.width = `${cpuPct}%`;
+        console.log(`CPU: ${cpuPct}%`);
       }
       
       if (memValue && typeof info.memPercent === 'number') {
         const memPct = Math.min(100, Math.max(0, info.memPercent));
         memValue.textContent = `${memPct}%`;
         if (memBar) memBar.style.width = `${memPct}%`;
+        console.log(`Memory: ${memPct}%`);
       }
       
       if (tempValue && typeof info.tempC === 'number') {
         const tempPct = Math.max(0, Math.min(100, ((info.tempC - 30) / 55) * 100));
         tempValue.textContent = `${info.tempC.toFixed(1)}°C`;
         if (tempBar) tempBar.style.width = `${tempPct}%`;
+        console.log(`Temperature: ${info.tempC}°C`);
       }
       
       if (uptimeValue && info.uptime) {
         uptimeValue.textContent = info.uptime;
+        console.log(`Uptime: ${info.uptime}`);
       }
       
       if (wifiStatus && info.network) {

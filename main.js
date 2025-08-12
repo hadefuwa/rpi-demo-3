@@ -118,6 +118,9 @@ function readTemperatureC() {
   return null;
 }
 
+// Global variable to store previous CPU stats for accurate calculation
+let previousCpuStats = null;
+
 function getCPUUsage() {
   try {
     // Only try Linux-specific paths if we're on Linux
@@ -127,16 +130,33 @@ function getCPUUsage() {
       const cpuLine = statContent.split('\n')[0];
       const cpuValues = cpuLine.split(' ').filter(val => val.trim() !== '');
       
-      if (cpuValues.length >= 5) {
+      if (cpuValues.length >= 8) {
         const user = parseInt(cpuValues[1]);
         const nice = parseInt(cpuValues[2]);
         const system = parseInt(cpuValues[3]);
         const idle = parseInt(cpuValues[4]);
+        const iowait = parseInt(cpuValues[5]);
+        const irq = parseInt(cpuValues[6]);
+        const softirq = parseInt(cpuValues[7]);
         
-        const total = user + nice + system + idle;
-        const used = total - idle;
+        const currentStats = {
+          idle: idle + iowait,
+          total: user + nice + system + idle + iowait + irq + softirq
+        };
         
-        return total > 0 ? Math.round((used / total) * 100) : null;
+        if (previousCpuStats) {
+          const idleDiff = currentStats.idle - previousCpuStats.idle;
+          const totalDiff = currentStats.total - previousCpuStats.total;
+          
+          if (totalDiff > 0) {
+            const cpuPercent = Math.round(((totalDiff - idleDiff) / totalDiff) * 100);
+            previousCpuStats = currentStats;
+            return Math.max(0, Math.min(100, cpuPercent));
+          }
+        }
+        
+        previousCpuStats = currentStats;
+        return 0; // Return 0 for first reading
       }
     }
     
@@ -188,25 +208,6 @@ function getNetworkInfo() {
 
 function getStorageInfo() {
   try {
-    // Cross-platform storage info
-    const home = os.homedir();
-    let rootStats = null;
-    
-    // Try to get root directory stats safely
-    if (os.platform() === 'win32') {
-      // On Windows, try to get C: drive info
-      try {
-        rootStats = fs.statSync('C:\\');
-      } catch {}
-    } else {
-      // On Unix-like systems, try root directory
-      try {
-        rootStats = fs.statSync('/');
-      } catch {}
-    }
-    
-    const homeStats = fs.statSync(home);
-    
     const formatBytes = (bytes) => {
       if (bytes === 0) return '0 B';
       const k = 1024;
@@ -214,10 +215,59 @@ function getStorageInfo() {
       const i = Math.floor(Math.log(bytes) / Math.log(k));
       return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     };
+
+    // Cross-platform storage info using disk usage commands
+    let rootInfo = 'N/A';
+    let homeInfo = 'N/A';
+    
+    if (os.platform() === 'linux') {
+      try {
+        // Use df command to get disk usage
+        const rootOutput = execSync('df -h / | tail -1', { encoding: 'utf8' }).trim();
+        const rootParts = rootOutput.split(/\s+/);
+        if (rootParts.length >= 5) {
+          rootInfo = `${rootParts[2]} / ${rootParts[1]} (${rootParts[4]} used)`;
+        }
+        
+        const homeOutput = execSync('df -h $HOME | tail -1', { encoding: 'utf8' }).trim();
+        const homeParts = homeOutput.split(/\s+/);
+        if (homeParts.length >= 5) {
+          homeInfo = `${homeParts[2]} / ${homeParts[1]} (${homeParts[4]} used)`;
+        }
+      } catch {}
+    } else if (os.platform() === 'win32') {
+      try {
+        // Use wmic command for Windows
+        const rootOutput = execSync('wmic logicaldisk where caption="C:" get size,freespace /value', { encoding: 'utf8' });
+        const sizeMatch = rootOutput.match(/Size=(\d+)/);
+        const freeMatch = rootOutput.match(/FreeSpace=(\d+)/);
+        
+        if (sizeMatch && freeMatch) {
+          const total = parseInt(sizeMatch[1]);
+          const free = parseInt(freeMatch[1]);
+          const used = total - free;
+          const usedPercent = Math.round((used / total) * 100);
+          rootInfo = `${formatBytes(used)} / ${formatBytes(total)} (${usedPercent}% used)`;
+        }
+        
+        homeInfo = rootInfo; // On Windows, home is usually on C: drive
+      } catch {}
+    } else {
+      try {
+        // macOS and other Unix-like systems
+        const rootOutput = execSync('df -h / | tail -1', { encoding: 'utf8' }).trim();
+        const rootParts = rootOutput.split(/\s+/);
+        if (rootParts.length >= 5) {
+          rootInfo = `${rootParts[2]} / ${rootParts[1]} (${rootParts[4]} used)`;
+        }
+        
+        homeInfo = rootInfo; // Usually same filesystem
+      } catch {}
+    }
     
     return {
-      root: rootStats ? formatBytes(rootStats.size || 0) : 'N/A',
-      home: formatBytes(homeStats.size || 0)
+      root: rootInfo,
+      home: homeInfo
     };
   } catch {}
   return { root: 'N/A', home: 'N/A' };
