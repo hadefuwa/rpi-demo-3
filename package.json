@@ -9,7 +9,10 @@
     "start": "npx http-server renderer -p 3000 -o",
     "dev": "npx http-server renderer -p 3000 -o --cors",
     "build": "echo 'PWA is ready to deploy'",
-    "serve": "npx http-server renderer -p 3000"
+    "serve": "npx http-server renderer -p 3000",
+    "kiosk": "./scripts/start-kiosk.sh",
+    "install-service": "./scripts/install-autostart.sh",
+    "uninstall-service": "./scripts/uninstall-autostart.sh"
   },
   "devDependencies": {
     "http-server": "^14.1.1"

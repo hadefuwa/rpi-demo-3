@@ -1,0 +1,22 @@
+[Unit]
+Description=RPI 5Inch Showcase PWA
+After=network.target graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/pi/.Xauthority
+WorkingDirectory=/home/pi/rpi-5inch-2
+ExecStartPre=/bin/bash -c 'sleep 10'
+ExecStart=/usr/bin/npm start
+ExecStartPost=/bin/bash -c 'sleep 5 && /home/pi/rpi-5inch-2/scripts/start-kiosk.sh'
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=graphical.target
