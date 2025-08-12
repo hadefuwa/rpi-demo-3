@@ -257,7 +257,7 @@
             }
             
             // Load new app
-            fetch(`./screens/${appId}.html`)
+            fetch(`./src/screens/${appId}.html`)
               .then(response => {
                 if (!response.ok) {
                   throw new Error(`Failed to load app: ${response.status}`);
@@ -358,16 +358,8 @@
             showcaseFramework.goHome();
           });
           
-          // Handle card clicks (delegated to screen container)
-          document.getElementById('screen-container').addEventListener('click', function(e) {
-            if (e.target.classList.contains('card')) {
-              const target = e.target.dataset.target;
-              if (target) {
-                const appId = target.replace('screen-', '');
-                showcaseFramework.navigateTo(appId);
-              }
-            }
-          });
+          // Note: Each screen handles its own navigation events
+          // This follows the architecture rule of embedding all JS within each HTML file
         }
         
         // Setup service worker

@@ -159,10 +159,61 @@
   (function() {
     'use strict';
     
+    // Private variables for this screen
+    var cardElements = [];
+    var eventListeners = [];
+    
     function initHome() {
       console.log('Home screen initialized');
-      // Home screen doesn't need complex lifecycle management
-      // It's just a navigation hub
+      
+      // Get all card elements
+      cardElements = document.querySelectorAll('#screen-home .card');
+      
+      // Setup event listeners for each card
+      setupCardNavigation();
+    }
+    
+    function setupCardNavigation() {
+      cardElements.forEach(function(card) {
+        var target = card.getAttribute('data-target');
+        if (target) {
+          var listener = function() {
+            navigateToScreen(target);
+          };
+          
+          card.addEventListener('click', listener);
+          eventListeners.push({ element: card, listener: listener, target: target });
+          
+          console.log('Added navigation listener for:', target);
+        }
+      });
+    }
+    
+    function navigateToScreen(target) {
+      console.log('Navigating to:', target);
+      
+      // Use the showcase framework if available
+      if (window.showcaseFramework && window.showcaseFramework.navigateTo) {
+        var appId = target.replace('screen-', '');
+        window.showcaseFramework.navigateTo(appId);
+      } else {
+        // Fallback navigation
+        console.warn('Showcase framework not available, using fallback navigation');
+        var appId = target.replace('screen-', '');
+        if (window.location.pathname.includes('/public/')) {
+          window.location.href = `./src/screens/${appId}.html`;
+        } else {
+          window.location.href = `./src/screens/${appId}.html`;
+        }
+      }
+    }
+    
+    function cleanupEventListeners() {
+      eventListeners.forEach(function(item) {
+        item.element.removeEventListener('click', item.listener);
+      });
+      eventListeners = [];
+      console.log('Home screen event listeners cleaned up');
     }
     
     // Lifecycle management for home screen
@@ -174,12 +225,15 @@
       
       deactivate: function() {
         console.log('Home screen deactivated');
-        // No cleanup needed for home screen
+        // Clean up when screen is deactivated
+        cleanupEventListeners();
       },
       
       cleanup: function() {
         console.log('Home screen cleanup');
-        // No cleanup needed for home screen
+        // Ensure all resources are cleaned up
+        cleanupEventListeners();
+        cardElements = [];
       }
     };
     

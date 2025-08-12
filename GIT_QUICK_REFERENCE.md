@@ -1,30 +1,20 @@
-Push 
--------------------------
+# Git Quick Reference
+
+## Push
 ```bash
-cd RPI-5Inch
-git status
-git add -A
-git commit -m "Describe your change"
-git pull --rebase origin main
+cd ~/rpi-5inch-2
+git add .
+git commit -m "Update message here"
 git push origin main
 ```
 
-Pull 
--------------------------------
+## Pull 
 ```bash
-cd ~/RPI-5Inch
+cd ~/rpi-5inch-2
 git fetch origin
 git reset --hard origin/main
 git clean -fd
 npm install
-DISPLAY=:0 npm start
-
-
-cd ~
-rm -rf RPI-5Inch
-git clone https://github.com/hadefuwa/RPI-5Inch.git
-cd RPI-5Inch
-npm install
-DISPLAY=:0 npm start
-
-
+chmod +x scripts/*.sh
+npm run kiosk
+```
