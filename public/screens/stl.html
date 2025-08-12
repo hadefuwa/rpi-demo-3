@@ -1,15 +1,16 @@
 <section id="screen-stl" class="screen">
   <div class="panel">
-    <h2>3D Model (STL)</h2>
+    <h2>3D Model Viewer</h2>
     <div class="toolbar stl-models">
       <span class="chip">Models:</span>
-      <button class="chip" data-model="cad1.stl">CAD 1</button>
-      <button class="chip" data-model="cad2.stl">CAD 2</button>
-      <button class="chip" data-model="cad3.stl">CAD 3</button>
+      <button class="chip model-btn active" data-model="cad1.stl">CAD 1</button>
+      <button class="chip model-btn" data-model="cad2.stl">CAD 2</button>
+      <button class="chip model-btn" data-model="cad3.stl">CAD 3</button>
     </div>
-    <div class="note">Use buttons to rotate/zoom. Drag also works.</div>
+    <div class="note">Click and drag to rotate. Scroll to zoom. Use controls below.</div>
     <div class="stl-wrap">
       <canvas id="stlCanvas"></canvas>
+      <div id="loadingIndicator" class="loading-indicator">Loading 3D model...</div>
       <div class="stl-controls">
         <button id="btnStlUp" class="chip big">▲</button>
         <div class="row">
@@ -33,24 +34,248 @@
   </div>
 </section>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
 <script>
   (function() {
     'use strict';
     
+    let scene, camera, renderer, controls;
+    let currentModel = null;
+    let autoRotate = false;
+    let stars = [];
+    
     function initApp() {
       console.log('STL Viewer app initialized');
+      setupThreeJS();
       setupEventListeners();
+      loadModel('cad1.stl');
+    }
+    
+    function setupThreeJS() {
+      const canvas = document.getElementById('stlCanvas');
+      const container = canvas.parentElement;
+      
+      // Scene setup
+      scene = new THREE.Scene();
+      
+      // Camera setup
+      camera = new THREE.PerspectiveCamera(75, canvas.offsetWidth / canvas.offsetHeight, 0.1, 1000);
+      camera.position.set(0, 0, 5);
+      
+      // Renderer setup
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+      renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+      renderer.setClearColor(0x000011, 1);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      
+      // Controls setup
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.enableZoom = true;
+      controls.enablePan = true;
+      
+      // Create starfield background
+      createStarfield();
+      
+      // Lighting setup
+      const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+      scene.add(ambientLight);
+      
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(10, 10, 5);
+      directionalLight.castShadow = true;
+      scene.add(directionalLight);
+      
+      const pointLight = new THREE.PointLight(0x4444ff, 0.5, 100);
+      pointLight.position.set(-10, -10, -10);
+      scene.add(pointLight);
+      
+      // Handle window resize
+      window.addEventListener('resize', onWindowResize, false);
+      
+      // Start render loop
+      animate();
+    }
+    
+    function createStarfield() {
+      const starGeometry = new THREE.BufferGeometry();
+      const starCount = 2000;
+      const starPositions = new Float32Array(starCount * 3);
+      
+      for (let i = 0; i < starCount * 3; i += 3) {
+        starPositions[i] = (Math.random() - 0.5) * 2000;
+        starPositions[i + 1] = (Math.random() - 0.5) * 2000;
+        starPositions[i + 2] = (Math.random() - 0.5) * 2000;
+      }
+      
+      starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      
+      const starMaterial = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 2,
+        sizeAttenuation: true
+      });
+      
+      const starField = new THREE.Points(starGeometry, starMaterial);
+      scene.add(starField);
+      stars.push(starField);
+      
+      // Add some colored stars
+      const coloredStarGeometry = new THREE.BufferGeometry();
+      const coloredStarPositions = new Float32Array(500 * 3);
+      
+      for (let i = 0; i < 500 * 3; i += 3) {
+        coloredStarPositions[i] = (Math.random() - 0.5) * 1500;
+        coloredStarPositions[i + 1] = (Math.random() - 0.5) * 1500;
+        coloredStarPositions[i + 2] = (Math.random() - 0.5) * 1500;
+      }
+      
+      coloredStarGeometry.setAttribute('position', new THREE.BufferAttribute(coloredStarPositions, 3));
+      
+      const coloredStarMaterial = new THREE.PointsMaterial({
+        color: 0x4488ff,
+        size: 3,
+        sizeAttenuation: true
+      });
+      
+      const coloredStarField = new THREE.Points(coloredStarGeometry, coloredStarMaterial);
+      scene.add(coloredStarField);
+      stars.push(coloredStarField);
+    }
+    
+    function loadModel(filename) {
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      loadingIndicator.style.display = 'block';
+      
+      // Remove current model
+      if (currentModel) {
+        scene.remove(currentModel);
+      }
+      
+      const loader = new THREE.STLLoader();
+      loader.load(
+        `../assets/${filename}`,
+        function(geometry) {
+          // Create material with nice metallic look
+          const material = new THREE.MeshPhongMaterial({
+            color: 0x88ccff,
+            shininess: 100,
+            specular: 0x222222
+          });
+          
+          // Create mesh
+          currentModel = new THREE.Mesh(geometry, material);
+          currentModel.castShadow = true;
+          currentModel.receiveShadow = true;
+          
+          // Center and scale the model
+          geometry.computeBoundingBox();
+          const box = geometry.boundingBox;
+          const center = box.getCenter(new THREE.Vector3());
+          geometry.translate(-center.x, -center.y, -center.z);
+          
+          const size = box.getSize(new THREE.Vector3());
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const scale = 2 / maxDim;
+          currentModel.scale.setScalar(scale);
+          
+          scene.add(currentModel);
+          loadingIndicator.style.display = 'none';
+          
+          console.log(`Loaded model: ${filename}`);
+        },
+        function(progress) {
+          console.log('Loading progress:', (progress.loaded / progress.total * 100) + '%');
+        },
+        function(error) {
+          console.error('Error loading STL:', error);
+          loadingIndicator.textContent = 'Error loading model';
+          setTimeout(() => {
+            loadingIndicator.style.display = 'none';
+          }, 3000);
+        }
+      );
     }
     
     function setupEventListeners() {
-      const homeButton = document.querySelector('#btnHome');
-      if (homeButton) {
-        homeButton.addEventListener('click', goHome);
+      // Model selection buttons
+      document.querySelectorAll('.model-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.model-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          loadModel(this.dataset.model);
+        });
+      });
+      
+      // Control buttons
+      document.getElementById('btnStlUp').addEventListener('click', () => rotateModel(0.1, 0));
+      document.getElementById('btnStlDown').addEventListener('click', () => rotateModel(-0.1, 0));
+      document.getElementById('btnStlLeft').addEventListener('click', () => rotateModel(0, 0.1));
+      document.getElementById('btnStlRight').addEventListener('click', () => rotateModel(0, -0.1));
+      document.getElementById('btnStlZoomIn').addEventListener('click', () => zoomCamera(-0.5));
+      document.getElementById('btnStlZoomOut').addEventListener('click', () => zoomCamera(0.5));
+      document.getElementById('btnStlReset').addEventListener('click', resetView);
+      document.getElementById('btnStlAuto').addEventListener('click', toggleAutoRotate);
+      document.getElementById('btnHome').addEventListener('click', goHome);
+    }
+    
+    function rotateModel(x, y) {
+      if (currentModel) {
+        currentModel.rotation.x += x;
+        currentModel.rotation.y += y;
       }
     }
     
+    function zoomCamera(delta) {
+      camera.position.multiplyScalar(1 + delta);
+      camera.updateProjectionMatrix();
+    }
+    
+    function resetView() {
+      camera.position.set(0, 0, 5);
+      controls.reset();
+      if (currentModel) {
+        currentModel.rotation.set(0, 0, 0);
+      }
+    }
+    
+    function toggleAutoRotate() {
+      autoRotate = !autoRotate;
+      const btn = document.getElementById('btnStlAuto');
+      btn.textContent = autoRotate ? 'Stop Auto' : 'Auto Rotate';
+      btn.classList.toggle('active', autoRotate);
+    }
+    
+    function onWindowResize() {
+      const canvas = document.getElementById('stlCanvas');
+      camera.aspect = canvas.offsetWidth / canvas.offsetHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+    }
+    
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      // Auto rotate model
+      if (autoRotate && currentModel) {
+        currentModel.rotation.y += 0.01;
+      }
+      
+      // Animate stars
+      stars.forEach((starField, index) => {
+        starField.rotation.y += 0.0005 * (index + 1);
+      });
+      
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    
     function goHome() {
-      // Direct navigation back to home
       window.location.href = '../index.html';
     }
     

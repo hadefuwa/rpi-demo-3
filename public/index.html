@@ -536,7 +536,7 @@
       #screen-home .card:nth-child(1) { animation: float 4s ease-in-out infinite; }
       #screen-home .card:nth-child(2) { animation: float 3.5s ease-in-out infinite 0.1s; }
       #screen-home .card:nth-child(3) { animation: float 4.5s ease-in-out infinite 0.2s; }
-      #screen-home .card:nth-child(4) { animation: float 5s ease-in-out infinite 0.3s; }
+      #screen-home .card:nth-child(4) { animation: none; }
       #screen-home .card:nth-child(5) { animation: float 4.2s ease-in-out infinite 0.4s; }
       #screen-home .card:nth-child(6) { animation: float 3.8s ease-in-out infinite 0.5s; }
       #screen-home .card:nth-child(7) { animation: float 4.7s ease-in-out infinite 0.6s; }
@@ -566,9 +566,21 @@
         filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
       }
       
+      /* Override pulse animation for Scroll Test card label */
+      #screen-home .card:nth-child(4) .label {
+        animation: textScrollAround 3s linear infinite;
+      }
+      
       #screen-home .card:hover .label {
         transform: translateZ(40px) scale(1.1);
         filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.6));
+      }
+      
+      /* Override hover effect for Scroll Test card label */
+      #screen-home .card:nth-child(4):hover .label {
+        transform: translateZ(40px) scale(1.05);
+        filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.6));
+        animation: textScrollAround 1.5s linear infinite;
       }
       
       #screen-home .card .icon {
@@ -602,7 +614,7 @@
       #screen-home .card:nth-child(1) .icon { animation: bounce 2s infinite; }
       #screen-home .card:nth-child(2) .icon { animation: spin 4s linear infinite; }
       #screen-home .card:nth-child(3) .icon { animation: wobble 3s ease-in-out infinite; }
-      #screen-home .card:nth-child(4) .icon { animation: pulse 2.5s infinite; }
+      #screen-home .card:nth-child(4) .icon { animation: none; }
       #screen-home .card:nth-child(5) .icon { animation: flip 4s infinite; }
       #screen-home .card:nth-child(6) .icon { animation: rotate3d 5s infinite; }
       #screen-home .card:nth-child(7) .icon { animation: jump 2.5s infinite; }
@@ -613,7 +625,7 @@
       #screen-home .card:nth-child(1) .label { animation: glow 2.5s infinite; }
       #screen-home .card:nth-child(2) .label { animation: pulse 3s infinite 0.2s; }
       #screen-home .card:nth-child(3) .label { animation: glow 3.5s infinite 0.3s; }
-      #screen-home .card:nth-child(4) .label { animation: pulse 2.8s infinite 0.4s; }
+      #screen-home .card:nth-child(4) .label { animation: textScrollAround 3s linear infinite; }
       #screen-home .card:nth-child(5) .label { animation: glow 3.2s infinite 0.5s; }
       #screen-home .card:nth-child(6) .label { animation: pulse 3.4s infinite 0.6s; }
       #screen-home .card:nth-child(7) .label { animation: glow 2.9s infinite 0.7s; }
@@ -730,23 +742,70 @@
         transform: rotateY(180deg);
       }
       
-      /* Scroll Test Card - Bounce Effect */
+      /* Scroll Test Card - Scroll Around Effect */
       #screen-home .card:nth-child(4) {
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: scrollAround 4s linear infinite;
       }
       
       #screen-home .card:nth-child(4) .icon::before {
         content: "📜";
       }
       
-      #screen-home .card:nth-child(4):hover {
-        transform: translateY(-15px);
-        animation: bounce 1s ease infinite;
+      /* Scroll Test Card Text Animation */
+      #screen-home .card:nth-child(4) .label {
+        animation: textScrollAround 3s linear infinite;
+        position: relative;
+        overflow: hidden;
       }
       
-      @keyframes bounce {
-        0%, 100% { transform: translateY(-15px); }
-        50% { transform: translateY(-25px); }
+      #screen-home .card:nth-child(4):hover {
+        animation: scrollAround 1.5s linear infinite;
+        transform: scale(1.05);
+        box-shadow: 
+          0 8px 25px rgba(0, 0, 0, 0.5),
+          0 0 20px rgba(255, 255, 255, 0.3);
+      }
+      
+      #screen-home .card:nth-child(4):hover .label {
+        animation: textScrollAround 1.5s linear infinite;
+      }
+      
+      @keyframes scrollAround {
+        0% {
+          transform: translateX(0) translateY(0) rotate(0deg);
+        }
+        25% {
+          transform: translateX(10px) translateY(-10px) rotate(3deg);
+        }
+        50% {
+          transform: translateX(0) translateY(-20px) rotate(0deg);
+        }
+        75% {
+          transform: translateX(-10px) translateY(-10px) rotate(-3deg);
+        }
+        100% {
+          transform: translateX(0) translateY(0) rotate(0deg);
+        }
+      }
+      
+      /* Text scrolling animation for Scroll Test card */
+      @keyframes textScrollAround {
+        0% {
+          transform: translateX(0) translateY(0) rotate(0deg);
+        }
+        25% {
+          transform: translateX(8px) translateY(-8px) rotate(2deg);
+        }
+        50% {
+          transform: translateX(0) translateY(-15px) rotate(0deg);
+        }
+        75% {
+          transform: translateX(-8px) translateY(-8px) rotate(-2deg);
+        }
+        100% {
+          transform: translateX(0) translateY(0) rotate(0deg);
+        }
       }
       
       /* Visuals Card - Pulse Effect */

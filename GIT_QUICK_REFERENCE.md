@@ -2,7 +2,7 @@
 
 ## Push
 ```bash
-cd ~/rpi-5inch-2
+cd ~/rpi-demo-3
 git add .
 git commit -m "Update message here"
 git push origin main
@@ -10,7 +10,7 @@ git push origin main
 
 ## Pull 
 ```bash
-cd ~/rpi-5inch-2
+cd ~/rpi-demo-3
 git fetch origin
 git reset --hard origin/main
 git clean -fd
