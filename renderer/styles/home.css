@@ -27,8 +27,8 @@
   max-height: clamp(120px, 18vh, 160px);
   padding: clamp(8px, 2vw, 16px);
   border-radius: var(--radius-xl);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 
@@ -40,6 +40,7 @@
   overflow: hidden;
   cursor: pointer;
   transform-style: preserve-3d;
+  z-index: 1;
 }
 
 /* Add icon placeholder */
@@ -48,19 +49,21 @@
   height: clamp(32px, 8vw, 48px);
   margin-bottom: clamp(4px, 1vw, 8px);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.4s ease;
   position: relative;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+  z-index: 3;
+  pointer-events: none;
 }
 
 #screen-home .card.fancy .icon::before {
   content: '◆';
   font-size: clamp(16px, 4vw, 24px);
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   transition: all 0.4s ease;
 }
 
@@ -93,6 +96,7 @@
   transform: translateX(-100%);
   transition: transform 0.8s ease;
   pointer-events: none;
+  z-index: 2;
 }
 
 #screen-home .card.fancy:hover .border-animation {
@@ -136,7 +140,7 @@
   );
   transform: translateX(-100%) skewX(-15deg);
   transition: transform 0.8s ease;
-  z-index: 2;
+  z-index: 1;
   pointer-events: none;
   opacity: 0;
 }
@@ -150,13 +154,14 @@
   font-size: clamp(12px, 3vw, 18px);
   font-weight: 600;
   text-align: center;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   letter-spacing: 0.5px;
   position: relative;
-  z-index: 10;
+  z-index: 3;
   transition: all 0.4s ease;
   line-height: 1.2;
+  pointer-events: none;
 }
 
 #screen-home .card.fancy:hover { 

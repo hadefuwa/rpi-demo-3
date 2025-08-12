@@ -182,114 +182,114 @@ button:focus { outline: 2px solid var(--brand); outline-offset: 2px; }
 /* ===== Shared theme color helpers (used by Home cards and Games) ===== */
 /* ===== Shared theme color helpers (used by Home cards and Games) ===== */
 .theme-cyan { 
-  border-color: rgba(107, 203, 239, 0.6); 
-  background: linear-gradient(135deg, rgba(107, 203, 239, 0.2) 0%, rgba(107, 203, 239, 0.1) 100%) !important; 
+  border-color: rgba(0, 255, 255, 0.8); 
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.4) 0%, rgba(107, 203, 239, 0.25) 100%) !important; 
 }
 .theme-cyan:hover {
-  background: linear-gradient(135deg, rgba(107, 203, 239, 0.35) 0%, rgba(107, 203, 239, 0.15) 100%) !important;
-  border-color: rgba(107, 203, 239, 0.9);
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.6) 0%, rgba(107, 203, 239, 0.35) 100%) !important;
+  border-color: rgba(0, 255, 255, 1);
   box-shadow: 
     0 25px 80px rgba(0, 0, 0, 0.6), 
-    0 0 60px rgba(107, 203, 239, 0.4),
-    0 0 20px rgba(107, 203, 239, 0.6),
+    0 0 80px rgba(0, 255, 255, 0.6),
+    0 0 40px rgba(0, 255, 255, 0.8),
     0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .theme-purple { 
-  border-color: rgba(157, 124, 243, 0.6); 
-  background: linear-gradient(135deg, rgba(157, 124, 243, 0.2) 0%, rgba(157, 124, 243, 0.1) 100%) !important; 
+  border-color: rgba(157, 124, 243, 0.8); 
+  background: linear-gradient(135deg, rgba(157, 124, 243, 0.4) 0%, rgba(138, 43, 226, 0.25) 100%) !important; 
 }
 .theme-purple:hover {
-  background: linear-gradient(135deg, rgba(157, 124, 243, 0.35) 0%, rgba(157, 124, 243, 0.15) 100%) !important;
-  border-color: rgba(157, 124, 243, 0.9);
+  background: linear-gradient(135deg, rgba(157, 124, 243, 0.6) 0%, rgba(138, 43, 226, 0.35) 100%) !important;
+  border-color: rgba(157, 124, 243, 1);
   box-shadow: 
     0 25px 80px rgba(0, 0, 0, 0.6), 
-    0 0 60px rgba(157, 124, 243, 0.4),
-    0 0 20px rgba(157, 124, 243, 0.6),
+    0 0 80px rgba(157, 124, 243, 0.6),
+    0 0 40px rgba(157, 124, 243, 0.8),
     0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .theme-gold { 
-  border-color: rgba(255, 215, 0, 0.6); 
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 165, 0, 0.1) 100%) !important; 
+  border-color: rgba(255, 215, 0, 0.8); 
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.4) 0%, rgba(255, 165, 0, 0.25) 100%) !important; 
 }
 .theme-gold:hover {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.35) 0%, rgba(255, 165, 0, 0.15) 100%) !important;
-  border-color: rgba(255, 215, 0, 0.9);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.6) 0%, rgba(255, 165, 0, 0.35) 100%) !important;
+  border-color: rgba(255, 215, 0, 1);
   box-shadow: 
     0 25px 80px rgba(0, 0, 0, 0.6), 
-    0 0 60px rgba(255, 215, 0, 0.4),
-    0 0 20px rgba(255, 215, 0, 0.6),
+    0 0 80px rgba(255, 215, 0, 0.6),
+    0 0 40px rgba(255, 215, 0, 0.8),
     0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .theme-white { 
-  border-color: rgba(255, 255, 255, 0.4); 
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%) !important; 
+  border-color: rgba(255, 255, 255, 0.7); 
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(240, 240, 240, 0.2) 100%) !important; 
 }
 .theme-white:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.12) 100%) !important;
-  border-color: rgba(255, 255, 255, 0.7);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(240, 240, 240, 0.3) 100%) !important;
+  border-color: rgba(255, 255, 255, 1);
   box-shadow: 
     0 25px 80px rgba(0, 0, 0, 0.6), 
-    0 0 60px rgba(255, 255, 255, 0.2),
-    0 0 20px rgba(255, 255, 255, 0.4),
+    0 0 80px rgba(255, 255, 255, 0.4),
+    0 0 40px rgba(255, 255, 255, 0.6),
     0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .theme-lime { 
-  border-color: rgba(124, 252, 0, 0.6); 
-  background: linear-gradient(135deg, rgba(124, 252, 0, 0.2) 0%, rgba(50, 205, 50, 0.1) 100%) !important; 
+  border-color: rgba(173, 255, 47, 0.8); 
+  background: linear-gradient(135deg, rgba(173, 255, 47, 0.4) 0%, rgba(50, 205, 50, 0.25) 100%) !important; 
 }
 .theme-lime:hover {
-  background: linear-gradient(135deg, rgba(124, 252, 0, 0.35) 0%, rgba(50, 205, 50, 0.15) 100%) !important;
-  border-color: rgba(124, 252, 0, 0.9);
+  background: linear-gradient(135deg, rgba(173, 255, 47, 0.6) 0%, rgba(50, 205, 50, 0.35) 100%) !important;
+  border-color: rgba(173, 255, 47, 1);
   box-shadow: 
     0 25px 80px rgba(0, 0, 0, 0.6), 
-    0 0 60px rgba(124, 252, 0, 0.4),
-    0 0 20px rgba(124, 252, 0, 0.6),
+    0 0 80px rgba(173, 255, 47, 0.6),
+    0 0 40px rgba(173, 255, 47, 0.8),
     0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .theme-orange { 
-  border-color: rgba(255, 165, 0, 0.6); 
-  background: linear-gradient(135deg, rgba(255, 165, 0, 0.2) 0%, rgba(255, 140, 0, 0.1) 100%) !important; 
+  border-color: rgba(255, 165, 0, 0.8); 
+  background: linear-gradient(135deg, rgba(255, 165, 0, 0.4) 0%, rgba(255, 69, 0, 0.25) 100%) !important; 
 }
 .theme-orange:hover {
-  background: linear-gradient(135deg, rgba(255, 165, 0, 0.35) 0%, rgba(255, 140, 0, 0.15) 100%) !important;
-  border-color: rgba(255, 165, 0, 0.9);
+  background: linear-gradient(135deg, rgba(255, 165, 0, 0.6) 0%, rgba(255, 69, 0, 0.35) 100%) !important;
+  border-color: rgba(255, 165, 0, 1);
   box-shadow: 
     0 25px 80px rgba(0, 0, 0, 0.6), 
-    0 0 60px rgba(255, 165, 0, 0.4),
-    0 0 20px rgba(255, 165, 0, 0.6),
+    0 0 80px rgba(255, 165, 0, 0.6),
+    0 0 40px rgba(255, 165, 0, 0.8),
     0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .theme-blue { 
-  border-color: rgba(30, 144, 255, 0.6); 
-  background: linear-gradient(135deg, rgba(30, 144, 255, 0.2) 0%, rgba(0, 191, 255, 0.1) 100%) !important; 
+  border-color: rgba(30, 144, 255, 0.8); 
+  background: linear-gradient(135deg, rgba(30, 144, 255, 0.4) 0%, rgba(0, 191, 255, 0.25) 100%) !important; 
 }
 .theme-blue:hover {
-  background: linear-gradient(135deg, rgba(30, 144, 255, 0.35) 0%, rgba(0, 191, 255, 0.15) 100%) !important;
-  border-color: rgba(30, 144, 255, 0.9);
+  background: linear-gradient(135deg, rgba(30, 144, 255, 0.6) 0%, rgba(0, 191, 255, 0.35) 100%) !important;
+  border-color: rgba(30, 144, 255, 1);
   box-shadow: 
     0 25px 80px rgba(0, 0, 0, 0.6), 
-    0 0 60px rgba(30, 144, 255, 0.4),
-    0 0 20px rgba(30, 144, 255, 0.6),
+    0 0 80px rgba(30, 144, 255, 0.6),
+    0 0 40px rgba(30, 144, 255, 0.8),
     0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .theme-silver { 
-  border-color: rgba(192, 192, 192, 0.6); 
-  background: linear-gradient(135deg, rgba(192, 192, 192, 0.2) 0%, rgba(169, 169, 169, 0.1) 100%) !important; 
+  border-color: rgba(192, 192, 192, 0.8); 
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.4) 0%, rgba(169, 169, 169, 0.25) 100%) !important; 
 }
 .theme-silver:hover {
-  background: linear-gradient(135deg, rgba(192, 192, 192, 0.35) 0%, rgba(169, 169, 169, 0.15) 100%) !important;
-  border-color: rgba(192, 192, 192, 0.9);
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.6) 0%, rgba(169, 169, 169, 0.35) 100%) !important;
+  border-color: rgba(192, 192, 192, 1);
   box-shadow: 
     0 25px 80px rgba(0, 0, 0, 0.6), 
-    0 0 60px rgba(192, 192, 192, 0.4),
-    0 0 20px rgba(192, 192, 192, 0.6),
+    0 0 80px rgba(192, 192, 192, 0.6),
+    0 0 40px rgba(192, 192, 192, 0.8),
     0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
