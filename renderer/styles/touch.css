@@ -3,53 +3,61 @@
 .touch-demo-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding: 20px;
-  gap: 20px;
+  height: 100vh;
+  padding: 10px;
+  gap: 10px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .touch-header {
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
+  flex-shrink: 0;
 }
 
 .touch-header h2 {
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
   color: var(--fg);
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 }
 
 .touch-header p {
   margin: 0;
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 .touch-controls {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   gap: 15px;
-  padding: 15px;
+  padding: 8px 12px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .color-palette {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   justify-content: center;
   flex-wrap: wrap;
 }
 
 .color-swatch {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.3);
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
+  flex-shrink: 0;
 }
 
 .color-swatch:hover {
@@ -59,7 +67,7 @@
 
 .color-swatch.active {
   border-color: #fff;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
 }
 
 .color-swatch.active::after {
@@ -70,39 +78,41 @@
   transform: translate(-50%, -50%);
   color: #000;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 10px;
   text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
 }
 
 .brush-controls {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .brush-controls label {
   color: var(--fg);
   font-weight: 500;
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 .brush-sizes {
   display: flex;
-  gap: 8px;
+  gap: 4px;
 }
 
 .brush-size {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   color: var(--fg);
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .brush-size:hover {
@@ -116,26 +126,27 @@
   color: #6bcbef;
 }
 
-.brush-size[data-size="2"] { font-size: 8px; }
-.brush-size[data-size="5"] { font-size: 12px; }
-.brush-size[data-size="10"] { font-size: 16px; }
-.brush-size[data-size="20"] { font-size: 20px; }
+.brush-size[data-size="2"] { font-size: 6px; }
+.brush-size[data-size="5"] { font-size: 8px; }
+.brush-size[data-size="10"] { font-size: 12px; }
+.brush-size[data-size="20"] { font-size: 16px; }
 
 .action-buttons {
   display: flex;
-  gap: 10px;
+  gap: 6px;
   justify-content: center;
 }
 
 .action-btn {
-  padding: 8px 16px;
+  padding: 6px 12px;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--fg);
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 .action-btn:hover {
@@ -152,13 +163,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 300px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 #drawing-canvas {
   background: #1a1d23;
   border: 3px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: crosshair;
   touch-action: none;
   user-select: none;
@@ -170,53 +182,61 @@
 
 .touch-status {
   text-align: center;
-  padding: 10px;
+  padding: 6px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 #status-text {
   color: var(--fg);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .touch-demo-container {
-    padding: 15px;
-    gap: 15px;
+    padding: 8px;
+    gap: 8px;
   }
   
   .touch-controls {
-    padding: 12px;
+    padding: 6px 10px;
+    flex-direction: column;
+    gap: 8px;
   }
   
   .color-swatch {
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
   }
   
   .brush-size {
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
+  }
+  
+  .action-btn {
+    padding: 8px 12px;
+    font-size: 0.9rem;
   }
 }
 
 @media (pointer: coarse) {
   .color-swatch {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
   }
   
   .brush-size {
-    width: 48px;
-    height: 48px;
+    width: 34px;
+    height: 34px;
   }
   
   .action-btn {
-    padding: 12px 20px;
-    font-size: 1rem;
+    padding: 8px 16px;
+    font-size: 0.9rem;
   }
 }

@@ -922,12 +922,13 @@
     }
     
     setupCanvas() {
-      // Set canvas size to fit container
+      // Set canvas size to fit container with more aggressive sizing
       const container = this.canvas.parentElement;
       const containerRect = container.getBoundingClientRect();
       
-      const maxWidth = Math.min(containerRect.width - 40, 800);
-      const maxHeight = Math.min(containerRect.height - 40, 500);
+      // Take up almost all available space, leaving minimal padding
+      const maxWidth = Math.min(containerRect.width - 20, 1000);
+      const maxHeight = Math.min(containerRect.height - 20, 700);
       
       // Set display size
       this.canvas.style.width = maxWidth + 'px';
