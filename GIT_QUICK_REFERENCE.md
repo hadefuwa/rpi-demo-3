@@ -16,6 +16,10 @@ git reset --hard origin/main
 git clean -fd
 npm install
 chmod +x scripts/*.sh
+
+# Install emoji fonts (run once, then reboot)
+./scripts/install-emoji-fonts.sh
+
 npm run kiosk
 ```
 
@@ -117,3 +121,5 @@ git add -A
 git commit -m "Prepare for Rev 2 release"
 git tag -a rev2.1 -m "Rev 2 released"
 git push origin main --tags
+
+

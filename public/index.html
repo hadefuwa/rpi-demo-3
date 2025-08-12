@@ -620,6 +620,21 @@
           inset 0 1px 1px rgba(255, 255, 255, 0.6);
       }
       
+      /* Enhanced emoji support for all card icons */
+      #screen-home .card .icon::before {
+        font-family: 'EmojiFont', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', 'EmojiOne Mozilla', 'Twemoji Mozilla', 'Segoe UI Symbol', sans-serif;
+        font-variant-emoji: emoji;
+        text-rendering: optimizeSpeed;
+        font-size: 24px;
+        line-height: 1;
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
       #screen-home .card:hover .icon {
         transform: translateZ(50px) scale(1.2);
         box-shadow: 
@@ -692,13 +707,173 @@
         50% { text-shadow: 0 0 20px rgba(255, 255, 255, 1), 0 0 30px rgba(255, 255, 255, 0.8); }
       }
       
+      /* Touch Demo Card - Enhanced emoji */
+      #screen-home .card:nth-child(1) .icon::before {
+        content: "👆";
+      }
+      
+      #screen-home .card:nth-child(1) .icon::after {
+        content: "TOUCH";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 8px;
+        font-weight: bold;
+        color: rgba(255,255,255,0.8);
+        display: none;
+        font-family: Arial, sans-serif;
+      }
+      
+      /* Show text fallback if emoji doesn't render */
+      @supports not (font-variant-emoji: emoji) {
+        #screen-home .card .icon::before {
+          display: none;
+        }
+        #screen-home .card .icon::after {
+          display: block !important;
+        }
+      }
+      
+      /* System Info Card */
+      #screen-home .card:nth-child(2) .icon::before {
+        content: "📊";
+      }
+      #screen-home .card:nth-child(2) .icon::after {
+        content: "INFO";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 8px;
+        font-weight: bold;
+        color: rgba(255,255,255,0.8);
+        display: none;
+        font-family: Arial, sans-serif;
+      }
+      
+      /* Games Hub Card */
+      #screen-home .card:nth-child(3) .icon::before {
+        content: "🎮";
+      }
+      #screen-home .card:nth-child(3) .icon::after {
+        content: "GAME";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 8px;
+        font-weight: bold;
+        color: rgba(255,255,255,0.8);
+        display: none;
+        font-family: Arial, sans-serif;
+      }
+      
+      /* Scroll Test Card */
+      #screen-home .card:nth-child(4) .icon::before {
+        content: "📜";
+      }
+      #screen-home .card:nth-child(4) .icon::after {
+        content: "SCROLL";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 7px;
+        font-weight: bold;
+        color: rgba(255,255,255,0.8);
+        display: none;
+        font-family: Arial, sans-serif;
+      }
+      
+      /* Visuals Card */
+      #screen-home .card:nth-child(5) .icon::before {
+        content: "🎨";
+      }
+      #screen-home .card:nth-child(5) .icon::after {
+        content: "ART";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 8px;
+        font-weight: bold;
+        color: rgba(255,255,255,0.8);
+        display: none;
+        font-family: Arial, sans-serif;
+      }
+      
+      /* 3D Model Card */
+      #screen-home .card:nth-child(6) .icon::before {
+        content: "🧊";
+      }
+      #screen-home .card:nth-child(6) .icon::after {
+        content: "3D";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 8px;
+        font-weight: bold;
+        color: rgba(255,255,255,0.8);
+        display: none;
+        font-family: Arial, sans-serif;
+      }
+      
+      /* 3D Printer Demo Card */
+      #screen-home .card:nth-child(7) .icon::before {
+        content: "🖨️";
+      }
+      #screen-home .card:nth-child(7) .icon::after {
+        content: "PRINT";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 7px;
+        font-weight: bold;
+        color: rgba(255,255,255,0.8);
+        display: none;
+        font-family: Arial, sans-serif;
+      }
+      
+      /* Settings Card */
+      #screen-home .card:nth-child(8) .icon::before {
+        content: "⚙️";
+      }
+      #screen-home .card:nth-child(8) .icon::after {
+        content: "SET";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 8px;
+        font-weight: bold;
+        color: rgba(255,255,255,0.8);
+        display: none;
+        font-family: Arial, sans-serif;
+      }
+      
+      /* About Card */
+      #screen-home .card:nth-child(9) .icon::before {
+        content: "ℹ️";
+      }
+      #screen-home .card:nth-child(9) .icon::after {
+        content: "INFO";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 8px;
+        font-weight: bold;
+        color: rgba(255,255,255,0.8);
+        display: none;
+        font-family: Arial, sans-serif;
+      }
+      
       /* Touch Demo Card - Glow Effect */
       #screen-home .card:nth-child(1) {
         box-shadow: 0 0 15px rgba(0, 188, 212, 0.2);
-      }
-      
-      #screen-home .card:nth-child(1) .icon::before {
-        content: "👆";
       }
       
       #screen-home .card:nth-child(1):hover {
@@ -710,10 +885,6 @@
       #screen-home .card:nth-child(2) {
         transition: all 0.5s ease;
         overflow: hidden;
-      }
-      
-      #screen-home .card:nth-child(2) .icon::before {
-        content: "📊";
       }
       
       #screen-home .card:nth-child(2):hover {
@@ -746,10 +917,6 @@
         transition: all 0.6s ease;
       }
       
-      #screen-home .card:nth-child(3) .icon::before {
-        content: "🎮";
-      }
-      
       #screen-home .card:nth-child(3):hover {
         transform: rotateY(180deg);
       }
@@ -763,10 +930,6 @@
       #screen-home .card:nth-child(4) {
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         animation: scrollAround 4s linear infinite;
-      }
-      
-      #screen-home .card:nth-child(4) .icon::before {
-        content: "📜";
       }
       
       /* Scroll Test Card Text Animation */
@@ -830,10 +993,6 @@
         transition: all 0.3s ease;
       }
       
-      #screen-home .card:nth-child(5) .icon::before {
-        content: "🎨";
-      }
-      
       #screen-home .card:nth-child(5):hover {
         animation: pulse-card 1.5s infinite;
       }
@@ -849,10 +1008,6 @@
         transition: all 0.5s ease;
       }
       
-      #screen-home .card:nth-child(6) .icon::before {
-        content: "🧊";
-      }
-      
       #screen-home .card:nth-child(6):hover {
         transform: rotate(5deg) scale(1.1);
       }
@@ -862,10 +1017,6 @@
         transition: all 0.4s ease;
         position: relative;
         overflow: hidden;
-      }
-      
-      #screen-home .card:nth-child(7) .icon::before {
-        content: "🖨️";
       }
       
       #screen-home .card:nth-child(7)::before {
@@ -897,10 +1048,6 @@
         transition: all 0.3s ease;
       }
       
-      #screen-home .card:nth-child(8) .icon::before {
-        content: "⚙️";
-      }
-      
       #screen-home .card:nth-child(8):hover {
         animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
       }
@@ -915,10 +1062,6 @@
       /* About Card - Expand Effect */
       #screen-home .card:nth-child(9) {
         transition: all 0.4s ease;
-      }
-      
-      #screen-home .card:nth-child(9) .icon::before {
-        content: "ℹ️";
       }
       
       #screen-home .card:nth-child(9):hover {
