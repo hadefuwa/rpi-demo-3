@@ -555,6 +555,17 @@
     user-select: none !important;
     -webkit-touch-callout: none !important;
   }
+
+  /* On devices without real hover (typical touchscreens), neutralize hover effects
+     so that dragging doesn't trigger hover visuals. */
+  @media (hover: none) {
+    #screen-scroll .scroll-item:hover {
+      transform: none;
+      box-shadow: none;
+      border-color: rgba(255, 255, 255, 0.2);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+    }
+  }
 </style>
 
 <script>
@@ -604,6 +615,46 @@
       `;
       document.head.appendChild(style);
     }
+
+    // Pointer drag-to-scroll fallback for environments where touch is exposed as mouse
+    let isPointerDragging = false;
+    let dragStartY = 0;
+    let dragStartScrollTop = 0;
+    let activePointerId = null;
+
+    function shouldUsePointerDragFallback(e) {
+      // Use fallback when pointerType is 'mouse' or unknown; ignore right/middle buttons
+      if (!e) return false;
+      const isPrimaryButton = e.buttons === undefined ? e.button === 0 : (e.buttons & 1) === 1;
+      if (!isPrimaryButton) return false;
+      // If it's touch, let the browser handle native scrolling
+      if (e.pointerType && e.pointerType === 'touch') return false;
+      return true; // mouse/pen/unknown
+    }
+
+    function handlePointerDown(e) {
+      if (!scrollBox) return;
+      if (!shouldUsePointerDragFallback(e)) return;
+      isPointerDragging = true;
+      activePointerId = e.pointerId;
+      dragStartY = e.clientY;
+      dragStartScrollTop = scrollBox.scrollTop;
+      try { scrollBox.setPointerCapture && scrollBox.setPointerCapture(e.pointerId); } catch (_) {}
+      e.preventDefault();
+    }
+
+    function handlePointerMove(e) {
+      if (!isPointerDragging || e.pointerId !== activePointerId || !scrollBox) return;
+      const deltaY = e.clientY - dragStartY;
+      scrollBox.scrollTop = dragStartScrollTop - deltaY;
+      e.preventDefault();
+    }
+
+    function handlePointerUp(e) {
+      if (e && activePointerId !== null && e.pointerId !== activePointerId) return;
+      isPointerDragging = false;
+      activePointerId = null;
+    }
     
     function setupEventListeners() {
       // Home button
@@ -636,6 +687,13 @@
         scrollBox.addEventListener('contextmenu', function(e) {
           e.preventDefault();
         });
+
+  // Pointer-based drag-to-scroll fallback (for Pi touch that appears as mouse)
+  scrollBox.addEventListener('pointerdown', handlePointerDown);
+  scrollBox.addEventListener('pointermove', handlePointerMove, { capture: true });
+  scrollBox.addEventListener('pointerup', handlePointerUp);
+  scrollBox.addEventListener('pointercancel', handlePointerUp);
+  scrollBox.addEventListener('pointerleave', handlePointerUp);
       }
     }
     
