@@ -33,31 +33,43 @@
         console.log('WebGL detection failed:', e);
       }
       
-      // Determine quality mode based on device capabilities
-      function determineQualityMode() {
-        // Pi 3B+ detection (4 cores, low memory, older GPU)
-        if (deviceInfo.cores === 4 && 
-            deviceInfo.memory <= 1 && 
-            deviceInfo.userAgent.includes('armv7l')) {
-          return 'low';
-        }
-        // Pi 4 detection (4 cores, more memory, better GPU)
-        if (deviceInfo.cores === 4 && 
-            deviceInfo.memory > 1 && 
-            deviceInfo.userAgent.includes('armv7l')) {
-          return 'medium';
-        }
-        // Pi 5 detection (4+ cores, more memory, modern GPU)
-        if (deviceInfo.cores >= 4 && 
-            deviceInfo.memory > 2 && 
-            (deviceInfo.userAgent.includes('aarch64') || deviceInfo.userAgent.includes('armv8'))) {
-          return 'high';
-        }
-        // Fallback based on memory
-        if (deviceInfo.memory <= 1) return 'low';
-        if (deviceInfo.memory <= 2) return 'medium';
-        return 'high';
-      }
+             // Determine quality mode based on device capabilities
+       function determineQualityMode() {
+         // Check for GPU issues in user agent or console errors
+         const hasGPUIssues = deviceInfo.userAgent.includes('Mesa') || 
+                             deviceInfo.userAgent.includes('llvmpipe') ||
+                             deviceInfo.userAgent.includes('Software');
+         
+         // Pi 3B+ detection (4 cores, low memory, older GPU) - force low quality
+         if (deviceInfo.cores === 4 && 
+             deviceInfo.memory <= 1 && 
+             deviceInfo.userAgent.includes('armv7l')) {
+           return 'low';
+         }
+         
+         // Force low quality if GPU issues detected
+         if (hasGPUIssues) {
+           console.log('GPU issues detected, forcing low quality mode');
+           return 'low';
+         }
+         
+         // Pi 4 detection (4 cores, more memory, better GPU)
+         if (deviceInfo.cores === 4 && 
+             deviceInfo.memory > 1 && 
+             deviceInfo.userAgent.includes('armv7l')) {
+           return 'medium';
+         }
+         // Pi 5 detection (4+ cores, more memory, modern GPU)
+         if (deviceInfo.cores >= 4 && 
+             deviceInfo.memory > 2 && 
+             (deviceInfo.userAgent.includes('aarch64') || deviceInfo.userAgent.includes('armv8'))) {
+           return 'high';
+         }
+         // Fallback based on memory
+         if (deviceInfo.memory <= 1) return 'low';
+         if (deviceInfo.memory <= 2) return 'medium';
+         return 'high';
+       }
       
       window.QUALITY_MODE = determineQualityMode();
       window.DEVICE_INFO = deviceInfo;
@@ -195,39 +207,68 @@
       loadModel('cad1.stl');
     }
     
-    function setupThreeJS() {
-      const canvas = document.getElementById('stlCanvas');
-      
-      // Scene setup
-      scene = new THREE.Scene();
-      
-      // Camera setup
-      camera = new THREE.PerspectiveCamera(75, canvas.offsetWidth / canvas.offsetHeight, 0.1, 1000);
-      camera.position.set(0, 0, 5);
-      
-      // Renderer setup with quality-based settings
-      const qualityMode = window.QUALITY_MODE || 'medium';
-      const rendererOptions = {
-        canvas: canvas,
-        alpha: true
-      };
-      
-      // Adjust renderer quality based on device capabilities
-      if (qualityMode === 'high') {
-        rendererOptions.antialias = true;
-      } else {
-        rendererOptions.antialias = false;
-      }
-      
-      renderer = new THREE.WebGLRenderer(rendererOptions);
-      renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
-      renderer.setClearColor(0x000011, 1);
-      
-      // Enable shadows only for medium and high quality
-      if (qualityMode !== 'low') {
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-      }
+         function setupThreeJS() {
+       const canvas = document.getElementById('stlCanvas');
+       
+       // Scene setup
+       scene = new THREE.Scene();
+       
+       // Camera setup
+       camera = new THREE.PerspectiveCamera(75, canvas.offsetWidth / canvas.offsetHeight, 0.1, 1000);
+       camera.position.set(0, 0, 5);
+       
+       // Renderer setup with quality-based settings and GPU fallbacks
+       const qualityMode = window.QUALITY_MODE || 'medium';
+       const rendererOptions = {
+         canvas: canvas,
+         alpha: true,
+         powerPreference: 'low-power', // Force low-power mode for RPi
+         failIfMajorPerformanceCaveat: false, // Allow software rendering
+         preserveDrawingBuffer: false,
+         depth: true,
+         stencil: false,
+         antialias: false // Disable antialiasing for better performance
+       };
+       
+       // Try to create WebGL renderer with fallbacks
+       try {
+         renderer = new THREE.WebGLRenderer(rendererOptions);
+         console.log('WebGL renderer created successfully');
+       } catch (error) {
+         console.warn('WebGL renderer failed, trying fallback options:', error);
+         
+         // Fallback renderer options for problematic GPUs
+         const fallbackOptions = {
+           canvas: canvas,
+           alpha: true,
+           powerPreference: 'low-power',
+           failIfMajorPerformanceCaveat: false,
+           preserveDrawingBuffer: false,
+           depth: true,
+           stencil: false,
+           antialias: false,
+           precision: 'lowp' // Use low precision for better compatibility
+         };
+         
+         try {
+           renderer = new THREE.WebGLRenderer(fallbackOptions);
+           console.log('Fallback WebGL renderer created successfully');
+         } catch (fallbackError) {
+           console.error('Both WebGL renderers failed:', fallbackError);
+           document.getElementById('loadingIndicator').textContent = 'WebGL not supported on this device.';
+           return;
+         }
+       }
+       
+       renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+       renderer.setClearColor(0x000011, 1);
+       
+       // Disable shadows for all quality modes on RPi 3 to improve performance
+       renderer.shadowMap.enabled = false;
+       
+       // Set renderer info for debugging
+       console.log('Renderer:', renderer.getContext().getParameter(renderer.getContext().RENDERER));
+       console.log('Vendor:', renderer.getContext().getParameter(renderer.getContext().VENDOR));
       
       // Controls setup
       controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -239,20 +280,21 @@
       // Create starfield background based on quality
       createStarfield();
       
-      // Lighting setup
-      const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
-      scene.add(ambientLight);
-      
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      directionalLight.position.set(10, 10, 5);
-      if (qualityMode !== 'low') {
-        directionalLight.castShadow = true;
-      }
-      scene.add(directionalLight);
-      
-      const pointLight = new THREE.PointLight(0x4444ff, 0.5, 100);
-      pointLight.position.set(-10, -10, -10);
-      scene.add(pointLight);
+             // Lighting setup - simplified for RPi 3 compatibility
+       const ambientLight = new THREE.AmbientLight(0x404040, 0.8); // Increased ambient light
+       scene.add(ambientLight);
+       
+       const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+       directionalLight.position.set(10, 10, 5);
+       directionalLight.castShadow = false; // Disable shadows for better performance
+       scene.add(directionalLight);
+       
+       // Only add point light for medium and high quality
+       if (qualityMode !== 'low') {
+         const pointLight = new THREE.PointLight(0x4444ff, 0.3, 100);
+         pointLight.position.set(-10, -10, -10);
+         scene.add(pointLight);
+       }
       
       // Handle window resize
       window.addEventListener('resize', onWindowResize, false);
@@ -355,14 +397,12 @@
           
           const material = new THREE.MeshPhongMaterial(materialOptions);
           
-          // Create mesh
-          currentModel = new THREE.Mesh(geometry, material);
-          
-          // Enable shadows only for medium and high quality
-          if (qualityMode !== 'low') {
-            currentModel.castShadow = true;
-            currentModel.receiveShadow = true;
-          }
+                     // Create mesh
+           currentModel = new THREE.Mesh(geometry, material);
+           
+           // Disable shadows for all quality modes to improve performance on RPi 3
+           currentModel.castShadow = false;
+           currentModel.receiveShadow = false;
           
           // Center and scale the model
           geometry.computeBoundingBox();
