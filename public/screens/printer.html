@@ -16,33 +16,27 @@
     <main class="grid">
       <!-- Card 1: Progress + ETA -->
       <section class="card progress-card" aria-label="Job status">
-                 <div class="mesh-container">
-           <div class="mesh" id="rotating-mesh">
-             <!-- Main body faces -->
-             <div class="mesh-face front"></div>
-             <div class="mesh-face back"></div>
-             <div class="mesh-face left"></div>
-             <div class="mesh-face right"></div>
-             <div class="mesh-face top"></div>
-             <div class="mesh-face bottom"></div>
-             <!-- Additional geometric faces for complexity -->
-             <div class="mesh-face front-top"></div>
-             <div class="mesh-face front-bottom"></div>
-             <div class="mesh-face left-top"></div>
-             <div class="mesh-face left-bottom"></div>
-             <div class="mesh-face right-top"></div>
-             <div class="mesh-face right-bottom"></div>
-             <div class="mesh-face back-top"></div>
-             <div class="mesh-face back-bottom"></div>
-             <!-- Corner pieces -->
-             <div class="mesh-face corner-front-left-top"></div>
-             <div class="mesh-face corner-front-right-top"></div>
-             <div class="mesh-face corner-front-left-bottom"></div>
-             <div class="mesh-face corner-front-right-bottom"></div>
-             <div class="mesh-face corner-back-left-top"></div>
-             <div class="mesh-face corner-back-right-top"></div>
-             <div class="mesh-face corner-back-left-bottom"></div>
-             <div class="mesh-face corner-back-right-bottom"></div>
+         <div class="mesh-container">
+           <div class="gear" id="rotating-mesh">
+             <!-- Gear rims (front/back) -->
+             <div class="rim front"></div>
+             <div class="rim back"></div>
+             <!-- Gear hub (hole) -->
+             <div class="hub front"></div>
+             <div class="hub back"></div>
+             <!-- Teeth (front/back for simple thickness) -->
+             <div class="tooth front t0"></div><div class="tooth back t0"></div>
+             <div class="tooth front t1"></div><div class="tooth back t1"></div>
+             <div class="tooth front t2"></div><div class="tooth back t2"></div>
+             <div class="tooth front t3"></div><div class="tooth back t3"></div>
+             <div class="tooth front t4"></div><div class="tooth back t4"></div>
+             <div class="tooth front t5"></div><div class="tooth back t5"></div>
+             <div class="tooth front t6"></div><div class="tooth back t6"></div>
+             <div class="tooth front t7"></div><div class="tooth back t7"></div>
+             <div class="tooth front t8"></div><div class="tooth back t8"></div>
+             <div class="tooth front t9"></div><div class="tooth back t9"></div>
+             <div class="tooth front t10"></div><div class="tooth back t10"></div>
+             <div class="tooth front t11"></div><div class="tooth back t11"></div>
            </div>
          </div>
         <div class="progress-text">
@@ -145,7 +139,7 @@
          /* Progress */
      #screen-printer .progress-card { display:flex; align-items:center; justify-content:space-between; gap:20px; padding: 8px; }
     
-    /* 3D Mesh */
+    /* 3D Mesh (gear) */
     #screen-printer .mesh-container { 
       width: min(120px, 25%); 
       height: min(120px, 25%);
@@ -154,133 +148,81 @@
       align-items: center;
       justify-content: center;
     }
-         #screen-printer .mesh { 
-       width: 60px; 
-       height: 60px; 
-       position: relative;
-       transform-style: preserve-3d;
-       animation: rotate 6s linear infinite;
-     }
-     #screen-printer .mesh-face { 
-       position: absolute; 
-       background: linear-gradient(45deg, #4f8cff, #2b60ff);
-       border: 1px solid #1c2030;
-       opacity: 0.7;
-     }
-     
-     /* Main body faces - larger core */
-     #screen-printer .mesh-face.front { 
-       width: 50px; height: 50px; 
-       transform: translateZ(25px); 
-     }
-     #screen-printer .mesh-face.back { 
-       width: 50px; height: 50px; 
-       transform: translateZ(-25px) rotateY(180deg); 
-     }
-     #screen-printer .mesh-face.left { 
-       width: 50px; height: 50px; 
-       transform: translateX(-25px) rotateY(-90deg); 
-     }
-     #screen-printer .mesh-face.right { 
-       width: 50px; height: 50px; 
-       transform: translateX(25px) rotateY(90deg); 
-     }
-     #screen-printer .mesh-face.top { 
-       width: 50px; height: 50px; 
-       transform: translateY(-25px) rotateX(90deg); 
-     }
-     #screen-printer .mesh-face.bottom { 
-       width: 50px; height: 50px; 
-       transform: translateY(25px) rotateX(-90deg); 
-     }
-     
-     /* Additional geometric faces - smaller protruding pieces */
-     #screen-printer .mesh-face.front-top { 
-       width: 20px; height: 20px; 
-       transform: translateZ(35px) translateY(-15px); 
-       background: linear-gradient(45deg, #5a9eff, #3b70ff);
-     }
-     #screen-printer .mesh-face.front-bottom { 
-       width: 20px; height: 20px; 
-       transform: translateZ(35px) translateY(15px); 
-       background: linear-gradient(45deg, #5a9eff, #3b70ff);
-     }
-     #screen-printer .mesh-face.left-top { 
-       width: 20px; height: 20px; 
-       transform: translateX(-35px) translateY(-15px) rotateY(-90deg); 
-       background: linear-gradient(45deg, #5a9eff, #3b70ff);
-     }
-     #screen-printer .mesh-face.left-bottom { 
-       width: 20px; height: 20px; 
-       transform: translateX(-35px) translateY(15px) rotateY(-90deg); 
-       background: linear-gradient(45deg, #5a9eff, #3b70ff);
-     }
-     #screen-printer .mesh-face.right-top { 
-       width: 20px; height: 20px; 
-       transform: translateX(35px) translateY(-15px) rotateY(90deg); 
-       background: linear-gradient(45deg, #5a9eff, #3b70ff);
-     }
-     #screen-printer .mesh-face.right-bottom { 
-       width: 20px; height: 20px; 
-       transform: translateX(35px) translateY(15px) rotateY(90deg); 
-       background: linear-gradient(45deg, #5a9eff, #3b70ff);
-     }
-     #screen-printer .mesh-face.back-top { 
-       width: 20px; height: 20px; 
-       transform: translateZ(-35px) translateY(-15px) rotateY(180deg); 
-       background: linear-gradient(45deg, #5a9eff, #3b70ff);
-     }
-     #screen-printer .mesh-face.back-bottom { 
-       width: 20px; height: 20px; 
-       transform: translateZ(-35px) translateY(15px) rotateY(180deg); 
-       background: linear-gradient(45deg, #5a9eff, #3b70ff);
-     }
-     
-     /* Corner pieces - small triangular-like shapes */
-     #screen-printer .mesh-face.corner-front-left-top { 
-       width: 15px; height: 15px; 
-       transform: translateZ(40px) translateX(-12px) translateY(-12px) rotateX(45deg) rotateY(-45deg); 
-       background: linear-gradient(45deg, #6aaeff, #4b80ff);
-     }
-     #screen-printer .mesh-face.corner-front-right-top { 
-       width: 15px; height: 15px; 
-       transform: translateZ(40px) translateX(12px) translateY(-12px) rotateX(45deg) rotateY(45deg); 
-       background: linear-gradient(45deg, #6aaeff, #4b80ff);
-     }
-     #screen-printer .mesh-face.corner-front-left-bottom { 
-       width: 15px; height: 15px; 
-       transform: translateZ(40px) translateX(-12px) translateY(12px) rotateX(-45deg) rotateY(-45deg); 
-       background: linear-gradient(45deg, #6aaeff, #4b80ff);
-     }
-     #screen-printer .mesh-face.corner-front-right-bottom { 
-       width: 15px; height: 15px; 
-       transform: translateZ(40px) translateX(12px) translateY(12px) rotateX(-45deg) rotateY(45deg); 
-       background: linear-gradient(45deg, #6aaeff, #4b80ff);
-     }
-     #screen-printer .mesh-face.corner-back-left-top { 
-       width: 15px; height: 15px; 
-       transform: translateZ(-40px) translateX(-12px) translateY(-12px) rotateX(45deg) rotateY(135deg); 
-       background: linear-gradient(45deg, #6aaeff, #4b80ff);
-     }
-     #screen-printer .mesh-face.corner-back-right-top { 
-       width: 15px; height: 15px; 
-       transform: translateZ(-40px) translateX(12px) translateY(-12px) rotateX(45deg) rotateY(-135deg); 
-       background: linear-gradient(45deg, #6aaeff, #4b80ff);
-     }
-     #screen-printer .mesh-face.corner-back-left-bottom { 
-       width: 15px; height: 15px; 
-       transform: translateZ(-40px) translateX(-12px) translateY(12px) rotateX(-45deg) rotateY(135deg); 
-       background: linear-gradient(45deg, #6aaeff, #4b80ff);
-     }
-     #screen-printer .mesh-face.corner-back-right-bottom { 
-       width: 15px; height: 15px; 
-       transform: translateZ(-40px) translateX(12px) translateY(12px) rotateX(-45deg) rotateY(-135deg); 
-       background: linear-gradient(45deg, #6aaeff, #4b80ff);
-     }
     
-    @keyframes rotate {
-      from { transform: rotateX(0deg) rotateY(0deg); }
-      to { transform: rotateX(360deg) rotateY(360deg); }
+    /* Gear object */
+    #screen-printer .gear { 
+      width: 80px; 
+      height: 80px; 
+      position: relative;
+      transform-style: preserve-3d;
+      transform-origin: 50% 50%;
+      will-change: transform;
+      animation: rotateXClockwise 16s linear infinite;
+    }
+    #screen-printer .gear .rim, 
+    #screen-printer .gear .hub, 
+    #screen-printer .gear .tooth { position: absolute; }
+    
+    /* Rims (front/back) */
+    #screen-printer .gear .rim {
+      width: 70px; height: 70px; border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #5a9eff, #2b60ff);
+      border: 2px solid #1c2030;
+      opacity: 0.9;
+    }
+    #screen-printer .gear .rim.front { transform: translateZ(8px); }
+    #screen-printer .gear .rim.back { transform: translateZ(-8px); }
+    
+    /* Hub hole (to fake a cutout) */
+    #screen-printer .gear .hub {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: #0b0c10;
+      border: 2px solid #1c2030;
+      left: 50%; top: 50%; transform: translate(-50%, -50%) translateZ(9px);
+    }
+    #screen-printer .gear .hub.back { transform: translate(-50%, -50%) translateZ(-9px); }
+    
+    /* Teeth - 12 around the rim (front/back plates to give thickness) */
+    #screen-printer .gear .tooth {
+      width: 12px; height: 22px; border-radius: 2px;
+      background: linear-gradient(45deg, #6aaeff, #3b70ff);
+      border: 1px solid #1c2030;
+      left: 50%; top: 50%;
+      transform-origin: 50% 38px; /* pivot around gear center */
+      opacity: 0.95;
+    }
+    #screen-printer .gear .tooth.front { transform: translate(-50%, -50%) translateZ(10px); }
+    #screen-printer .gear .tooth.back { transform: translate(-50%, -50%) translateZ(-10px); }
+    
+    /* Position each tooth by rotation */
+    #screen-printer .gear .tooth.t0.front { transform: translate(-50%, -50%) translateZ(10px) rotate(0deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t0.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(0deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t1.front { transform: translate(-50%, -50%) translateZ(10px) rotate(30deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t1.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(30deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t2.front { transform: translate(-50%, -50%) translateZ(10px) rotate(60deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t2.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(60deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t3.front { transform: translate(-50%, -50%) translateZ(10px) rotate(90deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t3.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(90deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t4.front { transform: translate(-50%, -50%) translateZ(10px) rotate(120deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t4.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(120deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t5.front { transform: translate(-50%, -50%) translateZ(10px) rotate(150deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t5.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(150deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t6.front { transform: translate(-50%, -50%) translateZ(10px) rotate(180deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t6.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(180deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t7.front { transform: translate(-50%, -50%) translateZ(10px) rotate(210deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t7.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(210deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t8.front { transform: translate(-50%, -50%) translateZ(10px) rotate(240deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t8.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(240deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t9.front { transform: translate(-50%, -50%) translateZ(10px) rotate(270deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t9.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(270deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t10.front { transform: translate(-50%, -50%) translateZ(10px) rotate(300deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t10.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(300deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t11.front { transform: translate(-50%, -50%) translateZ(10px) rotate(330deg) translateY(-38px); }
+    #screen-printer .gear .tooth.t11.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(330deg) translateY(-38px); }
+    
+    @keyframes rotateXClockwise {
+      from { transform: rotateX(0deg); }
+      to { transform: rotateX(-360deg); }
     }
     
          /* Progress Slider */
@@ -438,6 +380,10 @@
       border-radius:4px; 
       border:1px solid #0008; 
       display:inline-block; 
+      background-size: cover; 
+      background-position: center; 
+      background-repeat: no-repeat;
+      background-color: #1a1d2a; /* fallback */
     }
     #screen-printer .slot .meta { 
       font-size: clamp(11px, 1.8vmin, 14px); 
@@ -522,6 +468,7 @@
     let online = true;
     let worker = null;
     let listeners = [];
+    let currentCamUrl = '';
   
     // Inline Web Worker via Blob, to keep file self-contained
     function makeWorker() {
@@ -532,10 +479,10 @@
           temps: { nozzle: 25, bed: 25, tNozzle: 0, tBed: 0 },
           speed: { multiplier: 100 },
           materials: { slots: [
-            { id:"A1", type:"PLA", color:"#f94144", grams:230, active:true },
-            { id:"A2", type:"PLA", color:"#577590", grams:180, active:false },
-            { id:"A3", type:"PETG", color:"#90be6d", grams:150, active:false },
-            { id:"A4", type:"ABS", color:"#f9c74f", grams:90, active:false }
+            { id:"A1", type:"Orange", color:"#f97f29", grams:230, active:true },
+            { id:"A2", type:"Blue", color:"#577590", grams:180, active:false },
+            { id:"A3", type:"Silver", color:"#bdbdbd", grams:150, active:false },
+            { id:"A4", type:"Yellow", color:"#f9c74f", grams:90, active:false }
           ]},
           camera: { url:"", online:false },
           ts: Date.now()
@@ -711,11 +658,54 @@
     }
   
     function applyAMS(slots) {
+      function pickFilamentImageFromType(typeText) {
+        const t = String(typeText || '').toUpperCase();
+        if (t.includes('YELLOW')) return '../assets/yellow.png';
+        if (t.includes('ORANGE')) return '../assets/orange.png';
+        if (t.includes('BLUE')) return '../assets/blue.png';
+        if (t.includes('SILVER')) return '../assets/silver.png';
+        return '';
+      }
+
+      function pickFilamentImageFromColor(hex) {
+        if (!hex || typeof hex !== 'string' || !hex.startsWith('#') || (hex.length !== 7 && hex.length !== 4)) return '';
+        // Normalize 3-digit hex to 6-digit
+        let h = hex.toLowerCase();
+        if (h.length === 4) h = `#${h[1]}${h[1]}${h[2]}${h[2]}${h[3]}${h[3]}`;
+        const r = parseInt(h.slice(1,3), 16);
+        const g = parseInt(h.slice(3,5), 16);
+        const b = parseInt(h.slice(5,7), 16);
+        // Very simple rules
+        const isYellow = r > 200 && g > 180 && b < 120;
+        const isOrange = r > 200 && g >= 80 && g < 180 && b < 120;
+        const isBlue = b > 140 && r < 140;
+        const isSilver = Math.abs(r-g) < 20 && Math.abs(g-b) < 20 && r > 120; // near gray
+        if (isYellow) return '../assets/yellow.png';
+        if (isOrange) return '../assets/orange.png';
+        if (isBlue) return '../assets/blue.png';
+        if (isSilver) return '../assets/silver.png';
+        return '';
+      }
+
       slots.slice(0,4).forEach((s, i) => {
         const el = slotEls[i];
         if (!el) return;
-        el.querySelector('.chip').style.background = s.color;
-        el.querySelector('.meta').textContent = `${s.type} • ${s.grams} g${s.active ? ' • Active' : ''}`;
+
+        const chipEl = el.querySelector('.chip');
+        // Prefer explicit type keywords, else infer from color
+        let img = pickFilamentImageFromType(s.type);
+        if (!img) img = pickFilamentImageFromColor(s.color);
+
+        if (img) {
+          chipEl.style.backgroundImage = `url(${img})`;
+          chipEl.style.backgroundColor = '#1a1d2a';
+        } else {
+          chipEl.style.backgroundImage = '';
+          chipEl.style.background = s.color || '#666';
+        }
+
+        // Keep grams and Active label, remove material type text
+        el.querySelector('.meta').textContent = `${s.grams} g${s.active ? ' • Active' : ''}`;
         el.style.outline = s.active ? '2px solid #4f8cff' : 'none';
       });
     }
@@ -731,17 +721,20 @@
   
     function setCamera(url, isOnline) {
       camStatus.textContent = isOnline ? 'Live' : 'Camera offline';
-      if (isOnline && url) { 
-        // Only set the source if it's not already set or if it's different
-        if (cam.src !== url && !cam.src.includes(url)) {
+      if (isOnline && url) {
+        // Only set once to avoid restarting the GIF on each state update
+        if (currentCamUrl !== url) {
           cam.src = url;
+          currentCamUrl = url;
         }
-        
-        // Ensure proper GIF playback attributes
-        cam.setAttribute('loading', 'eager');
-        cam.setAttribute('decoding', 'sync');
-      } else { 
-        cam.removeAttribute('src'); 
+        // Set attributes once (idempotent)
+        if (!cam.hasAttribute('loading')) cam.setAttribute('loading', 'eager');
+        if (!cam.hasAttribute('decoding')) cam.setAttribute('decoding', 'sync');
+      } else {
+        if (currentCamUrl) {
+          cam.removeAttribute('src');
+          currentCamUrl = '';
+        }
       }
     }
   
