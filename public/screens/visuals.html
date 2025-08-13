@@ -160,7 +160,7 @@
         pointer.x = p.x; pointer.y = p.y; pointer.has = true;
         if (pointer.down && mode === 'ripples') addRipple(pointer.x, pointer.y);
       };
-      const onUp = () => { pointer.down = false; };
+  const onUp = () => { pointer.down = false; pointer.has = false; };
       canvas.addEventListener('pointerdown', onDown);
       canvas.addEventListener('pointermove', onMove, { passive: false });
       window.addEventListener('pointerup', onUp, { passive: true });
@@ -277,6 +277,10 @@
           vx: (Math.random() - 0.5) * 50,
           vy: (Math.random() - 0.5) * 50,
           r: 1.5 + Math.random() * 2.5,
+          // Gentle drift parameters to keep motion alive without input
+          theta: Math.random() * Math.PI * 2,    // current drift angle
+          omega: (Math.random() - 0.5) * 1.2,    // angular velocity (rad/s)
+          base: 18 + Math.random() * 22          // base drift speed influence
         });
       }
     }
@@ -284,17 +288,35 @@
       const w = canvas.width / dpr, h = canvas.height / dpr;
       ctx.fillStyle = 'rgba(255,255,255,0.9)';
       for (const p of particles) {
-  // Attraction to pointer when present (follows finger/mouse)
-  if (pointer.has) {
+        // Attraction to pointer when present (follows finger/mouse)
+        if (pointer.has) {
           const dx = pointer.x - p.x, dy = pointer.y - p.y;
           const dist2 = dx*dx + dy*dy + 1;
           const force = Math.min(1200 / dist2, 40);
           p.vx += (dx / Math.sqrt(dist2)) * force * dt;
           p.vy += (dy / Math.sqrt(dist2)) * force * dt;
+          // Regular damping during user interaction
+          p.vx *= 0.98; p.vy *= 0.98;
+        } else {
+          // No input: apply gentle drift and keep a minimal speed
+          p.theta += p.omega * dt;
+          const ax = Math.cos(p.theta) * p.base * 0.3;
+          const ay = Math.sin(p.theta) * p.base * 0.3;
+          p.vx += ax * dt;
+          p.vy += ay * dt;
+          // Mild damping to avoid runaway speeds
+          p.vx *= 0.995; p.vy *= 0.995;
+          // Speed floor to prevent full stop
+          const sp = Math.hypot(p.vx, p.vy);
+          const minSp = 12;
+          if (sp < minSp) {
+            const ang = p.theta;
+            const boost = minSp - sp;
+            p.vx += Math.cos(ang) * boost;
+            p.vy += Math.sin(ang) * boost;
+          }
         }
         p.x += p.vx * dt; p.y += p.vy * dt;
-        // Dampen
-        p.vx *= 0.98; p.vy *= 0.98;
         // Wrap
         if (p.x < -5) p.x = w + 5; if (p.x > w + 5) p.x = -5;
         if (p.y < -5) p.y = h + 5; if (p.y > h + 5) p.y = -5;

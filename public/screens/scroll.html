@@ -276,13 +276,7 @@
     }
   }
   
-  /* Hover effects are disabled by default; enabled only when .enable-hover is present */
-  #screen-scroll.enable-hover .scroll-item:hover {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    border-color: rgba(255, 255, 255, 0.4);
-  }
+  /* Hover effects removed for list items */
   
   /* Touch-specific active state (replaces hover on touch devices) */
   #screen-scroll .scroll-item:active,
@@ -293,20 +287,8 @@
     border-color: rgba(255, 255, 255, 0.5);
   }
   
-  #screen-scroll .scroll-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s ease;
-  }
-  
-  #screen-scroll.enable-hover .scroll-item:hover::before {
-    left: 100%;
-  }
+  /* Remove shimmer overlay entirely */
+  #screen-scroll .scroll-item::before { content: none; }
   
   #screen-scroll .item-number {
     font-weight: 700;
@@ -449,26 +431,13 @@
     -webkit-touch-callout: none !important;
   }
 
-  /* On devices without real hover (typical touchscreens), neutralize hover effects
-     so that dragging doesn't trigger hover visuals. */
-  @media (hover: none) {
-    #screen-scroll .scroll-item:hover {
-      transform: none;
-      box-shadow: none;
-      border-color: rgba(255, 255, 255, 0.2);
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
-    }
+  /* No hover visuals on any device */
+  @media (hover: hover) {
+    #screen-scroll .scroll-item:hover { transform: none !important; box-shadow: none !important; }
   }
 
-  /* Disable all hover effects for list items completely */
-  #screen-scroll .scroll-item:hover,
-  #screen-scroll .scroll-item:hover::before {
-    transform: none !important;
-    box-shadow: none !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
-    left: -100% !important; /* keep the shimmer off-screen */
-  }
+  /* Ensure no hover transforms apply at all */
+  #screen-scroll .scroll-item:hover { transform: none !important; box-shadow: none !important; }
 
   /* While dragging/swiping, disable hover/pointer effects so scrolling is never blocked */
   #screen-scroll.dragging .scroll-item:hover {
