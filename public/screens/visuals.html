@@ -28,6 +28,11 @@
     background: #0f1424;
     color: #e4e6f1;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Prevent page zoom/pan gestures within this screen */
+  touch-action: none;
+  -ms-touch-action: none;
+  overscroll-behavior: contain;
+  -webkit-tap-highlight-color: transparent;
   }
 
   #screen-visuals .panel {
@@ -73,6 +78,11 @@
     background: radial-gradient(800px 400px at 50% 50%, rgba(255,255,255,0.06), rgba(0,0,0,0.15));
     border: 6px solid rgba(255,255,255,0.18);
     box-shadow: 0 8px 24px rgba(0,0,0,0.25) inset, 0 6px 18px rgba(0,0,0,0.25);
+  /* Ensure all touch goes to the canvas (no browser zoom/pan) */
+  touch-action: none;
+  -ms-touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
   }
 
   #screen-visuals .note {
@@ -132,21 +142,27 @@
 
       // Pointer interactions on canvas
       const onDown = (e) => {
+        // Block double-tap-to-zoom and any default gesture
+        if (e.cancelable) e.preventDefault();
         pointer.down = true; pointer.has = true;
         const p = getPos(e);
         pointer.x = p.x; pointer.y = p.y;
         if (mode === 'ripples') addRipple(pointer.x, pointer.y);
         if (mode === 'fireworks') spawnFirework(pointer.x, pointer.y);
+        // Capture pointer for consistent move/up events
+        try { canvas.setPointerCapture && canvas.setPointerCapture(e.pointerId); } catch(_) {}
       };
       const onMove = (e) => {
+        // Prevent browser gesture handling during interaction
+        if (pointer.down && e.cancelable) e.preventDefault();
         const p = getPos(e);
         pointer.x = p.x; pointer.y = p.y; pointer.has = true;
         if (pointer.down && mode === 'ripples') addRipple(pointer.x, pointer.y);
       };
       const onUp = () => { pointer.down = false; };
       canvas.addEventListener('pointerdown', onDown);
-      canvas.addEventListener('pointermove', onMove);
-      window.addEventListener('pointerup', onUp);
+      canvas.addEventListener('pointermove', onMove, { passive: false });
+      window.addEventListener('pointerup', onUp, { passive: true });
 
       // Store for cleanup
       cleanupFns.push(() => {
@@ -235,8 +251,8 @@
       const w = canvas.width / dpr, h = canvas.height / dpr;
       ctx.fillStyle = 'rgba(255,255,255,0.9)';
       for (const p of particles) {
-        // Simple attraction to pointer when present
-        if (pointer.has) {
+  // Attraction to pointer when present (follows finger/mouse)
+  if (pointer.has) {
           const dx = pointer.x - p.x, dy = pointer.y - p.y;
           const dist2 = dx*dx + dy*dy + 1;
           const force = Math.min(1200 / dist2, 40);

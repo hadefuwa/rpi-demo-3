@@ -15,19 +15,64 @@
 <style>
   /* Memory Game - Complete Rewrite */
   #screen-memory {
-    width: 100vw;
+    /* Avoid 100vw horizontal overflow; prefer percentage width */
+    width: 100%;
+    /* Use dynamic viewport height to avoid mobile browser UI causing scroll */
     height: 100vh;
+    height: 100dvh; /* modern browsers */
     margin: 0;
     padding: 20px;
     box-sizing: border-box;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-size: 200% 200%;
+    animation: gradientShift 28s ease-in-out infinite;
     color: white;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: hidden; /* ensure no window scrollbars from this screen */
     position: relative;
   }
+  /* Animated background gradient */
+  @keyframes gradientShift {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+  }
+  
+  /* Soft drifting glow layers */
+  #screen-memory::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(520px 520px at 20% 30%, rgba(255,255,255,0.08), transparent 60%),
+      radial-gradient(460px 460px at 80% 70%, rgba(255,255,255,0.06), transparent 60%);
+    filter: blur(8px);
+    opacity: 0.8;
+    animation: glowDrift 40s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  @keyframes glowDrift {
+    0% { background-position: 20% 30%, 80% 70%; }
+    50% { background-position: 32% 62%, 62% 42%; }
+    100% { background-position: 20% 30%, 80% 70%; }
+  }
+  
+  /* Subtle dotted grid overlay */
+  #screen-memory::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 22px 22px;
+    opacity: 0.18;
+    pointer-events: none;
+    z-index: 1;
+  }
+  /* Ensure all children respect the container's size */
+  #screen-memory * { box-sizing: border-box; max-width: 100%; }
   
   /* Logo and Home Button */
   #screen-memory .matrix-logo {
@@ -71,10 +116,13 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 20px;
+    gap: clamp(12px, 2.5vmin, 20px);
     max-width: 600px;
     margin: 0 auto;
-    padding-top: 60px;
+    padding-top: 60px; /* create safe space for logo/home */
+    min-height: 0; /* allow proper flex shrinking to prevent overflow */
+    position: relative;
+    z-index: 2; /* keep content above decorative layers */
   }
   
   #screen-memory .game-title {
@@ -82,6 +130,7 @@
     margin: 0;
     text-align: center;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    overflow-wrap: anywhere;
   }
   
   #screen-memory .status-bar {
@@ -91,16 +140,19 @@
     font-size: clamp(14px, 2.5vw, 18px);
     font-weight: 600;
     text-align: center;
-    min-width: 200px;
+    min-width: 0;
+    max-width: 100%;
   }
   
   /* Game Board */
   #screen-memory .game-board {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    width: 100%;
-    max-width: 400px;
+    gap: clamp(8px, 2vmin, 12px);
+    /* Bound the board to available viewport space; maintain square via aspect-ratio */
+    height: min(70vmin, calc(100dvh - 220px), 90vw, 400px);
+    width: auto;
+    max-width: 90vw;
     aspect-ratio: 1;
   }
   
@@ -160,6 +212,7 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    max-width: 100%;
   }
   
   #screen-memory .new-game-btn:hover {
@@ -174,13 +227,8 @@
     }
     
     #screen-memory .game-container {
-      gap: 15px;
-      padding-top: 70px;
-    }
-    
-    #screen-memory .game-board {
-      gap: 8px;
-      max-width: 320px;
+      gap: clamp(10px, 2.5vmin, 15px);
+      padding-top: 64px;
     }
   }
   
@@ -191,7 +239,18 @@
     }
     
     #screen-memory .game-board {
-      max-width: 300px;
+      height: min(62vmin, calc(100dvh - 200px), 90vw, 360px);
+    }
+  }
+  
+  @media (max-height: 480px) {
+    #screen-memory .game-container {
+      gap: 8px;
+      padding-top: 46px;
+    }
+    
+    #screen-memory .game-board {
+      height: min(56vmin, calc(100dvh - 180px), 90vw, 320px);
     }
   }
 </style>
@@ -209,8 +268,8 @@
   let isGameActive = false;
   let canFlip = true;
   
-  // Game symbols
-  const symbols = ['�', '�', '🎲', '�', '🎨', '🎭', '�', '�'];
+  // Game symbols (short one-word foods, ASCII-safe)
+  const symbols = ['Apple', 'Pear', 'Plum', 'Kiwi', 'Grape', 'Bread', 'Taco', 'Sushi'];
   
   // Initialize the game
   function init() {

@@ -323,19 +323,7 @@
   /* Scroll controls */
   /* (Removed old .scroll-controls and button styles to maximize scroll area) */
   
-  /* Empty state */
-  #screen-scroll .empty-state {
-    text-align: center;
-    color: rgba(255, 255, 255, 0.6);
-    font-style: italic;
-    padding: 40px 20px;
-    animation: pulse 2s ease-in-out infinite;
-  }
-  
-  @keyframes pulse {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 0.8; }
-  }
+  /* (Removed old empty state styles) */
   
   /* Responsive design - optimized for Raspberry Pi screens */
   @media (max-width: 800px) {
@@ -499,6 +487,13 @@
   const scrollBox = document.querySelector('#scrollbox');
   const screenEl = document.querySelector('#screen-scroll');
   const DRAG_TOLERANCE = 8; // px movement to consider as dragging
+    // Infinite loop state
+    let baseSetCount = 0;       // number of items in one base set
+    let loopStartTop = 0;       // scrollTop where the middle (second) set begins
+    let loopEndTop = 0;         // scrollTop where the third set begins
+    let loopSpan = 0;           // distance between start of second and third set
+    let loopEnabled = false;    // whether infinite loop is active
+    let isLoopAdjusting = false;// guard to avoid recursive scroll handling
     
     function initApp() {
       console.log('Scroll Test app initialized');
@@ -620,21 +615,15 @@
         homeButton.addEventListener('click', goHome);
       }
       
-      // Add items button
-      const addButton = document.querySelector('#btnAddItems');
-      if (addButton) {
-        addButton.addEventListener('click', addMoreItems);
-      }
-      
-      // Clear items button
-      const clearButton = document.querySelector('#btnClearItems');
-      if (clearButton) {
-        clearButton.addEventListener('click', clearAllItems);
-      }
+  // (Removed Add/Clear buttons and handlers)
       
       // Add scroll event listener for dynamic effects
       if (scrollBox) {
         scrollBox.addEventListener('scroll', handleScroll);
+          // Keep loop boundaries accurate on viewport changes
+          window.addEventListener('resize', () => {
+            requestAnimationFrame(computeLoopMetrics);
+          }, { passive: true });
         
   // Simple touch event listeners - let browser handle native scrolling
   scrollBox.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -755,61 +744,7 @@
       });
     }
     
-    function addMoreItems() {
-      const funFacts = [
-        "🧠 Your brain uses 20% of your body's energy",
-        "🌊 The ocean contains 99% of Earth's living space",
-        "🦋 Butterflies taste with their feet",
-        "⚡ Lightning strikes Earth 100 times per second",
-        "🌟 A day on Venus is longer than its year",
-        "🐙 Octopuses have three hearts",
-        "🌍 Honey never spoils - ever!",
-        "🦒 Giraffes only sleep 5-30 minutes per day",
-        "🧬 Bananas share 50% of human DNA",
-        "🌙 One day on the Moon equals 29.5 Earth days"
-      ];
-      
-      const randomFacts = funFacts.sort(() => 0.5 - Math.random()).slice(0, 5);
-      
-      randomFacts.forEach(fact => {
-        createScrollItem(fact);
-      });
-      
-      // Scroll to show new items
-      setTimeout(() => {
-        if (scrollBox) {
-          scrollBox.scrollTop = scrollBox.scrollHeight;
-        }
-      }, 300);
-      
-      showToast('Added 5 new items!');
-    }
-    
-    function clearAllItems() {
-      if (!scrollBox) return;
-      
-      const items = scrollBox.querySelectorAll('.scroll-item');
-      
-      if (items.length === 0) {
-        showToast('No items to clear!');
-        return;
-      }
-      
-      // Animate out
-      items.forEach((item, index) => {
-        setTimeout(() => {
-          item.style.opacity = '0';
-          item.style.transform = 'translateX(-100px) scale(0.8)';
-        }, index * 50);
-      });
-      
-      // Clear after animation
-      setTimeout(() => {
-        scrollBox.innerHTML = '<div class="empty-state">🎭 No items to display. Click "Add More Items" to get started!</div>';
-        itemCounter = 0;
-        showToast('All items cleared!');
-      }, items.length * 50 + 300);
-    }
+  // (Removed addMoreItems and clearAllItems as no longer used)
     
     function handleScroll() {
       if (!scrollBox) return;
@@ -832,6 +767,20 @@
         item.style.transform = `scale(${scale})`;
         item.style.opacity = opacity;
       });
+        // Infinite loop wrap-around
+        if (loopEnabled && !isLoopAdjusting) {
+          const st = scrollBox.scrollTop;
+          const threshold = 2; // small tolerance
+          if (st < loopStartTop - threshold) {
+            isLoopAdjusting = true;
+            scrollBox.scrollTop = st + loopSpan;
+            isLoopAdjusting = false;
+          } else if (st >= loopEndTop + threshold) {
+            isLoopAdjusting = true;
+            scrollBox.scrollTop = st - loopSpan;
+            isLoopAdjusting = false;
+          }
+        }
     }
     
     let touchStartY = 0;
