@@ -15,15 +15,8 @@
     <h2>🎢 Scroll Animation Test</h2>
     
     <div class="content">
-      <p class="note">Try scrolling with touch or mouse wheel. Watch the smooth animations!</p>
-      
       <div id="scrollbox" class="scrollbox">
         <!-- Items will be generated dynamically -->
-      </div>
-      
-      <div class="scroll-controls">
-        <button id="btnAddItems" class="btn">Add More Items</button>
-        <button id="btnClearItems" class="btn-secondary">Clear All</button>
       </div>
     </div>
   </div>
@@ -193,27 +186,14 @@
     flex-direction: column;
     gap: 20px;
     flex: 1;
-    max-height: calc(100vh - 140px);
+  /* Fill available space within panel; no explicit max-height to maximize scroll area */
   }
   
-  #screen-scroll .note {
-    text-align: center;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 16px;
-    margin: 0;
-    animation: fadeInUp 0.8s ease-out;
-  }
-  
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
   
   /* Scrollbox styles */
   #screen-scroll .scrollbox {
     flex: 1;
     min-height: 200px;
-    max-height: calc(100vh - 300px);
     overflow-y: auto;
     overflow-x: hidden;
     border: 2px solid rgba(255, 255, 255, 0.2);
@@ -341,61 +321,7 @@
   }
   
   /* Scroll controls */
-  #screen-scroll .scroll-controls {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    flex-wrap: wrap;
-    width: 100%;
-  }
-  
-  #screen-scroll .btn,
-  #screen-scroll .btn-secondary {
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 600;
-    border: none;
-    cursor: none; /* Hide cursor for touch experience */
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    font-family: inherit;
-    position: relative;
-    overflow: hidden;
-    touch-action: manipulation; /* Optimize for touch */
-    user-select: none; /* Prevent text selection */
-    -webkit-user-select: none;
-    -webkit-touch-callout: none; /* Disable iOS callout */
-  }
-  
-  #screen-scroll .btn {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
-  }
-  
-  #screen-scroll .btn:hover {
-    background: linear-gradient(135deg, #ff5252 0%, #d63031 100%);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
-  }
-  
-  #screen-scroll .btn-secondary {
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  }
-  
-  #screen-scroll .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  }
-  
-  #screen-scroll .btn:active,
-  #screen-scroll .btn-secondary:active {
-    transform: translateY(-1px);
-  }
+  /* (Removed old .scroll-controls and button styles to maximize scroll area) */
   
   /* Empty state */
   #screen-scroll .empty-state {
@@ -429,11 +355,10 @@
     #screen-scroll .content {
       padding: 20px;
       border-radius: 16px;
-      max-height: calc(100vh - 120px);
+  /* No explicit max-height; let flex layout size it */
     }
     
     #screen-scroll .scrollbox {
-      max-height: calc(100vh - 260px);
       min-height: 150px;
     }
     
@@ -476,11 +401,10 @@
     #screen-scroll .content {
       padding: 16px;
       border-radius: 14px;
-      max-height: calc(100vh - 100px);
+  /* No explicit max-height; let flex layout size it */
     }
     
     #screen-scroll .scrollbox {
-      max-height: calc(100vh - 240px);
       min-height: 120px;
       padding: 12px;
     }
@@ -497,33 +421,13 @@
     #screen-scroll .item-text {
       font-size: 13px;
     }
-    
-    #screen-scroll .btn,
-    #screen-scroll .btn-secondary {
-      padding: 9px 18px;
-      font-size: 13px;
-      border-radius: 10px;
-    }
-    
-    #screen-scroll .scroll-controls {
-      gap: 8px;
-    }
-    
-    #screen-scroll .note {
-      font-size: 14px;
-    }
+  /* Removed button, controls, and note responsive overrides */
   }
   
   /* Touch-specific optimizations */
   @media (pointer: coarse) {
     #screen-scroll .scroll-item {
       min-height: 44px; /* Touch target size */
-    }
-    
-    #screen-scroll .btn,
-    #screen-scroll .btn-secondary {
-      min-height: 44px;
-      min-width: 44px;
     }
     
     /* Force hide all cursors on touch devices */
