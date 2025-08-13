@@ -387,13 +387,13 @@
       loader.load(
         `../assets/${filename}`,
         function(geometry) {
-          // Create material with quality-based settings
-          const qualityMode = window.QUALITY_MODE || 'medium';
-          const materialOptions = {
-            color: 0x6bcbef,
-            shininess: qualityMode === 'low' ? 50 : 100,
-            specular: qualityMode === 'low' ? 0x111111 : 0x222222
-          };
+                     // Create material with quality-based settings
+           const qualityMode = window.QUALITY_MODE || 'medium';
+           const materialOptions = {
+             color: 0xffffff, // Changed from blue (0x6bcbef) to white (0xffffff)
+             shininess: qualityMode === 'low' ? 50 : 100,
+             specular: qualityMode === 'low' ? 0x111111 : 0x222222
+           };
           
           const material = new THREE.MeshPhongMaterial(materialOptions);
           

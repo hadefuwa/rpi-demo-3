@@ -16,12 +16,24 @@
     <main class="grid">
       <!-- Card 1: Progress + ETA -->
       <section class="card progress-card" aria-label="Job status">
-        <svg viewBox="0 0 120 120" class="ring" aria-hidden="true">
-          <circle class="bg" cx="60" cy="60" r="52"></circle>
-          <circle class="fg" cx="60" cy="60" r="52" stroke-dasharray="326" stroke-dashoffset="326"></circle>
-        </svg>
+        <div class="mesh-container">
+          <div class="mesh" id="rotating-mesh">
+            <div class="mesh-face front"></div>
+            <div class="mesh-face back"></div>
+            <div class="mesh-face left"></div>
+            <div class="mesh-face right"></div>
+            <div class="mesh-face top"></div>
+            <div class="mesh-face bottom"></div>
+          </div>
+        </div>
         <div class="progress-text">
           <div class="job-name" id="job-name">No job</div>
+          <div class="progress-slider">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-percent" id="progress-percent">0%</div>
+          </div>
           <div class="eta" id="eta">ETA —</div>
           <div class="layer" id="layer">Layer —</div>
         </div>
@@ -112,15 +124,73 @@
       flex-direction: column;
     }
     /* Progress */
-    #screen-printer .progress-card { display:flex; align-items:center; justify-content:center; gap:8px; }
-    #screen-printer .ring { 
-      width: min(140px, 30%); 
-      height: min(140px, 30%); 
-      transform: rotate(-90deg);
+    #screen-printer .progress-card { display:flex; align-items:center; justify-content:center; gap:16px; }
+    
+    /* 3D Mesh */
+    #screen-printer .mesh-container { 
+      width: min(120px, 25%); 
+      height: min(120px, 25%);
+      perspective: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    #screen-printer .ring .bg { fill:none; stroke:#23283d; stroke-width:12; }
-    #screen-printer .ring .fg { fill:none; stroke:#4f8cff; stroke-width:12; stroke-linecap:round; transition: stroke-dashoffset 120ms linear; }
-    #screen-printer .progress-text { display:flex; flex-direction:column; gap:4px; min-width:120px; }
+    #screen-printer .mesh { 
+      width: 60px; 
+      height: 60px; 
+      position: relative;
+      transform-style: preserve-3d;
+      animation: rotate 4s linear infinite;
+    }
+    #screen-printer .mesh-face { 
+      position: absolute; 
+      width: 60px; 
+      height: 60px; 
+      background: linear-gradient(45deg, #4f8cff, #2b60ff);
+      border: 2px solid #1c2030;
+      opacity: 0.8;
+    }
+    #screen-printer .mesh-face.front { transform: translateZ(30px); }
+    #screen-printer .mesh-face.back { transform: translateZ(-30px) rotateY(180deg); }
+    #screen-printer .mesh-face.left { transform: translateX(-30px) rotateY(-90deg); }
+    #screen-printer .mesh-face.right { transform: translateX(30px) rotateY(90deg); }
+    #screen-printer .mesh-face.top { transform: translateY(-30px) rotateX(90deg); }
+    #screen-printer .mesh-face.bottom { transform: translateY(30px) rotateX(-90deg); }
+    
+    @keyframes rotate {
+      from { transform: rotateX(0deg) rotateY(0deg); }
+      to { transform: rotateX(360deg) rotateY(360deg); }
+    }
+    
+    /* Progress Slider */
+    #screen-printer .progress-text { display:flex; flex-direction:column; gap:8px; min-width:140px; }
+    #screen-printer .progress-slider { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      margin: 8px 0;
+    }
+    #screen-printer .progress-bar { 
+      flex: 1; 
+      height: 8px; 
+      background: #23283d; 
+      border-radius: 4px; 
+      overflow: hidden; 
+    }
+    #screen-printer .progress-fill { 
+      height: 100%; 
+      width: 0%; 
+      background: linear-gradient(90deg, #4f8cff, #2b60ff);
+      border-radius: 4px;
+      transition: width 150ms linear;
+    }
+    #screen-printer .progress-percent { 
+      font-size: clamp(12px, 2vmin, 16px); 
+      color: #4f8cff; 
+      font-weight: bold;
+      min-width: 32px;
+      text-align: right;
+    }
     #screen-printer .job-name { 
       font-size: clamp(14px, 2.5vmin, 18px); 
       white-space:nowrap; 
@@ -155,7 +225,7 @@
     #screen-printer .temps-card .fill { 
       height:100%; 
       width:0%; 
-      background:#ffd166; 
+      background: linear-gradient(90deg, #4a90e2, #ff6b6b);
       transition: width 150ms linear; 
     }
     #screen-printer .temps-card .vals { 
@@ -272,7 +342,8 @@
     const root = document.getElementById('screen-printer');
   
     // UI refs (scoped)
-    const ring = root.querySelector('.ring .fg');
+    const progressFill = root.querySelector('#progress-fill');
+    const progressPercent = root.querySelector('#progress-percent');
     const nameEl = root.querySelector('#job-name');
     const etaEl = root.querySelector('#eta');
     const layerEl = root.querySelector('#layer');
@@ -294,8 +365,7 @@
     const slotEls = Array.from(root.querySelectorAll('.slot'));
   
     // Constants
-    const CIRCUMFERENCE = 2 * Math.PI * 52;
-    ring.style.strokeDasharray = String(CIRCUMFERENCE);
+    // No longer needed - using simple percentage for progress slider
   
     // Local state
     let uiState = null;
@@ -456,8 +526,8 @@
   
     function setProgress(pct) {
       const clamped = Math.max(0, Math.min(100, pct || 0));
-      const offset = CIRCUMFERENCE * (1 - clamped / 100);
-      ring.style.strokeDashoffset = String(offset);
+      progressFill.style.width = `${clamped}%`;
+      progressPercent.textContent = `${Math.round(clamped)}%`;
     }
   
     function applyTemps(noz, nozT, bed, bedT) {
@@ -493,19 +563,12 @@
     function setCamera(url, isOnline) {
       camStatus.textContent = isOnline ? 'Live' : 'Camera offline';
       if (isOnline && url) { 
-        // Force reload the GIF to ensure it plays properly
-        if (cam.src === url) {
-          // If it's the same URL, add a cache-busting parameter
-          const timestamp = Date.now();
-          cam.src = `${url}?t=${timestamp}`; 
-        } else {
+        // Only set the source if it's not already set or if it's different
+        if (cam.src !== url && !cam.src.includes(url)) {
           cam.src = url;
         }
         
-        // Prevent browser from caching the GIF frames
-        cam.style.willChange = 'transform';
-        
-        // Add specific attributes to ensure proper GIF playback
+        // Ensure proper GIF playback attributes
         cam.setAttribute('loading', 'eager');
         cam.setAttribute('decoding', 'sync');
       } else { 

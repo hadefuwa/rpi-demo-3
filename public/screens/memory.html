@@ -1,351 +1,373 @@
 <section id="screen-memory" class="screen">
   <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo matrix-logo" />
   <button id="btnHome" class="home-button">🏠</button>
-  <div class="panel">
-    <h2>Memory Match</h2>
-    <div id="memoryGrid" class="memory-grid"></div>
-    <div class="toolbar center">
-      <div id="memoryStatus" class="chip">Find all pairs</div>
-      <button id="btnMemoryReset" class="chip">Reset</button>
+  
+  <div class="game-container">
+    <h1 class="game-title">Memory Match</h1>
+    <div class="status-bar">
+      <span id="status">Click to start!</span>
     </div>
+    <div id="game-board" class="game-board"></div>
+    <button id="new-game" class="new-game-btn">New Game</button>
   </div>
 </section>
 
 <style>
-  /* Memory App Specific Styles - All scoped to #screen-memory */
+  /* Memory Game - Complete Rewrite */
   #screen-memory {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     flex-direction: column;
-    height: 100%;
-    max-height: 100vh;
     overflow: hidden;
-    background: radial-gradient(1200px 600px at 50% 0%, rgba(255,255,255,0.06), rgba(0,0,0,0.2)), linear-gradient(135deg, #5b73e8 0%, #764ba2 100%);
-    color: white;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    padding: 14px;
     position: relative;
-    box-sizing: border-box;
   }
   
-  /* Home button styles */
+  /* Logo and Home Button */
+  #screen-memory .matrix-logo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    height: 35px;
+    width: auto;
+    z-index: 10;
+    opacity: 0.9;
+  }
+  
   #screen-memory .home-button {
     position: absolute;
-    top: 15px;
-    right: 15px;
-    padding: 10px 15px;
-    background: rgba(255,255,255,0.2);
-    border: 2px solid rgba(255,255,255,0.3);
+    top: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    border: none;
     border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
     color: white;
-    font-size: 18px;
+    font-size: 20px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    z-index: 100;
-    width: 40px;
-    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10;
   }
   
   #screen-memory .home-button:hover {
-    background: rgba(255,255,255,0.3);
+    background: rgba(255, 255, 255, 0.3);
     transform: scale(1.1);
   }
   
-  /* Matrix logo styles */
-  #screen-memory .matrix-logo {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    height: 40px;
-    width: auto;
-    z-index: 100;
-    animation: pulse 2s infinite;
-  }
-  
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-  }
-  
-  #screen-memory .panel {
+  /* Game Container */
+  #screen-memory .game-container {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    max-width: 100%;
-    box-sizing: border-box;
+    justify-content: center;
+    gap: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    padding-top: 60px;
   }
   
-  #screen-memory h2 {
-    font-size: clamp(20px, 3.5vw, 28px);
+  #screen-memory .game-title {
+    font-size: clamp(24px, 4vw, 32px);
     margin: 0;
-    text-shadow: 0 6px 24px rgba(0,0,0,0.35);
     text-align: center;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
   }
   
-  #screen-memory .memory-grid {
+  #screen-memory .status-bar {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: clamp(14px, 2.5vw, 18px);
+    font-weight: 600;
+    text-align: center;
+    min-width: 200px;
+  }
+  
+  /* Game Board */
+  #screen-memory .game-board {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(85px, 22vw), 1fr));
-    gap: clamp(6px, 2vw, 12px);
-    max-width: 540px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
     width: 100%;
-    perspective: 800px;
+    max-width: 400px;
+    aspect-ratio: 1;
   }
   
-  #screen-memory .memory-card {
-    aspect-ratio: 1;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.18);
+  /* Cards */
+  #screen-memory .card {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(20px, 6.5vw, 28px);
+    font-size: clamp(24px, 5vw, 36px);
     cursor: pointer;
     transition: all 0.3s ease;
+    user-select: none;
+    aspect-ratio: 1;
     position: relative;
-    overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25), inset 0 6px 16px rgba(255,255,255,0.04);
-    color: white;
-    font-weight: bold;
   }
   
-  #screen-memory .memory-card:hover { 
-    background: rgba(255,255,255,0.14); 
-    border-color: rgba(255,255,255,0.32); 
-    transform: translateY(-2px); 
-    box-shadow: 0 12px 28px rgba(0,0,0,0.3); 
-  }
-  
-  /* Card states */
-  #screen-memory .memory-card.flipped {
-    background: rgba(255,255,255,0.95);
-    color: #2b2b2b;
-    border-color: rgba(255,255,255,0.6);
-  }
-  
-  #screen-memory .memory-card.matched { 
-    background: rgba(76,175,80,0.3); 
-    border-color: rgba(76,175,80,0.6); 
-    animation: memoryMatchedPulse 0.6s ease-in-out; 
-    color: white;
-  }
-  
-  @keyframes memoryMatchedPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1.1); }
-  }
-  
-  #screen-memory .toolbar { display: flex; gap: 10px; margin: 6px 0 0; flex-wrap: wrap; justify-content: center; }
-  
-  #screen-memory .chip { padding: 10px 16px; border: 1px solid rgba(255,255,255,0.22); border-radius: 12px; background: rgba(255,255,255,0.1); color: #fff; font-size: 14px; cursor: pointer; transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; font-family: inherit; }
-  
-  #screen-memory .chip:hover {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.5);
+  #screen-memory .card:hover {
+    background: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
   }
   
-  /* Responsive design */
-  @media (max-width: 768px) { #screen-memory .game-stats { padding: 8px 12px; } }
+  #screen-memory .card.flipped {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    border-color: rgba(255, 255, 255, 0.8);
+  }
+  
+  #screen-memory .card.matched {
+    background: rgba(76, 175, 80, 0.8);
+    border-color: rgba(76, 175, 80, 1);
+    color: white;
+    animation: matchPulse 0.5s ease-in-out;
+  }
+  
+  #screen-memory .card.disabled {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  
+  @keyframes matchPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  
+  /* New Game Button */
+  #screen-memory .new-game-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  #screen-memory .new-game-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 600px) {
+    #screen-memory {
+      padding: 15px;
+    }
+    
+    #screen-memory .game-container {
+      gap: 15px;
+      padding-top: 70px;
+    }
+    
+    #screen-memory .game-board {
+      gap: 8px;
+      max-width: 320px;
+    }
+  }
+  
+  @media (max-height: 600px) {
+    #screen-memory .game-container {
+      gap: 10px;
+      padding-top: 50px;
+    }
+    
+    #screen-memory .game-board {
+      max-width: 300px;
+    }
+  }
 </style>
 
 <script>
-  (function() {
-    'use strict';
+(function() {
+  'use strict';
+  
+  // Game state
+  let gameBoard = null;
+  let statusEl = null;
+  let cards = [];
+  let flippedCards = [];
+  let matchedPairs = 0;
+  let isGameActive = false;
+  let canFlip = true;
+  
+  // Game symbols
+  const symbols = ['�', '�', '🎲', '�', '🎨', '🎭', '�', '�'];
+  
+  // Initialize the game
+  function init() {
+    gameBoard = document.getElementById('game-board');
+    statusEl = document.getElementById('status');
     
-    // Game state
-    let cards = [];
-    let firstCard = null;
-    let secondCard = null;
-    let matchedPairs = 0;
-    let canClick = true; // Simple flag to control clicking
+    // Event listeners
+    document.getElementById('new-game').addEventListener('click', startNewGame);
+    document.getElementById('btnHome').addEventListener('click', goHome);
     
-    // Card symbols (using emojis for better visibility)
-    const symbols = ['🍎', '🍌', '🥕', '🍩', '🥚', '🐟', '🍇', '🍯'];
+    // Start first game
+    startNewGame();
+  }
+  
+  function startNewGame() {
+    // Reset game state
+    cards = [];
+    flippedCards = [];
+    matchedPairs = 0;
+    isGameActive = true;
+    canFlip = true;
     
-    // DOM elements
-    let memoryGrid;
-    let statusElement;
+    // Create shuffled card pairs
+    const cardData = [...symbols, ...symbols];
+    shuffleArray(cardData);
     
-    function initApp() {
-      console.log('Memory Match game initialized');
-      setupDOM();
-      setupEventListeners();
-      startNewGame();
+    // Clear board
+    gameBoard.innerHTML = '';
+    
+    // Create card elements
+    cardData.forEach((symbol, index) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.symbol = symbol;
+      card.dataset.index = index;
+      card.textContent = '?';
+      card.addEventListener('click', () => flipCard(card));
+      
+      gameBoard.appendChild(card);
+      cards.push(card);
+    });
+    
+    updateStatus('Find all matching pairs!');
+  }
+  
+  function flipCard(card) {
+    // Check if we can flip this card
+    if (!canFlip || !isGameActive || 
+        card.classList.contains('flipped') || 
+        card.classList.contains('matched') ||
+        flippedCards.length >= 2) {
+      return;
     }
     
-    function setupDOM() {
-      memoryGrid = document.querySelector('#memoryGrid');
-      statusElement = document.querySelector('#memoryStatus');
-    }
+    // Flip the card
+    card.classList.add('flipped');
+    card.textContent = card.dataset.symbol;
+    flippedCards.push(card);
     
-    function setupEventListeners() {
-      const container = document.querySelector('#screen-memory');
-      
-      // Game control buttons
-      container.addEventListener('click', function(e) {
-        if (e.target.id === 'btnMemoryReset') {
-          startNewGame();
-        } else if (e.target.id === 'btnHome') {
-          goHome();
-        } else {
-          const cardEl = e.target.closest('.memory-card');
-          if (cardEl && container.contains(cardEl)) {
-            handleCardClick(cardEl);
-          }
-        }
-      });
-      
-      // Touch events for mobile
-      container.addEventListener('touchstart', function(e) {
-        const target = e.target.closest('.memory-card');
-        if (target && container.contains(target)) {
-          e.preventDefault();
-          handleCardClick(target);
-        }
-      }, { passive: false });
+    // Check what to do next
+    if (flippedCards.length === 1) {
+      updateStatus('Pick another card!');
+    } else if (flippedCards.length === 2) {
+      canFlip = false; // Prevent more flips
+      checkForMatch();
     }
+  }
+  
+  function checkForMatch() {
+    const [card1, card2] = flippedCards;
     
-    function startNewGame() {
-      // Reset game state
-      firstCard = null;
-      secondCard = null;
-      matchedPairs = 0;
-      canClick = true;
-      
-      // Create new cards
-      createCards();
-      
-      // Update display
-      updateStatus('Find all pairs');
-    }
-    
-    function createCards() {
-      // Create pairs of cards
-      const cardPairs = [...symbols, ...symbols];
-      
-      // Shuffle cards
-      for (let i = cardPairs.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [cardPairs[i], cardPairs[j]] = [cardPairs[j], cardPairs[i]];
-      }
-      
-      // Clear grid
-      memoryGrid.innerHTML = '';
-      
-      // Create simple card elements
-      cards = cardPairs.map((symbol, index) => {
-        const card = document.createElement('div');
-        card.className = 'memory-card';
-        card.dataset.index = index;
-        card.dataset.symbol = symbol;
-        card.textContent = '?'; // Initially show question mark
+    if (card1.dataset.symbol === card2.dataset.symbol) {
+      // Match found!
+      setTimeout(() => {
+        card1.classList.add('matched');
+        card2.classList.add('matched');
+        card1.classList.remove('flipped');
+        card2.classList.remove('flipped');
         
-        memoryGrid.appendChild(card);
-        return card;
-      });
-    }
-    
-    function handleCardClick(card) {
-      // Basic checks: can't click if game is paused or card is already revealed
-      if (!canClick || card.classList.contains('flipped') || card.classList.contains('matched')) {
-        return;
-      }
-      
-      // Flip the card
-      card.classList.add('flipped');
-      card.textContent = card.dataset.symbol;
-      
-      // Check which card this is
-      if (firstCard === null) {
-        // This is the first card
-        firstCard = card;
-      } else if (secondCard === null) {
-        // This is the second card
-        secondCard = card;
-        canClick = false; // Disable all clicking until we process this pair
-        
-        // Check for match after a short delay
-        setTimeout(checkForMatch, 600);
-      }
-    }
-    
-    function checkForMatch() {
-      if (firstCard.dataset.symbol === secondCard.dataset.symbol) {
-        // It's a match!
-        firstCard.classList.add('matched');
-        secondCard.classList.add('matched');
         matchedPairs++;
+        flippedCards = [];
+        canFlip = true;
         
         if (matchedPairs === symbols.length) {
-          updateStatus('You won! 🎉');
-          setTimeout(() => {
-            alert('Congratulations! You found all pairs!');
-          }, 300);
+          endGame();
         } else {
-          updateStatus(`${matchedPairs} pairs found!`);
+          updateStatus(`Great! ${matchedPairs} pairs found!`);
         }
+      }, 500);
+    } else {
+      // No match
+      setTimeout(() => {
+        card1.classList.remove('flipped');
+        card2.classList.remove('flipped');
+        card1.textContent = '?';
+        card2.textContent = '?';
         
-        // Reset for next turn
-        firstCard = null;
-        secondCard = null;
-        canClick = true;
-      } else {
-        // Not a match - flip cards back
-        firstCard.classList.remove('flipped');
-        firstCard.textContent = '?';
-        secondCard.classList.remove('flipped');
-        secondCard.textContent = '?';
-        
-        // Reset for next turn
-        firstCard = null;
-        secondCard = null;
-        canClick = true;
+        flippedCards = [];
+        canFlip = true;
         updateStatus('Try again!');
-      }
+      }, 1000);
     }
+  }
+  
+  function endGame() {
+    isGameActive = false;
+    updateStatus('🎉 You won! Great memory!');
     
-    function updateStatus(message) {
-      statusElement.textContent = message;
-    }
-    
-    function goHome() {
-      if (window.showcaseFramework && window.showcaseFramework.goHome) {
-        window.showcaseFramework.goHome();
-      } else {
-        // Fallback when framework navigation isn't available
-        window.location.href = '../index.html';
-      }
-    }
-    
-    // Lifecycle management
-    window.appLifecycle = {
-      activate: function() {
-        console.log('Memory Match game activated');
-      },
-      
-      deactivate: function() {
-        console.log('Memory Match game deactivated');
-      },
-      
-      cleanup: function() {
-        console.log('Memory Match game cleanup');
-        // Reset game
+    setTimeout(() => {
+      if (confirm('Congratulations! Play again?')) {
         startNewGame();
       }
-    };
-    
-    // Initialize app
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initApp);
-    } else {
-      initApp();
+    }, 1000);
+  }
+  
+  function updateStatus(message) {
+    statusEl.textContent = message;
+  }
+  
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
     }
-  })();
+  }
+  
+  function goHome() {
+    if (window.showcaseFramework && window.showcaseFramework.goHome) {
+      window.showcaseFramework.goHome();
+    } else {
+      window.location.href = '../index.html';
+    }
+  }
+  
+  // Lifecycle management for the showcase framework
+  window.appLifecycle = {
+    activate: function() {
+      console.log('Memory game activated');
+    },
+    
+    deactivate: function() {
+      console.log('Memory game deactivated');
+    },
+    
+    cleanup: function() {
+      console.log('Memory game cleanup');
+      if (isGameActive) {
+        startNewGame();
+      }
+    }
+  };
+  
+  // Start the game when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
 </script>
