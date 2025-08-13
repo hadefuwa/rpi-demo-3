@@ -727,41 +727,67 @@
         <div class="item-text">${text}</div>
       `;
       
-      // Add click handler for interaction with touch support
-      item.addEventListener('click', function() {
-        this.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-          this.style.transform = '';
-          showToast(`Clicked item #${itemNumber}!`);
-        }, 150);
-      });
-      
-      // Enhanced touch support for scroll items - simplified
-      let touchStartTime = 0;
-      
-      item.addEventListener('touchstart', function(e) {
-        touchStartTime = Date.now();
-        this.classList.add('touch-active');
-      }, { passive: true });
-      
-      item.addEventListener('touchend', function(e) {
-        this.classList.remove('touch-active');
-        
-        // Only trigger click if it was a quick tap (not a scroll)
-        const touchDuration = Date.now() - touchStartTime;
-        if (touchDuration < 200) {
-          // Brief visual feedback for tap
-          this.style.transform = 'scale(0.95)';
-          setTimeout(() => {
-            this.style.transform = '';
-            showToast(`Tapped item #${itemNumber}!`);
-          }, 150);
+      // Long-press to select; swipes and quick taps do nothing.
+      let lpTimer = null;
+      let startX = 0, startY = 0;
+      let moved = false;
+      let selectedFired = false;
+      let downPointerId = null;
+      const LONG_PRESS_MS = 500;
+      const MOVE_TOLERANCE = 12; // px
+
+      function clearLongPress() {
+        if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
+      }
+
+      function fireSelected(targetEl) {
+        selectedFired = true;
+        targetEl.classList.add('touch-active');
+        showToast(`Selected item #${itemNumber}!`);
+        setTimeout(() => targetEl.classList.remove('touch-active'), 300);
+      }
+
+      function onItemPointerDown(e) {
+        // record initial position and arm long-press
+        downPointerId = e.pointerId;
+        startX = e.clientX;
+        startY = e.clientY;
+        moved = false;
+        selectedFired = false;
+        // Don't preventDefault here to allow list drag scrolling
+        clearLongPress();
+        lpTimer = setTimeout(() => {
+          if (!moved) fireSelected(item);
+        }, LONG_PRESS_MS);
+      }
+
+      function onItemPointerMove(e) {
+        if (downPointerId === null || e.pointerId !== downPointerId) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (Math.abs(dx) > MOVE_TOLERANCE || Math.abs(dy) > MOVE_TOLERANCE) {
+          moved = true;
+          clearLongPress();
         }
-      }, { passive: true });
-      
-      item.addEventListener('touchcancel', function(e) {
-        this.classList.remove('touch-active');
-      }, { passive: true });
+      }
+
+      function onItemPointerUp(e) {
+        if (downPointerId !== null && e.pointerId !== downPointerId) return;
+        clearLongPress();
+        downPointerId = null;
+        // If long press already fired we consider it handled; otherwise do nothing
+      }
+
+      function onItemPointerCancel() {
+        clearLongPress();
+        downPointerId = null;
+      }
+
+      item.addEventListener('pointerdown', onItemPointerDown);
+      item.addEventListener('pointermove', onItemPointerMove, { capture: false });
+      item.addEventListener('pointerup', onItemPointerUp);
+      item.addEventListener('pointercancel', onItemPointerCancel);
+      item.addEventListener('pointerleave', onItemPointerCancel);
       
       scrollBox.appendChild(item);
       
