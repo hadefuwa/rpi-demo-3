@@ -161,9 +161,10 @@
     
     // Game state
     let cards = [];
-    let flippedCards = [];
+    let firstCard = null;
+    let secondCard = null;
     let matchedPairs = 0;
-    let isGameRunning = false;
+    let canClick = true; // Simple flag to control clicking
     
     // Card symbols (using emojis for better visibility)
     const symbols = ['🍎', '🍌', '🥕', '🍩', '🥚', '🐟', '🍇', '🍯'];
@@ -213,9 +214,10 @@
     
     function startNewGame() {
       // Reset game state
-      flippedCards = [];
+      firstCard = null;
+      secondCard = null;
       matchedPairs = 0;
-      isGameRunning = false;
+      canClick = true;
       
       // Create new cards
       createCards();
@@ -251,64 +253,66 @@
     }
     
     function handleCardClick(card) {
-      // Don't allow clicking if card is already flipped or matched
-      if (card.classList.contains('flipped') || card.classList.contains('matched')) {
+      // Basic checks: can't click if game is paused or card is already revealed
+      if (!canClick || card.classList.contains('flipped') || card.classList.contains('matched')) {
         return;
       }
       
-      // Start game on first move
-      if (!isGameRunning) {
-        isGameRunning = true;
-      }
-      
-      // Flip card - show the symbol
+      // Flip the card
       card.classList.add('flipped');
       card.textContent = card.dataset.symbol;
-      flippedCards.push(card);
       
-      // Check if we have two flipped cards
-      if (flippedCards.length === 2) {
-        const [card1, card2] = flippedCards;
+      // Check which card this is
+      if (firstCard === null) {
+        // This is the first card
+        firstCard = card;
+      } else if (secondCard === null) {
+        // This is the second card
+        secondCard = card;
+        canClick = false; // Disable all clicking until we process this pair
         
-        if (card1.dataset.symbol === card2.dataset.symbol) {
-          // Match found
+        // Check for match after a short delay
+        setTimeout(checkForMatch, 600);
+      }
+    }
+    
+    function checkForMatch() {
+      if (firstCard.dataset.symbol === secondCard.dataset.symbol) {
+        // It's a match!
+        firstCard.classList.add('matched');
+        secondCard.classList.add('matched');
+        matchedPairs++;
+        
+        if (matchedPairs === symbols.length) {
+          updateStatus('You won! 🎉');
           setTimeout(() => {
-            card1.classList.add('matched');
-            card2.classList.add('matched');
-            matchedPairs++;
-            
-            if (matchedPairs === symbols.length) {
-              endGame();
-            } else {
-              updateStatus(`${matchedPairs} pairs found!`);
-            }
-            
-            flippedCards = [];
-          }, 500);
+            alert('Congratulations! You found all pairs!');
+          }, 300);
         } else {
-          // No match, flip cards back
-          setTimeout(() => {
-            card1.classList.remove('flipped');
-            card1.textContent = '?';
-            card2.classList.remove('flipped');
-            card2.textContent = '?';
-            flippedCards = [];
-            updateStatus('Try again!');
-          }, 1000);
+          updateStatus(`${matchedPairs} pairs found!`);
         }
+        
+        // Reset for next turn
+        firstCard = null;
+        secondCard = null;
+        canClick = true;
+      } else {
+        // Not a match - flip cards back
+        firstCard.classList.remove('flipped');
+        firstCard.textContent = '?';
+        secondCard.classList.remove('flipped');
+        secondCard.textContent = '?';
+        
+        // Reset for next turn
+        firstCard = null;
+        secondCard = null;
+        canClick = true;
+        updateStatus('Try again!');
       }
     }
     
     function updateStatus(message) {
       statusElement.textContent = message;
-    }
-    
-    function endGame() {
-      // Show victory message
-      setTimeout(() => {
-        alert(`Congratulations! You found all pairs!`);
-        updateStatus('Game Complete!');
-      }, 500);
     }
     
     function goHome() {

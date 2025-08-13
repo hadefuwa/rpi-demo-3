@@ -6,6 +6,69 @@
   <title>3D Model Viewer</title>
   <link rel="stylesheet" href="../styles/base.css">
   <link rel="stylesheet" href="../styles/stl.css">
+  
+  <!-- Quality Detection System -->
+  <script>
+    // Device capability detection and quality mode selection
+    (function() {
+      'use strict';
+      
+      // Get device information
+      const deviceInfo = {
+        cores: navigator.hardwareConcurrency || 1,
+        memory: navigator.deviceMemory || 1,
+        userAgent: navigator.userAgent,
+        platform: navigator.platform
+      };
+      
+      // Try to detect GPU info if WebGL is available
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (gl) {
+          deviceInfo.gpuVendor = gl.getParameter(gl.VENDOR);
+          deviceInfo.gpuRenderer = gl.getParameter(gl.RENDERER);
+        }
+      } catch (e) {
+        console.log('WebGL detection failed:', e);
+      }
+      
+      // Determine quality mode based on device capabilities
+      function determineQualityMode() {
+        // Pi 3B+ detection (4 cores, low memory, older GPU)
+        if (deviceInfo.cores === 4 && 
+            deviceInfo.memory <= 1 && 
+            deviceInfo.userAgent.includes('armv7l')) {
+          return 'low';
+        }
+        // Pi 4 detection (4 cores, more memory, better GPU)
+        if (deviceInfo.cores === 4 && 
+            deviceInfo.memory > 1 && 
+            deviceInfo.userAgent.includes('armv7l')) {
+          return 'medium';
+        }
+        // Pi 5 detection (4+ cores, more memory, modern GPU)
+        if (deviceInfo.cores >= 4 && 
+            deviceInfo.memory > 2 && 
+            (deviceInfo.userAgent.includes('aarch64') || deviceInfo.userAgent.includes('armv8'))) {
+          return 'high';
+        }
+        // Fallback based on memory
+        if (deviceInfo.memory <= 1) return 'low';
+        if (deviceInfo.memory <= 2) return 'medium';
+        return 'high';
+      }
+      
+      window.QUALITY_MODE = determineQualityMode();
+      window.DEVICE_INFO = deviceInfo;
+      
+      // Apply quality mode to body
+      document.body.setAttribute('data-quality-mode', window.QUALITY_MODE);
+      
+      console.log('STL Viewer Quality Mode:', window.QUALITY_MODE);
+      console.log('Device Info:', deviceInfo);
+    })();
+  </script>
 </head>
 <body>
   <div id="app">
@@ -57,9 +120,52 @@
     </main>
   </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<!-- Load Three.js with fallback -->
+<script>
+  // Load Three.js with timeout and fallback
+  function loadScript(src, fallbackSrc = null) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = () => resolve();
+      script.onerror = () => {
+        if (fallbackSrc) {
+          console.log(`Failed to load ${src}, trying fallback...`);
+          const fallbackScript = document.createElement('script');
+          fallbackScript.src = fallbackSrc;
+          fallbackScript.onload = () => resolve();
+          fallbackScript.onerror = () => reject(new Error(`Failed to load ${src} and fallback`));
+          document.head.appendChild(fallbackScript);
+        } else {
+          reject(new Error(`Failed to load ${src}`));
+        }
+      };
+      
+      // Add timeout
+      setTimeout(() => {
+        if (!script.onload) {
+          script.onerror();
+        }
+      }, 10000); // 10 second timeout
+      
+      document.head.appendChild(script);
+    });
+  }
+  
+  // Load all required scripts
+  async function loadDependencies() {
+    try {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
+      await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js');
+      await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js');
+      console.log('All Three.js dependencies loaded successfully');
+      initApp();
+    } catch (error) {
+      console.error('Failed to load Three.js dependencies:', error);
+      document.getElementById('loadingIndicator').textContent = 'Failed to load 3D libraries. Please check your internet connection.';
+    }
+  }
+</script>
 
 <script>
   (function() {
@@ -87,21 +193,38 @@
       camera = new THREE.PerspectiveCamera(75, canvas.offsetWidth / canvas.offsetHeight, 0.1, 1000);
       camera.position.set(0, 0, 5);
       
-      // Renderer setup
-      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+      // Renderer setup with quality-based settings
+      const qualityMode = window.QUALITY_MODE || 'medium';
+      const rendererOptions = {
+        canvas: canvas,
+        alpha: true
+      };
+      
+      // Adjust renderer quality based on device capabilities
+      if (qualityMode === 'high') {
+        rendererOptions.antialias = true;
+      } else {
+        rendererOptions.antialias = false;
+      }
+      
+      renderer = new THREE.WebGLRenderer(rendererOptions);
       renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
       renderer.setClearColor(0x000011, 1);
-      renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      
+      // Enable shadows only for medium and high quality
+      if (qualityMode !== 'low') {
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      }
       
       // Controls setup
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
-      controls.dampingFactor = 0.05;
+      controls.dampingFactor = qualityMode === 'low' ? 0.1 : 0.05;
       controls.enableZoom = true;
       controls.enablePan = true;
       
-      // Create starfield background
+      // Create starfield background based on quality
       createStarfield();
       
       // Lighting setup
@@ -110,7 +233,9 @@
       
       const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
       directionalLight.position.set(10, 10, 5);
-      directionalLight.castShadow = true;
+      if (qualityMode !== 'low') {
+        directionalLight.castShadow = true;
+      }
       scene.add(directionalLight);
       
       const pointLight = new THREE.PointLight(0x4444ff, 0.5, 100);
@@ -125,8 +250,30 @@
     }
     
     function createStarfield() {
+      const qualityMode = window.QUALITY_MODE || 'medium';
+      
+      // Adjust star count based on quality mode
+      let starCount, coloredStarCount;
+      switch (qualityMode) {
+        case 'low':
+          starCount = 100;
+          coloredStarCount = 25;
+          break;
+        case 'medium':
+          starCount = 500;
+          coloredStarCount = 100;
+          break;
+        case 'high':
+          starCount = 2000;
+          coloredStarCount = 500;
+          break;
+        default:
+          starCount = 500;
+          coloredStarCount = 100;
+      }
+      
+      // Create main starfield
       const starGeometry = new THREE.BufferGeometry();
-      const starCount = 2000;
       const starPositions = new Float32Array(starCount * 3);
       
       for (let i = 0; i < starCount * 3; i += 3) {
@@ -139,7 +286,7 @@
       
       const starMaterial = new THREE.PointsMaterial({
         color: 0xffffff,
-        size: 2,
+        size: qualityMode === 'low' ? 1 : 2,
         sizeAttenuation: true
       });
       
@@ -147,32 +294,35 @@
       scene.add(starField);
       stars.push(starField);
       
-      // Add some colored stars
-      const coloredStarGeometry = new THREE.BufferGeometry();
-      const coloredStarPositions = new Float32Array(500 * 3);
-      
-      for (let i = 0; i < 500 * 3; i += 3) {
-        coloredStarPositions[i] = (Math.random() - 0.5) * 1500;
-        coloredStarPositions[i + 1] = (Math.random() - 0.5) * 1500;
-        coloredStarPositions[i + 2] = (Math.random() - 0.5) * 1500;
+      // Add colored stars only for medium and high quality
+      if (qualityMode !== 'low') {
+        const coloredStarGeometry = new THREE.BufferGeometry();
+        const coloredStarPositions = new Float32Array(coloredStarCount * 3);
+        
+        for (let i = 0; i < coloredStarCount * 3; i += 3) {
+          coloredStarPositions[i] = (Math.random() - 0.5) * 1500;
+          coloredStarPositions[i + 1] = (Math.random() - 0.5) * 1500;
+          coloredStarPositions[i + 2] = (Math.random() - 0.5) * 1500;
+        }
+        
+        coloredStarGeometry.setAttribute('position', new THREE.BufferAttribute(coloredStarPositions, 3));
+        
+        const coloredStarMaterial = new THREE.PointsMaterial({
+          color: 0x4488ff,
+          size: qualityMode === 'high' ? 3 : 2,
+          sizeAttenuation: true
+        });
+        
+        const coloredStarField = new THREE.Points(coloredStarGeometry, coloredStarMaterial);
+        scene.add(coloredStarField);
+        stars.push(coloredStarField);
       }
-      
-      coloredStarGeometry.setAttribute('position', new THREE.BufferAttribute(coloredStarPositions, 3));
-      
-      const coloredStarMaterial = new THREE.PointsMaterial({
-        color: 0x4488ff,
-        size: 3,
-        sizeAttenuation: true
-      });
-      
-      const coloredStarField = new THREE.Points(coloredStarGeometry, coloredStarMaterial);
-      scene.add(coloredStarField);
-      stars.push(coloredStarField);
     }
     
     function loadModel(filename) {
       const loadingIndicator = document.getElementById('loadingIndicator');
       loadingIndicator.style.display = 'block';
+      loadingIndicator.textContent = 'Loading 3D model...';
       
       // Remove current model
       if (currentModel) {
@@ -183,17 +333,24 @@
       loader.load(
         `../assets/${filename}`,
         function(geometry) {
-          // Create material with nice metallic look
-          const material = new THREE.MeshPhongMaterial({
+          // Create material with quality-based settings
+          const qualityMode = window.QUALITY_MODE || 'medium';
+          const materialOptions = {
             color: 0x6bcbef,
-            shininess: 100,
-            specular: 0x222222
-          });
+            shininess: qualityMode === 'low' ? 50 : 100,
+            specular: qualityMode === 'low' ? 0x111111 : 0x222222
+          };
+          
+          const material = new THREE.MeshPhongMaterial(materialOptions);
           
           // Create mesh
           currentModel = new THREE.Mesh(geometry, material);
-          currentModel.castShadow = true;
-          currentModel.receiveShadow = true;
+          
+          // Enable shadows only for medium and high quality
+          if (qualityMode !== 'low') {
+            currentModel.castShadow = true;
+            currentModel.receiveShadow = true;
+          }
           
           // Center and scale the model
           geometry.computeBoundingBox();
@@ -209,14 +366,17 @@
           scene.add(currentModel);
           loadingIndicator.style.display = 'none';
           
-          console.log(`Loaded model: ${filename}`);
+          console.log(`Loaded model: ${filename} with quality mode: ${qualityMode}`);
         },
         function(progress) {
-          console.log('Loading progress:', (progress.loaded / progress.total * 100) + '%');
+          if (progress.total > 0) {
+            const percent = Math.round(progress.loaded / progress.total * 100);
+            loadingIndicator.textContent = `Loading 3D model... ${percent}%`;
+          }
         },
         function(error) {
           console.error('Error loading STL:', error);
-          loadingIndicator.textContent = 'Error loading model';
+          loadingIndicator.textContent = 'Error loading model. Please try again.';
           setTimeout(() => {
             loadingIndicator.style.display = 'none';
           }, 3000);
@@ -269,7 +429,7 @@
     function toggleAutoRotate() {
       autoRotate = !autoRotate;
       const btn = document.getElementById('btnStlAuto');
-      btn.textContent = autoRotate ? 'Stop Auto' : 'Auto Rotate';
+      btn.textContent = autoRotate ? 'Stop Auto' : 'Auto';
       btn.classList.toggle('active', autoRotate);
     }
     
@@ -288,10 +448,13 @@
         currentModel.rotation.y += 0.01;
       }
       
-      // Animate stars
-      stars.forEach((starField, index) => {
-        starField.rotation.y += 0.0005 * (index + 1);
-      });
+      // Animate stars based on quality mode
+      const qualityMode = window.QUALITY_MODE || 'medium';
+      if (qualityMode !== 'low') {
+        stars.forEach((starField, index) => {
+          starField.rotation.y += 0.0005 * (index + 1);
+        });
+      }
       
       controls.update();
       renderer.render(scene, camera);
@@ -301,11 +464,11 @@
       window.location.href = '../index.html';
     }
     
-    // Initialize app
+    // Start loading dependencies when DOM is ready
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initApp);
+      document.addEventListener('DOMContentLoaded', loadDependencies);
     } else {
-      initApp();
+      loadDependencies();
     }
   })();
 </script>
