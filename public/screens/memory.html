@@ -3,10 +3,6 @@
   <button id="btnHome" class="home-button">🏠</button>
   <div class="panel">
     <h2>Memory Match</h2>
-    <div class="game-stats">
-      <span class="stat-item">Moves: <span id="moveCount">0</span></span>
-      <span class="stat-item">Time: <span id="timer">00:00</span></span>
-    </div>
     <div id="memoryGrid" class="memory-grid"></div>
     <div class="toolbar center">
       <div id="memoryStatus" class="chip">Find all pairs</div>
@@ -91,18 +87,6 @@
     text-align: center;
   }
   
-  #screen-memory .game-stats {
-    display: flex;
-    gap: clamp(10px, 4vw, 24px);
-    background: rgba(255,255,255,0.08);
-    padding: 10px 14px;
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.18);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25) inset;
-  }
-  
-  #screen-memory .stat-item { font-size: clamp(12px, 2.6vw, 16px); font-weight: 600; }
-  
   #screen-memory .memory-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(85px, 22vw), 1fr));
@@ -122,80 +106,39 @@
     justify-content: center;
     font-size: clamp(20px, 6.5vw, 28px);
     cursor: pointer;
-    transition: transform 0.35s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-    transform-style: preserve-3d;
-    will-change: transform;
     box-shadow: 0 8px 24px rgba(0,0,0,0.25), inset 0 6px 16px rgba(255,255,255,0.04);
+    color: white;
+    font-weight: bold;
   }
   
-  #screen-memory .memory-card:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.32); transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.3); }
-  
-  /* 3D inner wrapper for flip */
-  #screen-memory .memory-card .card-inner {
-    position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 0.45s ease; border-radius: inherit;
+  #screen-memory .memory-card:hover { 
+    background: rgba(255,255,255,0.14); 
+    border-color: rgba(255,255,255,0.32); 
+    transform: translateY(-2px); 
+    box-shadow: 0 12px 28px rgba(0,0,0,0.3); 
   }
-  #screen-memory .memory-card.flipped .card-inner { transform: rotateY(180deg); }
   
-  #screen-memory .memory-card.matched { background: rgba(76,175,80,0.18); border-color: rgba(76,175,80,0.45); animation: memoryMatchedPulse 0.6s ease-in-out; }
+  /* Card states */
+  #screen-memory .memory-card.flipped {
+    background: rgba(255,255,255,0.95);
+    color: #2b2b2b;
+    border-color: rgba(255,255,255,0.6);
+  }
+  
+  #screen-memory .memory-card.matched { 
+    background: rgba(76,175,80,0.3); 
+    border-color: rgba(76,175,80,0.6); 
+    animation: memoryMatchedPulse 0.6s ease-in-out; 
+    color: white;
+  }
   
   @keyframes memoryMatchedPulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.2); }
     100% { transform: scale(1.1); }
-  }
-  
-  #screen-memory .memory-card .card-back {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
-    color: #fff;
-    font-size: 1.3em;
-    backface-visibility: hidden;
-    transform: rotateY(0deg);
-    transition: transform 0.3s ease;
-  }
-  
-  #screen-memory .memory-card.flipped .card-back {
-    transform: rotateY(180deg);
-  }
-  
-  #screen-memory .memory-card .card-front {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255,255,255,0.96);
-    color: #2b2b2b;
-    backface-visibility: hidden;
-    transform: rotateY(180deg);
-    transition: transform 0.3s ease;
-  }
-
-  #screen-memory .memory-card .card-front .card-label {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 8px;
-    font-size: clamp(12px, 3.2vw, 18px);
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    background: linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0));
-    color: #2b2b2b;
-  }
-  
-  #screen-memory .memory-card.flipped .card-front {
-    transform: rotateY(0deg);
   }
   
   #screen-memory .toolbar { display: flex; gap: 10px; margin: 6px 0 0; flex-wrap: wrap; justify-content: center; }
@@ -220,18 +163,13 @@
     let cards = [];
     let flippedCards = [];
     let matchedPairs = 0;
-    let moveCount = 0;
-    let gameTimer = null;
-    let startTime = null;
     let isGameRunning = false;
     
-    // Card labels (foods) for better rendering consistency
-    const symbols = ['Apple', 'Banana', 'Carrot', 'Donut', 'Egg', 'Fish', 'Grape', 'Honey'];
+    // Card symbols (using emojis for better visibility)
+    const symbols = ['🍎', '🍌', '🥕', '🍩', '🥚', '🐟', '🍇', '🍯'];
     
     // DOM elements
     let memoryGrid;
-    let moveCountElement;
-    let timerElement;
     let statusElement;
     
     function initApp() {
@@ -243,8 +181,6 @@
     
     function setupDOM() {
       memoryGrid = document.querySelector('#memoryGrid');
-      moveCountElement = document.querySelector('#moveCount');
-      timerElement = document.querySelector('#timer');
       statusElement = document.querySelector('#memoryStatus');
     }
     
@@ -279,21 +215,12 @@
       // Reset game state
       flippedCards = [];
       matchedPairs = 0;
-      moveCount = 0;
       isGameRunning = false;
-      
-      // Stop existing timer
-      if (gameTimer) {
-        clearInterval(gameTimer);
-        gameTimer = null;
-      }
       
       // Create new cards
       createCards();
-      resetTimerDisplay();
       
       // Update display
-      updateDisplay();
       updateStatus('Find all pairs');
     }
     
@@ -310,32 +237,15 @@
       // Clear grid
       memoryGrid.innerHTML = '';
       
-      // Create card elements with inner wrapper for flip
+      // Create simple card elements
       cards = cardPairs.map((symbol, index) => {
         const card = document.createElement('div');
         card.className = 'memory-card';
         card.dataset.index = index;
         card.dataset.symbol = symbol;
-
-        const inner = document.createElement('div');
-        inner.className = 'card-inner';
+        card.textContent = '?'; // Initially show question mark
         
-        const cardBack = document.createElement('div');
-        cardBack.className = 'card-back';
-        cardBack.textContent = '?';
-        
-        const cardFront = document.createElement('div');
-        cardFront.className = 'card-front';
-        const label = document.createElement('span');
-        label.className = 'card-label';
-        label.textContent = symbol;
-        cardFront.appendChild(label);
-
-        inner.appendChild(cardBack);
-        inner.appendChild(cardFront);
-        card.appendChild(inner);
         memoryGrid.appendChild(card);
-        
         return card;
       });
     }
@@ -346,21 +256,18 @@
         return;
       }
       
-      // Start timer on first move
+      // Start game on first move
       if (!isGameRunning) {
-        startTimer();
         isGameRunning = true;
       }
       
-      // Flip card
+      // Flip card - show the symbol
       card.classList.add('flipped');
+      card.textContent = card.dataset.symbol;
       flippedCards.push(card);
       
       // Check if we have two flipped cards
       if (flippedCards.length === 2) {
-        moveCount++;
-        updateDisplay();
-        
         const [card1, card2] = flippedCards;
         
         if (card1.dataset.symbol === card2.dataset.symbol) {
@@ -382,7 +289,9 @@
           // No match, flip cards back
           setTimeout(() => {
             card1.classList.remove('flipped');
+            card1.textContent = '?';
             card2.classList.remove('flipped');
+            card2.textContent = '?';
             flippedCards = [];
             updateStatus('Try again!');
           }, 1000);
@@ -390,69 +299,16 @@
       }
     }
     
-    function startTimer() {
-      startTime = Date.now();
-      gameTimer = setInterval(updateTimer, 1000);
-    }
-    
-    function updateTimer() {
-      if (!startTime) return;
-      
-      const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      const minutes = Math.floor(elapsed / 60);
-      const seconds = elapsed % 60;
-      
-      timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-
-    function resetTimerDisplay() {
-      timerElement.textContent = '00:00';
-      startTime = null;
-    }
-    
-    function updateDisplay() {
-      moveCountElement.textContent = moveCount;
-    }
-    
     function updateStatus(message) {
       statusElement.textContent = message;
     }
     
     function endGame() {
-      // Stop timer
-      if (gameTimer) {
-        clearInterval(gameTimer);
-        gameTimer = null;
-      }
-      
-      // Calculate final time
-      const finalTime = timerElement.textContent || '00:00';
-      
       // Show victory message
       setTimeout(() => {
-        alert(`Congratulations! You found all pairs in ${moveCount} moves and ${finalTime}!`);
+        alert(`Congratulations! You found all pairs!`);
         updateStatus('Game Complete!');
       }, 500);
-      
-      // Save high score
-      saveHighScore(moveCount, finalTime);
-    }
-    
-    function saveHighScore(moves, time) {
-      try {
-        const saved = localStorage.getItem('memory-high-scores');
-        let scores = saved ? JSON.parse(saved) : [];
-        
-        scores.push({ moves, time, date: new Date().toISOString() });
-        
-        // Keep only top 5 scores
-        scores.sort((a, b) => a.moves - b.moves);
-        scores = scores.slice(0, 5);
-        
-        localStorage.setItem('memory-high-scores', JSON.stringify(scores));
-      } catch (e) {
-        console.warn('Failed to save high score:', e);
-      }
     }
     
     function goHome() {
@@ -468,28 +324,14 @@
     window.appLifecycle = {
       activate: function() {
         console.log('Memory Match game activated');
-        // Resume timer if game was running
-        if (isGameRunning && !gameTimer) {
-          startTimer();
-        }
       },
       
       deactivate: function() {
         console.log('Memory Match game deactivated');
-        // Pause timer when switching away
-        if (gameTimer) {
-          clearInterval(gameTimer);
-          gameTimer = null;
-        }
       },
       
       cleanup: function() {
         console.log('Memory Match game cleanup');
-        // Stop timer
-        if (gameTimer) {
-          clearInterval(gameTimer);
-          gameTimer = null;
-        }
         // Reset game
         startNewGame();
       }

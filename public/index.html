@@ -5,6 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
     <title>RPI 5" Showcase - Home</title>
     
+    <!-- Smart Quality Detection System for Pi 3/4/5 -->
+    <script>
+      // Device capability detection and quality mode selection
+      (function() {
+        'use strict';
+        
+        // Detect device capabilities
+        const deviceInfo = {
+          // CPU cores
+          cores: navigator.hardwareConcurrency || 1,
+          
+          // Memory (approximate)
+          memory: navigator.deviceMemory || 1,
+          
+          // GPU info
+          gpu: {
+            vendor: '',
+            renderer: ''
+          },
+          
+          // Screen size and pixel density
+          screen: {
+            width: screen.width,
+            height: screen.height,
+            pixelRatio: window.devicePixelRatio || 1
+          },
+          
+          // User agent hints
+          userAgent: navigator.userAgent.toLowerCase()
+        };
+        
+        // Try to get GPU info
+        try {
+          const canvas = document.createElement('canvas');
+          const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+          if (gl) {
+            deviceInfo.gpu.vendor = gl.getParameter(gl.VENDOR) || '';
+            deviceInfo.gpu.renderer = gl.getParameter(gl.RENDERER) || '';
+          }
+        } catch (e) {
+          console.log('GPU detection failed:', e);
+        }
+        
+        // Determine quality mode based on device capabilities
+        function determineQualityMode() {
+          // Pi 3B+ detection (4 cores, low memory, older GPU)
+          if (deviceInfo.cores === 4 && 
+              deviceInfo.memory <= 1 && 
+              deviceInfo.userAgent.includes('armv7l')) {
+            return 'low';
+          }
+          
+          // Pi 4 detection (4 cores, more memory, better GPU)
+          if (deviceInfo.cores === 4 && 
+              deviceInfo.memory > 1 && 
+              deviceInfo.userAgent.includes('armv7l')) {
+            return 'medium';
+          }
+          
+          // Pi 5 detection (4+ cores, more memory, modern GPU)
+          if (deviceInfo.cores >= 4 && 
+              deviceInfo.memory > 2 && 
+              (deviceInfo.userAgent.includes('aarch64') || deviceInfo.userAgent.includes('armv8'))) {
+            return 'high';
+          }
+          
+          // Fallback based on memory
+          if (deviceInfo.memory <= 1) return 'low';
+          if (deviceInfo.memory <= 2) return 'medium';
+          return 'high';
+        }
+        
+        // Set quality mode globally
+        window.QUALITY_MODE = determineQualityMode();
+        window.DEVICE_INFO = deviceInfo;
+        
+        // Log detection results
+        console.log('🔍 Device Detection:', {
+          cores: deviceInfo.cores,
+          memory: deviceInfo.memory + 'GB',
+          gpu: deviceInfo.gpu.renderer,
+          screen: `${deviceInfo.screen.width}x${deviceInfo.screen.height}`,
+          qualityMode: window.QUALITY_MODE
+        });
+        
+        // Add quality mode indicator to body
+        document.addEventListener('DOMContentLoaded', function() {
+          document.body.setAttribute('data-quality-mode', window.QUALITY_MODE);
+          console.log(`🎮 Quality Mode: ${window.QUALITY_MODE.toUpperCase()}`);
+        });
+      })();
+    </script>
+    
     <!-- Emoji Font Support for Raspberry Pi -->
     <style>
       @font-face {
@@ -19,6 +112,49 @@
         font-family: 'EmojiFont', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', 'EmojiOne Mozilla', 'Twemoji Mozilla', 'Segoe UI Symbol', sans-serif;
         font-variant-emoji: emoji;
         text-rendering: optimizeSpeed;
+      }
+      
+      /* Quality mode CSS variables */
+      :root {
+        /* Low quality (Pi 3B+) */
+        --low-particles: 15;
+        --low-animations: none;
+        --low-effects: none;
+        --low-background: simple;
+        
+        /* Medium quality (Pi 4) */
+        --medium-particles: 40;
+        --medium-animations: basic;
+        --medium-effects: basic;
+        --medium-background: gradient;
+        
+        /* High quality (Pi 5) */
+        --high-particles: 80;
+        --high-animations: full;
+        --high-effects: full;
+        --high-background: complex;
+      }
+
+      /* Apply quality modes */
+      [data-quality-mode="low"] {
+        --particles: var(--low-particles);
+        --animations: var(--low-animations);
+        --effects: var(--low-effects);
+        --background: var(--low-background);
+      }
+
+      [data-quality-mode="medium"] {
+        --particles: var(--medium-particles);
+        --animations: var(--medium-animations);
+        --effects: var(--medium-effects);
+        --background: var(--medium-background);
+      }
+
+      [data-quality-mode="high"] {
+        --particles: var(--high-particles);
+        --animations: var(--high-animations);
+        --effects: var(--high-effects);
+        --background: var(--high-background);
       }
     </style>
     
@@ -1135,6 +1271,95 @@
         box-shadow: 0 5px 15px rgba(158, 158, 158, 0.6);
       }
       
+      /* Quality-based optimizations */
+      
+      /* Low quality - disable all animations */
+      [data-quality-mode="low"] #screen-home .card {
+        animation: none !important;
+        transform-style: flat !important;
+        perspective: none !important;
+      }
+      
+      [data-quality-mode="low"] #screen-home .card .icon {
+        animation: none !important;
+        transform: none !important;
+      }
+      
+      [data-quality-mode="low"] #screen-home .card .label {
+        animation: none !important;
+        transform: none !important;
+        text-shadow: none !important;
+      }
+      
+      [data-quality-mode="low"] .particle {
+        animation: none !important;
+      }
+      
+      [data-quality-mode="low"] .nebula {
+        animation: none !important;
+      }
+      
+      [data-quality-mode="low"] .galaxy-cluster {
+        animation: none !important;
+      }
+      
+      /* Low quality - simplify background */
+      [data-quality-mode="low"] #screen-home::before {
+        background: #1e0033 !important;
+        animation: none !important;
+      }
+      
+      /* Low quality - remove complex effects */
+      [data-quality-mode="low"] #screen-home .card {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+      }
+      
+      [data-quality-mode="low"] #screen-home .card::before,
+      [data-quality-mode="low"] #screen-home .card::after {
+        display: none !important;
+      }
+      
+      /* Medium quality - basic animations */
+      [data-quality-mode="medium"] #screen-home .card {
+        animation: float 4s ease-in-out infinite;
+        transform-style: flat !important;
+        perspective: none !important;
+      }
+      
+      [data-quality-mode="medium"] #screen-home .card .icon {
+        animation: pulse 3s infinite;
+        transform: none !important;
+      }
+      
+      [data-quality-mode="medium"] #screen-home .card .label {
+        animation: pulse 2s infinite;
+        transform: none !important;
+      }
+      
+      /* Medium quality - simplified background */
+      [data-quality-mode="medium"] #screen-home::before {
+        background: linear-gradient(to bottom, #1e0033, #4b0063) !important;
+        animation: cosmic-pulse 20s ease infinite alternate;
+      }
+      
+      /* Predefined float animations for medium quality */
+      @keyframes float-slow {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+      }
+      
+      @keyframes float-medium {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+      }
+      
+      @keyframes float-fast {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-12px); }
+      }
+      
       /* Responsive design */
       @media (max-width: 1024px) {
         .title {
@@ -1243,85 +1468,136 @@
       }
     </style>
     
-    <!-- Animated Cosmic Background Script -->
+    <!-- Quality-Based Animated Cosmic Background Script -->
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        // Create animated particles
+        // Quality-based particle system
+        const qualityMode = window.QUALITY_MODE || 'medium';
         const particlesContainer = document.getElementById('particles');
-        const numParticles = 80; // More stars for galaxy effect
-        const numNebulae = 5;    // Add nebulae
-        const numGalaxies = 3;   // Add distant galaxy clusters
         
-        // Create stars
-        for (let i = 0; i < numParticles; i++) {
-          createStar(particlesContainer);
-        }
-        
-        // Create nebulae
-        for (let i = 0; i < numNebulae; i++) {
-          createNebula(particlesContainer);
-        }
-        
-        // Create galaxy clusters
-        for (let i = 0; i < numGalaxies; i++) {
-          createGalaxyCluster(particlesContainer);
-        }
-        
-        // Create occasional shooting stars
-        setInterval(() => {
-          if (Math.random() > 0.7) { // 30% chance every interval
-            createShootingStar(particlesContainer);
+        // Particle counts based on quality
+        const particleConfigs = {
+          low: {
+            stars: 15,
+            nebulae: 1,
+            galaxies: 0,
+            shootingStars: false,
+            animations: false
+          },
+          medium: {
+            stars: 40,
+            nebulae: 2,
+            galaxies: 1,
+            shootingStars: true,
+            animations: true
+          },
+          high: {
+            stars: 80,
+            nebulae: 5,
+            galaxies: 3,
+            shootingStars: true,
+            animations: true
           }
-        }, 8000); // Try to create a shooting star every 8 seconds
+        };
         
-        // Create a single star with random properties
-        function createStar(container) {
+        const config = particleConfigs[qualityMode];
+        
+        console.log(`🌟 Creating ${config.stars} stars, ${config.nebulae} nebulae, ${config.galaxies} galaxies for ${qualityMode} quality mode`);
+        
+        // Create particles based on quality mode
+        if (config.stars > 0) {
+          for (let i = 0; i < config.stars; i++) {
+            createStar(particlesContainer, qualityMode);
+          }
+        }
+        
+        if (config.nebulae > 0) {
+          for (let i = 0; i < config.nebulae; i++) {
+            createNebula(particlesContainer, qualityMode);
+          }
+        }
+        
+        if (config.galaxies > 0) {
+          for (let i = 0; i < config.galaxies; i++) {
+            createGalaxyCluster(particlesContainer, qualityMode);
+          }
+        }
+        
+        // Shooting stars only for medium/high quality
+        if (config.shootingStars) {
+          setInterval(() => {
+            if (Math.random() > 0.7) { // 30% chance every interval
+              createShootingStar(particlesContainer, qualityMode);
+            }
+          }, 8000); // Try to create a shooting star every 8 seconds
+        }
+        
+        // Quality-based star creation
+        function createStar(container, quality) {
           const particle = document.createElement('div');
           particle.classList.add('particle');
           
-          // Random size between 1px and 4px for stars (some larger for effect)
-          let size;
-          const isLargeStar = Math.random() > 0.9;
-          
-          if (isLargeStar) {
-            size = Math.random() * 4 + 3; // 3-7px for bright stars
-            particle.style.opacity = Math.random() * 0.4 + 0.6; // Brighter
+          // Simpler stars for low quality
+          if (quality === 'low') {
+            particle.style.width = '2px';
+            particle.style.height = '2px';
+            particle.style.background = 'rgba(255, 255, 255, 0.8)';
+            particle.style.opacity = '0.6';
           } else {
-            size = Math.random() * 2 + 1; // 1-3px for regular stars
-            particle.style.opacity = Math.random() * 0.3 + 0.3; // Regular brightness
+            // Full star effects for medium/high
+            let size;
+            const isLargeStar = Math.random() > 0.9;
+            
+            if (isLargeStar) {
+              size = Math.random() * 4 + 3; // 3-7px for bright stars
+              particle.style.opacity = Math.random() * 0.4 + 0.6; // Brighter
+            } else {
+              size = Math.random() * 2 + 1; // 1-3px for regular stars
+              particle.style.opacity = Math.random() * 0.3 + 0.3; // Regular brightness
+            }
+            
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
           }
           
-          particle.style.width = `${size}px`;
-          particle.style.height = `${size}px`;
-          
-          // Random starting position
+          // Position
           const x = Math.random() * 100;
           const y = Math.random() * 100;
           particle.style.left = `${x}%`;
           particle.style.top = `${y}%`;
           
-          // Add twinkling effect to some stars
-          if (Math.random() > 0.7) {
-            const twinkleDuration = Math.random() * 3 + 2; // 2-5s
-            particle.style.animation = `twinkle ${twinkleDuration}s ease-in-out infinite`;
+          // Animations only for medium/high quality
+          if (quality !== 'low' && config.animations) {
+            if (Math.random() > 0.7) {
+              const twinkleDuration = Math.random() * 3 + 2; // 2-5s
+              particle.style.animation = `twinkle ${twinkleDuration}s ease-in-out infinite`;
+            }
+            
+            if (Math.random() > 0.6) {
+              setRandomStarMovement(particle, quality);
+            }
           }
           
-          // Add to container
           container.appendChild(particle);
-          
-          // Set random movement for some stars (distant stars move less)
-          if (Math.random() > 0.6) {
-            setRandomStarMovement(particle, size);
-          }
         }
         
-        // Create a nebula effect
-        function createNebula(container) {
+        // Quality-based nebula creation
+        function createNebula(container, quality) {
           const nebula = document.createElement('div');
           nebula.classList.add('nebula');
           
-          // Random size between 100px and 300px
-          const size = Math.random() * 200 + 100;
+          // Smaller, simpler nebulae for low quality
+          let size;
+          if (quality === 'low') {
+            size = Math.random() * 50 + 50; // 50-100px
+            nebula.style.filter = 'blur(20px)';
+            nebula.style.opacity = '0.1';
+          } else {
+            size = Math.random() * 200 + 100; // 100-300px
+            nebula.style.filter = 'blur(40px)';
+            nebula.style.opacity = '0.15';
+          }
+          
           nebula.style.width = `${size}px`;
           nebula.style.height = `${size}px`;
           
@@ -1340,20 +1616,41 @@
           // Add to container
           container.appendChild(nebula);
           
-          // Add custom animation delay
-          const delay = Math.random() * 5;
-          nebula.style.animationDelay = `${delay}s`;
+          // Animations only for medium/high quality
+          if (quality !== 'low') {
+            const delay = Math.random() * 5;
+            nebula.style.animationDelay = `${delay}s`;
+          }
         }
         
-        // Set random floating movement for stars
-        function setRandomStarMovement(particle, size) {
-          // Smaller stars move less (parallax effect)
-          const moveFactor = size < 3 ? 30 : 60;
+        // Quality-based star movement
+        function setRandomStarMovement(particle, quality) {
+          // No movement for low quality
+          if (quality === 'low') {
+            return;
+          }
+          
+          // Simplified movement for medium quality
+          if (quality === 'medium') {
+            const moveFactor = 20;
+            const x1 = (Math.random() * moveFactor) - (moveFactor/2);
+            const y1 = (Math.random() * moveFactor) - (moveFactor/2);
+            
+            // Use predefined animations instead of dynamic keyframes
+            const animations = ['float-slow', 'float-medium', 'float-fast'];
+            const animation = animations[Math.floor(Math.random() * animations.length)];
+            const duration = Math.random() * 20 + 40; // 40-60s
+            particle.style.animation = `${animation} ${duration}s ease-in-out infinite`;
+            return;
+          }
+          
+          // Full movement for high quality
+          const moveFactor = 60;
+          const x1 = (Math.random() * moveFactor) - (moveFactor/2);
+          const y1 = (Math.random() * moveFactor) - (moveFactor/2);
           
           // Create a unique keyframe animation for each particle
           const uniqueName = 'star-' + Math.floor(Math.random() * 1000000);
-          const x1 = (Math.random() * moveFactor) - (moveFactor/2);
-          const y1 = (Math.random() * moveFactor) - (moveFactor/2);
           
           // Create keyframe animation - slower and more subtle for stars
           const keyframes = `
@@ -1463,6 +1760,50 @@
         const twinkleStyle = document.createElement('style');
         twinkleStyle.innerHTML = twinkleKeyframes;
         document.head.appendChild(twinkleStyle);
+        
+        // Manual quality override function for testing
+        window.setQualityMode = function(mode) {
+          if (!['low', 'medium', 'high'].includes(mode)) {
+            console.error('Invalid quality mode. Use: low, medium, or high');
+            return;
+          }
+          
+          window.QUALITY_MODE = mode;
+          document.body.setAttribute('data-quality-mode', mode);
+          console.log(`🎮 Manual Quality Mode: ${mode.toUpperCase()}`);
+          
+          // Reload particles with new quality mode
+          const particlesContainer = document.getElementById('particles');
+          particlesContainer.innerHTML = '';
+          
+          // Recreate particles with new quality mode
+          const config = particleConfigs[mode];
+          
+          if (config.stars > 0) {
+            for (let i = 0; i < config.stars; i++) {
+              createStar(particlesContainer, mode);
+            }
+          }
+          
+          if (config.nebulae > 0) {
+            for (let i = 0; i < config.nebulae; i++) {
+              createNebula(particlesContainer, mode);
+            }
+          }
+          
+          if (config.galaxies > 0) {
+            for (let i = 0; i < config.galaxies; i++) {
+              createGalaxyCluster(particlesContainer, mode);
+            }
+          }
+          
+          console.log(`🌟 Recreated ${config.stars} stars, ${config.nebulae} nebulae, ${config.galaxies} galaxies for ${mode} quality mode`);
+        };
+        
+        console.log('🎮 Quality testing commands:');
+        console.log('  setQualityMode("low")    - Pi 3B+ mode');
+        console.log('  setQualityMode("medium") - Pi 4 mode');
+        console.log('  setQualityMode("high")   - Pi 5 mode');
         
       });
       
