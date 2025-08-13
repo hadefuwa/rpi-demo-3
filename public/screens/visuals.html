@@ -119,6 +119,7 @@
       setupDOM();
       setupUI();
       setupCanvas();
+  setupNoZoom();
       switchMode('particles');
       start();
     }
@@ -188,6 +189,38 @@
       resize();
       window.addEventListener('resize', resize);
       cleanupFns.push(() => window.removeEventListener('resize', resize));
+    }
+
+    // Prevent browser zoom (pinch, ctrl+wheel, double tap) within this screen only
+    function setupNoZoom() {
+      const root = document.querySelector('#screen-visuals');
+      if (!root) return;
+      // Disable gesture events if supported
+      const onGesture = (e) => { if (e.cancelable) e.preventDefault(); };
+      root.addEventListener('gesturestart', onGesture);
+      root.addEventListener('gesturechange', onGesture);
+      root.addEventListener('gestureend', onGesture);
+      // Block ctrl/cmd + wheel zoom when the pointer is over this screen
+      const onWheel = (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.cancelable) e.preventDefault();
+      };
+      root.addEventListener('wheel', onWheel, { passive: false });
+      // Prevent double-tap zoom: if two taps within 300ms, prevent default
+      let lastTap = 0;
+      const onTouchEnd = (e) => {
+        const now = Date.now();
+        if (now - lastTap < 300 && e.cancelable) e.preventDefault();
+        lastTap = now;
+      };
+      root.addEventListener('touchend', onTouchEnd, { passive: false });
+      // Cleanup
+      cleanupFns.push(() => {
+        root.removeEventListener('gesturestart', onGesture);
+        root.removeEventListener('gesturechange', onGesture);
+        root.removeEventListener('gestureend', onGesture);
+        root.removeEventListener('wheel', onWheel);
+        root.removeEventListener('touchend', onTouchEnd);
+      });
     }
 
     function switchMode(next) {
