@@ -45,13 +45,26 @@
     padding: 0;
     position: relative;
     box-sizing: border-box;
-    cursor: none; /* Hide cursor for touchscreen experience */
-    -webkit-touch-callout: none; /* Disable iOS callout */
+    cursor: none !important; /* Force hide cursor */
+    -webkit-touch-callout: none !important; /* Disable iOS callout */
+    -webkit-user-select: none !important; /* Disable text selection */
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
   }
   
-  /* Hide cursor on all child elements */
-  #screen-scroll * {
+  /* Force hide cursor and disable selection on ALL child elements */
+  #screen-scroll *,
+  #screen-scroll *:before,
+  #screen-scroll *:after {
     cursor: none !important;
+    -webkit-user-select: none !important;
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
   }
   
   /* Animated background particles */
@@ -212,10 +225,16 @@
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     position: relative;
-    cursor: none; /* Hide cursor for touch experience */
-    /* Simplified touch action - allow all touch interactions */
+    cursor: none !important; /* Force hide cursor */
     touch-action: auto;
-    overscroll-behavior: contain; /* Prevent page bounce */
+    overscroll-behavior: contain;
+    /* Prevent text selection during scrolling */
+    -webkit-user-select: none !important;
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
   }
   
   /* Custom scrollbar */
@@ -246,14 +265,20 @@
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: none; /* Hide cursor for touch experience */
+    cursor: none !important; /* Force hide cursor */
     position: relative;
     overflow: hidden;
     transform: translateY(20px);
     opacity: 0;
     animation: slideInUp 0.6s ease-out forwards;
-    touch-action: manipulation; /* Optimize for touch */
-    -webkit-touch-callout: none; /* Disable iOS callout */
+    touch-action: manipulation;
+    -webkit-touch-callout: none !important;
+    /* Prevent text selection on items */
+    -webkit-user-select: none !important;
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
   }
   
   #screen-scroll .scroll-item:nth-child(even) {
@@ -500,8 +525,10 @@
       min-width: 44px;
     }
     
-    /* Hide all cursors on touch devices */
-    #screen-scroll * {
+    /* Force hide all cursors on touch devices */
+    #screen-scroll *,
+    #screen-scroll *:before,
+    #screen-scroll *:after {
       cursor: none !important;
     }
     
@@ -510,6 +537,23 @@
       -webkit-overflow-scrolling: touch;
       scroll-snap-type: none; /* Disable snap scrolling for smooth experience */
     }
+  }
+  
+  /* Force cursor hiding and text selection prevention for ALL devices */
+  #screen-scroll,
+  #screen-scroll *,
+  #screen-scroll *:before,
+  #screen-scroll *:after,
+  #screen-scroll *:hover,
+  #screen-scroll *:active,
+  #screen-scroll *:focus {
+    cursor: none !important;
+    -webkit-user-select: none !important;
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
   }
 </style>
 
@@ -524,6 +568,41 @@
       console.log('Scroll Test app initialized');
       setupEventListeners();
       generateInitialItems();
+      preventTextSelection();
+      hideCursor();
+    }
+    
+    function preventTextSelection() {
+      // Prevent text selection globally within the screen
+      const screen = document.querySelector('#screen-scroll');
+      if (screen) {
+        screen.addEventListener('selectstart', function(e) {
+          e.preventDefault();
+          return false;
+        });
+        
+        screen.addEventListener('dragstart', function(e) {
+          e.preventDefault();
+          return false;
+        });
+        
+        // Prevent context menu
+        screen.addEventListener('contextmenu', function(e) {
+          e.preventDefault();
+          return false;
+        });
+      }
+    }
+    
+    function hideCursor() {
+      // Force cursor to be hidden
+      const style = document.createElement('style');
+      style.textContent = `
+        #screen-scroll, #screen-scroll * {
+          cursor: none !important;
+        }
+      `;
+      document.head.appendChild(style);
     }
     
     function setupEventListeners() {
