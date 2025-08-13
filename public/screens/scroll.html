@@ -566,14 +566,25 @@
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
     }
   }
+
+  /* While dragging/swiping, disable hover/pointer effects so scrolling is never blocked */
+  #screen-scroll.dragging .scroll-item { pointer-events: none !important; }
+  #screen-scroll.dragging .scroll-item:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+  }
 </style>
 
 <script>
   (function() {
     'use strict';
     
-    let itemCounter = 0;
-    const scrollBox = document.querySelector('#scrollbox');
+  let itemCounter = 0;
+  const scrollBox = document.querySelector('#scrollbox');
+  const screenEl = document.querySelector('#screen-scroll');
+  const DRAG_TOLERANCE = 8; // px movement to consider as dragging
     
     function initApp() {
       console.log('Scroll Test app initialized');
@@ -616,11 +627,12 @@
       document.head.appendChild(style);
     }
 
-    // Pointer drag-to-scroll fallback for environments where touch is exposed as mouse
-    let isPointerDragging = false;
-    let dragStartY = 0;
-    let dragStartScrollTop = 0;
-    let activePointerId = null;
+  // Drag detection + pointer drag-to-scroll fallback for environments where touch is exposed as mouse
+  let isPointerDragging = false;
+  let dragStartY = 0;
+  let dragStartX = 0;
+  let dragStartScrollTop = 0;
+  let activePointerId = null;
 
     function shouldUsePointerDragFallback(e) {
       // Use fallback when pointerType is 'mouse' or unknown; ignore right/middle buttons
@@ -634,26 +646,38 @@
 
     function handlePointerDown(e) {
       if (!scrollBox) return;
-      if (!shouldUsePointerDragFallback(e)) return;
-      isPointerDragging = true;
       activePointerId = e.pointerId;
       dragStartY = e.clientY;
+      dragStartX = e.clientX;
       dragStartScrollTop = scrollBox.scrollTop;
-      try { scrollBox.setPointerCapture && scrollBox.setPointerCapture(e.pointerId); } catch (_) {}
-      e.preventDefault();
+      if (shouldUsePointerDragFallback(e)) {
+        isPointerDragging = true;
+        try { scrollBox.setPointerCapture && scrollBox.setPointerCapture(e.pointerId); } catch (_) {}
+      }
+      // Don't prevent default here; only in move when actively fallback-dragging
     }
 
     function handlePointerMove(e) {
-      if (!isPointerDragging || e.pointerId !== activePointerId || !scrollBox) return;
+      if (activePointerId === null || e.pointerId !== activePointerId) return;
       const deltaY = e.clientY - dragStartY;
-      scrollBox.scrollTop = dragStartScrollTop - deltaY;
-      e.preventDefault();
+      const deltaX = e.clientX - dragStartX;
+      if (Math.abs(deltaX) > DRAG_TOLERANCE || Math.abs(deltaY) > DRAG_TOLERANCE) {
+        // Toggle dragging class to suppress hover while swiping
+        if (screenEl) screenEl.classList.add('dragging');
+      }
+      if (!scrollBox) return;
+      if (isPointerDragging) {
+        scrollBox.scrollTop = dragStartScrollTop - deltaY;
+        e.preventDefault();
+      }
     }
 
     function handlePointerUp(e) {
       if (e && activePointerId !== null && e.pointerId !== activePointerId) return;
       isPointerDragging = false;
       activePointerId = null;
+      // Let inertia finish; then remove dragging flag
+      if (screenEl) setTimeout(() => screenEl.classList.remove('dragging'), 120);
     }
     
     function setupEventListeners() {
@@ -679,16 +703,17 @@
       if (scrollBox) {
         scrollBox.addEventListener('scroll', handleScroll);
         
-        // Simple touch event listeners - let browser handle native scrolling
-        scrollBox.addEventListener('touchstart', handleTouchStart, { passive: true });
-        scrollBox.addEventListener('touchend', handleTouchEnd, { passive: true });
+  // Simple touch event listeners - let browser handle native scrolling
+  scrollBox.addEventListener('touchstart', handleTouchStart, { passive: true });
+  scrollBox.addEventListener('touchmove', handleTouchMoveDetect, { passive: true });
+  scrollBox.addEventListener('touchend', handleTouchEnd, { passive: true });
         
         // Prevent context menu on long touch but allow scrolling
         scrollBox.addEventListener('contextmenu', function(e) {
           e.preventDefault();
         });
 
-  // Pointer-based drag-to-scroll fallback (for Pi touch that appears as mouse)
+  // Pointer-based drag-to-scroll fallback (for Pi touch that appears as mouse) and drag detection
   scrollBox.addEventListener('pointerdown', handlePointerDown);
   scrollBox.addEventListener('pointermove', handlePointerMove, { capture: true });
   scrollBox.addEventListener('pointerup', handlePointerUp);
@@ -889,6 +914,14 @@
         scrollBox.style.filter = 'brightness(1.05)';
       }
     }
+
+    function handleTouchMoveDetect(e) {
+      if (!e.touches || e.touches.length === 0) return;
+      const y = e.touches[0].clientY;
+      if (Math.abs(y - touchStartY) > DRAG_TOLERANCE) {
+        if (screenEl) screenEl.classList.add('dragging');
+      }
+    }
     
     function handleTouchEnd(e) {
       if (!scrollBox) return;
@@ -896,6 +929,7 @@
       // Reset visual feedback
       scrollBox.style.transition = 'filter 0.3s ease';
       scrollBox.style.filter = '';
+  if (screenEl) setTimeout(() => screenEl.classList.remove('dragging'), 120);
     }
     
     function showToast(message) {

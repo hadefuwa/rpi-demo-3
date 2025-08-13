@@ -116,8 +116,8 @@ git push origin main --tags
 
 #When ready for the next release
 git add -A
-git commit -m "Prepare for Rev 2.5 release"
-git tag -a rev2.5 -m "Rev 2.5 released"
+git commit -m "Prepare for Rev 2.6 release"
+git tag -a rev2.6 -m "Rev 2.6 released"
 git push origin main --tags
 
 
