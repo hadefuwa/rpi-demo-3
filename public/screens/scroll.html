@@ -296,7 +296,8 @@
     }
   }
   
-  #screen-scroll .scroll-item:hover {
+  /* Hover effects are disabled by default; enabled only when .enable-hover is present */
+  #screen-scroll.enable-hover .scroll-item:hover {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
     transform: translateY(-4px) scale(1.02);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
@@ -323,7 +324,7 @@
     transition: left 0.5s ease;
   }
   
-  #screen-scroll .scroll-item:hover::before {
+  #screen-scroll.enable-hover .scroll-item:hover::before {
     left: 100%;
   }
   
@@ -568,7 +569,6 @@
   }
 
   /* While dragging/swiping, disable hover/pointer effects so scrolling is never blocked */
-  #screen-scroll.dragging .scroll-item { pointer-events: none !important; }
   #screen-scroll.dragging .scroll-item:hover {
     transform: none !important;
     box-shadow: none !important;
@@ -592,6 +592,7 @@
       generateInitialItems();
       preventTextSelection();
       hideCursor();
+  setupHoverDetection();
     }
     
     function preventTextSelection() {
@@ -627,6 +628,22 @@
       document.head.appendChild(style);
     }
 
+    function setupHoverDetection() {
+      // If we ever detect a real mouse move, allow hover visuals
+      const screen = document.querySelector('#screen-scroll');
+      function onMouseMove(e) {
+        if (!screen) return;
+        // Heuristic: if movementX/Y exists and is small, assume a mouse
+        if (typeof e.mozInputSource !== 'undefined' && e.mozInputSource === 1) {
+          screen.classList.add('enable-hover');
+          return;
+        }
+        const isMouse = e.sourceCapabilities ? e.sourceCapabilities.firesTouchEvents === false : true;
+        if (isMouse) screen.classList.add('enable-hover');
+      }
+      window.addEventListener('mousemove', onMouseMove, { passive: true });
+    }
+
   // Drag detection + pointer drag-to-scroll fallback for environments where touch is exposed as mouse
   let isPointerDragging = false;
   let dragStartY = 0;
@@ -650,6 +667,8 @@
       dragStartY = e.clientY;
       dragStartX = e.clientX;
       dragStartScrollTop = scrollBox.scrollTop;
+  // Immediately mark dragging to suppress hover during swipe start
+  if (screenEl) screenEl.classList.add('dragging');
       if (shouldUsePointerDragFallback(e)) {
         isPointerDragging = true;
         try { scrollBox.setPointerCapture && scrollBox.setPointerCapture(e.pointerId); } catch (_) {}
@@ -907,6 +926,7 @@
     function handleTouchStart(e) {
       touchStartY = e.touches[0].clientY;
       touchStartTime = Date.now();
+  if (screenEl) screenEl.classList.add('dragging');
       
       // Add visual feedback for touch start
       if (scrollBox) {
