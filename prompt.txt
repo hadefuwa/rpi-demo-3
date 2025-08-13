@@ -1,5 +1,11 @@
-**Remember**: Each mini app should be completely self-contained and not interfere with any other app in the showcase!
+Please only change this one file and its css as other people are working on the rest of the codebase
+
+**Remember**: Each mini app or html page should be completely self-contained and not interfere with any other app in the showcase!
 
 can you ensure you stick to the architecture rules
 
 please do not run any server, this is for my pi not my pc. dont run tests, i will run the tests
+
+
+
+the page also has some issues with responsiveness. it needs to be100% responsive, both vertically and horizontally, so no window scroll bars show.
