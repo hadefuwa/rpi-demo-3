@@ -614,22 +614,47 @@
     }
     
     function generateInitialItems() {
-      const messages = [
-        "🚀 Welcome to the scroll test!",
-        "📱 Touch and drag to scroll",
-        "🎨 Watch the smooth animations",
-        "⚡ Optimized for Raspberry Pi",
-        "🌈 Beautiful gradient backgrounds",
-        "🔥 Smooth 60fps scrolling",
-        "✨ Modern glassmorphism design",
-        "🎯 Perfect touch targets",
-        "📐 100% responsive layout",
-        "🎪 Interactive hover effects"
-      ];
-      
-      messages.forEach((message, index) => {
-        createScrollItem(message, index);
+      if (!scrollBox) return;
+      // Build 30 base items
+      const baseMessages = Array.from({ length: 30 }, (_, i) => `📜 Demo item ${i + 1}`);
+      baseSetCount = baseMessages.length;
+
+      // Clear existing and create 3 consecutive sets for seamless looping
+      scrollBox.innerHTML = '';
+      // First set: deterministic numbering via index
+      baseMessages.forEach((msg, index) => createScrollItem(msg, index));
+      // Second and third sets: append identical items
+      baseMessages.forEach((msg) => createScrollItem(msg));
+      baseMessages.forEach((msg) => createScrollItem(msg));
+
+      // Compute loop metrics and position to the middle copy
+      requestAnimationFrame(() => {
+        computeLoopMetrics();
+        if (loopEnabled) {
+          scrollBox.scrollTop = loopStartTop + 1; // avoid immediate wrap
+        }
       });
+    }
+
+    function computeLoopMetrics() {
+      if (!scrollBox) return;
+      const items = scrollBox.querySelectorAll('.scroll-item');
+      if (baseSetCount === 0 || items.length < baseSetCount * 3) {
+        loopEnabled = false;
+        return;
+      }
+      const idxStart = baseSetCount;       // first item of 2nd set
+      const idxEnd = baseSetCount * 2;     // first item of 3rd set
+      const startEl = items[idxStart];
+      const endEl = items[idxEnd];
+      if (!startEl || !endEl) {
+        loopEnabled = false;
+        return;
+      }
+      loopStartTop = startEl.offsetTop;
+      loopEndTop = endEl.offsetTop;
+      loopSpan = loopEndTop - loopStartTop;
+      loopEnabled = loopSpan > 0;
     }
     
     function createScrollItem(text, index = null) {
