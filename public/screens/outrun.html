@@ -10,7 +10,7 @@
   #wrap { position:fixed; inset:0; display:flex; flex-direction:column; }
   header { padding:6px 10px; font-size:14px; opacity:0.85; display:flex; gap:14px; align-items:center; }
   header .stat b{color:var(--accent)}
-  canvas { flex:1 1 auto; display:block; width:100%; height:100%; background:linear-gradient(#204, #104 40%, #013 60%); }
+  canvas { flex:1 1 auto; display:block; width:100%; height:100%; background:linear-gradient(#87CEEB, #4682B4 60%, #1E90FF 100%); }
   /* Touch controls */
   #controls { position:fixed; left:0; right:0; bottom:10px; display:flex; justify-content:center; gap:10px; pointer-events:auto; }
   .btn { user-select:none; -webkit-user-select:none; touch-action:none;
@@ -162,7 +162,7 @@
 
   function project(p, camX, camY, camZ) {
     // Improved projection with better scaling
-    const dz = p.world.z - camZ;
+    let dz = p.world.z - camZ;
     const dx = p.world.x - camX;
     const dy = p.world.y - camY;
     
@@ -185,7 +185,6 @@
     
     // Safety check: if no valid segment found, don't draw anything
     if (!baseSeg) {
-      console.log('No base segment found');
       return;
     }
     
@@ -200,7 +199,6 @@
     // clear sky already via canvas background gradient
     // draw road from far to near
     let maxY = canvas.height;
-    let segmentsDrawn = 0; // Debug counter
     
     for (let n=0; n<DRAW_DISTANCE; n++) {
       const seg = segments[(baseIdx + n) % segments.length];
@@ -216,81 +214,37 @@
 
       if (seg.p1.screen.y >= seg.p2.screen.y) continue; // backface cull
       if (seg.p2.screen.y >= maxY) continue;
-      
-      segmentsDrawn++; // Count drawn segments
 
-      // Road width scales with perspective
-      const laneW = seg.p2.screen.w;
-      const roadW = laneW * 1.9;
-      const rumbleW = laneW * 0.2;
-      const grassY1 = seg.p1.screen.y, grassY2 = seg.p2.screen.y;
+      // draw road segment
+      const p1 = seg.p1.screen;
+      const p2 = seg.p2.screen;
+      const w1 = p1.w;
+      const w2 = p2.w;
 
-      // grass
-      ctx.fillStyle = (Math.floor(seg.index/RUMBLE_LEN)%2===0) ? "#063c2e" : "#084935";
-      ctx.fillRect(0, grassY2, canvas.width, grassY1 - grassY2);
+      // road
+      ctx.fillStyle = (n % 2) ? "#606060" : "#696969";
+      fillQuad(p1.x - w1, p1.y, p2.x - w2, p2.y, p2.x + w2, p2.y, p1.x + w1, p1.y);
 
       // rumble strips
-      ctx.fillStyle = "#a33";
-      fillQuad(
-        seg.p1.screen.x - seg.p1.screen.w*2, grassY1,
-        seg.p2.screen.x - seg.p2.screen.w*2, grassY2,
-        seg.p2.screen.x - roadW - rumbleW, grassY2,
-        seg.p1.screen.x - roadW - rumbleW, grassY1
-      );
-      ctx.fillStyle = "#a33";
-      fillQuad(
-        seg.p1.screen.x + roadW + rumbleW, grassY1,
-        seg.p2.screen.x + roadW + rumbleW, grassY2,
-        seg.p2.screen.x + seg.p2.screen.w*2, grassY2,
-        seg.p1.screen.x + seg.p1.screen.w*2, grassY1
-      );
+      const rumbleW1 = w1 * 1.4;
+      const rumbleW2 = w2 * 1.4;
+      ctx.fillStyle = (n % 2) ? "#ff0000" : "#ffffff";
+      fillQuad(p1.x - rumbleW1, p1.y, p2.x - rumbleW2, p2.y, p2.x - w2, p2.y, p1.x - w1, p1.y);
+      fillQuad(p1.x + w1, p1.y, p2.x + w2, p2.y, p2.x + rumbleW2, p2.y, p1.x + rumbleW1, p1.y);
 
-      // road surface
-      ctx.fillStyle = "#222833";
-      fillQuad(
-        seg.p1.screen.x - roadW, grassY1,
-        seg.p2.screen.x - roadW, grassY2,
-        seg.p2.screen.x + roadW, grassY2,
-        seg.p1.screen.x + roadW, grassY1
-      );
-
-      // center lines
-      if (Math.floor(seg.index/RUMBLE_LEN)%2===0){
-        ctx.fillStyle = "#ddd";
-        const lineW1 = laneW*0.08, lineW2 = laneW*0.04;
-        fillQuad(
-          seg.p1.screen.x - lineW1, grassY1,
-          seg.p2.screen.x - lineW2, grassY2,
-          seg.p2.screen.x + lineW2, grassY2,
-          seg.p1.screen.x + lineW1, grassY1
-        );
+      // lane markings
+      if (n % 3 === 0) {
+        ctx.fillStyle = "#ffffff";
+        const laneW1 = w1 / LANES;
+        const laneW2 = w2 / LANES;
+        const laneX1 = p1.x - w1 + laneW1;
+        const laneX2 = p2.x - w2 + laneW2;
+        const laneX3 = p2.x - w2 + laneW2 * 2;
+        const laneX4 = p1.x - w1 + laneW1 * 2;
+        fillQuad(laneX1, p1.y, laneX2, p2.y, laneX3, p2.y, laneX4, p1.y);
       }
 
-      // roadside sprites
-      seg.sprites.forEach(sp => {
-        const base = lerpPoint(seg.p1.screen, seg.p2.screen, 0.5);
-        const sideX = base.x + (sp.side * roadW * 1.2);
-        const size = base.scale * 150 * sp.size;
-        if (sp.type === 'tree') drawTree(sideX, base.y, size);
-        if (sp.type === 'sign') drawSign(sideX, base.y, size*0.7);
-      });
-
-      maxY = grassY2;
-    }
-
-    // player car (simple shape) always at bottom center with lateral offset
-    drawCar();
-    
-    // Debug info
-    if (segmentsDrawn === 0) {
-      console.log('No road segments drawn, drawing fallback road');
-      // Draw a simple fallback road
-      ctx.fillStyle = "#222833";
-      ctx.fillRect(0, canvas.height * 0.5, canvas.width, canvas.height * 0.5);
-      
-      // Draw center line
-      ctx.fillStyle = "#ddd";
-      ctx.fillRect(canvas.width * 0.5 - 2, canvas.height * 0.5, 4, canvas.height * 0.5);
+      maxY = p1.y;
     }
   }
 
@@ -331,8 +285,10 @@
     const roadCenter = w/2;
     const maxOffsetPx = w*0.35;
     const carX = roadCenter + playerX * maxOffsetPx;
-    const carW = Math.max(60, Math.min(w, h)*0.15); // Much bigger car
-    const carH = carW*0.6; // Slightly taller for better proportions
+    const carW = Math.max(80, Math.min(w, h)*0.2); // Even bigger car
+    const carH = carW*0.7; // Taller for better visibility
+    
+
 
     // shadow
     ctx.fillStyle = "rgba(0,0,0,0.35)";
@@ -341,7 +297,7 @@
     ctx.fill();
 
     // body
-    ctx.fillStyle = "#e33";
+    ctx.fillStyle = "#ff0000"; // Bright red for maximum visibility
     ctx.fillRect(carX - carW*0.5, carY - carH*0.5, carW, carH);
 
     // roof
@@ -367,7 +323,6 @@
 
   // Safety check: ensure road was built properly
   if (!segments || segments.length === 0) {
-    console.error('Road segments not initialized properly');
     segments = []; // Ensure it's at least an empty array
   }
 
@@ -429,10 +384,10 @@
     // Render
     ctx.clearRect(0,0,canvas.width,canvas.height);
     
-    // Debug info
-    console.log('Position:', position, 'Speed:', speed, 'Segments:', segments.length);
-    
     drawRoad();
+    
+    // Draw car on top of the road
+    drawCar();
 
     // UI
     spdEl.textContent = Math.round(speed).toString();
