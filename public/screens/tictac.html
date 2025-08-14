@@ -14,27 +14,35 @@
     <h2>Tic-Tac-Toe</h2>
     <p class="game-description">Play against the computer or a friend!</p>
     
-    <div id="board" class="board"></div>
-    
-    <div class="status-bar">
-      <div id="status" class="status">Your move</div>
-    </div>
-    
-    <div class="toolbar">
-      <button id="btnReset" class="btn">Reset Game</button>
-      <button id="btnToggleMode" class="btn" aria-pressed="false">Mode: vs Computer</button>
-      <button id="btnDifficulty" class="btn">Difficulty: Medium</button>
-    </div>
-    
-    <div class="score-board">
-      <div class="score-item">
-        <span class="player-label">You</span>
-        <span class="score-value" id="playerScore">0</span>
+    <div class="game-grid">
+      <aside class="side left">
+        <div class="toolbar side-toolbar">
+          <button id="btnReset" class="btn">Reset Game</button>
+          <button id="btnToggleMode" class="btn" aria-pressed="false">Mode: vs Computer</button>
+          <button id="btnDifficulty" class="btn">Difficulty: Medium</button>
+        </div>
+      </aside>
+
+      <div class="center">
+        <div id="board" class="board"></div>
       </div>
-      <div class="score-item">
-        <span class="player-label">Computer</span>
-        <span class="score-value" id="computerScore">0</span>
-      </div>
+
+      <aside class="side right">
+        <div class="status-bar">
+          <div id="status" class="status">Your move</div>
+        </div>
+        
+        <div class="score-board">
+          <div class="score-item">
+            <span class="player-label">You</span>
+            <span class="score-value" id="playerScore">0</span>
+          </div>
+          <div class="score-item">
+            <span class="player-label">Computer</span>
+            <span class="score-value" id="computerScore">0</span>
+          </div>
+        </div>
+      </aside>
     </div>
   </div>
 </section>
@@ -118,10 +126,24 @@
     gap: 20px;
     width: 100%;
     max-height: calc(100vh - 64px); /* Ensure panel fits in viewport */
-    overflow-y: auto; /* allow internal scroll so controls remain reachable */
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden; /* no scrolling */
     box-sizing: border-box;
   }
+  
+  /* Three-column layout: controls | board | status */
+  #screen-game .game-grid {
+    display: grid;
+    grid-template-columns: minmax(110px, 160px) auto minmax(110px, 180px);
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    flex: 1;
+  }
+  
+  #screen-game .center { display: flex; justify-content: center; }
+  #screen-game .side { display: flex; flex-direction: column; gap: 12px; align-items: stretch; }
+  #screen-game .side .btn { width: 100%; }
   
   #screen-game h2 {
     font-size: 28px;
@@ -145,7 +167,7 @@
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr); /* ensure stable rows that don't resize with content */
     gap: 8px;
-    width: clamp(240px, 60vmin, 360px); /* responsive but bounded */
+    width: clamp(240px, 55vmin, 360px); /* responsive but bounded to leave room for sidebars */
     aspect-ratio: 1 / 1; /* keep the board square */
     background: rgba(255, 255, 255, 0.03);
     padding: 12px;
@@ -226,9 +248,8 @@
     display: flex;
     gap: 12px;
     margin: 4px 0;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
   }
   
   #screen-game .btn {
@@ -302,10 +323,11 @@
       font-size: 24px;
     }
     
-    #screen-game .board {
-      width: clamp(220px, 60vmin, 320px);
-      padding: 10px;
+    #screen-game .game-grid {
+      grid-template-columns: minmax(96px, 130px) auto minmax(96px, 140px);
+      gap: 12px;
     }
+    #screen-game .board { width: clamp(220px, 50vmin, 320px); padding: 10px; }
     
     #screen-game .cell {
       font-size: 2.5em;
@@ -335,10 +357,7 @@
       height: 32px;
     }
     
-    #screen-game .panel {
-      padding: 12px;
-      gap: 12px;
-    }
+    #screen-game .panel { padding: 12px; gap: 12px; }
     
     #screen-game h2 {
       font-size: 22px;
@@ -349,11 +368,11 @@
       margin-top: -6px;
     }
     
-    #screen-game .board {
-      width: clamp(200px, 60vmin, 280px);
-      padding: 8px;
-      gap: 6px;
+    #screen-game .game-grid {
+      grid-template-columns: minmax(88px, 110px) auto minmax(88px, 110px);
+      gap: 10px;
     }
+    #screen-game .board { width: clamp(200px, 48vmin, 280px); padding: 8px; gap: 6px; }
     
     #screen-game .cell {
       font-size: 2.2em;
