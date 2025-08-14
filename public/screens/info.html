@@ -3,12 +3,7 @@
   <button id="btnHome" class="home-button">🏠</button>
   <div class="panel">
     <h2>System Info</h2>
-    <div class="info-description">
-      <p>Detailed information about your device and browser</p>
-    </div>
-    
     <div class="visual-metrics">
-      <h3>Visual Metrics</h3>
       <div class="gauge-grid">
         <div class="gauge-card">
           <canvas class="gauge-canvas" id="gaugeActivity"></canvas>
@@ -42,7 +37,27 @@
     </div>
 
     <div class="trend-section">
-      <h3>Trends</h3>
+      <h3>System Performance Trends</h3>
+      <div class="trend-info">
+        <div class="trend-stats">
+          <div class="trend-stat">
+            <span class="trend-label">Peak FPS:</span>
+            <span class="trend-value" id="peakFPS">--</span>
+          </div>
+          <div class="trend-stat">
+            <span class="trend-label">Avg Memory:</span>
+            <span class="trend-value" id="avgMemory">--</span>
+          </div>
+          <div class="trend-stat">
+            <span class="trend-label">Network Speed:</span>
+            <span class="trend-value" id="networkSpeed">--</span>
+          </div>
+          <div class="trend-stat">
+            <span class="trend-label">Uptime:</span>
+            <span class="trend-value" id="uptime">--</span>
+          </div>
+        </div>
+      </div>
       <canvas class="trend-canvas" id="trendCanvas"></canvas>
     </div>
 
@@ -272,17 +287,17 @@
     position: absolute;
     top: 15px;
     right: 15px;
-    padding: 10px 15px;
+    padding: 12px 18px;
     background: rgba(255,255,255,0.08);
     border: 1px solid var(--divider);
     border-radius: 12px;
     color: var(--text);
-    font-size: 18px;
+    font-size: 22px;
     cursor: pointer;
     transition: all 0.3s ease;
     z-index: 100;
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -563,6 +578,40 @@
     text-transform: uppercase;
   }
 
+  #screen-info .trend-info {
+    margin-bottom: 16px;
+  }
+  
+  #screen-info .trend-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  
+  #screen-info .trend-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.03);
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--divider);
+  }
+  
+  #screen-info .trend-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  
+  #screen-info .trend-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: 'Courier New', monospace;
+  }
+  
   #screen-info .trend-canvas { width: 100%; height: 220px; display: block; }
 
   /* Sparklines */
@@ -805,6 +854,10 @@
       grid-template-columns: repeat(2, 1fr);
       gap: 12px;
     }
+    #screen-info .trend-stats {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
     #screen-info .chip { padding: 10px 18px; font-size: 14px; }
   }
 
@@ -816,6 +869,7 @@
       word-break: break-word;
     }
     #screen-info .real-time-grid { grid-template-columns: 1fr; }
+    #screen-info .trend-stats { grid-template-columns: 1fr; }
   }
 </style>
 
@@ -837,6 +891,10 @@
     let networkLatency = null;
     let cpuLoadHistory = [];
     let healthUpdateTimer = null;
+    let appStartTime = Date.now();
+    let peakFPS = 0;
+    let totalMemorySamples = 0;
+    let totalMemorySum = 0;
     
     // DOM elements
     let elements = {};
@@ -912,6 +970,12 @@
       elements.memoryHealthBar = document.querySelector('#memoryHealthBar');
       elements.networkQualityBar = document.querySelector('#networkQualityBar');
       elements.overallStatusBar = document.querySelector('#overallStatusBar');
+      
+      // Trend statistics elements
+      elements.peakFPS = document.querySelector('#peakFPS');
+      elements.avgMemory = document.querySelector('#avgMemory');
+      elements.networkSpeed = document.querySelector('#networkSpeed');
+      elements.uptime = document.querySelector('#uptime');
     }
     
     function setupEventListeners() {
@@ -1308,6 +1372,54 @@
       return 80; // Fallback value
     }
     
+    function updateTrendStats() {
+      // Update peak FPS
+      if (lastComputedFPS > peakFPS) {
+        peakFPS = lastComputedFPS;
+      }
+      if (elements.peakFPS) {
+        elements.peakFPS.textContent = `${peakFPS} FPS`;
+      }
+      
+      // Update average memory
+      if ('memory' in performance) {
+        const mem = performance.memory;
+        const currentMem = mem.usedJSHeapSize / 1048576;
+        totalMemorySamples++;
+        totalMemorySum += currentMem;
+        const avgMem = Math.round(totalMemorySum / totalMemorySamples);
+        if (elements.avgMemory) {
+          elements.avgMemory.textContent = `${avgMem} MB`;
+        }
+      }
+      
+      // Update network speed
+      const currentNetSpeed = getDownlinkMbps();
+      if (elements.networkSpeed) {
+        elements.networkSpeed.textContent = `${currentNetSpeed.toFixed(1)} Mbps`;
+      }
+      
+      // Update uptime
+      const uptimeMs = Date.now() - appStartTime;
+      const uptimeSeconds = Math.floor(uptimeMs / 1000);
+      const hours = Math.floor(uptimeSeconds / 3600);
+      const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+      const seconds = uptimeSeconds % 60;
+      
+      let uptimeText = '';
+      if (hours > 0) {
+        uptimeText = `${hours}h ${minutes}m ${seconds}s`;
+      } else if (minutes > 0) {
+        uptimeText = `${minutes}m ${seconds}s`;
+      } else {
+        uptimeText = `${seconds}s`;
+      }
+      
+      if (elements.uptime) {
+        elements.uptime.textContent = uptimeText;
+      }
+    }
+    
     function updateHealthBar(type, value, label, unit) {
       const element = elements[type];
       const barElement = elements[`${type}Bar`];
@@ -1398,6 +1510,9 @@
       const netPercent = clamp((netMbps / 10) * 100, 0, 100);
       drawGauge(elements.gaugeNetworkCanvas, netPercent, ['#00e5ff', '#39ff14']);
 
+      // Update trend statistics
+      updateTrendStats();
+      
       // Draw trend and sparklines
       drawTrend(elements.trendCanvas, history);
       drawSparkline(elements.sparkFPSCanvas, history.fps, '#00e5ff');

@@ -482,6 +482,12 @@
           handleCellClick(e.target);
         }
       });
+      
+      // Direct home button event listener as backup
+      const homeButton = document.querySelector('#btnHome');
+      if (homeButton) {
+        homeButton.addEventListener('click', goHome);
+      }
     }
     
     function handleCellClick(cell) {
@@ -823,6 +829,9 @@
     function goHome() {
       if (window.showcaseFramework && window.showcaseFramework.goHome) {
         window.showcaseFramework.goHome();
+      } else {
+        // Fallback if opened directly
+        window.location.href = '../index.html';
       }
     }
     

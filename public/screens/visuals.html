@@ -347,7 +347,7 @@
       // Faint background trail
       ctx.fillStyle = 'rgba(15,20,36,0.25)';
       ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
-      ctx.strokeStyle = 'rgba(90,150,255,0.8)';
+      ctx.strokeStyle = 'rgba(255,255,0,0.9)';
       ripples.forEach(r => {
         r.r += 120 * dt; r.alpha *= 0.985;
         ctx.globalAlpha = Math.max(0, r.alpha);
