@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Mini OutRun – single file</title>
+<style>
+  :root { --bg:#0a0f1a; --fg:#e7f0ff; --accent:#5cf; }
+  html,body { height:100%; margin:0; background:var(--bg); color:var(--fg); font-family:system-ui,Segoe UI,Roboto,Arial; }
+  #wrap { position:fixed; inset:0; display:flex; flex-direction:column; }
+  header { padding:6px 10px; font-size:14px; opacity:0.85; display:flex; gap:14px; align-items:center; }
+  header .stat b{color:var(--accent)}
+  canvas { flex:1 1 auto; display:block; width:100%; height:100%; background:linear-gradient(#204, #104 40%, #013 60%); }
+  /* Touch controls */
+  #controls { position:fixed; left:0; right:0; bottom:10px; display:flex; justify-content:center; gap:10px; pointer-events:auto; }
+  .btn { user-select:none; -webkit-user-select:none; touch-action:none;
+         background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+         padding:14px 18px; border-radius:14px; backdrop-filter:blur(6px);
+         min-width:52px; text-align:center; font-weight:600; font-size:14px; }
+  .btn:active, .btn.on { background:rgba(92,170,255,0.25); border-color:#5cf; }
+  #hint { position:fixed; right:8px; top:8px; font-size:12px; opacity:0.6; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <div class="stat">Speed: <b id="spd">0</b> km/h</div>
+    <div class="stat">Score: <b id="scr">0</b></div>
+    <div class="stat">FPS: <b id="fps">0</b></div>
+  </header>
+  <canvas id="game"></canvas>
+  <div id="controls">
+    <div class="btn" data-key="ArrowLeft">◀</div>
+    <div class="btn" data-key="ArrowUp">▲</div>
+    <div class="btn" data-key="ArrowDown">▼</div>
+    <div class="btn" data-key="ArrowRight">▶</div>
+  </div>
+  <div id="hint">Keys: arrows, R to reset</div>
+</div>
+
+<script>
+/* Mini OutRun-style road in one file.
+   Focus: simple pseudo-3D projection, lane stripes, curves, hills, roadside sprites.
+   No images, just shapes for speed on Raspberry Pi. */
+
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const spdEl = document.getElementById('spd');
+  const scrEl = document.getElementById('scr');
+  const fpsEl = document.getElementById('fps');
+
+  // Responsive canvas
+  function fit() {
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = Math.floor(canvas.clientWidth * ratio);
+    canvas.height = Math.floor(canvas.clientHeight * ratio);
+  }
+  window.addEventListener('resize', fit, { passive:true });
+  fit();
+
+  // Input
+  const keys = new Set();
+  window.addEventListener('keydown', e => { keys.add(e.key); if (e.key==='r'||e.key==='R') reset(); });
+  window.addEventListener('keyup', e => keys.delete(e.key));
+
+  // Touch buttons map to keys
+  document.querySelectorAll('.btn').forEach(btn => {
+    const k = btn.dataset.key;
+    const press = (on) => { if(on){ keys.add(k); btn.classList.add('on'); } else { keys.delete(k); btn.classList.remove('on'); } };
+    btn.addEventListener('pointerdown', e => { e.preventDefault(); press(true); btn.setPointerCapture(e.pointerId); });
+    btn.addEventListener('pointerup',   e => { e.preventDefault(); press(false); });
+    btn.addEventListener('pointercancel', e => press(false));
+    btn.addEventListener('lostpointercapture', e => press(false));
+  });
+
+  // World constants
+  const ROAD_LENGTH = 5000;      // length of one loop in world units
+  const SEG_LEN = 12;            // meters per road segment
+  const RUMBLE_LEN = 3;          // number of segments per rumble strip
+  const LANES = 3;
+  const MAX_SPEED = 300;         // km/h
+  const ACCEL = 160;             // km/h per second
+  const BRAKE = 240;             // km/h per second
+  const OFFROAD_DECEL = 120;
+  const CENTRIFUGAL = 0.0003;    // lateral force factor
+  const CAMERA_HEIGHT = 1000;
+  const DRAW_DISTANCE = 240;     // number of segments visible
+
+  // State
+  let segments = [];
+  let position = 0;       // player z position along the road (meters)
+  let speed = 0;          // km/h
+  let playerX = 0;        // -1..1 across the road
+  let score = 0;
+  let lastFrameTime = performance.now();
+  let fpsS = 0, fpsC = 0, fpsTimer = 0;
+
+  function easeInOut(a, b, pct) { return a + (b - a) * (0.5 - 0.5*Math.cos(Math.PI*pct)); }
+
+  function addRoad(length, curve, hill) {
+    const start = segments.length;
+    for (let i=0;i<length;i++) {
+      const pct = i/length;
+      const seg = {
+        index: start+i,
+        p1: { world:{ z: (start+i)*SEG_LEN, y:0, x:0 }, screen:{}, cam:{} },
+        p2: { world:{ z: (start+i+1)*SEG_LEN, y:0, x:0 }, screen:{}, cam:{} },
+        curve: 0,
+        sprites: []
+      };
+      seg.curve = easeInOut(0, curve, pct);
+      const h = easeInOut(0, hill, pct);
+      seg.p1.world.y = h*1000;
+      seg.p2.world.y = easeInOut(0, hill, (i+1)/length)*1000;
+      // More frequent roadside objects for better visual appeal
+      if (i % 15 === 0) seg.sprites.push({ side:-1, size:1.6, type:'tree' });
+      if (i % 20 === 0) seg.sprites.push({ side:+1, size:1.1, type:'sign' });
+      if (i % 35 === 0) seg.sprites.push({ side:-1, size:1.3, type:'tree' });
+      if (i % 40 === 0) seg.sprites.push({ side:+1, size:1.0, type:'sign' });
+      segments.push(seg);
+    }
+  }
+
+  function buildRoad() {
+    segments = [];
+    // More interesting road pattern with varied curves and hills
+    addRoad(200, 0, 0);      // Straight start
+    addRoad(250, 0.8, 0.2);  // Gentle curve with slight hill
+    addRoad(180, 0, 0.6);    // Straight uphill
+    addRoad(300, -1.2, 0.4); // Sharp left curve
+    addRoad(220, 0.6, -0.3); // Right curve downhill
+    addRoad(280, 0, 0.8);    // Straight uphill
+    addRoad(320, 1.0, 0.1);  // Right curve
+    addRoad(240, -0.8, -0.5); // Left curve downhill
+    addRoad(260, 0, 0.3);    // Straight
+    addRoad(300, 0.9, 0.2);  // Final curve
+    addRoad(200, 0, 0);      // Straight finish
+    
+    // make it loop
+    // pad to full loop length in meters
+    const meters = segments.length * SEG_LEN;
+    if (meters < ROAD_LENGTH) addRoad(Math.floor((ROAD_LENGTH - meters)/SEG_LEN), 0, 0);
+  }
+
+  function findSegment(z) {
+    // Make sure segments array exists and has content
+    if (!segments || segments.length === 0) {
+      return null;
+    }
+    
+    // Calculate the segment index with bounds checking
+    const index = Math.floor(z / SEG_LEN) % segments.length;
+    
+    // Ensure the index is within valid bounds
+    if (index < 0 || index >= segments.length) {
+      return segments[0]; // Return first segment as fallback
+    }
+    
+    return segments[index];
+  }
+
+  function project(p, camX, camY, camZ) {
+    // Improved projection with better scaling
+    const dz = p.world.z - camZ;
+    const dx = p.world.x - camX;
+    const dy = p.world.y - camY;
+    
+    // Prevent division by zero and ensure minimum distance
+    if (dz < 0.1) dz = 0.1;
+    
+    const scale = CAMERA_HEIGHT / dz;
+    p.cam.z = dz;
+    const w = canvas.width, h = canvas.height;
+    p.screen.x = Math.round((w/2) + (dx * scale * (w/2)));
+    p.screen.y = Math.round((h/2) - (dy * scale * (h/2)));
+    p.screen.w = Math.round(scale * (w/2));
+    p.screen.scale = scale;
+  }
+
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+  function drawRoad() {
+    const baseSeg = findSegment(position);
+    
+    // Safety check: if no valid segment found, don't draw anything
+    if (!baseSeg) {
+      console.log('No base segment found');
+      return;
+    }
+    
+    const baseIdx = baseSeg.index;
+
+    let camX = playerX * 2000;
+    let camY = CAMERA_HEIGHT + baseSeg.p1.world.y;
+    let camZ = position;
+
+    let x=0, dx=0;
+
+    // clear sky already via canvas background gradient
+    // draw road from far to near
+    let maxY = canvas.height;
+    let segmentsDrawn = 0; // Debug counter
+    
+    for (let n=0; n<DRAW_DISTANCE; n++) {
+      const seg = segments[(baseIdx + n) % segments.length];
+
+      seg.p1.world.x = x;
+      seg.p2.world.x = x + dx;
+
+      project(seg.p1, camX, camY, camZ);
+      project(seg.p2, camX, camY, camZ);
+
+      x += dx;
+      dx += seg.curve;
+
+      if (seg.p1.screen.y >= seg.p2.screen.y) continue; // backface cull
+      if (seg.p2.screen.y >= maxY) continue;
+      
+      segmentsDrawn++; // Count drawn segments
+
+      // Road width scales with perspective
+      const laneW = seg.p2.screen.w;
+      const roadW = laneW * 1.9;
+      const rumbleW = laneW * 0.2;
+      const grassY1 = seg.p1.screen.y, grassY2 = seg.p2.screen.y;
+
+      // grass
+      ctx.fillStyle = (Math.floor(seg.index/RUMBLE_LEN)%2===0) ? "#063c2e" : "#084935";
+      ctx.fillRect(0, grassY2, canvas.width, grassY1 - grassY2);
+
+      // rumble strips
+      ctx.fillStyle = "#a33";
+      fillQuad(
+        seg.p1.screen.x - seg.p1.screen.w*2, grassY1,
+        seg.p2.screen.x - seg.p2.screen.w*2, grassY2,
+        seg.p2.screen.x - roadW - rumbleW, grassY2,
+        seg.p1.screen.x - roadW - rumbleW, grassY1
+      );
+      ctx.fillStyle = "#a33";
+      fillQuad(
+        seg.p1.screen.x + roadW + rumbleW, grassY1,
+        seg.p2.screen.x + roadW + rumbleW, grassY2,
+        seg.p2.screen.x + seg.p2.screen.w*2, grassY2,
+        seg.p1.screen.x + seg.p1.screen.w*2, grassY1
+      );
+
+      // road surface
+      ctx.fillStyle = "#222833";
+      fillQuad(
+        seg.p1.screen.x - roadW, grassY1,
+        seg.p2.screen.x - roadW, grassY2,
+        seg.p2.screen.x + roadW, grassY2,
+        seg.p1.screen.x + roadW, grassY1
+      );
+
+      // center lines
+      if (Math.floor(seg.index/RUMBLE_LEN)%2===0){
+        ctx.fillStyle = "#ddd";
+        const lineW1 = laneW*0.08, lineW2 = laneW*0.04;
+        fillQuad(
+          seg.p1.screen.x - lineW1, grassY1,
+          seg.p2.screen.x - lineW2, grassY2,
+          seg.p2.screen.x + lineW2, grassY2,
+          seg.p1.screen.x + lineW1, grassY1
+        );
+      }
+
+      // roadside sprites
+      seg.sprites.forEach(sp => {
+        const base = lerpPoint(seg.p1.screen, seg.p2.screen, 0.5);
+        const sideX = base.x + (sp.side * roadW * 1.2);
+        const size = base.scale * 150 * sp.size;
+        if (sp.type === 'tree') drawTree(sideX, base.y, size);
+        if (sp.type === 'sign') drawSign(sideX, base.y, size*0.7);
+      });
+
+      maxY = grassY2;
+    }
+
+    // player car (simple shape) always at bottom center with lateral offset
+    drawCar();
+    
+    // Debug info
+    if (segmentsDrawn === 0) {
+      console.log('No road segments drawn, drawing fallback road');
+      // Draw a simple fallback road
+      ctx.fillStyle = "#222833";
+      ctx.fillRect(0, canvas.height * 0.5, canvas.width, canvas.height * 0.5);
+      
+      // Draw center line
+      ctx.fillStyle = "#ddd";
+      ctx.fillRect(canvas.width * 0.5 - 2, canvas.height * 0.5, 4, canvas.height * 0.5);
+    }
+  }
+
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function lerpPoint(a, b, t){
+    return { x: lerp(a.x,b.x,t), y: lerp(a.y,b.y,t), scale: lerp(a.scale,b.scale,t) };
+  }
+
+  function fillQuad(x1,y1,x2,y2,x3,y3,x4,y4){
+    ctx.beginPath();
+    ctx.moveTo(x1,y1);
+    ctx.lineTo(x2,y2);
+    ctx.lineTo(x3,y3);
+    ctx.lineTo(x4,y4);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Simple roadside “sprites”
+  function drawTree(x, y, s){
+    ctx.fillStyle = "#2a5";
+    ctx.beginPath();
+    ctx.ellipse(x, y - s*0.8, s*0.6, s*0.8, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = "#531";
+    ctx.fillRect(x - s*0.08, y - s*0.2, s*0.16, s*0.3);
+  }
+  function drawSign(x, y, s){
+    ctx.fillStyle = "#eee";
+    ctx.fillRect(x - s*0.6, y - s*0.6, s*1.2, s*0.7);
+    ctx.fillStyle = "#333";
+    ctx.fillRect(x - s*0.05, y - s*0.6, s*0.1, s*0.8);
+  }
+
+  function drawCar(){
+    const w = canvas.width, h = canvas.height;
+    const carY = h * 0.82;
+    const roadCenter = w/2;
+    const maxOffsetPx = w*0.35;
+    const carX = roadCenter + playerX * maxOffsetPx;
+    const carW = Math.max(60, Math.min(w, h)*0.15); // Much bigger car
+    const carH = carW*0.6; // Slightly taller for better proportions
+
+    // shadow
+    ctx.fillStyle = "rgba(0,0,0,0.35)";
+    ctx.beginPath();
+    ctx.ellipse(carX, carY+carH*0.55, carW*0.55, carH*0.35, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // body
+    ctx.fillStyle = "#e33";
+    ctx.fillRect(carX - carW*0.5, carY - carH*0.5, carW, carH);
+
+    // roof
+    ctx.fillStyle = "#bbb";
+    ctx.fillRect(carX - carW*0.25, carY - carH*0.28, carW*0.5, carH*0.3);
+
+    // wheels
+    ctx.fillStyle = "#111";
+    const ww = carW*0.14, wh = carH*0.45;
+    ctx.fillRect(carX - carW*0.55, carY - wh*0.5, ww, wh);
+    ctx.fillRect(carX + carW*0.41, carY - wh*0.5, ww, wh);
+  }
+
+  function reset(){
+    position = 0;
+    speed = 50; // Start with some speed so the road moves immediately
+    playerX = 0;
+    score = 0;
+  }
+
+  buildRoad();
+  reset();
+
+  // Safety check: ensure road was built properly
+  if (!segments || segments.length === 0) {
+    console.error('Road segments not initialized properly');
+    segments = []; // Ensure it's at least an empty array
+  }
+
+  // Game loop
+  function loop(now){
+    const dt = Math.min(0.05, (now - lastFrameTime)/1000); // clamp to 50 ms
+    lastFrameTime = now;
+
+    // Input
+    const left = keys.has('ArrowLeft');
+    const right = keys.has('ArrowRight');
+    const up = keys.has('ArrowUp');
+    const down = keys.has('ArrowDown');
+
+    // Speed in km/h - more responsive controls
+    if (up)    speed += ACCEL * dt * 1.5; // Faster acceleration
+    else       speed -= ACCEL * 0.3 * dt; // Slower deceleration
+    if (down)  speed -= BRAKE * dt * 1.2; // Stronger braking
+
+    // Offroad penalty if too far
+    const off = Math.abs(playerX) > 1.0;
+    if (off) speed -= OFFROAD_DECEL * dt;
+
+    speed = clamp(speed, 20, MAX_SPEED); // Minimum speed of 20 km/h so road always moves
+
+    // Convert speed to m/s for movement
+    const speedMS = speed * 1000/3600;
+
+    // Lateral movement and centrifugal force from road curvature
+    const seg = findSegment(position);
+    
+    // Safety check: if no valid segment found, use default values
+    if (!seg) {
+      // Use default values to prevent crashes
+      const defaultCurve = 0;
+      playerX -= (left?1:0) * 2.5 * dt; // More responsive steering
+      playerX += (right?1:0) * 2.5 * dt;
+      playerX -= (speedMS * CENTRIFUGAL) * defaultCurve;
+      playerX = clamp(playerX, -2.5, 2.5);
+    } else {
+      const curve = seg.curve;
+      playerX -= (left?1:0) * 2.5 * dt; // More responsive steering
+      playerX += (right?1:0) * 2.5 * dt;
+      playerX -= (speedMS * CENTRIFUGAL) * curve; // push outward in curves
+      playerX = clamp(playerX, -2.5, 2.5);
+    }
+
+    // Advance along road
+    const roadLength = segments.length * SEG_LEN;
+    if (roadLength > 0) {
+      position = (position + speedMS * dt) % roadLength;
+    } else {
+      position = 0; // Fallback if road is not built yet
+    }
+
+    // Score increases with speed
+    score += speedMS * dt;
+
+    // Render
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    
+    // Debug info
+    console.log('Position:', position, 'Speed:', speed, 'Segments:', segments.length);
+    
+    drawRoad();
+
+    // UI
+    spdEl.textContent = Math.round(speed).toString();
+    scrEl.textContent = Math.floor(score).toString();
+
+    // FPS
+    fpsC++; fpsS += 1/dt; fpsTimer += dt;
+    if (fpsTimer >= 0.5) {
+      fpsEl.textContent = Math.round(fpsC/fpsTimer).toString();
+      fpsS = 0; fpsC = 0; fpsTimer = 0;
+    }
+
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
