@@ -118,7 +118,8 @@
     gap: 20px;
     width: 100%;
     max-height: calc(100vh - 64px); /* Ensure panel fits in viewport */
-    overflow: hidden;
+    overflow-y: auto; /* allow internal scroll so controls remain reachable */
+    -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
   }
   

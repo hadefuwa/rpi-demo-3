@@ -605,8 +605,39 @@
     
     function generateInitialItems() {
       if (!scrollBox) return;
-      // Build 30 base items (single set, no looping)
-      const baseMessages = Array.from({ length: 30 }, (_, i) => `📜 Demo item ${i + 1}`);
+      // Build 30 engineering-themed items (single set, no looping)
+      const baseMessages = [
+        "🛠️ Engineering is applied problem‑solving.",
+        "📐 Measure twice, cut once.",
+        "⚡ Ohm’s law: V = I × R.",
+        "🔁 Feedback makes systems stable.",
+        "📊 Tolerance and fit matter in assemblies.",
+        "🌡️ Thermal management protects reliability.",
+        "🧲 Faraday’s law: changing flux induces EMF.",
+        "🔩 Use safety factors for critical parts.",
+        "📦 Design for Manufacture (DFM) early.",
+        "🔧 Debounce mechanical switches.",
+        "🌀 Hysteresis prevents chatter.",
+        "📶 Nyquist: sample > 2× highest frequency.",
+        "🧮 PID = Proportional + Integral + Derivative.",
+        "🌐 Keep interfaces small and clear.",
+        "🪛 Standard parts reduce cost and risk.",
+        "🔋 Power budgets start at the source.",
+        "🧵 Threads need proper engagement length.",
+        "📐 Statics: sum of forces/torques = 0.",
+        "🔌 Grounding and shielding cut noise.",
+        "🧱 Simplicity beats cleverness under load.",
+        "🧪 Test early, test often.",
+        "📈 Monitor and log real‑world behavior.",
+        "🧰 Redundancy improves availability.",
+        "🧭 Requirements drive design choices.",
+        "🧊 Keep margins for temperature and aging.",
+        "🔩 Torque specs protect fasteners.",
+        "⚙️ Lubrication changes wear and heat.",
+        "🔌 PCB trace width depends on current & rise time.",
+        "� Dimension from datums, not edges.",
+        "🛰️ Every constraint is a design lever."
+      ];
       scrollBox.innerHTML = '';
       baseMessages.forEach((msg, index) => createScrollItem(msg, index));
     }
