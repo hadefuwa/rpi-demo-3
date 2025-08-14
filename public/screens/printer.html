@@ -360,8 +360,8 @@
     /* Materials + controls */
     #screen-printer .ams { 
       display:grid; 
-      grid-template-columns: repeat(4, 1fr); 
-      gap:10px; 
+      grid-template-columns: repeat(2, 1fr); 
+      gap:12px; 
       margin-bottom: clamp(12px, 3vh, 24px); 
       flex: 1;
     }
@@ -371,24 +371,30 @@
       border-radius:8px; 
       padding:8px; 
       display:flex; 
+      flex-direction: column;
       gap:8px; 
-      align-items:center; 
+      align-items:stretch; 
+      min-height: 80px;
     }
     #screen-printer .slot .chip { 
-      width: clamp(16px, 2.5vmin, 24px); 
-      height: clamp(16px, 2.5vmin, 24px); 
-      border-radius:4px; 
-      border:1px solid #0008; 
-      display:inline-block; 
+      width: 100%; 
+      height: 100%; 
+      border-radius: 8px; 
+      border: 1px solid #1c2030; 
+      display: block; 
       background-size: cover; 
       background-position: center; 
       background-repeat: no-repeat;
       background-color: #1a1d2a; /* fallback */
+      min-height: 60px;
+      flex: 1;
     }
     #screen-printer .slot .meta { 
       font-size: clamp(11px, 1.8vmin, 14px); 
       color:#cfd6e6; 
       line-height:1.2; 
+      text-align: center;
+      margin-top: 4px;
     }
     #screen-printer .controls { 
       display:flex; 
@@ -479,10 +485,10 @@
           temps: { nozzle: 25, bed: 25, tNozzle: 0, tBed: 0 },
           speed: { multiplier: 100 },
           materials: { slots: [
-            { id:"A1", type:"Orange", color:"#f97f29", grams:230, active:true },
+            { id:"A1", type:"Yellow", color:"#f9c74f", grams:230, active:true },
             { id:"A2", type:"Blue", color:"#577590", grams:180, active:false },
-            { id:"A3", type:"Silver", color:"#bdbdbd", grams:150, active:false },
-            { id:"A4", type:"Yellow", color:"#f9c74f", grams:90, active:false }
+            { id:"A3", type:"Green", color:"#90be6d", grams:150, active:false },
+            { id:"A4", type:"Tort", color:"#f97f29", grams:90, active:false }
           ]},
           camera: { url:"", online:false },
           ts: Date.now()
@@ -661,9 +667,10 @@
       function pickFilamentImageFromType(typeText) {
         const t = String(typeText || '').toUpperCase();
         if (t.includes('YELLOW')) return '../assets/yellow.png';
-        if (t.includes('ORANGE')) return '../assets/orange.png';
+        if (t.includes('ORANGE')) return '../assets/tort.png';
         if (t.includes('BLUE')) return '../assets/blue.png';
-        if (t.includes('SILVER')) return '../assets/silver.png';
+        if (t.includes('GREEN')) return '../assets/green.png';
+        if (t.includes('SILVER')) return '../assets/tort.png';
         return '';
       }
 
@@ -679,11 +686,13 @@
         const isYellow = r > 200 && g > 180 && b < 120;
         const isOrange = r > 200 && g >= 80 && g < 180 && b < 120;
         const isBlue = b > 140 && r < 140;
+        const isGreen = g > 140 && r < 140 && b < 140;
         const isSilver = Math.abs(r-g) < 20 && Math.abs(g-b) < 20 && r > 120; // near gray
         if (isYellow) return '../assets/yellow.png';
-        if (isOrange) return '../assets/orange.png';
+        if (isOrange) return '../assets/tort.png';
         if (isBlue) return '../assets/blue.png';
-        if (isSilver) return '../assets/silver.png';
+        if (isGreen) return '../assets/green.png';
+        if (isSilver) return '../assets/tort.png';
         return '';
       }
 

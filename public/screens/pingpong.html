@@ -19,6 +19,10 @@
           <span class="score-value" id="aiScore">0</span>
         </div>
       </div>
+      <div class="speed-indicator">
+        <span class="speed-label">Speed:</span>
+        <span class="speed-value" id="speedValue">Normal</span>
+      </div>
     </div>
     <div class="game-info">
       <span>First to 11 wins!</span>
@@ -32,11 +36,14 @@
   #screen-pingpong {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 100vh;
+    width: 100vw;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     color: white;
     font-family: 'Arial', sans-serif;
     padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
   
   #screen-pingpong .panel {
@@ -45,10 +52,12 @@
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    max-height: 100%;
+    overflow: hidden;
   }
   
   #screen-pingpong h2 {
-    font-size: 2.5em;
+    font-size: clamp(1.5em, 4vw, 2.5em);
     margin: 0;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
     text-align: center;
@@ -59,7 +68,7 @@
     gap: 15px;
     flex-wrap: wrap;
     justify-content: center;
-    margin: 20px 0;
+    margin: 10px 0;
   }
   
   #screen-pingpong .chip {
@@ -68,7 +77,7 @@
     border-radius: 25px;
     background: rgba(255,255,255,0.1);
     color: white;
-    font-size: 16px;
+    font-size: clamp(14px, 2.5vw, 16px);
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: inherit;
@@ -94,7 +103,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
   }
   
   #screen-pingpong #pingPongCanvas {
@@ -102,6 +114,10 @@
     border-radius: 10px;
     background: #000;
     box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
   }
   
   #screen-pingpong .ping-pong-score {
@@ -120,16 +136,37 @@
   
   #screen-pingpong .score-label {
     display: block;
-    font-size: 16px;
+    font-size: clamp(14px, 2.5vw, 16px);
     opacity: 0.8;
     margin-bottom: 8px;
   }
   
   #screen-pingpong .score-value {
     display: block;
-    font-size: 32px;
+    font-size: clamp(24px, 5vw, 32px);
     font-weight: bold;
     color: #4CAF50;
+  }
+  
+  #screen-pingpong .speed-indicator {
+    display: flex;
+    gap: 10px;
+    background: rgba(255,255,255,0.1);
+    padding: 10px 20px;
+    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.2);
+    align-items: center;
+  }
+  
+  #screen-pingpong .speed-label {
+    font-size: clamp(14px, 2.5vw, 16px);
+    opacity: 0.8;
+  }
+  
+  #screen-pingpong .speed-value {
+    font-size: clamp(14px, 2.5vw, 16px);
+    font-weight: bold;
+    color: #ff9800;
   }
   
   #screen-pingpong .game-info {
@@ -137,7 +174,7 @@
     flex-direction: column;
     gap: 10px;
     text-align: center;
-    font-size: 16px;
+    font-size: clamp(14px, 2.5vw, 16px);
     opacity: 0.9;
   }
   
@@ -150,8 +187,8 @@
   
   /* Responsive design */
   @media (max-width: 768px) {
-    #screen-pingpong h2 {
-      font-size: 2em;
+    #screen-pingpong {
+      padding: 10px;
     }
     
     #screen-pingpong .game-controls {
@@ -160,16 +197,29 @@
     
     #screen-pingpong .chip {
       padding: 10px 20px;
-      font-size: 14px;
     }
     
     #screen-pingpong .ping-pong-score {
       gap: 20px;
       padding: 15px;
     }
+  }
+  
+  @media (max-height: 600px) {
+    #screen-pingpong .panel {
+      gap: 10px;
+    }
     
-    #screen-pingpong .score-value {
-      font-size: 24px;
+    #screen-pingpong h2 {
+      font-size: 1.5em;
+    }
+    
+    #screen-pingpong .game-controls {
+      margin: 5px 0;
+    }
+    
+    #screen-pingpong .ping-pong-container {
+      gap: 10px;
     }
   }
 </style>
@@ -184,16 +234,27 @@
     let isGameRunning = false;
     let isPaused = false;
     
-    // Game objects
+    // Responsive canvas dimensions
+    let canvasWidth = 800;
+    let canvasHeight = 400;
+    let scaleFactor = 1;
+    
+    // Game objects (will be scaled based on canvas size)
     let ball = { x: 0, y: 0, vx: 0, vy: 0, radius: 8 };
     let playerPaddle = { x: 0, y: 0, width: 10, height: 80, speed: 0 };
     let aiPaddle = { x: 0, y: 0, width: 10, height: 80, speed: 0 };
     
     // Game settings
-    const canvasWidth = 800;
-    const canvasHeight = 400;
-    const paddleSpeed = 5;
-    const ballSpeed = 4;
+    const basePaddleSpeed = 5;
+    const baseBallSpeed = 4;
+    let currentBallSpeed = baseBallSpeed;
+    let paddleSpeed = basePaddleSpeed;
+    
+    // Speed ramping system
+    let lastScoreTime = 0;
+    let speedRampStartTime = 0;
+    const maxSpeedMultiplier = 3.0;
+    const speedRampDuration = 30000; // 30 seconds to reach max speed
     
     // Scores
     let playerScore = 0;
@@ -209,15 +270,70 @@
       loadScores();
       resetGame();
       render();
+      
+      // Handle window resize
+      window.addEventListener('resize', handleResize);
     }
     
     function setupCanvas() {
       canvas = document.querySelector('#pingPongCanvas');
       ctx = canvas.getContext('2d');
       
-      // Set canvas size
+      calculateCanvasSize();
+      setCanvasSize();
+    }
+    
+    function calculateCanvasSize() {
+      // Get available space in the container
+      const container = document.querySelector('.ping-pong-container');
+      const containerRect = container.getBoundingClientRect();
+      
+      // Calculate maximum available space (accounting for other elements)
+      const maxWidth = Math.min(window.innerWidth - 40, containerRect.width);
+      const maxHeight = Math.min(window.innerHeight - 200, containerRect.height);
+      
+      // Maintain aspect ratio (2:1)
+      const aspectRatio = 2;
+      
+      if (maxWidth / aspectRatio <= maxHeight) {
+        // Width is the limiting factor
+        canvasWidth = maxWidth;
+        canvasHeight = maxWidth / aspectRatio;
+      } else {
+        // Height is the limiting factor
+        canvasHeight = maxHeight;
+        canvasWidth = maxHeight * aspectRatio;
+      }
+      
+      // Ensure minimum size
+      canvasWidth = Math.max(canvasWidth, 400);
+      canvasHeight = Math.max(canvasHeight, 200);
+      
+      // Calculate scale factor based on original 800x400 size
+      scaleFactor = canvasWidth / 800;
+    }
+    
+    function setCanvasSize() {
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
+      
+      // Update game object sizes based on scale factor
+      ball.radius = 8 * scaleFactor;
+      playerPaddle.width = 10 * scaleFactor;
+      playerPaddle.height = 80 * scaleFactor;
+      aiPaddle.width = 10 * scaleFactor;
+      aiPaddle.height = 80 * scaleFactor;
+      
+      // Update speeds based on scale factor
+      paddleSpeed = basePaddleSpeed * scaleFactor;
+      currentBallSpeed = baseBallSpeed * scaleFactor;
+    }
+    
+    function handleResize() {
+      calculateCanvasSize();
+      setCanvasSize();
+      resetGame();
+      render();
     }
     
     function setupEventListeners() {
@@ -283,6 +399,7 @@
       
       isGameRunning = true;
       isPaused = false;
+      speedRampStartTime = Date.now();
       document.querySelector('#btnPingPongStart').textContent = 'Stop Game';
       document.querySelector('#btnPingPongStart').classList.add('primary');
       document.querySelector('#btnPingPongPause').textContent = 'Pause';
@@ -325,13 +442,14 @@
       // Reset ball
       ball.x = canvasWidth / 2;
       ball.y = canvasHeight / 2;
-      ball.vx = (Math.random() > 0.5 ? 1 : -1) * ballSpeed;
-      ball.vy = (Math.random() - 0.5) * ballSpeed;
+      currentBallSpeed = baseBallSpeed * scaleFactor;
+      ball.vx = (Math.random() > 0.5 ? 1 : -1) * currentBallSpeed;
+      ball.vy = (Math.random() - 0.5) * currentBallSpeed;
       
       // Reset paddles
-      playerPaddle.x = 50;
+      playerPaddle.x = 50 * scaleFactor;
       playerPaddle.y = canvasHeight / 2 - playerPaddle.height / 2;
-      aiPaddle.x = canvasWidth - 50 - aiPaddle.width;
+      aiPaddle.x = canvasWidth - 50 * scaleFactor - aiPaddle.width;
       aiPaddle.y = canvasHeight / 2 - aiPaddle.height / 2;
       
       // Reset scores
@@ -339,14 +457,68 @@
       aiScore = 0;
       updateScores();
       
+      // Reset speed ramping
+      speedRampStartTime = Date.now();
+      updateSpeedIndicator();
+      
       // Stop game if running
       if (isGameRunning) {
         stopGame();
       }
     }
     
+    function updateSpeedRamp() {
+      if (!isGameRunning || isPaused) return;
+      
+      const currentTime = Date.now();
+      const timeSinceStart = currentTime - speedRampStartTime;
+      
+      // Calculate speed multiplier (1.0 to maxSpeedMultiplier over speedRampDuration)
+      const speedMultiplier = 1.0 + (maxSpeedMultiplier - 1.0) * Math.min(timeSinceStart / speedRampDuration, 1.0);
+      
+      // Update ball speed
+      const baseSpeed = baseBallSpeed * scaleFactor;
+      currentBallSpeed = baseSpeed * speedMultiplier;
+      
+      // Update ball velocity magnitude while preserving direction
+      const currentSpeed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+      if (currentSpeed > 0) {
+        const speedRatio = currentBallSpeed / currentSpeed;
+        ball.vx *= speedRatio;
+        ball.vy *= speedRatio;
+      }
+      
+      updateSpeedIndicator(speedMultiplier);
+    }
+    
+    function updateSpeedIndicator(speedMultiplier = 1.0) {
+      const speedElement = document.querySelector('#speedValue');
+      let speedText = 'Normal';
+      let speedColor = '#ff9800';
+      
+      if (speedMultiplier >= 2.5) {
+        speedText = 'Extreme!';
+        speedColor = '#f44336';
+      } else if (speedMultiplier >= 2.0) {
+        speedText = 'Very Fast';
+        speedColor = '#ff5722';
+      } else if (speedMultiplier >= 1.5) {
+        speedText = 'Fast';
+        speedColor = '#ff9800';
+      } else if (speedMultiplier >= 1.2) {
+        speedText = 'Quick';
+        speedColor = '#ffc107';
+      }
+      
+      speedElement.textContent = speedText;
+      speedElement.style.color = speedColor;
+    }
+    
     function updateGame() {
       if (isPaused) return;
+      
+      // Update speed ramping
+      updateSpeedRamp();
       
       // Update player paddle
       if (keys['w'] || keys['arrowup']) {
@@ -382,7 +554,7 @@
         ball.vx = -ball.vx;
         ball.x = playerPaddle.x + playerPaddle.width + ball.radius;
         // Add some randomness to ball direction
-        ball.vy += (Math.random() - 0.5) * 2;
+        ball.vy += (Math.random() - 0.5) * 2 * scaleFactor;
       }
       
       if (ball.x >= aiPaddle.x - ball.radius &&
@@ -391,7 +563,7 @@
         ball.vx = -ball.vx;
         ball.x = aiPaddle.x - ball.radius;
         // Add some randomness to ball direction
-        ball.vy += (Math.random() - 0.5) * 2;
+        ball.vy += (Math.random() - 0.5) * 2 * scaleFactor;
       }
       
       // Ball out of bounds
@@ -421,8 +593,13 @@
     function resetBall() {
       ball.x = canvasWidth / 2;
       ball.y = canvasHeight / 2;
-      ball.vx = (Math.random() > 0.5 ? 1 : -1) * ballSpeed;
-      ball.vy = (Math.random() - 0.5) * ballSpeed;
+      
+      // Reset speed to base and start ramping again
+      currentBallSpeed = baseBallSpeed * scaleFactor;
+      speedRampStartTime = Date.now();
+      
+      ball.vx = (Math.random() > 0.5 ? 1 : -1) * currentBallSpeed;
+      ball.vy = (Math.random() - 0.5) * currentBallSpeed;
     }
     
     function endGame(winner) {
@@ -444,7 +621,7 @@
       
       // Draw center line
       ctx.strokeStyle = '#fff';
-      ctx.setLineDash([5, 15]);
+      ctx.setLineDash([5 * scaleFactor, 15 * scaleFactor]);
       ctx.beginPath();
       ctx.moveTo(canvasWidth / 2, 0);
       ctx.lineTo(canvasWidth / 2, canvasHeight);
@@ -467,10 +644,10 @@
       
       // Draw scores
       ctx.fillStyle = '#fff';
-      ctx.font = '24px Arial';
+      ctx.font = `${24 * scaleFactor}px Arial`;
       ctx.textAlign = 'center';
-      ctx.fillText(playerScore.toString(), canvasWidth / 4, 50);
-      ctx.fillText(aiScore.toString(), 3 * canvasWidth / 4, 50);
+      ctx.fillText(playerScore.toString(), canvasWidth / 4, 50 * scaleFactor);
+      ctx.fillText(aiScore.toString(), 3 * canvasWidth / 4, 50 * scaleFactor);
     }
     
     function updateScores() {
@@ -504,9 +681,8 @@
     }
     
     function goHome() {
-      if (window.showcaseFramework && window.showcaseFramework.goHome) {
-        window.showcaseFramework.goHome();
-      }
+      // Direct navigation back to home
+      window.location.href = '../index.html';
     }
     
     // Lifecycle management
@@ -534,6 +710,7 @@
         console.log('Ping Pong game cleanup');
         stopGame();
         // Remove event listeners
+        window.removeEventListener('resize', handleResize);
         document.removeEventListener('keydown', function(){});
         document.removeEventListener('keyup', function(){});
       }
