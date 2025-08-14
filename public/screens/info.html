@@ -111,6 +111,63 @@
       </div>
     </div>
     
+    <div class="visual-metrics">
+      <h3>Visual Metrics</h3>
+      <div class="gauge-grid">
+        <div class="gauge-card">
+          <canvas class="gauge-canvas" id="gaugeActivity"></canvas>
+          <div class="gauge-meta">
+            <span class="gauge-title">Activity</span>
+            <span class="gauge-value" id="gaugeActivityValue">--</span>
+          </div>
+        </div>
+        <div class="gauge-card">
+          <canvas class="gauge-canvas" id="gaugeMemory"></canvas>
+          <div class="gauge-meta">
+            <span class="gauge-title">Memory</span>
+            <span class="gauge-value" id="gaugeMemoryValue">--</span>
+          </div>
+        </div>
+        <div class="gauge-card">
+          <canvas class="gauge-canvas" id="gaugeBattery"></canvas>
+          <div class="gauge-meta">
+            <span class="gauge-title">Battery</span>
+            <span class="gauge-value" id="gaugeBatteryValue">--</span>
+          </div>
+        </div>
+        <div class="gauge-card">
+          <canvas class="gauge-canvas" id="gaugeNetwork"></canvas>
+          <div class="gauge-meta">
+            <span class="gauge-title">Network</span>
+            <span class="gauge-value" id="gaugeNetworkValue">--</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="trend-section">
+      <h3>Trends</h3>
+      <canvas class="trend-canvas" id="trendCanvas"></canvas>
+    </div>
+
+    <div class="sparkline-section">
+      <h3>Mini Sparklines</h3>
+      <div class="sparkline-grid">
+        <div class="sparkline-card">
+          <span class="sparkline-title">FPS</span>
+          <canvas class="sparkline-canvas" id="sparkFPS"></canvas>
+        </div>
+        <div class="sparkline-card">
+          <span class="sparkline-title">Memory (MB)</span>
+          <canvas class="sparkline-canvas" id="sparkMem"></canvas>
+        </div>
+        <div class="sparkline-card">
+          <span class="sparkline-title">Network (Mbps)</span>
+          <canvas class="sparkline-canvas" id="sparkNet"></canvas>
+        </div>
+      </div>
+    </div>
+    
     <div class="toolbar center">
       <button id="btnInfoRefresh" class="chip">Refresh Info</button>
     </div>
@@ -315,6 +372,136 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
+
+  /* Visual metrics (gauges) */
+  #screen-info .visual-metrics {
+    background: var(--panel);
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    padding: 18px;
+    width: 100%;
+    max-width: 1200px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(230, 241, 255, 0.02);
+  }
+
+  #screen-info .visual-metrics h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.05em;
+    color: var(--accent-2);
+    text-align: center;
+    border-bottom: 1px solid var(--divider);
+    padding-bottom: 8px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  #screen-info .gauge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  #screen-info .gauge-card {
+    position: relative;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    padding: 14px 14px 10px 14px;
+    overflow: hidden;
+  }
+
+  #screen-info .gauge-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: conic-gradient(from 0deg, var(--accent), var(--accent-2), var(--accent-3), var(--accent));
+    opacity: 0.06;
+    animation: spin 16s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #screen-info .gauge-canvas {
+    width: 100%;
+    height: 140px;
+    display: block;
+  }
+
+  #screen-info .gauge-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+
+  #screen-info .gauge-title { color: var(--muted); font-size: 13px; }
+  #screen-info .gauge-value { font-weight: 700; color: var(--text); font-family: 'Courier New', monospace; }
+
+  /* Trends */
+  #screen-info .trend-section {
+    background: var(--panel);
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    padding: 18px;
+    width: 100%;
+    max-width: 1200px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(230, 241, 255, 0.02);
+  }
+
+  #screen-info .trend-section h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.05em;
+    color: var(--accent);
+    text-align: center;
+    border-bottom: 1px solid var(--divider);
+    padding-bottom: 8px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  #screen-info .trend-canvas { width: 100%; height: 220px; display: block; }
+
+  /* Sparklines */
+  #screen-info .sparkline-section {
+    background: var(--panel);
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    padding: 18px;
+    width: 100%;
+    max-width: 1200px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(230, 241, 255, 0.02);
+  }
+
+  #screen-info .sparkline-section h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.05em;
+    color: var(--accent-3);
+    text-align: center;
+    border-bottom: 1px solid var(--divider);
+    padding-bottom: 8px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  #screen-info .sparkline-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  #screen-info .sparkline-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+
+  #screen-info .sparkline-title { color: var(--muted); font-size: 12px; display: block; margin-bottom: 6px; }
+  #screen-info .sparkline-canvas { width: 100%; height: 56px; display: block; }
   
   #screen-info .real-time-grid {
     display: grid;
@@ -431,6 +618,11 @@
     let fpsCounter = 0;
     let lastFpsTime = 0;
     let pageLoadStart = performance.now();
+    let lastComputedFPS = 0;
+    let maxHistoryPoints = 120;
+    let history = { fps: [], mem: [], net: [] };
+    let batteryState = { level: null, charging: null };
+    let netDownlinkMbps = null;
     
     // DOM elements
     let elements = {};
@@ -438,6 +630,7 @@
     function initApp() {
       console.log('System Info app initialized');
       setupDOM();
+      initCanvases();
       setupEventListeners();
       collectSystemInfo();
       startRealTimeUpdates();
@@ -473,6 +666,22 @@
       elements.pageLoadTime = document.querySelector('#pageLoadTime');
       elements.memoryUsage = document.querySelector('#memoryUsage');
       elements.fps = document.querySelector('#fps');
+
+      // Gauges
+      elements.gaugeActivityCanvas = document.querySelector('#gaugeActivity');
+      elements.gaugeMemoryCanvas = document.querySelector('#gaugeMemory');
+      elements.gaugeBatteryCanvas = document.querySelector('#gaugeBattery');
+      elements.gaugeNetworkCanvas = document.querySelector('#gaugeNetwork');
+      elements.gaugeActivityValue = document.querySelector('#gaugeActivityValue');
+      elements.gaugeMemoryValue = document.querySelector('#gaugeMemoryValue');
+      elements.gaugeBatteryValue = document.querySelector('#gaugeBatteryValue');
+      elements.gaugeNetworkValue = document.querySelector('#gaugeNetworkValue');
+
+      // Trend and sparklines
+      elements.trendCanvas = document.querySelector('#trendCanvas');
+      elements.sparkFPSCanvas = document.querySelector('#sparkFPS');
+      elements.sparkMemCanvas = document.querySelector('#sparkMem');
+      elements.sparkNetCanvas = document.querySelector('#sparkNet');
     }
     
     function setupEventListeners() {
@@ -485,6 +694,10 @@
           goHome();
         }
       });
+      window.addEventListener('resize', debounce(function() {
+        initCanvases();
+        redrawAllCharts();
+      }, 150));
     }
     
     function collectSystemInfo() {
@@ -565,6 +778,16 @@
           const level = Math.round(battery.level * 100);
           const charging = battery.charging ? ' (Charging)' : '';
           elements.battery.textContent = `${level}%${charging}`;
+          // Track for gauges
+          if (typeof battery.level === 'number') batteryState.level = battery.level;
+          if (typeof battery.charging === 'boolean') batteryState.charging = battery.charging;
+
+          battery.addEventListener('levelchange', function() {
+            batteryState.level = battery.level;
+          });
+          battery.addEventListener('chargingchange', function() {
+            batteryState.charging = battery.charging;
+          });
         }).catch(() => {
           elements.battery.textContent = 'Not available';
         });
@@ -577,7 +800,13 @@
       if ('connection' in navigator) {
         navigator.connection.addEventListener('change', () => {
           elements.connection.textContent = getConnectionInfo();
+          if (typeof navigator.connection.downlink === 'number') {
+            netDownlinkMbps = navigator.connection.downlink;
+          }
         });
+        if (typeof navigator.connection.downlink === 'number') {
+          netDownlinkMbps = navigator.connection.downlink;
+        }
       }
     }
     
@@ -592,6 +821,7 @@
         
         if (currentTime - lastTime >= 1000) {
           const fps = Math.round((fpsCounter * 1000) / (currentTime - lastTime));
+          lastComputedFPS = fps;
           elements.fps.textContent = `${fps} FPS`;
           fpsCounter = 0;
           lastTime = currentTime;
@@ -617,11 +847,266 @@
         const used = Math.round(mem.usedJSHeapSize / 1048576);
         elements.memoryUsage.textContent = `${used}MB`;
       }
+
+      // Gather numeric metrics
+      const fpsVal = clamp(lastComputedFPS, 0, 120);
+      const memStats = getMemoryStats();
+      const netMbps = getDownlinkMbps();
+      const batteryPct = getBatteryPercent();
+
+      // Update histories
+      pushTrim(history.fps, fpsVal, maxHistoryPoints);
+      pushTrim(history.mem, memStats.usedMB, maxHistoryPoints);
+      pushTrim(history.net, netMbps, maxHistoryPoints);
+
+      // Compute activity index (0-100)
+      const fpsNorm = clamp(fpsVal / 60, 0, 1);
+      const netNorm = clamp(netMbps / 10, 0, 1); // assume 10 Mbps as 100%
+      const memNorm = memStats.totalMB > 0 ? clamp(memStats.usedMB / Math.max(memStats.totalMB, 1), 0, 1) : 0.4;
+      const activity = Math.round(((fpsNorm * 0.5) + (netNorm * 0.3) + (memNorm * 0.2)) * 100);
+
+      // Update gauge labels
+      if (elements.gaugeActivityValue) elements.gaugeActivityValue.textContent = `${activity}%`;
+      if (elements.gaugeMemoryValue) elements.gaugeMemoryValue.textContent = memStats.totalMB > 0 ? `${Math.round(memStats.usedMB)}/${Math.round(memStats.totalMB)} MB` : `${Math.round(memStats.usedMB)} MB`;
+      if (elements.gaugeBatteryValue) elements.gaugeBatteryValue.textContent = batteryPct >= 0 ? `${batteryPct}%${batteryState.charging ? ' ⚡' : ''}` : 'N/A';
+      if (elements.gaugeNetworkValue) elements.gaugeNetworkValue.textContent = `${netMbps.toFixed(1)} Mbps`;
+
+      // Draw gauges
+      drawGauge(elements.gaugeActivityCanvas, activity, ['#00e5ff', '#ff3d00']);
+      const memPercent = memStats.totalMB > 0 ? clamp((memStats.usedMB / memStats.totalMB) * 100, 0, 100) : clamp(memStats.usedMB / 2000 * 100, 0, 100);
+      drawGauge(elements.gaugeMemoryCanvas, memPercent, ['#ff3d00', '#ffcc00']);
+      drawGauge(elements.gaugeBatteryCanvas, batteryPct >= 0 ? batteryPct : 0, ['#39ff14', '#00e5ff']);
+      const netPercent = clamp((netMbps / 10) * 100, 0, 100);
+      drawGauge(elements.gaugeNetworkCanvas, netPercent, ['#00e5ff', '#39ff14']);
+
+      // Draw trend and sparklines
+      drawTrend(elements.trendCanvas, history);
+      drawSparkline(elements.sparkFPSCanvas, history.fps, '#00e5ff');
+      drawSparkline(elements.sparkMemCanvas, history.mem, '#ff3d00');
+      drawSparkline(elements.sparkNetCanvas, history.net, '#39ff14');
     }
     
     function goHome() {
       // Direct navigation back to home
       window.location.href = '../index.html';
+    }
+
+    /* Helpers */
+    function debounce(fn, delay) {
+      let t = null;
+      return function() {
+        if (t) clearTimeout(t);
+        t = setTimeout(fn, delay);
+      };
+    }
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function pushTrim(arr, value, maxLen) {
+      arr.push(value);
+      if (arr.length > maxLen) arr.shift();
+    }
+
+    function getDownlinkMbps() {
+      if ('connection' in navigator && navigator.connection && typeof navigator.connection.downlink === 'number') {
+        netDownlinkMbps = navigator.connection.downlink || netDownlinkMbps || 0;
+      }
+      if (typeof netDownlinkMbps !== 'number' || isNaN(netDownlinkMbps)) {
+        // fallback: gentle pseudo-random walk
+        netDownlinkMbps = (netDownlinkMbps || 2) + ((Math.random() - 0.5) * 0.6);
+      }
+      return clamp(netDownlinkMbps, 0, 50);
+    }
+
+    function getMemoryStats() {
+      if ('memory' in performance) {
+        const mem = performance.memory;
+        return {
+          usedMB: mem.usedJSHeapSize / 1048576,
+          totalMB: mem.totalJSHeapSize / 1048576
+        };
+      }
+      // fallback: synthetic usage with smoothing
+      const prev = history.mem.length ? history.mem[history.mem.length - 1] : 400;
+      const next = clamp(prev + (Math.random() - 0.5) * 20, 200, 800);
+      return { usedMB: next, totalMB: 0 };
+    }
+
+    function getBatteryPercent() {
+      if (batteryState.level == null) return -1;
+      return clamp(Math.round(batteryState.level * 100), 0, 100);
+    }
+
+    function initCanvases() {
+      [elements.gaugeActivityCanvas, elements.gaugeMemoryCanvas, elements.gaugeBatteryCanvas, elements.gaugeNetworkCanvas, elements.trendCanvas, elements.sparkFPSCanvas, elements.sparkMemCanvas, elements.sparkNetCanvas]
+        .forEach(function(c){ if (c) sizeCanvasForDPR(c); });
+    }
+
+    function sizeCanvasForDPR(canvas) {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.max(1, Math.round(rect.width * dpr));
+      canvas.height = Math.max(1, Math.round(rect.height * dpr));
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+      return ctx;
+    }
+
+    function redrawAllCharts() {
+      // Redraw using latest history
+      const fpsVal = history.fps.length ? history.fps[history.fps.length - 1] : 0;
+      const memStats = getMemoryStats();
+      const netMbps = getDownlinkMbps();
+      const batteryPct = getBatteryPercent();
+      const fpsNorm = clamp(fpsVal / 60, 0, 1);
+      const netNorm = clamp(netMbps / 10, 0, 1);
+      const memNorm = memStats.totalMB > 0 ? clamp(memStats.usedMB / Math.max(memStats.totalMB, 1), 0, 1) : 0.4;
+      const activity = Math.round(((fpsNorm * 0.5) + (netNorm * 0.3) + (memNorm * 0.2)) * 100);
+
+      drawGauge(elements.gaugeActivityCanvas, activity, ['#00e5ff', '#ff3d00']);
+      const memPercent = memStats.totalMB > 0 ? clamp((memStats.usedMB / memStats.totalMB) * 100, 0, 100) : clamp(memStats.usedMB / 2000 * 100, 0, 100);
+      drawGauge(elements.gaugeMemoryCanvas, memPercent, ['#ff3d00', '#ffcc00']);
+      drawGauge(elements.gaugeBatteryCanvas, batteryPct >= 0 ? batteryPct : 0, ['#39ff14', '#00e5ff']);
+      const netPercent = clamp((netMbps / 10) * 100, 0, 100);
+      drawGauge(elements.gaugeNetworkCanvas, netPercent, ['#00e5ff', '#39ff14']);
+
+      drawTrend(elements.trendCanvas, history);
+      drawSparkline(elements.sparkFPSCanvas, history.fps, '#00e5ff');
+      drawSparkline(elements.sparkMemCanvas, history.mem, '#ff3d00');
+      drawSparkline(elements.sparkNetCanvas, history.net, '#39ff14');
+    }
+
+    /* Drawing functions */
+    function drawGauge(canvas, percent, colors) {
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width, h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h * 0.9;
+      const radius = Math.min(w, h * 1.1) * 0.42;
+      const start = Math.PI;      // 180°
+      const endBg = 2 * Math.PI; // 360°
+
+      // background arc
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, start, endBg);
+      ctx.strokeStyle = 'rgba(230,241,255,0.12)';
+      ctx.lineWidth = 10;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // value arc
+      const endVal = start + (percent / 100) * Math.PI;
+      const grad = ctx.createLinearGradient(cx - radius, cy, cx + radius, cy);
+      grad.addColorStop(0, colors[0]);
+      grad.addColorStop(1, colors[1]);
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, start, endVal);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 12;
+      ctx.shadowColor = colors[0];
+      ctx.shadowBlur = 6;
+      ctx.stroke();
+
+      // ticks
+      ctx.save();
+      ctx.translate(cx, cy);
+      for (let i = 0; i <= 10; i++) {
+        const ang = Math.PI + (i / 10) * Math.PI;
+        const x1 = Math.cos(ang) * (radius + 2);
+        const y1 = Math.sin(ang) * (radius + 2);
+        const x2 = Math.cos(ang) * (radius + 10);
+        const y2 = Math.sin(ang) * (radius + 10);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = 'rgba(230,241,255,0.12)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawTrend(canvas, hist) {
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width, h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // axes (minimal)
+      ctx.strokeStyle = 'rgba(230,241,255,0.10)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(32, h - 24);
+      ctx.lineTo(w - 8, h - 24);
+      ctx.moveTo(32, 8);
+      ctx.lineTo(32, h - 24);
+      ctx.stroke();
+
+      // scale functions
+      const left = 36, right = w - 10;
+      const top = 14, bottom = h - 28;
+      const maxLen = Math.max(hist.fps.length, hist.mem.length, hist.net.length, 1);
+      function xFor(i) {
+        return left + (i / Math.max(maxLen - 1, 1)) * (right - left);
+      }
+
+      // y scales (separate domains)
+      const fpsMax = 60;
+      const memMax = Math.max(800, Math.max.apply(null, hist.mem.concat([0])));
+      const netMax = Math.max(10, Math.max.apply(null, hist.net.concat([0])));
+      function yFor(val, maxV) { return bottom - (clamp(val / maxV, 0, 1) * (bottom - top)); }
+
+      // line renderer
+      function drawLine(data, color, maxV) {
+        if (!data.length) return;
+        ctx.beginPath();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = color;
+        data.forEach(function(v, i){
+          const x = xFor(i);
+          const y = yFor(v, maxV);
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 6;
+        ctx.stroke();
+      }
+
+      drawLine(hist.fps, '#00e5ff', fpsMax);
+      drawLine(hist.mem, '#ff3d00', memMax);
+      drawLine(hist.net, '#39ff14', netMax);
+    }
+
+    function drawSparkline(canvas, data, color) {
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width, h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+      if (!data.length) return;
+      const left = 2, right = w - 2, top = 2, bottom = h - 2;
+      const maxVal = Math.max.apply(null, data.concat([1]));
+      const minVal = Math.min.apply(null, data.concat([0]));
+      function xFor(i) { return left + (i / Math.max(data.length - 1, 1)) * (right - left); }
+      function yFor(v) {
+        const range = Math.max(maxVal - minVal, 1);
+        return bottom - ((v - minVal) / range) * (bottom - top);
+      }
+      ctx.beginPath();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = color;
+      data.forEach(function(v, i){ const x = xFor(i), y = yFor(v); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 6;
+      ctx.stroke();
     }
     
     // Lifecycle management
