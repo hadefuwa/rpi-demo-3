@@ -142,9 +142,10 @@
   #screen-game .board {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr); /* ensure stable rows that don't resize with content */
     gap: 8px;
-    width: 300px;
-    height: 300px;
+    width: clamp(240px, 60vmin, 360px); /* responsive but bounded */
+    aspect-ratio: 1 / 1; /* keep the board square */
     background: rgba(255, 255, 255, 0.03);
     padding: 12px;
     border-radius: 12px;
@@ -168,6 +169,9 @@
     overflow: hidden;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     will-change: transform;
+    aspect-ratio: 1 / 1; /* keep individual cells square */
+    min-width: 0; /* avoid overflow in grid */
+    line-height: 1; /* prevent text from affecting height */
   }
   
   #screen-game .cell:hover {
@@ -298,8 +302,7 @@
     }
     
     #screen-game .board {
-      width: 280px;
-      height: 280px;
+      width: clamp(220px, 60vmin, 320px);
       padding: 10px;
     }
     
@@ -346,8 +349,7 @@
     }
     
     #screen-game .board {
-      width: 240px;
-      height: 240px;
+      width: clamp(200px, 60vmin, 280px);
       padding: 8px;
       gap: 6px;
     }

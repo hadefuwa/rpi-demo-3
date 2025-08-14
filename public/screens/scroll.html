@@ -456,13 +456,7 @@
   const scrollBox = document.querySelector('#scrollbox');
   const screenEl = document.querySelector('#screen-scroll');
   const DRAG_TOLERANCE = 8; // px movement to consider as dragging
-    // Infinite loop state
-    let baseSetCount = 0;       // number of items in one base set
-    let loopStartTop = 0;       // scrollTop where the middle (second) set begins
-    let loopEndTop = 0;         // scrollTop where the third set begins
-    let loopSpan = 0;           // distance between start of second and third set
-    let loopEnabled = false;    // whether infinite loop is active
-    let isLoopAdjusting = false;// guard to avoid recursive scroll handling
+  // (Removed infinite loop state)
     
     function initApp() {
       console.log('Scroll Test app initialized');
@@ -589,10 +583,6 @@
       // Add scroll event listener for dynamic effects
       if (scrollBox) {
         scrollBox.addEventListener('scroll', handleScroll);
-          // Keep loop boundaries accurate on viewport changes
-          window.addEventListener('resize', () => {
-            requestAnimationFrame(computeLoopMetrics);
-          }, { passive: true });
         
   // Simple touch event listeners - let browser handle native scrolling
   scrollBox.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -615,46 +605,10 @@
     
     function generateInitialItems() {
       if (!scrollBox) return;
-      // Build 30 base items
+      // Build 30 base items (single set, no looping)
       const baseMessages = Array.from({ length: 30 }, (_, i) => `📜 Demo item ${i + 1}`);
-      baseSetCount = baseMessages.length;
-
-      // Clear existing and create 3 consecutive sets for seamless looping
       scrollBox.innerHTML = '';
-      // First set: deterministic numbering via index
       baseMessages.forEach((msg, index) => createScrollItem(msg, index));
-      // Second and third sets: append identical items
-      baseMessages.forEach((msg) => createScrollItem(msg));
-      baseMessages.forEach((msg) => createScrollItem(msg));
-
-      // Compute loop metrics and position to the middle copy
-      requestAnimationFrame(() => {
-        computeLoopMetrics();
-        if (loopEnabled) {
-          scrollBox.scrollTop = loopStartTop + 1; // avoid immediate wrap
-        }
-      });
-    }
-
-    function computeLoopMetrics() {
-      if (!scrollBox) return;
-      const items = scrollBox.querySelectorAll('.scroll-item');
-      if (baseSetCount === 0 || items.length < baseSetCount * 3) {
-        loopEnabled = false;
-        return;
-      }
-      const idxStart = baseSetCount;       // first item of 2nd set
-      const idxEnd = baseSetCount * 2;     // first item of 3rd set
-      const startEl = items[idxStart];
-      const endEl = items[idxEnd];
-      if (!startEl || !endEl) {
-        loopEnabled = false;
-        return;
-      }
-      loopStartTop = startEl.offsetTop;
-      loopEndTop = endEl.offsetTop;
-      loopSpan = loopEndTop - loopStartTop;
-      loopEnabled = loopSpan > 0;
     }
     
     function createScrollItem(text, index = null) {
@@ -760,21 +714,7 @@
         
         item.style.transform = `scale(${scale})`;
         item.style.opacity = opacity;
-      });
-        // Infinite loop wrap-around
-        if (loopEnabled && !isLoopAdjusting) {
-          const st = scrollBox.scrollTop;
-          const threshold = 2; // small tolerance
-          if (st < loopStartTop - threshold) {
-            isLoopAdjusting = true;
-            scrollBox.scrollTop = st + loopSpan;
-            isLoopAdjusting = false;
-          } else if (st >= loopEndTop + threshold) {
-            isLoopAdjusting = true;
-            scrollBox.scrollTop = st - loopSpan;
-            isLoopAdjusting = false;
-          }
-        }
+  });
     }
     
     let touchStartY = 0;
