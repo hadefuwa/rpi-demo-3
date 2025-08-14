@@ -7,6 +7,63 @@
       <p>Detailed information about your device and browser</p>
     </div>
     
+    <div class="visual-metrics">
+      <h3>Visual Metrics</h3>
+      <div class="gauge-grid">
+        <div class="gauge-card">
+          <canvas class="gauge-canvas" id="gaugeActivity"></canvas>
+          <div class="gauge-meta">
+            <span class="gauge-title">Activity</span>
+            <span class="gauge-value" id="gaugeActivityValue">--</span>
+          </div>
+        </div>
+        <div class="gauge-card">
+          <canvas class="gauge-canvas" id="gaugeMemory"></canvas>
+          <div class="gauge-meta">
+            <span class="gauge-title">Memory</span>
+            <span class="gauge-value" id="gaugeMemoryValue">--</span>
+          </div>
+        </div>
+        <div class="gauge-card">
+          <canvas class="gauge-canvas" id="gaugeBattery"></canvas>
+          <div class="gauge-meta">
+            <span class="gauge-title">Battery</span>
+            <span class="gauge-value" id="gaugeBatteryValue">--</span>
+          </div>
+        </div>
+        <div class="gauge-card">
+          <canvas class="gauge-canvas" id="gaugeNetwork"></canvas>
+          <div class="gauge-meta">
+            <span class="gauge-title">Network</span>
+            <span class="gauge-value" id="gaugeNetworkValue">--</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="trend-section">
+      <h3>Trends</h3>
+      <canvas class="trend-canvas" id="trendCanvas"></canvas>
+    </div>
+
+    <div class="sparkline-section">
+      <h3>Mini Sparklines</h3>
+      <div class="sparkline-grid">
+        <div class="sparkline-card">
+          <span class="sparkline-title">FPS</span>
+          <canvas class="sparkline-canvas" id="sparkFPS"></canvas>
+        </div>
+        <div class="sparkline-card">
+          <span class="sparkline-title">Memory (MB)</span>
+          <canvas class="sparkline-canvas" id="sparkMem"></canvas>
+        </div>
+        <div class="sparkline-card">
+          <span class="sparkline-title">Network (Mbps)</span>
+          <canvas class="sparkline-canvas" id="sparkNet"></canvas>
+        </div>
+      </div>
+    </div>
+
     <div class="info-grid">
       <div class="info-section">
         <h3>Device Information</h3>
@@ -111,62 +168,7 @@
       </div>
     </div>
     
-    <div class="visual-metrics">
-      <h3>Visual Metrics</h3>
-      <div class="gauge-grid">
-        <div class="gauge-card">
-          <canvas class="gauge-canvas" id="gaugeActivity"></canvas>
-          <div class="gauge-meta">
-            <span class="gauge-title">Activity</span>
-            <span class="gauge-value" id="gaugeActivityValue">--</span>
-          </div>
-        </div>
-        <div class="gauge-card">
-          <canvas class="gauge-canvas" id="gaugeMemory"></canvas>
-          <div class="gauge-meta">
-            <span class="gauge-title">Memory</span>
-            <span class="gauge-value" id="gaugeMemoryValue">--</span>
-          </div>
-        </div>
-        <div class="gauge-card">
-          <canvas class="gauge-canvas" id="gaugeBattery"></canvas>
-          <div class="gauge-meta">
-            <span class="gauge-title">Battery</span>
-            <span class="gauge-value" id="gaugeBatteryValue">--</span>
-          </div>
-        </div>
-        <div class="gauge-card">
-          <canvas class="gauge-canvas" id="gaugeNetwork"></canvas>
-          <div class="gauge-meta">
-            <span class="gauge-title">Network</span>
-            <span class="gauge-value" id="gaugeNetworkValue">--</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="trend-section">
-      <h3>Trends</h3>
-      <canvas class="trend-canvas" id="trendCanvas"></canvas>
-    </div>
-
-    <div class="sparkline-section">
-      <h3>Mini Sparklines</h3>
-      <div class="sparkline-grid">
-        <div class="sparkline-card">
-          <span class="sparkline-title">FPS</span>
-          <canvas class="sparkline-canvas" id="sparkFPS"></canvas>
-        </div>
-        <div class="sparkline-card">
-          <span class="sparkline-title">Memory (MB)</span>
-          <canvas class="sparkline-canvas" id="sparkMem"></canvas>
-        </div>
-        <div class="sparkline-card">
-          <span class="sparkline-title">Network (Mbps)</span>
-          <canvas class="sparkline-canvas" id="sparkNet"></canvas>
-        </div>
-      </div>
-    </div>
+    
     
     <div class="toolbar center">
       <button id="btnInfoRefresh" class="chip">Refresh Info</button>
