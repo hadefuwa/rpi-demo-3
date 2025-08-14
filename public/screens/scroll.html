@@ -80,6 +80,37 @@
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.8; transform: scale(1.1); }
   }
+
+  /* Subtle scrolling background overlay */
+  #screen-scroll::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 1; /* below .panel (z-index:2), above base gradient */
+    opacity: 0.16;
+    background:
+      repeating-linear-gradient(135deg,
+        rgba(255,255,255,0.06) 0px,
+        rgba(255,255,255,0.06) 2px,
+        transparent 2px,
+        transparent 14px);
+    animation: panBackground 50s linear infinite;
+    will-change: transform;
+    transform: scale(1.2);
+  }
+
+  @keyframes panBackground {
+    0%   { transform: scale(1.2) translate3d(0%,   0%,   0); }
+    50%  { transform: scale(1.2) translate3d(-8%, -8%,  0); }
+    100% { transform: scale(1.2) translate3d(0%,   0%,   0); }
+  }
+
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    #screen-scroll::after { animation: none; }
+    #screen-scroll::before { animation: none; }
+  }
   
   /* Header styles */
   #screen-scroll .header {

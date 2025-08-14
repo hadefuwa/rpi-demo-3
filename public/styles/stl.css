@@ -4,17 +4,19 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding: 0; /* Remove default padding */
+  margin: 0; /* Remove default margin */
 }
 
 .panel {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: var(--spacing-sm);
-  margin: var(--spacing-xs);
-  border-radius: var(--radius-lg);
+  padding: var(--spacing-xs); /* Minimal padding */
+  margin: 0; /* Remove margin for full expansion */
+  border-radius: 0; /* Remove border radius for full coverage */
   background: var(--card);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: none; /* Remove border for cleaner look */
   backdrop-filter: blur(10px);
   min-height: 0; /* Important for flex shrinking */
   overflow: hidden;
@@ -43,14 +45,12 @@
 #stlCanvas { 
   width: 100%; 
   flex: 1;
-  min-height: 200px;
-  max-height: calc(100vh - 200px); /* Reserve space for controls */
-  border-radius: var(--radius-md); 
+  min-height: 300px; /* Increased minimum height */
+  max-height: calc(100vh - 120px); /* Reduced offset for more space */
+  border-radius: 0; /* Remove border radius for full coverage */
   background: linear-gradient(135deg, #0b0e13 0%, #1a1a2e 50%, #16213e 100%); 
-  border: 2px solid rgba(100, 149, 237, 0.3); 
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 2px 8px rgba(100, 149, 237, 0.1);
+  border: none; /* Remove border for cleaner look */
+  box-shadow: none; /* Remove shadow for cleaner look */
   position: relative;
 }
 
@@ -172,13 +172,13 @@
 
 @media (max-width: 768px) {
   .panel {
-    padding: var(--spacing-xs);
-    margin: var(--spacing-xs);
+    padding: 2px; /* Minimal padding for mobile */
+    margin: 0;
   }
   
   #stlCanvas {
-    min-height: 150px;
-    max-height: calc(100vh - 180px); /* Less space for mobile controls */
+    min-height: 200px; /* Reduced for mobile but still substantial */
+    max-height: calc(100vh - 100px); /* More space for mobile */
   }
   
   .stl-controls {
@@ -244,13 +244,13 @@
 /* Extra small screens */
 @media (max-width: 480px) {
   .panel {
-    padding: var(--spacing-xs);
-    margin: 2px;
+    padding: 2px; /* Minimal padding */
+    margin: 0;
   }
   
   #stlCanvas {
-    min-height: 120px;
-    max-height: calc(100vh - 160px);
+    min-height: 180px; /* Increased minimum for better visibility */
+    max-height: calc(100vh - 80px); /* Maximum space utilization */
   }
   
   .stl-controls {

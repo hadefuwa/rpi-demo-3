@@ -7,6 +7,7 @@
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
         <polyline points="9 22 9 12 15 12 15 22"></polyline>
       </svg>
+      <span class="home-label">Home</span>
     </button>
   </header>
   
@@ -82,23 +83,23 @@
   
   /* Home button styles */
   #screen-game .home-button {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     color: #e4e6f1;
     cursor: pointer;
     transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
   }
+
+  #screen-game .home-button svg { width: 28px; height: 28px; }
+  #screen-game .home-button .home-label { font-size: 16px; font-weight: 600; letter-spacing: 0.2px; }
   
-  #screen-game .home-button:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
+  #screen-game .home-button:hover { background: rgba(255, 255, 255, 0.16); }
   
   #screen-game .home-button:active {
     transform: scale(0.95);
@@ -450,20 +451,23 @@
       
       // Handle board clicks
       container.addEventListener('click', function(e) {
-        if (e.target.classList.contains('cell')) {
+        const target = e.target;
+        const id = target.id || (target.closest && target.closest('button') && target.closest('button').id) || '';
+        if (target.classList && target.classList.contains('cell')) {
           handleCellClick(e.target);
-        } else if (e.target.id === 'btnReset') {
+        } else if (id === 'btnReset') {
           resetGame();
-        } else if (e.target.id === 'btnHome') {
+        } else if (id === 'btnHome') {
           goHome();
-        } else if (e.target.id === 'btnToggleMode') {
+        } else if (id === 'btnToggleMode') {
           aiEnabled = !aiEnabled;
-          e.target.setAttribute('aria-pressed', String(!aiEnabled));
+          const btn = document.getElementById('btnToggleMode');
+          if (btn) btn.setAttribute('aria-pressed', String(!aiEnabled));
           updateModeUI();
           saveSettings();
           // Start a fresh round when switching modes
           resetGame();
-        } else if (e.target.id === 'btnDifficulty') {
+        } else if (id === 'btnDifficulty') {
           cycleDifficulty();
           updateDifficultyUI();
           saveSettings();

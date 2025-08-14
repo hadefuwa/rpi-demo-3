@@ -35,39 +35,53 @@
       
              // Determine quality mode based on device capabilities
        function determineQualityMode() {
-         // Check for GPU issues in user agent or console errors
-         const hasGPUIssues = deviceInfo.userAgent.includes('Mesa') || 
-                             deviceInfo.userAgent.includes('llvmpipe') ||
-                             deviceInfo.userAgent.includes('Software');
+         // Enhanced RPi detection patterns
+         const userAgent = deviceInfo.userAgent.toLowerCase();
+         const isRaspberryPi = userAgent.includes('armv7l') || 
+                              userAgent.includes('aarch64') || 
+                              userAgent.includes('armv8') ||
+                              userAgent.includes('linux arm') ||
+                              deviceInfo.platform.toLowerCase().includes('arm');
          
-         // Pi 3B+ detection (4 cores, low memory, older GPU) - force low quality
-         if (deviceInfo.cores === 4 && 
-             deviceInfo.memory <= 1 && 
-             deviceInfo.userAgent.includes('armv7l')) {
+         // Check for GPU issues in user agent or renderer info
+         const hasGPUIssues = userAgent.includes('mesa') || 
+                             userAgent.includes('llvmpipe') ||
+                             userAgent.includes('software') ||
+                             (deviceInfo.gpuRenderer && deviceInfo.gpuRenderer.toLowerCase().includes('llvmpipe'));
+         
+         // RPi 3B+ and older detection - force very low quality
+         if (isRaspberryPi && deviceInfo.cores <= 4 && deviceInfo.memory <= 1) {
+           console.log('RPi 3B+ or older detected, using minimal quality mode');
            return 'low';
          }
          
-         // Force low quality if GPU issues detected
+         // RPi 4 detection - moderate quality 
+         if (isRaspberryPi && deviceInfo.cores === 4 && deviceInfo.memory > 1 && deviceInfo.memory <= 4) {
+           console.log('RPi 4 detected, using medium quality mode');
+           return 'medium';
+         }
+         
+         // RPi 5 detection - better quality
+         if (isRaspberryPi && (deviceInfo.cores > 4 || deviceInfo.memory > 4)) {
+           console.log('RPi 5 detected, using high quality mode');
+           return 'high';
+         }
+         
+         // Force low quality if GPU issues detected on any device
          if (hasGPUIssues) {
            console.log('GPU issues detected, forcing low quality mode');
            return 'low';
          }
          
-         // Pi 4 detection (4 cores, more memory, better GPU)
-         if (deviceInfo.cores === 4 && 
-             deviceInfo.memory > 1 && 
-             deviceInfo.userAgent.includes('armv7l')) {
-           return 'medium';
+         // Generic ARM devices
+         if (isRaspberryPi) {
+           console.log('Generic ARM device detected, using low quality mode');
+           return 'low';
          }
-         // Pi 5 detection (4+ cores, more memory, modern GPU)
-         if (deviceInfo.cores >= 4 && 
-             deviceInfo.memory > 2 && 
-             (deviceInfo.userAgent.includes('aarch64') || deviceInfo.userAgent.includes('armv8'))) {
-           return 'high';
-         }
-         // Fallback based on memory
-         if (deviceInfo.memory <= 1) return 'low';
-         if (deviceInfo.memory <= 2) return 'medium';
+         
+         // Fallback based on memory for non-ARM devices
+         if (deviceInfo.memory <= 2) return 'low';
+         if (deviceInfo.memory <= 4) return 'medium';
          return 'high';
        }
       
@@ -153,7 +167,7 @@
     .stl-wrap {
       position: relative;
       width: 100%;
-      height: calc(100vh - 120px); /* Adjust for header and controls */
+      height: calc(100vh - 80px); /* Reduced from 120px to expand canvas */
       touch-action: none; /* Allow Three.js to handle all touch events */
     }
     
@@ -238,7 +252,7 @@
       }
       
       .stl-wrap {
-        height: calc(100vh - 160px);
+        height: calc(100vh - 120px); /* Reduced padding for mobile */
       }
       
       .stl-controls {
@@ -268,8 +282,8 @@
     
     <main>
       <section id="screen-stl" class="screen active">
-        <div class="container">
-          <div class="panel">
+        <div class="container" style="padding: 0; margin: 0;">
+          <div class="panel" style="padding: var(--spacing-xs); margin: 0;">
             <div class="note">Drag to rotate • Scroll to zoom</div>
             
             <div class="stl-wrap">
@@ -301,30 +315,52 @@
     let stars = [];
     
     // Load Three.js with timeout and fallback
-    function loadScript(src, fallbackSrc = null) {
+    function loadScript(src, fallbackSrc = null, localFallback = null) {
       return new Promise((resolve, reject) => {
         const script = document.createElement('script');
         script.src = src;
-        script.onload = () => resolve();
+        script.onload = () => {
+          console.log(`Successfully loaded: ${src}`);
+          resolve();
+        };
         script.onerror = () => {
+          console.warn(`Failed to load ${src}`);
           if (fallbackSrc) {
-            console.log(`Failed to load ${src}, trying fallback...`);
+            console.log(`Trying fallback: ${fallbackSrc}`);
             const fallbackScript = document.createElement('script');
             fallbackScript.src = fallbackSrc;
-            fallbackScript.onload = () => resolve();
-            fallbackScript.onerror = () => reject(new Error(`Failed to load ${src} and fallback`));
+            fallbackScript.onload = () => {
+              console.log(`Successfully loaded fallback: ${fallbackSrc}`);
+              resolve();
+            };
+            fallbackScript.onerror = () => {
+              if (localFallback) {
+                console.log(`Trying local fallback: ${localFallback}`);
+                const localScript = document.createElement('script');
+                localScript.src = localFallback;
+                localScript.onload = () => {
+                  console.log(`Successfully loaded local fallback: ${localFallback}`);
+                  resolve();
+                };
+                localScript.onerror = () => reject(new Error(`All fallbacks failed for ${src}`));
+                document.head.appendChild(localScript);
+              } else {
+                reject(new Error(`Failed to load ${src} and fallback`));
+              }
+            };
             document.head.appendChild(fallbackScript);
           } else {
             reject(new Error(`Failed to load ${src}`));
           }
         };
         
-        // Add timeout
+        // Add timeout for RPi slow connections
         setTimeout(() => {
-          if (!script.onload) {
+          if (!script.onload.called) {
+            console.warn(`Timeout loading ${src}, triggering error handler`);
             script.onerror();
           }
-        }, 10000); // 10 second timeout
+        }, 15000); // 15 second timeout for RPi
         
         document.head.appendChild(script);
       });
@@ -332,18 +368,51 @@
     
     // Load all required scripts
     async function loadDependencies() {
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      
       try {
-        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
-        await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js');
-        await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js');
+        loadingIndicator.textContent = 'Loading 3D libraries...';
+        
+        // Try multiple CDNs for better RPi compatibility
+        await loadScript(
+          'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
+          'https://unpkg.com/three@0.128.0/build/three.min.js',
+          'https://cdn.skypack.dev/three@0.128.0'
+        );
+        
+        loadingIndicator.textContent = 'Loading STL loader...';
+        await loadScript(
+          'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js',
+          'https://unpkg.com/three@0.128.0/examples/js/loaders/STLLoader.js'
+        );
+        
+        loadingIndicator.textContent = 'Loading orbit controls...';
+        await loadScript(
+          'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js',
+          'https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js'
+        );
+        
         console.log('All Three.js dependencies loaded successfully');
-        initApp();
+        loadingIndicator.textContent = 'Initializing 3D viewer...';
+        
+        // Add small delay for RPi processing
+        setTimeout(() => {
+          initApp();
+        }, 500);
+        
       } catch (error) {
         console.error('Failed to load Three.js dependencies:', error);
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        if (loadingIndicator) {
-          loadingIndicator.textContent = 'Failed to load 3D libraries. Please check your internet connection.';
-        }
+        loadingIndicator.innerHTML = `
+          <div style="text-align: center;">
+            <div>Failed to load 3D libraries</div>
+            <div style="font-size: 0.9em; margin-top: 10px; opacity: 0.7;">
+              Please check your internet connection and try refreshing the page
+            </div>
+            <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #6bcbef; border: none; border-radius: 4px; color: black; cursor: pointer;">
+              Retry
+            </button>
+          </div>
+        `;
       }
     }
     
@@ -366,7 +435,10 @@
        
        // Renderer setup with quality-based settings and GPU fallbacks
        const qualityMode = window.QUALITY_MODE || 'medium';
-       const rendererOptions = {
+       console.log(`Setting up renderer for quality mode: ${qualityMode}`);
+       
+       // Base renderer options optimized for RPi
+       const baseOptions = {
          canvas: canvas,
          alpha: true,
          powerPreference: 'low-power', // Force low-power mode for RPi
@@ -374,37 +446,51 @@
          preserveDrawingBuffer: false,
          depth: true,
          stencil: false,
-         antialias: false // Disable antialiasing for better performance
+         antialias: false, // Disable antialiasing for better performance
+         precision: 'lowp', // Use low precision for better compatibility
+         logarithmicDepthBuffer: false // Disable for better compatibility
        };
        
-       // Try to create WebGL renderer with fallbacks
-       try {
-         renderer = new THREE.WebGLRenderer(rendererOptions);
-         console.log('WebGL renderer created successfully');
-       } catch (error) {
-         console.warn('WebGL renderer failed, trying fallback options:', error);
-         
-         // Fallback renderer options for problematic GPUs
-         const fallbackOptions = {
-           canvas: canvas,
-           alpha: true,
-           powerPreference: 'low-power',
-           failIfMajorPerformanceCaveat: false,
-           preserveDrawingBuffer: false,
-           depth: true,
-           stencil: false,
-           antialias: false,
-           precision: 'lowp' // Use low precision for better compatibility
-         };
-         
+       // Try multiple renderer configurations
+       const rendererConfigs = [
+         // First try: standard WebGL
+         { ...baseOptions },
+         // Second try: force WebGL 1.0 for better compatibility
+         { ...baseOptions, context: 'webgl' },
+         // Third try: experimental WebGL
+         { ...baseOptions, context: 'experimental-webgl' },
+         // Fourth try: minimal options
+         { canvas: canvas, alpha: false, powerPreference: 'low-power', failIfMajorPerformanceCaveat: false }
+       ];
+       
+       let rendererCreated = false;
+       
+       for (let i = 0; i < rendererConfigs.length && !rendererCreated; i++) {
          try {
-           renderer = new THREE.WebGLRenderer(fallbackOptions);
-           console.log('Fallback WebGL renderer created successfully');
-         } catch (fallbackError) {
-           console.error('Both WebGL renderers failed:', fallbackError);
-           document.getElementById('loadingIndicator').textContent = 'WebGL not supported on this device.';
-           return;
+           console.log(`Attempting renderer config ${i + 1}`);
+           renderer = new THREE.WebGLRenderer(rendererConfigs[i]);
+           console.log(`WebGL renderer created successfully with config ${i + 1}`);
+           rendererCreated = true;
+         } catch (error) {
+           console.warn(`Renderer config ${i + 1} failed:`, error);
          }
+       }
+       
+       if (!rendererCreated) {
+         console.error('All WebGL renderer configurations failed');
+         const loadingIndicator = document.getElementById('loadingIndicator');
+         loadingIndicator.innerHTML = `
+           <div style="text-align: center;">
+             <div>WebGL not supported on this device</div>
+             <div style="font-size: 0.9em; margin-top: 10px; opacity: 0.7;">
+               Your browser or hardware doesn't support 3D graphics
+             </div>
+             <button onclick="window.location.href='../index.html'" style="margin-top: 10px; padding: 8px 16px; background: #6bcbef; border: none; border-radius: 4px; color: black; cursor: pointer;">
+               Back to Home
+             </button>
+           </div>
+         `;
+         return;
        }
        
        renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
@@ -531,44 +617,77 @@
       // Remove current model
       if (currentModel) {
         scene.remove(currentModel);
+        // Force garbage collection hint
+        if (currentModel.geometry) currentModel.geometry.dispose();
+        if (currentModel.material) currentModel.material.dispose();
+        currentModel = null;
       }
       
       const loader = new THREE.STLLoader();
+      
+      // Add timeout for RPi slow loading
+      const loadTimeout = setTimeout(() => {
+        console.warn('Model loading timeout');
+        loadingIndicator.innerHTML = `
+          <div style="text-align: center;">
+            <div>Loading taking longer than expected...</div>
+            <div style="font-size: 0.9em; margin-top: 10px; opacity: 0.7;">
+              Please wait or try a different model
+            </div>
+          </div>
+        `;
+      }, 30000); // 30 second timeout
+      
       loader.load(
         `../assets/${filename}`,
         function(geometry) {
-                     // Create material with quality-based settings
-           const qualityMode = window.QUALITY_MODE || 'medium';
-           const materialOptions = {
-             color: 0xffffff, // Changed from blue (0x6bcbef) to white (0xffffff)
-             shininess: qualityMode === 'low' ? 50 : 100,
-             specular: qualityMode === 'low' ? 0x111111 : 0x222222
-           };
+          clearTimeout(loadTimeout);
           
-          const material = new THREE.MeshPhongMaterial(materialOptions);
-          
-                     // Create mesh
-           currentModel = new THREE.Mesh(geometry, material);
-           
-           // Disable shadows for all quality modes to improve performance on RPi 3
-           currentModel.castShadow = false;
-           currentModel.receiveShadow = false;
-          
-          // Center and scale the model
-          geometry.computeBoundingBox();
-          const box = geometry.boundingBox;
-          const center = box.getCenter(new THREE.Vector3());
-          geometry.translate(-center.x, -center.y, -center.z);
-          
-          const size = box.getSize(new THREE.Vector3());
-          const maxDim = Math.max(size.x, size.y, size.z);
-          const scale = 2 / maxDim;
-          currentModel.scale.setScalar(scale);
-          
-          scene.add(currentModel);
-          loadingIndicator.style.display = 'none';
-          
-          console.log(`Loaded model: ${filename} with quality mode: ${qualityMode}`);
+          try {
+                       // Create material with quality-based settings
+             const qualityMode = window.QUALITY_MODE || 'medium';
+             const materialOptions = {
+               color: 0xffffff, // White color for better visibility
+               shininess: qualityMode === 'low' ? 30 : (qualityMode === 'medium' ? 50 : 100),
+               specular: qualityMode === 'low' ? 0x111111 : (qualityMode === 'medium' ? 0x222222 : 0x333333),
+               flatShading: qualityMode === 'low' // Use flat shading for better performance on low-end devices
+             };
+            
+            const material = new THREE.MeshPhongMaterial(materialOptions);
+            
+                       // Create mesh
+             currentModel = new THREE.Mesh(geometry, material);
+             
+             // Disable shadows for all quality modes to improve performance on RPi
+             currentModel.castShadow = false;
+             currentModel.receiveShadow = false;
+            
+            // Center and scale the model
+            geometry.computeBoundingBox();
+            const box = geometry.boundingBox;
+            const center = box.getCenter(new THREE.Vector3());
+            geometry.translate(-center.x, -center.y, -center.z);
+            
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 2 / maxDim;
+            currentModel.scale.setScalar(scale);
+            
+            scene.add(currentModel);
+            loadingIndicator.style.display = 'none';
+            
+            console.log(`Successfully loaded model: ${filename} with quality mode: ${qualityMode}`);
+          } catch (error) {
+            console.error('Error processing model geometry:', error);
+            loadingIndicator.innerHTML = `
+              <div style="text-align: center;">
+                <div>Error processing 3D model</div>
+                <button onclick="loadModel('${filename}')" style="margin-top: 10px; padding: 8px 16px; background: #6bcbef; border: none; border-radius: 4px; color: black; cursor: pointer;">
+                  Retry
+                </button>
+              </div>
+            `;
+          }
         },
         function(progress) {
           if (progress.total > 0) {
@@ -577,11 +696,19 @@
           }
         },
         function(error) {
+          clearTimeout(loadTimeout);
           console.error('Error loading STL:', error);
-          loadingIndicator.textContent = 'Error loading model. Please try again.';
-          setTimeout(() => {
-            loadingIndicator.style.display = 'none';
-          }, 3000);
+          loadingIndicator.innerHTML = `
+            <div style="text-align: center;">
+              <div>Error loading model: ${filename}</div>
+              <div style="font-size: 0.9em; margin-top: 10px; opacity: 0.7;">
+                Network error or file not found
+              </div>
+              <button onclick="loadModel('${filename}')" style="margin-top: 10px; padding: 8px 16px; background: #6bcbef; border: none; border-radius: 4px; color: black; cursor: pointer;">
+                Retry
+              </button>
+            </div>
+          `;
         }
       );
     }
