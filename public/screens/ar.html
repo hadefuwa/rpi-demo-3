@@ -518,13 +518,13 @@
     // Initialize AR Application
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🎯 Initializing AR Demo...');
-      // First check camera permissions before initializing AR
-      checkCameraPermissions().then(() => {
+      // Skip the separate camera permission check since camera.html works
+      // AR.js will handle camera access directly
+      updateLoadingMessage('Starting AR system...', 'Initializing AR.js...', 'Camera will be requested by AR.js...');
+      
+      setTimeout(() => {
         initializeAR();
-      }).catch((error) => {
-        console.error('Camera permission error:', error);
-        showError('Camera access is required for AR. Please allow camera access and refresh the page.');
-      });
+      }, 1000); // Small delay to show loading message
     });
 
     // Check camera permissions first - RPi Optimized
@@ -593,9 +593,9 @@
       if (detailTextEl) detailTextEl.textContent = detailText;
     }
 
-    // Initialize AR Scene - RPi Optimized
+    // Initialize AR Scene - Let AR.js handle camera access directly
     function initializeAR() {
-      updateLoadingMessage('Initializing AR.js for RPi...', 'Setting up augmented reality system...', 'Loading AR.js libraries and markers...');
+      updateLoadingMessage('Initializing AR.js for RPi...', 'Setting up augmented reality system...', 'AR.js will request camera access...');
       console.log('🎯 Starting AR.js initialization for Raspberry Pi...');
       arScene = document.querySelector('#ar-scene');
       
@@ -618,19 +618,14 @@
       // Set renderer for RPi performance
       arScene.setAttribute('renderer', `logarithmicDepthBuffer: true; precision: ${config.precision}; antialias: false; alpha: true;`);
       
-      // Wait for AR.js to initialize
+      // Wait for AR.js to initialize - this will handle camera access
       arScene.addEventListener('loaded', function() {
         console.log('📱 AR Scene loaded successfully on RPi');
-        updateLoadingMessage('AR Scene Ready!', 'Starting camera feed...', 'Almost ready...');
-        
-        setTimeout(() => {
-          hideLoadingScreen();
-          setupAREventListeners();
-          updateStatus('AR Ready - Look for Hiro marker', 'ar');
-        }, 1500); // Longer delay for RPi
+        updateLoadingMessage('AR Scene Ready!', 'Camera access will be requested...', 'Please allow camera access when prompted');
+        updateStatus('AR Scene Loaded', 'ar');
       });
 
-      // Handle successful camera stream
+      // Handle successful camera stream - this means camera access worked
       arScene.addEventListener('arjs-video-loaded', function() {
         console.log('📹 AR Camera stream loaded successfully on RPi');
         updateLoadingMessage('Camera Active!', 'AR system ready', 'Point your camera at a Hiro marker');
@@ -638,6 +633,8 @@
         
         setTimeout(() => {
           hideLoadingScreen();
+          setupAREventListeners();
+          updateStatus('AR Ready - Look for Hiro marker', 'ar');
         }, 1000);
       });
 
@@ -655,12 +652,22 @@
         }
       });
 
-      // Longer timeout for RPi - hardware takes more time
+      // Monitor for camera permission issues
+      setTimeout(() => {
+        // If still loading after 10 seconds, check what's happening
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen && loadingScreen.style.display !== 'none') {
+          console.warn('⚠️ Still loading after 10 seconds, checking for permission prompt...');
+          updateLoadingMessage('Waiting for camera permission...', 'Please allow camera access in browser popup', 'Look for permission request at top of browser');
+        }
+      }, 10000);
+
+      // Final timeout for RPi - hardware takes more time
       setTimeout(() => {
         const loadingScreen = document.getElementById('loading-screen');
         if (loadingScreen && loadingScreen.style.display !== 'none') {
           console.warn('⚠️ AR initialization timeout on RPi');
-          showError('AR initialization timeout on Raspberry Pi. This is common on slower hardware. Try: 1) Closing other browser tabs, 2) Rebooting the Pi, 3) Using a higher-quality SD card, 4) Ensuring good power supply.');
+          showError('AR initialization timeout on Raspberry Pi. This could be due to: 1) Camera permission not granted, 2) Camera being used by another app, 3) Hardware limitations. Try refreshing and allowing camera access.');
         }
       }, 25000); // 25 seconds for RPi
 
@@ -821,7 +828,7 @@
       console.log(`📹 Camera ${cameraActive ? 'enabled' : 'disabled'}`);
     }
 
-    // Retry camera access
+    // Retry camera access - simplified approach
     function retryCamera() {
       console.log('🔄 Retrying camera access...');
       const errorDiv = document.getElementById('error-message');
@@ -829,23 +836,11 @@
       
       const loadingScreen = document.getElementById('loading-screen');
       loadingScreen.style.display = 'flex';
-      updateLoadingMessage('Retrying camera access...', 'Please allow camera permissions...', 'Attempting to reconnect...');
+      updateLoadingMessage('Retrying AR initialization...', 'Restarting AR.js system...', 'Please allow camera access when prompted...');
       
-      // Reset AR scene
-      const scene = document.querySelector('#ar-scene');
-      const parent = scene.parentNode;
-      const newScene = scene.cloneNode(true);
-      parent.removeChild(scene);
-      parent.appendChild(newScene);
-      
-      // Reinitialize
+      // Simple page reload approach - most reliable for camera issues
       setTimeout(() => {
-        checkCameraPermissions().then(() => {
-          initializeAR();
-        }).catch((error) => {
-          console.error('Retry failed:', error);
-          showError('Camera access still failed: ' + error.message + '. Please check your browser settings and ensure no other application is using the camera.');
-        });
+        window.location.reload();
       }, 1000);
     }
 
@@ -964,20 +959,63 @@
     // Apply optimizations when page loads
     document.addEventListener('DOMContentLoaded', applyQualityOptimizations);
 
-    // Console commands for debugging
+    // Console commands for debugging - Enhanced for camera issues
     window.arDebug = {
       getMarkerState: () => isMarkerVisible,
       getObjectStates: () => objectStates,
       getCurrentMarker: () => currentMarker,
       forceMarkerFound: () => animateObjectsIn(),
-      resetAll: resetScene
+      resetAll: resetScene,
+      checkCameraStatus: () => {
+        const video = document.querySelector('video');
+        if (video) {
+          console.log('📹 Video element found:', video.src);
+          console.log('📊 Video stats:', {
+            videoWidth: video.videoWidth,
+            videoHeight: video.videoHeight,
+            readyState: video.readyState,
+            paused: video.paused,
+            srcObject: !!video.srcObject
+          });
+        } else {
+          console.log('❌ No video element found');
+        }
+        
+        // Check for AR.js camera
+        const arVideo = document.querySelector('video[data-aframe-default-camera]');
+        if (arVideo) {
+          console.log('🎯 AR.js video found:', arVideo);
+        }
+        
+        return video || arVideo;
+      },
+      forceHideLoading: () => {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          loadingScreen.style.display = 'none';
+        }
+      },
+      testBasicCamera: async () => {
+        try {
+          console.log('🧪 Testing basic camera access...');
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 320, height: 240 }
+          });
+          console.log('✅ Basic camera access works!');
+          stream.getTracks().forEach(track => track.stop());
+          return true;
+        } catch (error) {
+          console.error('❌ Basic camera test failed:', error);
+          return false;
+        }
+      }
     };
 
     console.log('🎯 AR Debug commands available:');
+    console.log('  arDebug.checkCameraStatus() - Check camera/video status');
+    console.log('  arDebug.testBasicCamera() - Test basic camera access');
+    console.log('  arDebug.forceHideLoading() - Force hide loading screen');
     console.log('  arDebug.getMarkerState() - Check if marker is visible');
-    console.log('  arDebug.getObjectStates() - Get object visibility states');
-    console.log('  arDebug.getCurrentMarker() - Get current marker type');
-    console.log('  arDebug.forceMarkerFound() - Trigger marker found animation');
     console.log('  arDebug.resetAll() - Reset entire scene');
   </script>
 </body>
