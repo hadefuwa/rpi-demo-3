@@ -9,62 +9,19 @@
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar-nft.js"></script>
   
-  <!-- Raspberry Pi Camera Detection Script -->
+  <!-- Raspberry Pi Camera Detection Script - Simplified -->
   <script>
-    // Detect Raspberry Pi and optimize accordingly
-    (function() {
-      'use strict';
-      
-      const isRaspberryPi = () => {
-        const userAgent = navigator.userAgent.toLowerCase();
-        const platform = navigator.platform.toLowerCase();
-        
-        return userAgent.includes('armv7l') || 
-               userAgent.includes('armv6l') || 
-               userAgent.includes('aarch64') ||
-               platform.includes('linux arm') ||
-               (navigator.hardwareConcurrency <= 4 && navigator.deviceMemory <= 4);
-      };
-      
-      const isLocalHost = () => {
-        return window.location.hostname === 'localhost' || 
-               window.location.hostname === '127.0.0.1' ||
-               window.location.hostname.startsWith('192.168') ||
-               window.location.hostname.startsWith('10.') ||
-               window.location.hostname.includes('.local');
-      };
-      
-      // Set global RPi detection
-      window.isRaspberryPi = isRaspberryPi();
-      window.isLocalHost = isLocalHost();
-      
-      console.log('🥧 Raspberry Pi detected:', window.isRaspberryPi);
-      console.log('🏠 Local network:', window.isLocalHost);
-      
-      // RPi specific optimizations
-      if (window.isRaspberryPi) {
-        // Reduce performance for RPi
-        window.RPi_AR_Config = {
-          videoWidth: 320,
-          videoHeight: 240,
-          frameRate: 10,
-          detectionMode: 'mono',
-          smoothing: false,
-          precision: 'lowp'
-        };
-        console.log('🎯 RPi AR Config applied:', window.RPi_AR_Config);
-      } else {
-        // Full performance for desktop/other devices
-        window.RPi_AR_Config = {
-          videoWidth: 640,
-          videoHeight: 480,
-          frameRate: 30,
-          detectionMode: 'mono_and_matrix',
-          smoothing: true,
-          precision: 'mediump'
-        };
-      }
-    })();
+    // Simple RPi detection
+    const isRaspberryPi = () => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      return userAgent.includes('armv7l') || 
+             userAgent.includes('armv6l') || 
+             userAgent.includes('aarch64') ||
+             (navigator.hardwareConcurrency <= 4 && navigator.deviceMemory <= 4);
+    };
+    
+    window.isRaspberryPi = isRaspberryPi();
+    console.log('🥧 Raspberry Pi detected:', window.isRaspberryPi);
   </script>
   
   <style>
@@ -218,39 +175,25 @@
       font-size: 12px;
     }
     
-    /* Loading screen */
+    /* Loading screen - simplified */
     .loading-screen {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: rgba(0, 0, 0, 0.8);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 2000;
-      transition: opacity 0.5s ease;
-    }
-    
-    .loading-spinner {
-      width: 60px;
-      height: 60px;
-      border: 4px solid rgba(255, 255, 255, 0.3);
-      border-top: 4px solid #fff;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      transition: opacity 0.3s ease;
     }
     
     .loading-text {
       margin-top: 20px;
-      font-size: 18px;
+      font-size: 16px;
       color: white;
       text-align: center;
     }
@@ -346,13 +289,10 @@
   </style>
 </head>
 <body>
-  <!-- Loading Screen -->
+  <!-- Simple Loading Screen -->
   <div id="loading-screen" class="loading-screen">
-    <div class="loading-spinner"></div>
     <div class="loading-text">
-      <p id="loading-main-text">Initializing AR Camera...</p>
-      <p id="loading-sub-text" style="font-size: 14px; margin-top: 10px; opacity: 0.8;">Please allow camera access when prompted</p>
-      <p id="loading-detail" style="font-size: 12px; margin-top: 10px; opacity: 0.6;">Setting up AR.js and camera stream...</p>
+      <p id="loading-main-text">Starting AR Camera...</p>
     </div>
   </div>
 
@@ -515,231 +455,67 @@
       'ar-text': true
     };
 
-    // Initialize AR Application - Using working camera.html approach
+    // Initialize AR Application - Direct like camera.html (no setup needed!)
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('🎯 Initializing AR Demo with camera.html approach...');
+      console.log('🎯 Starting AR Demo - camera already works!');
       
-      // First test camera access using the exact same method as camera.html
-      testCameraAccess().then(() => {
-        console.log('✅ Camera test successful, proceeding with AR.js');
-        initializeAR();
-      }).catch((error) => {
-        console.error('❌ Camera test failed:', error);
-        showError('Camera access failed: ' + error.message + '. Please check camera permissions and try again.');
-      });
+      // Skip camera testing since camera.html works perfectly
+      // Go straight to AR.js initialization
+      initializeAR();
     });
 
-    // Test camera access using camera.html method
-    async function testCameraAccess() {
-      try {
-        updateLoadingMessage('Testing camera access...', 'Using camera.html method...', 'Please allow camera access...');
-        console.log('📹 Testing camera access with camera.html method...');
-        
-        // Use the exact same constraints as camera.html
-        const isSmallScreen = window.innerWidth <= 800;
-        const constraints = isSmallScreen ? {
-          video: {
-            width: { ideal: 640 },
-            height: { ideal: 480 },
-            frameRate: { ideal: 15, max: 30 }
-          }
-        } : {
-          video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            facingMode: 'environment'
-          }
-        };
 
-        console.log('🎥 Using camera.html constraints:', constraints);
-        
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        console.log('✅ Camera access granted with camera.html method');
-        
-        // Log stream details like camera.html does
-        console.log('📊 Stream settings:', {
-          width: stream.getVideoTracks()[0].getSettings().width,
-          height: stream.getVideoTracks()[0].getSettings().height,
-          frameRate: stream.getVideoTracks()[0].getSettings().frameRate
-        });
-        
-        // Stop the test stream
-        stream.getTracks().forEach(track => track.stop());
-        
-        updateLoadingMessage('Camera test successful!', 'Starting AR.js...', 'Camera permissions verified');
-        return true;
-      } catch (error) {
-        console.error('❌ Camera test failed:', error);
-        
-        // Use the same error handling as camera.html
-        let errorMessage = 'Failed to access camera: ';
-        
-        if (error.name === 'NotAllowedError') {
-          errorMessage += 'Permission denied. Please allow camera access.';
-        } else if (error.name === 'NotFoundError') {
-          errorMessage += 'No camera found.';
-        } else if (error.name === 'NotSupportedError') {
-          errorMessage += 'Camera not supported by browser.';
-        } else if (error.name === 'NotReadableError') {
-          errorMessage += 'Camera is busy or not accessible.';
-        } else {
-          errorMessage += error.message;
-        }
-        
-        throw new Error(errorMessage);
-      }
-    }
 
-    // Check camera permissions first - RPi Optimized
-    async function checkCameraPermissions() {
-      try {
-        updateLoadingMessage('Checking camera permissions...', 'Optimizing for Raspberry Pi...', 'Testing camera access...');
-        console.log('📹 Checking camera permissions on RPi...');
-        
-        // RPi-optimized camera constraints
-        const config = window.RPi_AR_Config || {
-          videoWidth: 320,
-          videoHeight: 240,
-          frameRate: 10
-        };
-        
-        const constraints = {
-          video: {
-            width: { ideal: config.videoWidth, max: 640 },
-            height: { ideal: config.videoHeight, max: 480 },
-            frameRate: { ideal: config.frameRate, max: 15 },
-            facingMode: 'environment' // Use back camera if available
-          }
-        };
-        
-        console.log('🎥 Using RPi camera constraints:', constraints);
-        
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        console.log('✅ Camera access granted on RPi');
-        console.log('📊 Stream settings:', {
-          width: stream.getVideoTracks()[0].getSettings().width,
-          height: stream.getVideoTracks()[0].getSettings().height,
-          frameRate: stream.getVideoTracks()[0].getSettings().frameRate
-        });
-        
-        // Stop the test stream immediately
-        stream.getTracks().forEach(track => track.stop());
-        
-        updateLoadingMessage('Camera access granted!', 'Initializing AR for Raspberry Pi...', 'Setting up AR.js...');
-        updateStatus('Camera Permission Granted', 'camera');
-        return true;
-      } catch (error) {
-        console.error('❌ Camera access failed on RPi:', error);
-        
-        if (error.name === 'NotAllowedError') {
-          throw new Error('Camera access denied. On Raspberry Pi, make sure the camera is enabled in raspi-config and not being used by another process.');
-        } else if (error.name === 'NotFoundError') {
-          throw new Error('No camera found. Please check if your RPi camera is properly connected and enabled in raspi-config.');
-        } else if (error.name === 'NotSupportedError') {
-          throw new Error('Camera not supported. Try using Chromium browser on Raspberry Pi for better camera support.');
-        } else if (error.name === 'NotReadableError') {
-          throw new Error('Camera is busy or not accessible. Make sure no other application is using the camera.');
-        } else {
-          throw new Error('Failed to access camera on RPi: ' + error.message + '. Try restarting the browser or rebooting the Pi.');
-        }
-      }
-    }
 
-    // Update loading message
-    function updateLoadingMessage(mainText, subText = '', detailText = '') {
+    // Update loading message - simplified
+    function updateLoadingMessage(mainText) {
       const mainTextEl = document.getElementById('loading-main-text');
-      const subTextEl = document.getElementById('loading-sub-text');
-      const detailTextEl = document.getElementById('loading-detail');
-      
       if (mainTextEl) mainTextEl.textContent = mainText;
-      if (subTextEl) subTextEl.textContent = subText;
-      if (detailTextEl) detailTextEl.textContent = detailText;
     }
 
-    // Initialize AR Scene - After successful camera test
+    // Initialize AR Scene - direct start since camera works
     function initializeAR() {
-      updateLoadingMessage('Camera verified! Starting AR...', 'Initializing AR.js system...', 'Setting up augmented reality...');
-      console.log('🎯 Starting AR.js after successful camera test...');
+      updateLoadingMessage('Starting AR - camera ready!');
+      console.log('🎯 Starting AR.js - camera already works perfectly...');
       arScene = document.querySelector('#ar-scene');
       
-      // Use similar optimization as camera.html for small screens
-      const isSmallScreen = window.innerWidth <= 800;
-      let config;
-      
-      if (isSmallScreen) {
-        // RPi/small screen optimization
-        config = {
-          videoWidth: 640,
-          videoHeight: 480,
-          frameRate: 15,
-          detectionMode: 'mono',
-          precision: 'mediump'
-        };
-      } else {
-        // Desktop/larger screen
-        config = {
-          videoWidth: 1280,
-          videoHeight: 720,
-          frameRate: 30,
-          detectionMode: 'mono_and_matrix',
-          precision: 'highp'
-        };
-      }
-      
-      // Set up AR scene attributes with working camera settings
-      const arjsConfig = `sourceType: webcam; debugUIEnabled: false; detectionMode: ${config.detectionMode}; matrixCodeType: 3x3; sourceWidth: ${config.videoWidth}; sourceHeight: ${config.videoHeight}; displayWidth: ${config.videoWidth}; displayHeight: ${config.videoHeight};`;
+      // Use the exact same camera approach as camera.html
+      // Let AR.js handle camera with simple config
+      const arjsConfig = `sourceType: webcam; debugUIEnabled: false; detectionMode: mono; sourceWidth: 640; sourceHeight: 480; displayWidth: 640; displayHeight: 480;`;
       
       console.log('🔧 AR.js config:', arjsConfig);
       arScene.setAttribute('arjs', arjsConfig);
+      arScene.setAttribute('renderer', `precision: mediump; antialias: false;`);
       
-      // Set renderer
-      arScene.setAttribute('renderer', `logarithmicDepthBuffer: true; precision: ${config.precision}; antialias: false;`);
-      
-      // AR.js should now use the already-permitted camera
-      arScene.addEventListener('loaded', function() {
-        console.log('📱 AR Scene loaded - camera should work now');
-        updateLoadingMessage('AR Scene Ready!', 'Camera should activate...', 'Looking for camera stream...');
-        updateStatus('AR Scene Loaded', 'ar');
-      });
-
-      // Handle successful camera stream
+      // AR.js events - should work since camera.html works
       arScene.addEventListener('arjs-video-loaded', function() {
-        console.log('📹 AR Camera stream active!');
-        updateLoadingMessage('AR Camera Working!', 'System ready', 'Point camera at Hiro marker');
+        console.log('📹 AR Camera working! (like camera.html)');
+        updateLoadingMessage('AR Camera Active!');
         updateStatus('AR Camera Active', 'camera');
         
         setTimeout(() => {
           hideLoadingScreen();
           setupAREventListeners();
-          updateStatus('AR Ready - Look for Hiro marker', 'ar');
+          updateStatus('AR Ready - Point at Hiro marker', 'ar');
         }, 1000);
       });
 
-      // Handle AR.js errors
       arScene.addEventListener('arjs-video-error', function(event) {
         console.error('❌ AR.js video error:', event);
-        showError('AR camera stream failed even though camera test passed. This might be an AR.js compatibility issue. Try refreshing the page.');
+        showError('AR.js failed to access camera. This is strange since camera.html works perfectly. Try refreshing the page.');
       });
-
-      // Error handling
-      window.addEventListener('error', function(e) {
-        console.error('Global error:', e);
-        if (e.message && (e.message.includes('camera') || e.message.includes('getUserMedia') || e.message.includes('video'))) {
-          showError('Unexpected camera error after successful test: ' + e.message);
-        }
-      });
-
-      // Timeout handling - should be faster since camera is already tested
-      setTimeout(() => {
-        const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen && loadingScreen.style.display !== 'none') {
-          console.warn('⚠️ AR camera still not active after successful test');
-          showError('AR.js failed to use the camera even though camera test passed. This suggests an AR.js compatibility issue. Try: 1) Refreshing the page, 2) Using a different browser, 3) Checking for browser updates.');
-        }
-      }, 15000); // Shorter timeout since camera is pre-tested
 
       // Setup marker detection
       setupMarkerDetection();
+      
+      // Shorter timeout since camera should work (camera.html proves it)
+      setTimeout(() => {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen && loadingScreen.style.display !== 'none') {
+          console.warn('⚠️ AR.js timeout - but camera.html works fine');
+          showError('AR.js is taking too long to start, but your camera works fine in camera.html. This suggests an AR.js specific issue. Try refreshing the page.');
+        }
+      }, 8000);
     }
 
     // Setup marker detection events
@@ -895,25 +671,19 @@
       console.log(`📹 Camera ${cameraActive ? 'enabled' : 'disabled'}`);
     }
 
-    // Retry camera access - using camera.html approach
+    // Retry camera access - simple since camera.html works
     function retryCamera() {
-      console.log('🔄 Retrying with camera.html method...');
+      console.log('🔄 Retrying AR - camera.html works so this should too...');
       const errorDiv = document.getElementById('error-message');
       errorDiv.style.display = 'none';
       
       const loadingScreen = document.getElementById('loading-screen');
       loadingScreen.style.display = 'flex';
-      updateLoadingMessage('Retrying camera access...', 'Using camera.html method...', 'Please allow camera access...');
+      updateLoadingMessage('Retrying AR...');
       
-      // Use the same retry approach as camera.html
+      // Simple retry since camera works fine
       setTimeout(() => {
-        testCameraAccess().then(() => {
-          console.log('✅ Retry successful, restarting AR...');
-          initializeAR();
-        }).catch((error) => {
-          console.error('❌ Retry failed:', error);
-          showError('Camera access still failed: ' + error.message + '. Please check your camera settings and browser permissions.');
-        });
+        initializeAR();
       }, 1000);
     }
 
