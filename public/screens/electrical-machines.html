@@ -1,123 +1,114 @@
 <section id="screen-electrical-machines" class="screen" aria-label="Electrical Machines">
-  <header class="em-header">
-    <div class="power-readings">
-      <div class="reading">
-        <span class="reading-label">⚡ Power In</span>
-        <span id="power-in">2.127W</span>
-      </div>
-      <div class="reading">
-        <span class="reading-label">🔌 Power Out</span>
-        <span id="power-out">36.836W</span>
-      </div>
-      <div class="reading">
-        <span class="reading-label">📐 Phase Angle</span>
-        <span id="phase-angle">55°</span>
-      </div>
-    </div>
-    
+    <header class="em-header">
     <div class="logo-section">
       <div class="matrix-logo">MATRIX</div>
       <div class="subtitle">ELECTRICAL MACHINES</div>
     </div>
     
-         <div class="firmware-info">
-       <div class="firmware-version">Firmware Version: 1</div>
-       <div class="status-indicators">
-         <div class="indicator dyno">DYNO</div>
-         <div class="indicator connector">3PH</div>
-       </div>
-       <div class="voltage-readings">
-         <div class="reading">
-           <span class="reading-label">⚡ Supply Voltage</span>
-           <span id="supply-voltage">35.9V</span>
-         </div>
-         <div class="reading">
-           <span class="reading-label">🛡️ Limit Voltage</span>
-           <span id="limit-voltage">30.0V</span>
-         </div>
-       </div>
-     </div>
-     
-     <button id="btnHome" class="home-button" aria-label="Home">HOME</button>
+    <div class="firmware-info">
+      <div class="firmware-version">Firmware Version: 1</div>
+      <div class="status-indicators">
+        <div class="indicator dyno">DYNO</div>
+        <div class="indicator connector">3PH</div>
+      </div>
+    </div>
+    
+    <button id="btnHome" class="home-button" aria-label="Home">HOME</button>
   </header>
 
   <main class="em-main">
-    <!-- Left Control Panel -->
-    <section class="control-panel">
-      <div class="control-column">
-        <div class="control-label">Load</div>
-        <div class="control-value" id="load-value">50.0%</div>
-                           <div class="horizontal-slider">
-           <div class="slider-track" id="load-track">
-             <div class="slider-fill" id="load-fill"></div>
-             <div class="slider-thumb" id="load-thumb"></div>
-           </div>
-           <div class="slider-scale">
-             <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
-           </div>
-         </div>
-        <button class="control-btn">Set %</button>
-      </div>
-
-      <div class="control-column">
-        <div class="control-label">Voltage 1</div>
-        <div class="control-value" id="voltage1-value">66.7% - 20.0V</div>
-                           <div class="horizontal-slider">
-           <div class="slider-track" id="voltage1-track">
-             <div class="slider-fill" id="voltage1-fill"></div>
-             <div class="slider-thumb" id="voltage1-thumb"></div>
-           </div>
-           <div class="slider-scale">
-             <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
-           </div>
-         </div>
-        <button class="control-btn">Set V</button>
-        <button class="control-btn">Set %</button>
-      </div>
-
-      <div class="control-column">
-        <div class="control-label">Frequency</div>
-        <div class="control-value" id="frequency-value">50Hz</div>
-                           <div class="horizontal-slider">
-           <div class="slider-track" id="frequency-track">
-             <div class="slider-fill" id="frequency-fill"></div>
-             <div class="slider-thumb" id="frequency-thumb"></div>
-           </div>
-           <div class="slider-scale">
-             <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
-           </div>
-         </div>
-        <button class="control-btn">Set</button>
-      </div>
-
-      <div class="control-column">
-        <div class="control-label">Submodule Drive</div>
-        <div class="control-value" id="submodule-value">0.0% - 0.0V</div>
-                           <div class="horizontal-slider">
-           <div class="slider-track" id="submodule-track">
-             <div class="slider-fill" id="submodule-fill"></div>
-             <div class="slider-thumb" id="submodule-thumb"></div>
-           </div>
-           <div class="slider-scale">
-             <span>-50</span><span>-25</span><span>0</span><span>25</span><span>50</span>
-           </div>
-         </div>
-        <button class="control-btn">Set V</button>
-        <button class="control-btn">Set %</button>
-      </div>
-    </section>
-
-    <!-- Bottom Left Gauges -->
-    <section class="gauges-section">
-      <div class="motor-controls">
-        <div class="motor-toggle">
-          <div class="toggle-label">Motor</div>
-          <div class="toggle-switch">
-            <button class="toggle-btn stop-btn active">Stop</button>
-            <button class="toggle-btn run-btn">Run</button>
+         <!-- Left Control Panel -->
+     <section class="control-panel">
+       <div class="control-column">
+         <div class="control-label">Load</div>
+         <div class="control-value" id="load-value">50.0%</div>
+                            <div class="horizontal-slider">
+            <div class="slider-track" id="load-track">
+              <div class="slider-fill" id="load-fill"></div>
+              <div class="slider-thumb" id="load-thumb"></div>
+            </div>
+            <div class="slider-scale">
+              <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+            </div>
           </div>
-        </div>
-      </div>
+         <button class="control-btn">Set %</button>
+       </div>
+
+       <div class="control-column">
+         <div class="control-label">Voltage 1</div>
+         <div class="control-value" id="voltage1-value">66.7% - 20.0V</div>
+                            <div class="horizontal-slider">
+            <div class="slider-track" id="voltage1-track">
+              <div class="slider-fill" id="voltage1-fill"></div>
+              <div class="slider-thumb" id="voltage1-thumb"></div>
+            </div>
+            <div class="slider-scale">
+              <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+            </div>
+          </div>
+         <button class="control-btn">Set V</button>
+         <button class="control-btn">Set %</button>
+       </div>
+
+       <div class="control-column">
+         <div class="control-label">Frequency</div>
+         <div class="control-value" id="frequency-value">50Hz</div>
+                            <div class="horizontal-slider">
+            <div class="slider-track" id="frequency-track">
+              <div class="slider-fill" id="frequency-fill"></div>
+              <div class="slider-thumb" id="frequency-thumb"></div>
+            </div>
+            <div class="slider-scale">
+              <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+            </div>
+          </div>
+         <button class="control-btn">Set</button>
+       </div>
+
+       
+
+       <!-- Readings Panel in the pink box area -->
+       <div class="readings-panel">
+         <div class="power-readings">
+           <div class="reading">
+             <span class="reading-label">⚡ Power In</span>
+             <span id="power-in">2.127W</span>
+           </div>
+           <div class="reading">
+             <span class="reading-label">🔌 Power Out</span>
+             <span id="power-out">36.836W</span>
+           </div>
+           <div class="reading">
+             <span class="reading-label">📐 Phase Angle</span>
+             <span id="phase-angle">55°</span>
+           </div>
+         </div>
+         
+         <div class="voltage-readings">
+           <div class="reading">
+             <span class="reading-label">⚡ Supply Voltage</span>
+             <span id="supply-voltage">35.9V</span>
+           </div>
+           <div class="reading">
+             <span class="reading-label">🛡️ Limit Voltage</span>
+             <span id="limit-voltage">30.0V</span>
+           </div>
+         </div>
+       </div>
+     </section>
+
+         <!-- Bottom Left Gauges -->
+     <section class="gauges-section">
+       
+       <div class="motor-controls">
+         <div class="motor-toggle">
+           <div class="toggle-label">Motor</div>
+           <div class="toggle-switch">
+             <button class="toggle-btn stop-btn active">Stop</button>
+             <button class="toggle-btn run-btn">Run</button>
+           </div>
+         </div>
+       </div>
       
       <div class="gauge speed-gauge">
         <div class="gauge-label">Speed</div>
@@ -281,10 +272,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 15px;
+  padding: 8px 12px;
   background: #1a1a1a;
   border-bottom: 2px solid #444;
-  height: 70px;
+  height: 65px;
 }
 
 .logo-section {
@@ -293,7 +284,7 @@
 }
 
 .matrix-logo {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: bold;
   color: #fff;
   letter-spacing: 2px;
@@ -301,7 +292,7 @@
 }
 
 .subtitle {
-  font-size: 12px;
+  font-size: 11px;
   color: #ccc;
   margin-top: 1px;
 }
@@ -310,20 +301,20 @@
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .firmware-version {
-  font-size: 12px;
+  font-size: 11px;
   color: #ccc;
 }
 
 .status-indicators {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   background: #333;
-  padding: 6px 12px;
+  padding: 4px 8px;
   border-radius: 4px;
   position: relative;
 }
@@ -341,9 +332,9 @@
 }
 
 .indicator {
-  font-size: 11px;
+  font-size: 10px;
   color: #fff;
-  padding: 3px 6px;
+  padding: 2px 4px;
   border-radius: 3px;
   background: #000;
 }
@@ -351,15 +342,14 @@
 .power-readings {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   text-align: left;
   background: rgba(0,0,0,0.3);
   padding: 8px 10px;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid rgba(255,255,255,0.1);
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  min-width: 120px;
-  max-width: 130px;
+  min-width: 140px;
   position: relative;
   overflow: hidden;
 }
@@ -384,7 +374,7 @@
   padding: 2px 0;
   border-bottom: 1px solid rgba(255,255,255,0.05);
   font-weight: 500;
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
 .reading:last-child {
@@ -404,7 +394,7 @@
   text-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
   background: rgba(76, 175, 80, 0.1);
   padding: 1px 4px;
-  border-radius: 3px;
+  border-radius: 2px;
   border: 1px solid rgba(76, 175, 80, 0.3);
   transition: all 0.3s ease;
 }
@@ -425,15 +415,14 @@
 .voltage-readings {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  text-align: center;
+  gap: 4px;
+  text-align: left;
   background: rgba(0,0,0,0.3);
   padding: 8px 10px;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid rgba(255,255,255,0.1);
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  min-width: 120px;
-  max-width: 130px;
+  min-width: 140px;
   position: relative;
   overflow: hidden;
 }
@@ -456,7 +445,7 @@
   text-shadow: 0 0 4px rgba(33, 150, 243, 0.5);
   background: rgba(33, 150, 243, 0.1);
   padding: 1px 4px;
-  border-radius: 3px;
+  border-radius: 2px;
   border: 1px solid rgba(33, 150, 243, 0.3);
   transition: all 0.3s ease;
 }
@@ -482,49 +471,58 @@
   gap: 20px;
   padding: 20px;
   flex: 1;
-  height: calc(100vh - 150px);
+  height: calc(100vh - 145px);
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* Control Panel */
 .control-panel {
   background: #333;
   border-radius: 12px;
-  padding: 20px;
+  padding: 15px;
   display: flex;
-  gap: 20px;
+  gap: 15px;
   align-items: flex-start;
   grid-row: 1 / 3;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
   border: 1px solid #444;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  overflow: hidden;
+  min-height: 0;
 }
 
 .control-column {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   flex: 1;
-  padding: 12px;
+  padding: 15px 10px;
   border-radius: 8px;
   background: rgba(255,255,255,0.02);
   border: 1px solid rgba(255,255,255,0.05);
-  min-height: 400px;
+  min-height: 300px;
+  min-width: 100px;
+  max-width: 140px;
+  overflow: hidden;
 }
 
 .control-label {
-  font-size: 14px;
+  font-size: 12px;
   color: #ccc;
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-bottom: 2px;
 }
 
 .control-value {
-  font-size: 13px;
+  font-size: 11px;
   color: #fff;
   background: #222;
-  padding: 8px 12px;
+  padding: 4px 6px;
   border-radius: 6px;
-  min-width: 100px;
+  min-width: 80px;
   text-align: center;
   font-weight: 500;
   border: 1px solid #444;
@@ -535,9 +533,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   width: 100%;
-  padding: 8px;
+  padding: 2px;
 }
 
 .slider-track {
@@ -602,23 +600,23 @@
 .slider-scale {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 9px;
   color: #999;
   width: 100%;
   font-weight: 500;
-  padding: 0 10px;
+  padding: 0 2px;
 }
 
 .control-btn {
   background: #555;
   color: #fff;
   border: none;
-  padding: 10px 16px;
+  padding: 6px 10px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 80px;
+  min-width: 60px;
   font-weight: 500;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   border: 1px solid #666;
@@ -648,9 +646,21 @@
   padding: 20px;
   display: flex;
   gap: 20px;
-  align-items: center;
+  align-items: flex-start;
   grid-column: 2;
   grid-row: 2;
+}
+
+.readings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 160px;
+  flex: 1;
+  align-self: stretch;
+  min-height: 300px;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .motor-controls {
@@ -1019,18 +1029,18 @@
 }
 
  .home-button { 
-   padding: 8px 16px;
-   border-radius: 6px; 
-   background: rgba(255, 255, 255, 0.1); 
-   border: 1px solid rgba(255, 255, 255, 0.2); 
-   color: #fff; 
-   cursor: pointer; 
-   transition: all 0.2s ease; 
-   font-size: 12px;
-   font-weight: 500;
-   text-transform: uppercase;
-   letter-spacing: 1px;
- }
+  padding: 6px 12px;
+  border-radius: 6px; 
+  background: rgba(255, 255, 255, 0.1); 
+  border: 1px solid rgba(255, 255, 255, 0.2); 
+  color: #fff; 
+  cursor: pointer; 
+  transition: all 0.2s ease; 
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
 
  .home-button:hover { 
    background: rgba(255, 255, 255, 0.2); 
@@ -1053,12 +1063,26 @@
   }
   
   .control-panel {
-    padding: 15px;
-    gap: 15px;
+    padding: 12px;
+    gap: 10px;
   }
   
   .control-column {
+    gap: 6px;
+    min-width: 90px;
+    max-width: 120px;
+    padding: 10px 6px;
+    min-height: 280px;
+  }
+  
+  .readings-panel {
+    min-height: 280px;
     gap: 8px;
+  }
+  
+  .power-readings, .voltage-readings {
+    min-width: 120px;
+    padding: 6px 8px;
   }
   
   .horizontal-slider {
@@ -1076,19 +1100,20 @@
   }
   
   .slider-scale {
-    font-size: 9px;
+    font-size: 8px;
+    padding: 0 1px;
   }
   
   .control-value {
-    font-size: 12px;
-    min-width: 90px;
-    padding: 6px 10px;
+    font-size: 11px;
+    min-width: 80px;
+    padding: 5px 8px;
   }
   
   .control-btn {
-    font-size: 11px;
-    padding: 8px 14px;
-    min-width: 70px;
+    font-size: 10px;
+    padding: 6px 10px;
+    min-width: 60px;
   }
 }
 
@@ -1139,11 +1164,22 @@
     gap: 10px;
   }
   
-  .power-readings, .voltage-readings {
+  .gauges-section {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .readings-panel {
     flex-direction: row;
     gap: 15px;
     min-width: auto;
-    padding: 8px;
+  }
+  
+  .power-readings, .voltage-readings {
+    flex: 1;
+    min-width: auto;
+    padding: 10px;
   }
   
   .reading {
@@ -1348,7 +1384,6 @@
   const loadValue = root.querySelector('#load-value');
   const voltage1Value = root.querySelector('#voltage1-value');
   const frequencyValue = root.querySelector('#frequency-value');
-  const submoduleValue = root.querySelector('#submodule-value');
   
   // Gauge elements
   const speedValue = root.querySelector('#speed-value');
@@ -1376,8 +1411,7 @@
   let sliderValues = {
     load: 50,
     voltage1: 66.7,
-    frequency: 50,
-    submodule: 0
+    frequency: 50
   };
   
   // Initialize charts
@@ -1530,26 +1564,22 @@
     
     // Add some variation to the slider values
     const time = Date.now() / 1000;
-    const loadVariation = Math.sin(time * 0.3) * 5;
-    const voltageVariation = Math.sin(time * 0.4) * 3;
-    const frequencyVariation = Math.sin(time * 0.2) * 1;
-    const submoduleVariation = Math.sin(time * 0.5) * 10;
-    
-    const load = Math.max(0, Math.min(100, sliderValues.load + loadVariation));
-    const voltage1 = Math.max(0, Math.min(100, sliderValues.voltage1 + voltageVariation));
-    const frequency = Math.max(0, Math.min(100, sliderValues.frequency + frequencyVariation));
-    const submodule = Math.max(-50, Math.min(50, sliderValues.submodule + submoduleVariation));
-    
-    loadValue.textContent = `${load.toFixed(1)}%`;
-    voltage1Value.textContent = `${voltage1.toFixed(1)}% - ${(voltage1 * 0.3).toFixed(1)}V`;
-    frequencyValue.textContent = `${frequency.toFixed(0)}Hz`;
-    submoduleValue.textContent = `${submodule.toFixed(1)}% - ${(submodule * 0.3).toFixed(1)}V`;
-    
-    // Update slider indicators
-    updateSlider('load', load);
-    updateSlider('voltage1', voltage1);
-    updateSlider('frequency', frequency);
-    updateSlider('submodule', submodule + 50);
+         const loadVariation = Math.sin(time * 0.3) * 5;
+     const voltageVariation = Math.sin(time * 0.4) * 3;
+     const frequencyVariation = Math.sin(time * 0.2) * 1;
+     
+     const load = Math.max(0, Math.min(100, sliderValues.load + loadVariation));
+     const voltage1 = Math.max(0, Math.min(100, sliderValues.voltage1 + voltageVariation));
+     const frequency = Math.max(0, Math.min(100, sliderValues.frequency + frequencyVariation));
+     
+     loadValue.textContent = `${load.toFixed(1)}%`;
+     voltage1Value.textContent = `${voltage1.toFixed(1)}% - ${(voltage1 * 0.3).toFixed(1)}V`;
+     frequencyValue.textContent = `${frequency.toFixed(0)}Hz`;
+     
+     // Update slider indicators
+     updateSlider('load', load);
+     updateSlider('voltage1', voltage1);
+     updateSlider('frequency', frequency);
   }
   
   // Update slider visual
@@ -1564,46 +1594,39 @@
     }
   }
   
-  // Handle slider interaction
-  function handleSliderInteraction(sliderName, event) {
-    const track = event.currentTarget;
-    const rect = track.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const width = rect.width;
-    const percent = Math.max(0, Math.min(100, (clickX / width) * 100));
-    
-    // Update slider value
-    if (sliderName === 'submodule') {
-      sliderValues[sliderName] = percent - 50; // -50 to 50 range
-    } else {
-      sliderValues[sliderName] = percent;
-    }
-    
-    // Update visual
-    updateSlider(sliderName, sliderName === 'submodule' ? percent : sliderValues[sliderName]);
-    
-    // Update display value
-    updateControlDisplay(sliderName);
-  }
+     // Handle slider interaction
+   function handleSliderInteraction(sliderName, event) {
+     const track = event.currentTarget;
+     const rect = track.getBoundingClientRect();
+     const clickX = event.clientX - rect.left;
+     const width = rect.width;
+     const percent = Math.max(0, Math.min(100, (clickX / width) * 100));
+     
+     // Update slider value
+     sliderValues[sliderName] = percent;
+     
+     // Update visual
+     updateSlider(sliderName, sliderValues[sliderName]);
+     
+     // Update display value
+     updateControlDisplay(sliderName);
+   }
   
-  // Update control display
-  function updateControlDisplay(sliderName) {
-    const value = sliderValues[sliderName];
-    switch (sliderName) {
-      case 'load':
-        loadValue.textContent = `${value.toFixed(1)}%`;
-        break;
-      case 'voltage1':
-        voltage1Value.textContent = `${value.toFixed(1)}% - ${(value * 0.3).toFixed(1)}V`;
-        break;
-      case 'frequency':
-        frequencyValue.textContent = `${value.toFixed(0)}Hz`;
-        break;
-      case 'submodule':
-        submoduleValue.textContent = `${value.toFixed(1)}% - ${(value * 0.3).toFixed(1)}V`;
-        break;
-    }
-  }
+     // Update control display
+   function updateControlDisplay(sliderName) {
+     const value = sliderValues[sliderName];
+     switch (sliderName) {
+       case 'load':
+         loadValue.textContent = `${value.toFixed(1)}%`;
+         break;
+       case 'voltage1':
+         voltage1Value.textContent = `${value.toFixed(1)}% - ${(value * 0.3).toFixed(1)}V`;
+         break;
+       case 'frequency':
+         frequencyValue.textContent = `${value.toFixed(0)}Hz`;
+         break;
+     }
+   }
   
   // Update power readings
   function updatePowerReadings() {

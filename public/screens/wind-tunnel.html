@@ -45,18 +45,25 @@
             <span class="slider-label">Angle:</span>
             <span class="value-display" id="angleDisplay">0°</span>
           </div>
-          <input type="range" 
-                 id="angleSlider" 
-                 class="interactive-slider" 
-                 min="-45" 
-                 max="45" 
-                 value="0" 
-                 step="1"
-                 oninput="setAngleFromSlider(this.value)">
-          <div class="slider-marks">
-            <span>-45°</span>
-            <span>0°</span>
-            <span>45°</span>
+          <div class="vertical-slider-wrapper">
+            <div class="slider-marks">
+              <span>45°</span>
+              <span>30°</span>
+              <span>15°</span>
+              <span>0°</span>
+              <span>-15°</span>
+              <span>-30°</span>
+              <span>-45°</span>
+            </div>
+            <input type="range" 
+                   id="angleSlider" 
+                   class="interactive-slider" 
+                   min="-45" 
+                   max="45" 
+                   value="0" 
+                   step="1"
+                   oninput="setAngleFromSlider(this.value)"
+                   orient="vertical">
           </div>
         </div>
       </div>
@@ -64,28 +71,33 @@
       <!-- Fan Speed Section -->
       <div class="control-section">
         <div class="section-header">
-          <button class="control-btn switch-off">Switch Off</button>
-          <button class="control-btn">Set</button>
+          <button class="control-btn switch-off" onclick="setFanSpeed(0)">Switch Off</button>
+          <button class="control-btn" onclick="startSweep()">Set</button>
         </div>
-        <div class="section-title">Fan Speed</div>
-        <div class="fan-speed-display">
-          <div class="speed-scale">
-            <div class="speed-values">
-              <div class="speed-value">100</div>
-              <div class="speed-value">90</div>
-              <div class="speed-value">80</div>
-              <div class="speed-value">70</div>
-              <div class="speed-value">60</div>
-              <div class="speed-value">50</div>
-              <div class="speed-value">40</div>
-              <div class="speed-value selected">30</div>
-              <div class="speed-value">20</div>
-              <div class="speed-value">10</div>
-              <div class="speed-value">0</div>
-            </div>
-            <div class="speed-indicator"></div>
+        <div class="section-title">💨 Fan Speed</div>
+        <div class="interactive-slider-container">
+          <div class="slider-header">
+            <span class="slider-label">Speed:</span>
+            <span class="value-display" id="speedDisplay">50%</span>
           </div>
-          <div class="speed-readout">30%</div>
+          <div class="vertical-slider-wrapper">
+            <div class="slider-marks">
+              <span>100%</span>
+              <span>75%</span>
+              <span>50%</span>
+              <span>25%</span>
+              <span>0%</span>
+            </div>
+            <input type="range" 
+                   id="speedSlider" 
+                   class="interactive-slider" 
+                   min="0" 
+                   max="100" 
+                   value="50" 
+                   step="5"
+                   oninput="setFanSpeedFromSlider(this.value)"
+                   orient="vertical">
+          </div>
         </div>
       </div>
     </div>
@@ -603,6 +615,164 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.3);
   }
 
+  /* Interactive Sliders */
+  .interactive-slider-container {
+    margin: 15px 0;
+    padding: 15px;
+    background: rgba(0, 255, 255, 0.1);
+    border-radius: 8px;
+    border: 1px solid #00ffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 300px;
+  }
+
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #00ffff;
+    width: 100%;
+  }
+
+  .value-display {
+    font-weight: bold;
+    color: #ffffff;
+    background: rgba(0, 255, 255, 0.2);
+    padding: 4px 12px;
+    border-radius: 4px;
+    min-width: 50px;
+    text-align: center;
+    font-size: 16px;
+  }
+
+  .interactive-slider {
+    width: 8px;
+    height: 220px;
+    background: #333;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: slider-vertical;
+    appearance: slider-vertical;
+    writing-mode: bt-lr; /* IE */
+    -webkit-writing-mode: vertical-lr; /* WebKit */
+    writing-mode: vertical-lr;
+    margin: 10px 0;
+    transform: rotate(180deg); /* Flip so min is at bottom */
+  }
+
+  .interactive-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: #00ffff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    transition: all 0.2s ease;
+  }
+
+  .interactive-slider::-webkit-slider-thumb:hover {
+    background: #ffffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+    transform: scale(1.1);
+  }
+
+  .interactive-slider::-webkit-slider-thumb:active {
+    transform: scale(1.2);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 1);
+  }
+
+  .interactive-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: #00ffff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    transition: all 0.2s ease;
+  }
+
+  .interactive-slider::-moz-range-thumb:hover {
+    background: #ffffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+    transform: scale(1.1);
+  }
+
+  .slider-marks {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #888;
+    margin-left: 10px;
+    height: 220px;
+    align-items: flex-start;
+  }
+
+  .slider-marks span {
+    color: #00ffff;
+    font-size: 10px;
+    line-height: 1;
+  }
+
+  .vertical-slider-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    flex: 1;
+  }
+
+  /* Touch-friendly slider sizing */
+  @media (max-width: 768px) {
+    .interactive-slider {
+      width: 12px;
+      height: 250px;
+    }
+    
+    .interactive-slider::-webkit-slider-thumb {
+      width: 28px;
+      height: 28px;
+    }
+    
+    .interactive-slider::-moz-range-thumb {
+      width: 28px;
+      height: 28px;
+    }
+    
+    .slider-header {
+      font-size: 18px;
+    }
+    
+    .value-display {
+      font-size: 16px;
+      padding: 6px 12px;
+    }
+
+    .interactive-slider-container {
+      padding: 20px;
+      margin: 25px 0;
+      height: 350px;
+    }
+
+    .slider-marks {
+      height: 250px;
+      font-size: 12px;
+    }
+
+    .slider-marks span {
+      font-size: 12px;
+    }
+  }
+
   .input-label {
     font-weight: bold;
     min-width: 120px;
@@ -1072,7 +1242,20 @@
         });
       });
 
-      // Angle control (existing left panel)
+      // Slider-specific functions
+    function setAngleFromSlider(value) {
+      const angle = parseInt(value);
+      setAngle(angle);
+      document.getElementById('angleDisplay').textContent = `${angle}°`;
+    }
+
+    function setFanSpeedFromSlider(value) {
+      const speed = parseInt(value);
+      setFanSpeed(speed);
+      document.getElementById('speedDisplay').textContent = `${speed}%`;
+    }
+
+    // Update UI element text content
       const angleValues = document.querySelectorAll('.angle-value');
       angleValues.forEach((value, index) => {
         value.addEventListener('click', () => {
@@ -1519,6 +1702,8 @@
     window.windTunnelDebug = {
       setAngle: setAngle,
       setFanSpeed: setFanSpeed,
+      setAngleFromSlider: setAngleFromSlider,
+      setFanSpeedFromSlider: setFanSpeedFromSlider,
       startSweep: startSweep,
       clearGraph: clearGraph,
       reinitializeGraph: function() {
