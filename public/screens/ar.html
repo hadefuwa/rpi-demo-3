@@ -440,11 +440,11 @@
 
       <!-- Side Panel -->
       <div class="side-panel">
-        <div class="panel-title">AR Objects</div>
+        <div class="panel-title">Interactive AR</div>
         
         <div class="ar-option active" onclick="toggleObject('ar-box')">
           <div class="ar-icon">📦</div>
-          <span>Rotating Cube</span>
+          <span>Interactive Box</span>
         </div>
         
         <div class="ar-option active" onclick="toggleObject('ar-sphere')">
@@ -454,12 +454,22 @@
         
         <div class="ar-option active" onclick="toggleObject('ar-text')">
           <div class="ar-icon">📝</div>
-          <span>AR Text</span>
+          <span>Touch Text</span>
         </div>
         
-        <div class="ar-option" onclick="changeMarkerType()">
-          <div class="ar-icon">🎯</div>
-          <span id="marker-type">Hiro Marker</span>
+        <div class="ar-option" onclick="spawnObject('random')">
+          <div class="ar-icon">✨</div>
+          <span>Spawn Object</span>
+        </div>
+        
+        <div class="ar-option" onclick="changeColors()">
+          <div class="ar-icon">🎨</div>
+          <span>Change Colors</span>
+        </div>
+        
+        <div class="ar-option" onclick="togglePhysics()">
+          <div class="ar-icon">⚡</div>
+          <span id="physics-toggle">Physics On</span>
         </div>
         
         <div class="ar-option" onclick="captureScreenshot()">
@@ -492,10 +502,19 @@
     // Camera stream for AR
     let cameraStream = null;
     let videoElement = null;
+    
+    // Interactive AR system
+    let arObjects = [];
+    let selectedObject = null;
+    let isDragging = false;
+    let dragStartPos = { x: 0, y: 0 };
+    let touchStartDistance = 0;
+    let cameraMovement = { x: 0, y: 0 };
+    let lastCameraPosition = { x: 0, y: 0 };
 
     // Initialize AR Application - Direct camera access like camera.html
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('🎯 Starting AR Demo - using direct camera access');
+      console.log('🎯 Starting Interactive AR Demo - using direct camera access');
       
       // Initialize camera first, then AR
       initializeCamera();
@@ -531,7 +550,7 @@
         // Create video element for AR
         createARVideo();
         
-        updateLoadingMessage('Camera active - starting AR...');
+        updateLoadingMessage('Camera active - starting Interactive AR...');
         updateStatus('Camera Active', 'camera');
         
         // Initialize AR after camera is ready
@@ -590,7 +609,7 @@
       // Wait for video to load
       videoElement.addEventListener('loadedmetadata', () => {
         console.log('📹 AR Video ready:', videoElement.videoWidth, 'x', videoElement.videoHeight);
-        updateLoadingMessage('AR Video Ready!');
+        updateLoadingMessage('Interactive AR Video Ready!');
       });
       
       // Handle video errors
@@ -606,91 +625,427 @@
       if (mainTextEl) mainTextEl.textContent = mainText;
     }
 
-    // Initialize AR Scene - simplified without AR.js
+    // Initialize AR Scene - enhanced with interactive features
     function initializeAR() {
-      updateLoadingMessage('Starting AR overlay...');
-      console.log('🎯 Starting simplified AR overlay');
+      updateLoadingMessage('Starting Interactive AR overlay...');
+      console.log('🎯 Starting enhanced interactive AR overlay');
+      
+      // Create interactive AR objects
+      createInteractiveObjects();
+      
+      // Setup touch and gesture controls
+      setupTouchControls();
+      
+      // Setup camera movement detection
+      setupCameraTracking();
       
       // Hide loading screen
       setTimeout(() => {
         hideLoadingScreen();
         setupAREventListeners();
-        updateStatus('AR Ready - Point camera at objects', 'ar');
+        updateStatus('Interactive AR Ready - Touch and move objects!', 'ar');
         
-        // Start AR simulation
-        startARSimulation();
+        // Start physics simulation
+        startPhysicsSimulation();
       }, 1000);
     }
 
-    // Start AR simulation (since we're not using AR.js markers)
-    function startARSimulation() {
-      console.log('🎮 Starting AR simulation mode');
+    // Create interactive AR objects with physics properties
+    function createInteractiveObjects() {
+      const objectsContainer = document.getElementById('ar-objects');
       
-      // Simulate marker detection based on camera movement
-      let lastTime = 0;
-      let markerSimulation = false;
+      // Clear existing objects
+      objectsContainer.innerHTML = '';
       
-      function simulateMarkerDetection() {
-        const currentTime = Date.now();
-        
-        // Simulate marker detection every 3 seconds
-        if (currentTime - lastTime > 3000) {
-          if (!markerSimulation) {
-            console.log('🎯 Simulated marker detected');
-            isMarkerVisible = true;
-            updateStatus('Marker Detected (Simulated)', 'ar');
-            animateObjectsIn();
-            markerSimulation = true;
-          } else {
-            console.log('❌ Simulated marker lost');
-            isMarkerVisible = false;
-            updateStatus('Scanning for markers...', 'camera');
-            markerSimulation = false;
-          }
-          lastTime = currentTime;
-        }
-        
-        requestAnimationFrame(simulateMarkerDetection);
-      }
-      
-      simulateMarkerDetection();
-    }
-
-    // Setup marker detection events - simplified for HTML AR
-    function setupMarkerDetection() {
-      // No need for marker detection in simplified AR
-      console.log('🎯 Simplified AR mode - no marker detection needed');
-    }
-
-    // Animate objects when marker is found - updated for HTML AR
-    function animateObjectsIn() {
-      const objects = ['ar-box', 'ar-sphere', 'ar-text'];
-      objects.forEach((id, index) => {
-        const obj = document.querySelector(`#${id}`);
-        if (obj && objectStates[id]) {
-          // Fade in and add animations
-          obj.style.opacity = '1';
-          obj.style.transform = obj.id === 'ar-box' ? 'translate(-50%, -50%) scale(1)' : 'scale(1)';
-          
-          // Add rotation animation for box
-          if (obj.id === 'ar-box') {
-            obj.style.animation = 'rotate 10s linear infinite';
-          }
-          
-          // Add bounce animation for sphere
-          if (obj.id === 'ar-sphere') {
-            obj.style.animation = 'bounce 2s ease-in-out infinite alternate';
-          }
-          
-          // Add text animation
-          if (obj.id === 'ar-text') {
-            obj.style.animation = 'glow 3s ease-in-out infinite alternate';
-          }
-        }
+      // Create interactive box
+      const box = createARObject('box', {
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+        width: 100,
+        height: 100,
+        type: 'box',
+        color: '#4CC3D9',
+        velocity: { x: 0, y: 0 },
+        rotation: 0,
+        rotationSpeed: 2
       });
       
-      // Add CSS animations
-      addCSSAnimations();
+      // Create interactive sphere
+      const sphere = createARObject('sphere', {
+        x: window.innerWidth * 0.3,
+        y: window.innerHeight * 0.4,
+        width: 80,
+        height: 80,
+        type: 'sphere',
+        color: '#EF2D5E',
+        velocity: { x: 1, y: 1 },
+        bounce: 0.8
+      });
+      
+      // Create interactive text
+      const text = createARObject('text', {
+        x: window.innerWidth * 0.7,
+        y: window.innerHeight * 0.6,
+        width: 120,
+        height: 40,
+        type: 'text',
+        color: '#FFC65D',
+        text: 'Touch Me!',
+        velocity: { x: 0, y: 0 }
+      });
+      
+      arObjects = [box, sphere, text];
+    }
+
+    // Create a single interactive AR object
+    function createARObject(id, properties) {
+      const obj = document.createElement('div');
+      obj.id = `ar-${id}`;
+      obj.className = 'ar-object interactive';
+      
+      // Set object properties
+      Object.assign(obj, properties);
+      
+      // Apply styles based on type
+      if (properties.type === 'box') {
+        obj.style.cssText = `
+          position: absolute;
+          left: ${properties.x}px;
+          top: ${properties.y}px;
+          width: ${properties.width}px;
+          height: ${properties.height}px;
+          background: linear-gradient(45deg, ${properties.color}, #2196F3);
+          border-radius: 10px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+          cursor: grab;
+          user-select: none;
+          transition: transform 0.1s ease;
+          z-index: 10;
+        `;
+      } else if (properties.type === 'sphere') {
+        obj.style.cssText = `
+          position: absolute;
+          left: ${properties.x}px;
+          top: ${properties.y}px;
+          width: ${properties.width}px;
+          height: ${properties.height}px;
+          background: radial-gradient(circle, ${properties.color}, #C2185B);
+          border-radius: 50%;
+          box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+          cursor: grab;
+          user-select: none;
+          transition: transform 0.1s ease;
+          z-index: 10;
+        `;
+      } else if (properties.type === 'text') {
+        obj.style.cssText = `
+          position: absolute;
+          left: ${properties.x}px;
+          top: ${properties.y}px;
+          width: ${properties.width}px;
+          height: ${properties.height}px;
+          color: ${properties.color};
+          font-size: 18px;
+          font-weight: bold;
+          text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+          cursor: grab;
+          user-select: none;
+          text-align: center;
+          line-height: ${properties.height}px;
+          transition: transform 0.1s ease;
+          z-index: 10;
+        `;
+        obj.textContent = properties.text;
+      }
+      
+      // Add to container
+      document.getElementById('ar-objects').appendChild(obj);
+      
+      return obj;
+    }
+
+    // Setup touch controls for interactive objects
+    function setupTouchControls() {
+      const objectsContainer = document.getElementById('ar-objects');
+      
+      // Touch events for mobile
+      objectsContainer.addEventListener('touchstart', handleTouchStart);
+      objectsContainer.addEventListener('touchmove', handleTouchMove);
+      objectsContainer.addEventListener('touchend', handleTouchEnd);
+      
+      // Mouse events for desktop
+      objectsContainer.addEventListener('mousedown', handleMouseDown);
+      objectsContainer.addEventListener('mousemove', handleMouseMove);
+      objectsContainer.addEventListener('mouseup', handleMouseUp);
+      
+      // Prevent default touch behaviors
+      objectsContainer.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+      objectsContainer.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+    }
+
+    // Handle touch start
+    function handleTouchStart(e) {
+      const touch = e.touches[0];
+      const element = document.elementFromPoint(touch.clientX, touch.clientY);
+      
+      if (element && element.classList.contains('ar-object')) {
+        selectedObject = element;
+        isDragging = true;
+        dragStartPos = { x: touch.clientX, y: touch.clientY };
+        
+        // Add dragging visual feedback
+        element.style.transform = 'scale(1.1)';
+        element.style.cursor = 'grabbing';
+        
+        // Store initial position
+        element.initialX = parseInt(element.style.left);
+        element.initialY = parseInt(element.style.top);
+        
+        e.preventDefault();
+      }
+      
+      // Handle pinch gestures for scaling
+      if (e.touches.length === 2) {
+        touchStartDistance = getDistance(e.touches[0], e.touches[1]);
+        if (selectedObject) {
+          selectedObject.initialScale = selectedObject.scale || 1;
+        }
+      }
+    }
+
+    // Handle touch move
+    function handleTouchMove(e) {
+      if (isDragging && selectedObject) {
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - dragStartPos.x;
+        const deltaY = touch.clientY - dragStartPos.y;
+        
+        // Update object position
+        const newX = selectedObject.initialX + deltaX;
+        const newY = selectedObject.initialY + deltaY;
+        
+        // Keep object within screen bounds
+        const maxX = window.innerWidth - selectedObject.offsetWidth;
+        const maxY = window.innerHeight - selectedObject.offsetHeight;
+        
+        selectedObject.style.left = Math.max(0, Math.min(maxX, newX)) + 'px';
+        selectedObject.style.top = Math.max(0, Math.min(maxY, newY)) + 'px';
+        
+        // Update physics properties
+        selectedObject.x = parseInt(selectedObject.style.left);
+        selectedObject.y = parseInt(selectedObject.style.top);
+        
+        e.preventDefault();
+      }
+      
+      // Handle pinch scaling
+      if (e.touches.length === 2 && selectedObject) {
+        const currentDistance = getDistance(e.touches[0], e.touches[1]);
+        const scale = (currentDistance / touchStartDistance) * selectedObject.initialScale;
+        
+        // Limit scale range
+        const clampedScale = Math.max(0.5, Math.min(2.0, scale));
+        selectedObject.style.transform = `scale(${clampedScale})`;
+        selectedObject.scale = clampedScale;
+        
+        e.preventDefault();
+      }
+    }
+
+    // Handle touch end
+    function handleTouchEnd(e) {
+      if (isDragging && selectedObject) {
+        // Remove dragging visual feedback
+        selectedObject.style.transform = selectedObject.scale ? `scale(${selectedObject.scale})` : '';
+        selectedObject.style.cursor = 'grab';
+        
+        // Add some velocity based on drag speed
+        const touch = e.changedTouches[0];
+        const deltaX = touch.clientX - dragStartPos.x;
+        const deltaY = touch.clientY - dragStartPos.y;
+        
+        selectedObject.velocity.x = deltaX * 0.1;
+        selectedObject.velocity.y = deltaY * 0.1;
+        
+        isDragging = false;
+        selectedObject = null;
+      }
+    }
+
+    // Handle mouse down
+    function handleMouseDown(e) {
+      if (e.target.classList.contains('ar-object')) {
+        selectedObject = e.target;
+        isDragging = true;
+        dragStartPos = { x: e.clientX, y: e.clientY };
+        
+        selectedObject.style.transform = 'scale(1.1)';
+        selectedObject.style.cursor = 'grabbing';
+        
+        selectedObject.initialX = parseInt(selectedObject.style.left);
+        selectedObject.initialY = parseInt(selectedObject.style.top);
+        
+        e.preventDefault();
+      }
+    }
+
+    // Handle mouse move
+    function handleMouseMove(e) {
+      if (isDragging && selectedObject) {
+        const deltaX = e.clientX - dragStartPos.x;
+        const deltaY = e.clientY - dragStartPos.y;
+        
+        const newX = selectedObject.initialX + deltaX;
+        const newY = selectedObject.initialY + deltaY;
+        
+        const maxX = window.innerWidth - selectedObject.offsetWidth;
+        const maxY = window.innerHeight - selectedObject.offsetHeight;
+        
+        selectedObject.style.left = Math.max(0, Math.min(maxX, newX)) + 'px';
+        selectedObject.style.top = Math.max(0, Math.min(maxY, newY)) + 'px';
+        
+        selectedObject.x = parseInt(selectedObject.style.left);
+        selectedObject.y = parseInt(selectedObject.style.top);
+        
+        e.preventDefault();
+      }
+    }
+
+    // Handle mouse up
+    function handleMouseUp(e) {
+      if (isDragging && selectedObject) {
+        selectedObject.style.transform = selectedObject.scale ? `scale(${selectedObject.scale})` : '';
+        selectedObject.style.cursor = 'grab';
+        
+        const deltaX = e.clientX - dragStartPos.x;
+        const deltaY = e.clientY - dragStartPos.y;
+        
+        selectedObject.velocity.x = deltaX * 0.1;
+        selectedObject.velocity.y = deltaY * 0.1;
+        
+        isDragging = false;
+        selectedObject = null;
+      }
+    }
+
+    // Calculate distance between two touch points
+    function getDistance(touch1, touch2) {
+      const dx = touch1.clientX - touch2.clientX;
+      const dy = touch1.clientY - touch2.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    // Setup camera movement tracking
+    function setupCameraTracking() {
+      if (videoElement) {
+        // Track camera movement for object interaction
+        let lastFrame = null;
+        
+        function trackCameraMovement() {
+          if (videoElement.videoWidth > 0) {
+            // Simple motion detection based on video changes
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 64;
+            canvas.height = 48;
+            
+            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            if (lastFrame) {
+              let motion = 0;
+              for (let i = 0; i < imageData.data.length; i += 4) {
+                const diff = Math.abs(imageData.data[i] - lastFrame[i]);
+                motion += diff;
+              }
+              
+              const motionThreshold = 1000;
+              if (motion > motionThreshold) {
+                // Camera is moving - add some randomness to object movement
+                arObjects.forEach(obj => {
+                  if (obj.velocity && !isDragging) {
+                    obj.velocity.x += (Math.random() - 0.5) * 0.5;
+                    obj.velocity.y += (Math.random() - 0.5) * 0.5;
+                  }
+                });
+              }
+            }
+            
+            lastFrame = new Uint8ClampedArray(imageData.data);
+          }
+          
+          requestAnimationFrame(trackCameraMovement);
+        }
+        
+        trackCameraMovement();
+      }
+    }
+
+    // Start physics simulation for objects
+    function startPhysicsSimulation() {
+      function updatePhysics() {
+        arObjects.forEach(obj => {
+          if (obj.velocity && !isDragging) {
+            // Update position based on velocity
+            obj.x += obj.velocity.x;
+            obj.y += obj.velocity.y;
+            
+            // Apply friction
+            obj.velocity.x *= 0.98;
+            obj.velocity.y *= 0.98;
+            
+            // Bounce off screen edges
+            const maxX = window.innerWidth - obj.offsetWidth;
+            const maxY = window.innerHeight - obj.offsetHeight;
+            
+            if (obj.x <= 0 || obj.x >= maxX) {
+              obj.velocity.x *= -0.8;
+              obj.x = Math.max(0, Math.min(maxX, obj.x));
+            }
+            
+            if (obj.y <= 0 || obj.y >= maxY) {
+              obj.velocity.y *= -0.8;
+              obj.y = Math.max(0, Math.min(maxY, obj.y));
+            }
+            
+            // Update visual position
+            obj.style.left = obj.x + 'px';
+            obj.style.top = obj.y + 'px';
+            
+            // Apply rotation for box
+            if (obj.type === 'box') {
+              obj.rotation += obj.rotationSpeed || 0;
+              obj.style.transform = `rotate(${obj.rotation}deg)`;
+            }
+          }
+        });
+        
+        requestAnimationFrame(updatePhysics);
+      }
+      
+      updatePhysics();
+    }
+
+    // Setup marker detection events - enhanced for interactive AR
+    function setupMarkerDetection() {
+      console.log('🎯 Interactive AR mode - objects respond to touch and camera movement');
+    }
+
+    // Animate objects when marker is found - updated for interactive AR
+    function animateObjectsIn() {
+      arObjects.forEach((obj, index) => {
+        if (obj && objectStates[obj.id]) {
+          // Fade in with staggered timing
+          obj.style.opacity = '0';
+          obj.style.transform = 'scale(0)';
+          
+          setTimeout(() => {
+            obj.style.transition = 'all 0.5s ease';
+            obj.style.opacity = '1';
+            obj.style.transform = obj.scale ? `scale(${obj.scale})` : 'scale(1)';
+          }, index * 200);
+        }
+      });
     }
 
     // Add CSS animations for AR objects
@@ -699,19 +1054,29 @@
         const style = document.createElement('style');
         style.id = 'ar-animations';
         style.textContent = `
-          @keyframes rotate {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to { transform: translate(-50%, -50%) rotate(360deg); }
+          .ar-object {
+            transition: all 0.3s ease;
           }
           
-          @keyframes bounce {
-            from { transform: scale(1); }
-            to { transform: scale(1.2); }
+          .ar-object:hover {
+            filter: brightness(1.2);
           }
           
-          @keyframes glow {
-            from { text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 10px #FFC65D; }
-            to { text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 20px #FFC65D, 0 0 30px #FFC65D; }
+          .ar-object.interactive {
+            cursor: grab;
+          }
+          
+          .ar-object.interactive:active {
+            cursor: grabbing;
+          }
+          
+          @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+          }
+          
+          .ar-object.pulse {
+            animation: pulse 2s ease-in-out infinite;
           }
         `;
         document.head.appendChild(style);
@@ -747,7 +1112,7 @@
       if (statusDot) statusDot.className = `status-dot ${type}`;
     }
 
-    // Toggle AR object visibility - updated for HTML AR
+    // Toggle AR object visibility - enhanced for interactive AR
     function toggleObject(objectId) {
       const object = document.querySelector(`#${objectId}`);
       const option = document.querySelector(`[onclick="toggleObject('${objectId}')"]`);
@@ -756,13 +1121,15 @@
         objectStates[objectId] = !objectStates[objectId];
         
         if (objectStates[objectId]) {
-          // Show object
+          // Show object with animation
+          object.style.transition = 'all 0.5s ease';
           object.style.opacity = '1';
-          object.style.transform = object.id === 'ar-box' ? 'translate(-50%, -50%) scale(1)' : 'scale(1)';
+          object.style.transform = object.scale ? `scale(${object.scale})` : 'scale(1)';
         } else {
-          // Hide object
+          // Hide object with animation
+          object.style.transition = 'all 0.3s ease';
           object.style.opacity = '0';
-          object.style.transform = object.id === 'ar-box' ? 'translate(-50%, -50%) scale(0)' : 'scale(0)';
+          object.style.transform = 'scale(0)';
         }
         
         option.classList.toggle('active', objectStates[objectId]);
@@ -771,13 +1138,109 @@
       }
     }
 
-    // Change marker type - simplified for HTML AR
+    // Spawn new AR object
+    function spawnObject(type = 'random') {
+      const types = ['box', 'sphere', 'text', 'triangle', 'star'];
+      const colors = ['#4CC3D9', '#EF2D5E', '#FFC65D', '#7BC8A4', '#FF6B6B', '#9C27B0'];
+      
+      if (type === 'random') {
+        type = types[Math.floor(Math.random() * types.length)];
+      }
+      
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const x = Math.random() * (window.innerWidth - 100);
+      const y = Math.random() * (window.innerHeight - 100);
+      
+      let properties = {
+        x: x,
+        y: y,
+        width: 60 + Math.random() * 40,
+        height: 60 + Math.random() * 40,
+        type: type,
+        color: color,
+        velocity: { x: (Math.random() - 0.5) * 2, y: (Math.random() - 0.5) * 2 }
+      };
+      
+      if (type === 'box') {
+        properties.rotation = Math.random() * 360;
+        properties.rotationSpeed = 1 + Math.random() * 3;
+      } else if (type === 'text') {
+        properties.text = 'New!';
+        properties.width = 80;
+        properties.height = 30;
+      }
+      
+      const newObj = createARObject(`obj-${Date.now()}`, properties);
+      arObjects.push(newObj);
+      
+      // Animate in
+      newObj.style.opacity = '0';
+      newObj.style.transform = 'scale(0)';
+      setTimeout(() => {
+        newObj.style.transition = 'all 0.5s ease';
+        newObj.style.opacity = '1';
+        newObj.style.transform = 'scale(1)';
+      }, 100);
+      
+      console.log(`🎯 Spawned new ${type} object`);
+      updateStatus(`Spawned ${type}`, 'ar');
+    }
+
+    // Change object colors randomly
+    function changeColors() {
+      const colors = ['#4CC3D9', '#EF2D5E', '#FFC65D', '#7BC8A4', '#FF6B6B', '#9C27B0', '#00BCD4', '#E91E63'];
+      
+      arObjects.forEach(obj => {
+        if (obj.type === 'box') {
+          const newColor = colors[Math.floor(Math.random() * colors.length)];
+          obj.style.background = `linear-gradient(45deg, ${newColor}, #2196F3)`;
+        } else if (obj.type === 'sphere') {
+          const newColor = colors[Math.floor(Math.random() * colors.length)];
+          obj.style.background = `radial-gradient(circle, ${newColor}, #C2185B)`;
+        } else if (obj.type === 'text') {
+          const newColor = colors[Math.floor(Math.random() * colors.length)];
+          obj.style.color = newColor;
+        }
+      });
+      
+      console.log('🎨 Changed all object colors');
+      updateStatus('Colors Changed', 'ar');
+    }
+
+    // Toggle physics simulation
+    function togglePhysics() {
+      const physicsEnabled = !window.physicsEnabled;
+      window.physicsEnabled = physicsEnabled;
+      
+      // Update UI text
+      const physicsToggle = document.getElementById('physics-toggle');
+      if (physicsToggle) {
+        physicsToggle.textContent = physicsEnabled ? 'Physics On' : 'Physics Off';
+      }
+      
+      arObjects.forEach(obj => {
+        if (obj.velocity) {
+          if (physicsEnabled) {
+            obj.velocity.x = (Math.random() - 0.5) * 2;
+            obj.velocity.y = (Math.random() - 0.5) * 2;
+          } else {
+            obj.velocity.x = 0;
+            obj.velocity.y = 0;
+          }
+        }
+      });
+      
+      console.log(`⚡ Physics ${physicsEnabled ? 'enabled' : 'disabled'}`);
+      updateStatus(`Physics ${physicsEnabled ? 'On' : 'Off'}`, physicsEnabled ? 'ar' : 'camera');
+    }
+
+    // Change marker type - enhanced for interactive AR
     function changeMarkerType() {
       const markerTypeSpan = document.getElementById('marker-type');
       
       if (currentMarker === 'hiro') {
-        currentMarker = 'simulated';
-        markerTypeSpan.textContent = 'Simulated AR';
+        currentMarker = 'interactive';
+        markerTypeSpan.textContent = 'Interactive AR';
       } else {
         currentMarker = 'hiro';
         markerTypeSpan.textContent = 'Hiro Marker';
@@ -786,32 +1249,33 @@
       console.log(`🎯 Switched to ${currentMarker} mode`);
     }
 
-    // Reset AR scene - updated for HTML AR
+    // Reset AR scene - enhanced for interactive AR
     function resetScene() {
-      console.log('🔄 Resetting AR scene...');
+      console.log('🔄 Resetting interactive AR scene...');
+      
+      // Remove all objects
+      arObjects.forEach(obj => obj.remove());
+      arObjects = [];
       
       // Reset object states
       Object.keys(objectStates).forEach(id => {
         objectStates[id] = true;
-        const object = document.querySelector(`#${id}`);
         const option = document.querySelector(`[onclick="toggleObject('${id}')"]`);
-        
-        if (object) {
-          object.style.opacity = '1';
-          object.style.transform = object.id === 'ar-box' ? 'translate(-50%, -50%) scale(1)' : 'scale(1)';
-        }
         if (option) option.classList.add('active');
       });
       
       // Reset marker type
       currentMarker = 'hiro';
       const markerTypeSpan = document.getElementById('marker-type');
-      if (markerTypeSpan) markerTypeSpan.textContent = 'Hiro Marker';
+      if (markerTypeSpan) markerTypeSpan.textContent = 'Interactive AR';
+      
+      // Recreate objects
+      createInteractiveObjects();
       
       updateStatus('Scene Reset', 'ar');
     }
 
-    // Toggle camera - updated for HTML AR
+    // Toggle camera - enhanced for interactive AR
     function toggleCamera() {
       cameraActive = !cameraActive;
       
@@ -826,19 +1290,18 @@
       console.log(`📹 Camera ${cameraActive ? 'enabled' : 'disabled'}`);
     }
 
-    // Retry camera access - simple since camera.html works
+    // Retry camera access - enhanced for interactive AR
     function retryCamera() {
-      console.log('🔄 Retrying AR - camera.html works so this should too...');
+      console.log('🔄 Retrying Interactive AR...');
       const errorDiv = document.getElementById('error-message');
       errorDiv.style.display = 'none';
       
       const loadingScreen = document.getElementById('loading-screen');
       loadingScreen.style.display = 'flex';
-      updateLoadingMessage('Retrying AR...');
+      updateLoadingMessage('Retrying Interactive AR...');
       
-      // Simple retry since camera works fine
       setTimeout(() => {
-        initializeCamera(); // Call the new initializeCamera function
+        initializeCamera();
       }, 1000);
     }
 
@@ -857,7 +1320,7 @@
       }
     }
 
-    // Capture screenshot - updated for HTML AR
+    // Capture screenshot - enhanced for interactive AR
     function captureScreenshot() {
       try {
         // Create a canvas to capture the AR scene
@@ -879,7 +1342,6 @@
         }
         
         // Draw AR objects on top
-        const arObjects = document.querySelectorAll('.ar-object');
         arObjects.forEach(obj => {
           if (obj.style.opacity !== '0') {
             // Convert screen position to canvas position
@@ -888,27 +1350,39 @@
             const scaleY = canvas.height / window.innerHeight;
             
             // Draw a representation of the AR object
-            ctx.fillStyle = obj.style.background || '#4CC3D9';
-            ctx.fillRect(
-              rect.left * scaleX, 
-              rect.top * scaleY, 
-              rect.width * scaleX, 
-              rect.height * scaleY
-            );
+            if (obj.type === 'box') {
+              ctx.fillStyle = obj.style.background || '#4CC3D9';
+              ctx.fillRect(
+                rect.left * scaleX, 
+                rect.top * scaleY, 
+                rect.width * scaleX, 
+                rect.height * scaleY
+              );
+            } else if (obj.type === 'sphere') {
+              ctx.fillStyle = obj.style.background || '#EF2D5E';
+              ctx.beginPath();
+              ctx.arc(
+                (rect.left + rect.width/2) * scaleX,
+                (rect.top + rect.height/2) * scaleY,
+                Math.min(rect.width, rect.height) * scaleX / 2,
+                0, 2 * Math.PI
+              );
+              ctx.fill();
+            }
           }
         });
         
         // Create download link
         const link = document.createElement('a');
-        link.download = `ar-screenshot-${Date.now()}.png`;
+        link.download = `interactive-ar-${Date.now()}.png`;
         link.href = canvas.toDataURL();
         link.click();
         
-        console.log('📸 Screenshot captured');
+        console.log('📸 Interactive AR screenshot captured');
         updateStatus('Screenshot Saved', 'ar');
         
         setTimeout(() => {
-          updateStatus(isMarkerVisible ? 'Marker Detected (Simulated)' : 'Scanning for markers...', isMarkerVisible ? 'ar' : 'camera');
+          updateStatus('Interactive AR Ready - Touch and move objects!', 'ar');
         }, 2000);
         
       } catch (error) {
@@ -995,7 +1469,7 @@
     // Apply optimizations when page loads
     document.addEventListener('DOMContentLoaded', applyQualityOptimizations);
 
-    // Console commands for debugging - Enhanced for HTML AR
+    // Console commands for debugging - Enhanced for Interactive AR
     window.arDebug = {
       getMarkerState: () => isMarkerVisible,
       getObjectStates: () => objectStates,
@@ -1055,30 +1529,55 @@
         }
       },
       showAllObjects: () => {
-        Object.keys(objectStates).forEach(id => {
-          objectStates[id] = true;
-          const obj = document.querySelector(`#${id}`);
-          if (obj) {
-            obj.style.opacity = '1';
-            obj.style.transform = obj.id === 'ar-box' ? 'translate(-50%, -50%) scale(1)' : 'scale(1)';
-          }
+        arObjects.forEach(obj => {
+          obj.style.opacity = '1';
+          obj.style.transform = obj.scale ? `scale(${obj.scale})` : 'scale(1)';
         });
         console.log('🎯 All AR objects shown');
       },
       hideAllObjects: () => {
-        Object.keys(objectStates).forEach(id => {
-          objectStates[id] = false;
-          const obj = document.querySelector(`#${id}`);
-          if (obj) {
-            obj.style.opacity = '0';
-            obj.style.transform = obj.id === 'ar-box' ? 'translate(-50%, -50%) scale(0)' : 'scale(0)';
-          }
+        arObjects.forEach(obj => {
+          obj.style.opacity = '0';
+          obj.style.transform = 'scale(0)';
         });
         console.log('🎯 All AR objects hidden');
+      },
+      spawnRandomObject: () => spawnObject('random'),
+      changeAllColors: () => changeColors(),
+      togglePhysicsSim: () => togglePhysics(),
+      getObjectCount: () => arObjects.length,
+      getObjectPositions: () => {
+        return arObjects.map(obj => ({
+          id: obj.id,
+          type: obj.type,
+          x: obj.x,
+          y: obj.y,
+          velocity: obj.velocity
+        }));
+      },
+      setObjectVelocity: (objectId, vx, vy) => {
+        const obj = arObjects.find(o => o.id === objectId);
+        if (obj && obj.velocity) {
+          obj.velocity.x = vx;
+          obj.velocity.y = vy;
+          console.log(`🎯 Set velocity for ${objectId}:`, { x: vx, y: vy });
+        }
+      },
+      addPulseEffect: () => {
+        arObjects.forEach(obj => {
+          obj.classList.add('pulse');
+        });
+        console.log('🎯 Added pulse effect to all objects');
+      },
+      removePulseEffect: () => {
+        arObjects.forEach(obj => {
+          obj.classList.remove('pulse');
+        });
+        console.log('🎯 Removed pulse effect from all objects');
       }
     };
 
-    console.log('🎯 AR Debug commands available:');
+    console.log('🎯 Interactive AR Debug commands available:');
     console.log('  arDebug.checkCameraStatus() - Check camera/video status');
     console.log('  arDebug.testBasicCamera() - Test basic camera access');
     console.log('  arDebug.forceHideLoading() - Force hide loading screen');
@@ -1087,6 +1586,23 @@
     console.log('  arDebug.showAllObjects() - Show all AR objects');
     console.log('  arDebug.hideAllObjects() - Hide all AR objects');
     console.log('  arDebug.forceMarkerFound() - Force marker detection');
+    console.log('  arDebug.spawnRandomObject() - Spawn a new random object');
+    console.log('  arDebug.changeAllColors() - Change colors of all objects');
+    console.log('  arDebug.togglePhysicsSim() - Toggle physics simulation');
+    console.log('  arDebug.getObjectCount() - Get total number of objects');
+    console.log('  arDebug.getObjectPositions() - Get positions of all objects');
+    console.log('  arDebug.setObjectVelocity(id, vx, vy) - Set object velocity');
+    console.log('  arDebug.addPulseEffect() - Add pulse animation to objects');
+    console.log('  arDebug.removePulseEffect() - Remove pulse animation');
+    console.log('');
+    console.log('🎮 Interactive Features:');
+    console.log('  • Touch/drag objects to move them around');
+    console.log('  • Pinch to resize objects');
+    console.log('  • Objects bounce off screen edges');
+    console.log('  • Camera movement affects object behavior');
+    console.log('  • Spawn new objects with ✨ button');
+    console.log('  • Change colors with 🎨 button');
+    console.log('  • Toggle physics with ⚡ button');
   </script>
 </body>
 </html>
