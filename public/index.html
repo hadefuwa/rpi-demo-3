@@ -492,7 +492,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 40px 20px;
+        padding: 15px 10px; /* Reduced padding for more space */
         background: linear-gradient(to bottom, #1e0033, #3b0057, #4b0063);
         height: 100%;
         width: 100%;
@@ -628,26 +628,30 @@
       
       #screen-home .grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr); /* Fixed 3-column layout */
-        grid-template-rows: repeat(5, 1fr); /* 5 rows to accommodate 13 cards */
-        gap: clamp(8px, 2vw, 20px); /* Responsive gap */
-        max-width: 90vw; /* Use viewport width instead of fixed pixels */
+        grid-template-columns: repeat(4, 1fr); /* 4-column layout for better card size */
+        grid-template-rows: repeat(auto-fit, minmax(60px, 1fr)); /* Auto-fit rows based on content */
+        gap: clamp(6px, 1.5vw, 15px); /* Smaller gap for more space */
+        max-width: 95vw; /* Use more viewport width */
         width: 100%;
+        height: calc(100vh - 120px); /* Fixed height to prevent overflow */
         z-index: 10;
         position: relative;
+        padding: 10px;
+        box-sizing: border-box;
+        align-content: start; /* Align grid items to start */
       }
       
       #screen-home .card {
         background: rgba(255, 255, 255, 0.1);
         border: 2px solid rgba(255, 255, 255, 0.2);
-        border-radius: clamp(8px, 2vw, 15px);
-        padding: clamp(15px, 3vw, 30px) clamp(10px, 2vw, 20px);
+        border-radius: clamp(6px, 1.5vw, 12px);
+        padding: clamp(8px, 2vw, 20px) clamp(6px, 1.5vw, 15px);
         text-align: center;
         cursor: pointer;
         transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         position: relative;
         overflow: hidden;
-        min-height: 100px; /* Fixed minimum height */
+        min-height: clamp(70px, 12vh, 120px); /* Responsive minimum height */
         height: auto; /* Let height be determined by content */
         display: flex;
         flex-direction: column;
@@ -662,8 +666,8 @@
         transform-style: preserve-3d;
         perspective: 1000px;
         box-shadow: 
-          0 clamp(5px, 2vw, 10px) clamp(15px, 4vw, 30px) rgba(0, 0, 0, 0.4),
-          0 0 0 2px rgba(255, 255, 255, 0.2),
+          0 clamp(2px, 1vw, 5px) clamp(8px, 2vw, 15px) rgba(0, 0, 0, 0.4),
+          0 0 0 1px rgba(255, 255, 255, 0.2),
           inset 0 0 0 1px rgba(255, 255, 255, 0.1);
       }
       
@@ -734,20 +738,22 @@
       }
       
       #screen-home .card .label {
-        font-size: 18px;
+        font-size: clamp(10px, 2.5vw, 16px);
         font-weight: 600;
-        margin-top: 15px;
+        margin-top: clamp(6px, 1vw, 12px);
         z-index: 2;
         position: relative;
         animation: pulse 2s infinite;
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
         transform: translateZ(30px);
         transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         background: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.8));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+        line-height: 1.2;
+        text-align: center;
       }
       
       /* Override pulse animation for Scroll Test card label */
@@ -768,22 +774,22 @@
       }
       
       #screen-home .card .icon {
-        width: 60px;
-        height: 60px;
+        width: clamp(35px, 8vw, 55px);
+        height: clamp(35px, 8vw, 55px);
         background: rgba(255, 255, 255, 0.3);
         border-radius: 50%;
-        margin-bottom: 15px;
+        margin-bottom: clamp(6px, 1vw, 12px);
         z-index: 2;
         position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 30px;
+        font-size: clamp(16px, 4vw, 28px);
         animation: spin 5s linear infinite;
         transform: translateZ(40px);
         transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         box-shadow: 
-          0 5px 15px rgba(0, 0, 0, 0.3),
+          0 clamp(2px, 1vw, 5px) clamp(8px, 2vw, 15px) rgba(0, 0, 0, 0.3),
           inset 0 1px 1px rgba(255, 255, 255, 0.6);
       }
       
@@ -1490,59 +1496,10 @@
         50% { transform: translateY(-12px); }
       }
       
-      /* Responsive design */
-      @media (max-width: 1024px) {
-        .title {
-          font-size: 20px;
-        }
-        
-        #screen-home .grid {
-          grid-template-columns: repeat(3, 1fr); /* Keep 3 columns */
-          gap: clamp(8px, 2vw, 15px);
-          max-width: 95vw;
-        }
-        
-        #screen-home .card {
-          padding: 15px 10px;
-          min-height: 90px;
-        }
-        
-        #screen-home .card .label {
-          font-size: clamp(14px, 2.5vw, 16px);
-        }
-        
-        #screen-home .card .icon {
-          width: clamp(30px, 8vw, 40px);
-          height: clamp(30px, 8vw, 40px);
-        }
-      }
-      
-      @media (max-width: 768px) {
-        #screen-home .grid {
-          grid-template-columns: repeat(3, 1fr); /* Keep 3 columns */
-          gap: clamp(6px, 1.5vw, 12px);
-        }
-        
-        #screen-home .card {
-          padding: 12px 8px;
-          min-height: 80px;
-        }
-        
-        #screen-home .card .label {
-          font-size: clamp(12px, 2vw, 14px);
-          margin-top: 8px;
-        }
-        
-        #screen-home .card .icon {
-          width: clamp(25px, 6vw, 35px);
-          height: clamp(25px, 6vw, 35px);
-          margin-bottom: 8px;
-        }
-      }
-      
-      @media (max-width: 480px) {
+      /* Specific optimization for 5-inch RPi screens (typically 800x480) */
+      @media (max-width: 850px) and (max-height: 500px) {
         .topbar {
-          padding: 8px 12px;
+          padding: 6px 10px;
         }
         
         .logo {
@@ -1550,31 +1507,144 @@
         }
         
         .title {
-          font-size: clamp(12px, 3.5vw, 16px);
-          white-space: normal;
+          font-size: 14px;
+        }
+        
+        #screen-home {
+          padding: 5px;
         }
         
         #screen-home .grid {
-          grid-template-columns: repeat(3, 1fr); /* Keep 3 columns even on small screens */
-          gap: 6px;
+          grid-template-columns: repeat(4, 1fr);
+          grid-template-rows: repeat(4, 1fr);
+          gap: 4px;
+          padding: 4px;
+          height: calc(100vh - 80px); /* Account for smaller topbar */
+        }
+        
+        #screen-home .card {
+          padding: 4px 2px;
+          min-height: 65px;
+          border-radius: 6px;
+        }
+        
+        #screen-home .card .label {
+          font-size: 9px;
+          margin-top: 2px;
+          line-height: 1;
+        }
+        
+        #screen-home .card .icon {
+          width: 24px;
+          height: 24px;
+          margin-bottom: 2px;
+        }
+        
+        #screen-home .card .icon::before {
+          font-size: 14px;
+        }
+      }
+
+      /* Responsive design - optimized for 5-inch RPi screens */
+      @media (max-width: 1024px) {
+        .title {
+          font-size: 18px;
+        }
+        
+        #screen-home .grid {
+          grid-template-columns: repeat(4, 1fr); /* Keep 4 columns */
+          gap: clamp(6px, 1.5vw, 12px);
+          max-width: 98vw;
+          padding: 8px;
+        }
+        
+        #screen-home .card {
+          padding: 10px 6px;
+          min-height: clamp(60px, 10vh, 90px);
+        }
+        
+        #screen-home .card .label {
+          font-size: clamp(9px, 2vw, 14px);
+        }
+        
+        #screen-home .card .icon {
+          width: clamp(30px, 6vw, 40px);
+          height: clamp(30px, 6vw, 40px);
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .topbar {
+          padding: 10px 15px;
+        }
+        
+        .title {
+          font-size: 16px;
+        }
+        
+        #screen-home .grid {
+          grid-template-columns: repeat(4, 1fr); /* Keep 4 columns */
+          gap: clamp(4px, 1vw, 8px);
           padding: 6px;
         }
         
         #screen-home .card {
           padding: 8px 4px;
-          min-height: 70px;
-          border-width: 1px;
+          min-height: clamp(55px, 8vh, 80px);
         }
         
         #screen-home .card .label {
-          font-size: clamp(10px, 3vw, 12px);
+          font-size: clamp(8px, 1.8vw, 12px);
           margin-top: 4px;
         }
         
         #screen-home .card .icon {
-          width: clamp(20px, 5vw, 30px);
-          height: clamp(20px, 5vw, 30px);
+          width: clamp(25px, 5vw, 35px);
+          height: clamp(25px, 5vw, 35px);
           margin-bottom: 4px;
+        }
+      }
+      
+      @media (max-width: 600px) {
+        .topbar {
+          padding: 8px 12px;
+        }
+        
+        .logo {
+          height: 32px;
+        }
+        
+        .title {
+          font-size: clamp(12px, 3vw, 15px);
+        }
+        
+        #screen-home {
+          padding: 8px 5px;
+        }
+        
+        #screen-home .grid {
+          grid-template-columns: repeat(4, 1fr); /* Keep 4 columns even on small screens */
+          gap: 4px;
+          padding: 4px;
+          height: calc(100vh - 100px);
+        }
+        
+        #screen-home .card {
+          padding: 6px 3px;
+          min-height: clamp(50px, 7vh, 70px);
+          border-width: 1px;
+        }
+        
+        #screen-home .card .label {
+          font-size: clamp(7px, 1.5vw, 10px);
+          margin-top: 3px;
+          line-height: 1.1;
+        }
+        
+        #screen-home .card .icon {
+          width: clamp(20px, 4vw, 28px);
+          height: clamp(20px, 4vw, 28px);
+          margin-bottom: 3px;
         }
         
         /* Simplify animations on small screens for better performance */
@@ -1584,16 +1654,25 @@
         }
       }
       
+      /* Ultra-small screens (480px and below) - might show 3 columns if needed */
+      @media (max-width: 480px) {
+        #screen-home .grid {
+          grid-template-columns: repeat(3, 1fr); /* Switch to 3 columns for very small screens */
+          grid-template-rows: repeat(5, 1fr); /* Adjust rows accordingly */
+        }
+      }
+      
       /* Ensure portrait orientation on very small devices works well */
       @media (max-width: 380px) {
         #screen-home .grid {
-          max-width: 98vw;
-          padding: 4px;
+          max-width: 99vw;
+          padding: 2px;
+          grid-template-columns: repeat(3, 1fr); /* 3 columns for minimal screens */
         }
         
         #screen-home .card {
-          min-height: 60px;
-          padding: 6px 3px;
+          min-height: clamp(45px, 6vh, 60px);
+          padding: 4px 2px;
         }
       }
     </style>
