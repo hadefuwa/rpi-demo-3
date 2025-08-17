@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <title>Augmented Reality Demo - RPI Showcase</title>
+  <title>AR Guidance System - RPI Showcase</title>
   
   <!-- Raspberry Pi Camera Detection Script - Simplified -->
   <script>
@@ -30,22 +30,38 @@
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #000;
+      background: #1a1a1a;
       color: #fff;
       overflow: hidden;
       height: 100vh;
       width: 100vw;
     }
     
-    /* AR Scene Container */
+    /* Main Layout Container */
+    .main-container {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+    }
+    
+    /* Camera Container - Fixed Size */
+    .camera-container {
+      flex: 1;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+      background: #000;
+    }
+    
+    /* AR Scene Container - Within Camera Container */
     #ar-container {
       position: relative;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
     }
     
-    /* UI Overlay */
+    /* UI Overlay - Only for camera controls */
     .ui-overlay {
       position: absolute;
       top: 0;
@@ -56,13 +72,13 @@
       pointer-events: none;
     }
     
-    /* Top bar with controls */
+    /* Top bar with controls - Only in camera area */
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 15px 20px;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.8);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       pointer-events: auto;
@@ -81,7 +97,7 @@
       flex: 1;
     }
     
-    /* Bottom controls */
+    /* Bottom controls - Only in camera area */
     .bottom-controls {
       position: absolute;
       bottom: 20px;
@@ -116,59 +132,69 @@
       border-color: #2196f3;
     }
     
-    /* Side panel for AR options */
+    /* Right Side Panel - Fixed, Non-transparent */
     .side-panel {
-      position: absolute;
-      right: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0, 0, 0, 0.8);
-      border-radius: 15px;
-      padding: 20px;
-      min-width: 200px;
-      backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      pointer-events: auto;
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 280px;
+      height: 100vh;
+      background: #2d2d2d;
+      border-left: 3px solid #4CAF50;
+      overflow-y: auto;
+      z-index: 2000;
+      box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
     }
     
     .panel-title {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 600;
-      margin-bottom: 15px;
+      margin: 20px 20px 15px 20px;
       color: #fff;
       text-align: center;
+      padding: 15px;
+      background: #4CAF50;
+      border-radius: 10px;
     }
     
     .ar-option {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 10px;
-      margin: 5px 0;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
+      gap: 15px;
+      padding: 15px 20px;
+      margin: 8px 15px;
+      background: #3d3d3d;
+      border-radius: 10px;
       cursor: pointer;
       transition: all 0.3s ease;
+      border: 2px solid transparent;
     }
     
     .ar-option:hover {
-      background: rgba(255, 255, 255, 0.2);
+      background: #4d4d4d;
+      border-color: #4CAF50;
+      transform: translateX(-5px);
     }
     
     .ar-option.active {
-      background: rgba(76, 175, 80, 0.6);
-      border: 1px solid #4caf50;
+      background: #4CAF50;
+      border: 2px solid #45a049;
+      color: white;
     }
     
     .ar-icon {
-      width: 20px;
-      height: 20px;
-      background: rgba(255, 255, 255, 0.3);
+      width: 25px;
+      height: 25px;
+      background: rgba(255, 255, 255, 0.2);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 14px;
+    }
+    
+    .ar-option.active .ar-icon {
+      background: rgba(255, 255, 255, 0.3);
     }
     
     /* Loading screen - simplified */
@@ -178,7 +204,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.9);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -189,32 +215,32 @@
     
     .loading-text {
       margin-top: 20px;
-      font-size: 16px;
+      font-size: 18px;
       color: white;
       text-align: center;
     }
     
-    /* AR Status indicator */
+    /* AR Status indicator - Only in camera area */
     .ar-status {
       position: absolute;
       top: 80px;
       left: 20px;
-      padding: 8px 15px;
-      background: rgba(0, 0, 0, 0.7);
-      border-radius: 20px;
-      font-size: 12px;
+      padding: 10px 20px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 25px;
+      font-size: 14px;
       color: white;
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.2);
       pointer-events: auto;
     }
     
     .status-dot {
       display: inline-block;
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      margin-right: 8px;
+      margin-right: 10px;
       animation: pulse 2s infinite;
     }
     
@@ -228,33 +254,185 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(244, 67, 54, 0.9);
-      padding: 20px;
-      border-radius: 10px;
+      background: rgba(244, 67, 54, 0.95);
+      padding: 25px;
+      border-radius: 15px;
       color: white;
       text-align: center;
       max-width: 80%;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(15px);
       z-index: 3000;
+      border: 2px solid #d32f2f;
+    }
+    
+    /* AR Objects Container - Constrained to camera area */
+    #ar-objects {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: calc(100vw - 280px); /* Full width minus side panel */
+      height: 100vh;
+      pointer-events: auto;
+      z-index: 10;
+    }
+    
+    /* Guidance Elements */
+    .guidance-element {
+      background: rgba(0, 0, 0, 0.8);
+      border: 3px solid #FFC65D;
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      min-width: 150px;
+      pointer-events: none;
+    }
+    
+    .guidance-arrow {
+      font-size: 48px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    
+    .guidance-text {
+      font-size: 16px;
+      font-weight: bold;
+      color: #FFC65D;
+      margin-bottom: 8px;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+    
+    .guidance-progress {
+      font-size: 12px;
+      color: #4CAF50;
+      opacity: 0.8;
+    }
+    
+    /* Arrow Direction Styles */
+    .arrow-right { color: #4CAF50; }
+    .arrow-left { color: #EF2D5E; }
+    .arrow-up { color: #2196F3; }
+    .arrow-hold { color: #FFC65D; animation: pulse 1s ease-in-out infinite; }
+    .arrow-dig { color: #FF9800; animation: bounce 0.5s ease-in-out infinite; }
+    
+    /* Action Icon Styles */
+    .action-open { color: #4CAF50; }
+    .action-remove { color: #EF2D5E; }
+    .action-sensor { color: #2196F3; }
+    .action-unbolt { color: #FF9800; }
+    .action-found { color: #4CAF50; animation: celebration 1s ease-in-out infinite; }
+    
+    /* Completion Message */
+    .guidance-completion {
+      background: rgba(0, 0, 0, 0.9);
+      border: 4px solid #4CAF50;
+      border-radius: 25px;
+      padding: 30px;
+      text-align: center;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+      min-width: 250px;
+      pointer-events: none;
+    }
+    
+    .completion-icon {
+      font-size: 60px;
+      margin-bottom: 15px;
+    }
+    
+    .completion-text {
+      font-size: 24px;
+      font-weight: bold;
+      color: #FFC65D;
+      margin-bottom: 10px;
+    }
+    
+    .completion-subtext {
+      font-size: 18px;
+      color: #4CAF50;
+      opacity: 0.9;
+    }
+    
+    /* Animations */
+    @keyframes guidancePulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+    
+    @keyframes completionCelebration {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      25% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.9; }
+      75% { transform: translate(-50%, -50%) scale(0.9); opacity: 1; }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes celebration {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.1) rotate(5deg); }
+      75% { transform: scale(0.9) rotate(-5deg); }
     }
     
     /* Responsive design */
+    @media (max-width: 1200px) {
+      .side-panel {
+        width: 250px;
+      }
+      
+      #ar-objects {
+        width: calc(100vw - 250px);
+      }
+    }
+    
     @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+      
+      .camera-container {
+        height: 70vh;
+      }
+      
+      .side-panel {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        top: auto;
+        width: 100%;
+        height: 30vh;
+        border-left: none;
+        border-top: 3px solid #4CAF50;
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+      
+      .side-panel .ar-option {
+        display: inline-block;
+        min-width: 120px;
+        margin: 8px 10px;
+        text-align: center;
+      }
+      
+      #ar-objects {
+        width: 100%;
+        height: 70vh;
+      }
+      
       .top-bar {
         padding: 10px 15px;
       }
       
       .title {
         font-size: 16px;
-      }
-      
-      .side-panel {
-        position: fixed;
-        bottom: 80px;
-        right: 20px;
-        left: 20px;
-        transform: none;
-        top: auto;
       }
       
       .bottom-controls {
@@ -273,7 +451,7 @@
   <!-- Simple Loading Screen -->
   <div id="loading-screen" class="loading-screen">
     <div class="loading-text">
-      <p id="loading-main-text">Starting AR Camera...</p>
+      <p id="loading-main-text">Starting AR Guidance System...</p>
     </div>
   </div>
 
@@ -298,231 +476,241 @@
   </div>
 
   <!-- AR Container -->
-  <div id="ar-container">
-    <!-- AR Overlay System (simplified) -->
-    <div id="ar-overlay" style="
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 2;
-      pointer-events: none;
-    ">
-      <!-- AR Objects Container -->
-      <div id="ar-objects" style="
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: auto;
-      ">
-        <!-- AR Box -->
-        <div id="ar-box" class="ar-object" style="
+  <div class="main-container">
+    <!-- Camera Container -->
+    <div class="camera-container">
+      <div id="ar-container">
+        <!-- AR Overlay System (simplified) -->
+        <div id="ar-overlay" style="
           position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 100px;
-          height: 100px;
-          background: linear-gradient(45deg, #4CC3D9, #2196F3);
-          border-radius: 10px;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-          opacity: 0;
-          transition: all 0.5s ease;
-          pointer-events: auto;
-          cursor: pointer;
-        " onclick="toggleObject('ar-box')">
-          <div style="
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-          ">AR Box</div>
-        </div>
-        
-        <!-- AR Sphere -->
-        <div id="ar-sphere" class="ar-object" style="
-          position: absolute;
-          top: 40%;
-          left: 30%;
-          width: 80px;
-          height: 80px;
-          background: radial-gradient(circle, #EF2D5E, #C2185B);
-          border-radius: 50%;
-          box-shadow: 0 6px 24px rgba(0,0,0,0.3);
-          opacity: 0;
-          transition: all 0.5s ease;
-          pointer-events: auto;
-          cursor: pointer;
-        " onclick="toggleObject('ar-sphere')">
-          <div style="
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-          ">AR Sphere</div>
-        </div>
-        
-        <!-- AR Text -->
-        <div id="ar-text" class="ar-object" style="
-          position: absolute;
-          top: 60%;
-          left: 70%;
-          color: #FFC65D;
-          font-size: 24px;
-          font-weight: bold;
-          text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-          opacity: 0;
-          transition: all 0.5s ease;
-          pointer-events: auto;
-          cursor: pointer;
-          text-align: center;
-          min-width: 120px;
-        " onclick="toggleObject('ar-text')">
-          Hello AR!
-        </div>
-      </div>
-      
-      <!-- AR Grid Overlay -->
-      <div id="ar-grid" style="
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0.3;
-        pointer-events: none;
-        z-index: 1;
-      ">
-        <div style="
-          position: absolute;
-          top: 50%;
-          left: 0;
-          right: 0;
-          height: 1px;
-          background: rgba(255,255,255,0.5);
-        "></div>
-        <div style="
-          position: absolute;
-          left: 50%;
           top: 0;
-          bottom: 0;
-          width: 1px;
-          background: rgba(255,255,255,0.5);
-        "></div>
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 2;
+          pointer-events: none;
+        ">
+          <!-- AR Objects Container -->
+          <div id="ar-objects" style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: auto;
+          ">
+            <!-- AR Box -->
+            <div id="ar-box" class="ar-object" style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 100px;
+              height: 100px;
+              background: linear-gradient(45deg, #4CC3D9, #2196F3);
+              border-radius: 10px;
+              box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+              opacity: 0;
+              transition: all 0.5s ease;
+              pointer-events: auto;
+              cursor: pointer;
+            " onclick="toggleObject('ar-box')">
+              <div style="
+                position: absolute;
+                top: -30px;
+                left: 50%;
+                transform: translateX(-50%);
+                color: white;
+                font-size: 12px;
+                font-weight: bold;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+              ">AR Box</div>
+            </div>
+            
+            <!-- AR Sphere -->
+            <div id="ar-sphere" class="ar-object" style="
+              position: absolute;
+              top: 40%;
+              left: 30%;
+              width: 80px;
+              height: 80px;
+              background: radial-gradient(circle, #EF2D5E, #C2185B);
+              border-radius: 50%;
+              box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+              opacity: 0;
+              transition: all 0.5s ease;
+              pointer-events: auto;
+              cursor: pointer;
+            " onclick="toggleObject('ar-sphere')">
+              <div style="
+                position: absolute;
+                top: -25px;
+                left: 50%;
+                transform: translateX(-50%);
+                color: white;
+                font-size: 12px;
+                font-weight: bold;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+              ">AR Sphere</div>
+            </div>
+            
+            <!-- AR Text -->
+            <div id="ar-text" class="ar-object" style="
+              position: absolute;
+              top: 60%;
+              left: 70%;
+              color: #FFC65D;
+              font-size: 24px;
+              font-weight: bold;
+              text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+              opacity: 0;
+              transition: all 0.5s ease;
+              pointer-events: auto;
+              cursor: pointer;
+              text-align: center;
+              min-width: 120px;
+            " onclick="toggleObject('ar-text')">
+              Hello AR!
+            </div>
+          </div>
+          
+          <!-- AR Grid Overlay -->
+          <div id="ar-grid" style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 1;
+          ">
+            <div style="
+              position: absolute;
+              top: 50%;
+              left: 0;
+              right: 0;
+              height: 1px;
+              background: rgba(255,255,255,0.5);
+            "></div>
+            <div style="
+              position: absolute;
+              left: 50%;
+              top: 0;
+              bottom: 0;
+              width: 1px;
+              background: rgba(255,255,255,0.5);
+            "></div>
+          </div>
+        </div>
+
+        <!-- UI Overlay -->
+        <div class="ui-overlay">
+          <!-- Top Bar -->
+          <div class="top-bar">
+            <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo" />
+            <div class="title">AR Guidance System</div>
+            <button id="btn-home" class="control-btn" onclick="goHome()">🏠 Home</button>
+          </div>
+
+          <!-- AR Status -->
+          <div class="ar-status">
+            <span id="status-indicator" class="status-dot camera"></span>
+            <span id="status-text">Camera Active</span>
+          </div>
+
+          <!-- Bottom Controls -->
+          <div class="bottom-controls">
+            <button class="control-btn" onclick="startGuidance()">▶️ Start</button>
+            <button class="control-btn" onclick="stopGuidance()">⏹️ Stop</button>
+            <button class="control-btn" onclick="toggleCamera()">📹 Camera</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- UI Overlay -->
-    <div class="ui-overlay">
-      <!-- Top Bar -->
-      <div class="top-bar">
-        <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo" />
-        <div class="title">Augmented Reality Demo</div>
-        <button id="btn-home" class="control-btn" onclick="goHome()">🏠 Home</button>
+    <!-- Right Side Panel -->
+    <div class="side-panel">
+      <div class="panel-title">AR Guidance System</div>
+      
+      <div class="ar-option active" onclick="toggleGuidanceMode()">
+        <div class="ar-icon">🎯</div>
+        <span id="mode-toggle">Treasure Hunt</span>
       </div>
-
-      <!-- AR Status -->
-      <div class="ar-status">
-        <span id="status-indicator" class="status-dot camera"></span>
-        <span id="status-text">Camera Active</span>
+      
+      <div class="ar-option" onclick="startGuidance()">
+        <div class="ar-icon">▶️</div>
+        <span>Start Guidance</span>
       </div>
-
-      <!-- Side Panel -->
-      <div class="side-panel">
-        <div class="panel-title">Interactive AR</div>
-        
-        <div class="ar-option active" onclick="toggleObject('ar-box')">
-          <div class="ar-icon">📦</div>
-          <span>Interactive Box</span>
-        </div>
-        
-        <div class="ar-option active" onclick="toggleObject('ar-sphere')">
-          <div class="ar-icon">🔴</div>
-          <span>Bouncing Sphere</span>
-        </div>
-        
-        <div class="ar-option active" onclick="toggleObject('ar-text')">
-          <div class="ar-icon">📝</div>
-          <span>Touch Text</span>
-        </div>
-        
-        <div class="ar-option" onclick="spawnObject('random')">
-          <div class="ar-icon">✨</div>
-          <span>Spawn Object</span>
-        </div>
-        
-        <div class="ar-option" onclick="changeColors()">
-          <div class="ar-icon">🎨</div>
-          <span>Change Colors</span>
-        </div>
-        
-        <div class="ar-option" onclick="togglePhysics()">
-          <div class="ar-icon">⚡</div>
-          <span id="physics-toggle">Physics On</span>
-        </div>
-        
-        <div class="ar-option" onclick="captureScreenshot()">
-          <div class="ar-icon">📸</div>
-          <span>Screenshot</span>
-        </div>
+      
+      <div class="ar-option" onclick="stopGuidance()">
+        <div class="ar-icon">⏹️</div>
+        <span>Stop Guidance</span>
       </div>
-
-      <!-- Bottom Controls -->
-      <div class="bottom-controls">
-        <button class="control-btn" onclick="resetScene()">🔄 Reset</button>
-        <button class="control-btn" onclick="toggleCamera()">📹 Camera</button>
-        <button class="control-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+      
+      <div class="ar-option" onclick="resetGuidance()">
+        <div class="ar-icon">🔄</div>
+        <span>Reset Guidance</span>
+      </div>
+      
+      <div class="ar-option" onclick="nextStep()">
+        <div class="ar-icon">⏭️</div>
+        <span>Next Step</span>
+      </div>
+      
+      <div class="ar-option" onclick="previousStep()">
+        <div class="ar-icon">⏮️</div>
+        <span>Previous Step</span>
+      </div>
+      
+      <div class="ar-option" onclick="captureScreenshot()">
+        <div class="ar-icon">📸</div>
+        <span>Screenshot</span>
       </div>
     </div>
   </div>
 
   <script>
-    // AR Application State
-    let arScene, camera;
-    let isMarkerVisible = false;
-    let currentMarker = 'hiro';
-    let cameraActive = true;
-    let objectStates = {
-      'ar-box': true,
-      'ar-sphere': true,
-      'ar-text': true
-    };
-    
-    // Camera stream for AR
+    // AR Guidance System State
+    let currentMode = 'treasure'; // 'treasure' or 'troubleshoot'
+    let currentStep = 0;
+    let isGuidanceActive = false;
+    let guidanceSteps = [];
+    let currentArrow = null;
     let cameraStream = null;
     let videoElement = null;
-    
-    // Interactive AR system
-    let arObjects = [];
-    let selectedObject = null;
-    let isDragging = false;
-    let dragStartPos = { x: 0, y: 0 };
-    let touchStartDistance = 0;
-    let cameraMovement = { x: 0, y: 0 };
-    let lastCameraPosition = { x: 0, y: 0 };
 
-    // Initialize AR Application - Direct camera access like camera.html
+    // Treasure Hunt Guidance Steps
+    const treasureSteps = [
+      { direction: 'right', text: 'Go this way', duration: 3000, arrow: '→' },
+      { direction: 'left', text: 'Turn left here', duration: 2500, arrow: '←' },
+      { direction: 'up', text: 'Go up the hill', duration: 4000, arrow: '↑' },
+      { direction: 'hold', text: 'Hold it there...', duration: 2000, arrow: '●' },
+      { direction: 'right', text: 'Perfect! Now right', duration: 3000, arrow: '→' },
+      { direction: 'dig', text: 'Dig here! Gold found!', duration: 5000, arrow: '⛏️' }
+    ];
+
+    // Troubleshooting Guidance Steps
+    const troubleshootSteps = [
+      { action: 'open', text: 'Open that panel', duration: 3000, icon: '🔧' },
+      { action: 'remove', text: 'Remove that cover', duration: 2500, icon: '🔄' },
+      { action: 'sensor', text: 'There is the sensor', duration: 2000, icon: '📡' },
+      { action: 'remove', text: 'Remove the sensor', duration: 3000, icon: '🔄' },
+      { action: 'unbolt', text: 'Unbolt that bracket', duration: 4000, icon: '🔩' },
+      { action: 'found', text: 'Perfect! There\'s the fault!', duration: 5000, icon: '✅' }
+    ];
+
+    // Initialize AR Guidance System
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('🎯 Starting Interactive AR Demo - using direct camera access');
+      console.log('🎯 Starting AR Guidance System - Treasure Hunt & Troubleshooting');
       
-      // Initialize camera first, then AR
+      // Initialize camera first, then guidance system
       initializeCamera();
     });
 
     // Initialize camera using the same approach as camera.html
     async function initializeCamera() {
-      updateLoadingMessage('Starting camera...');
+      updateLoadingMessage('Starting guidance camera...');
       
       try {
         // Check camera permissions first (if available)
@@ -550,12 +738,12 @@
         // Create video element for AR
         createARVideo();
         
-        updateLoadingMessage('Camera active - starting Interactive AR...');
+        updateLoadingMessage('Camera active - starting guidance system...');
         updateStatus('Camera Active', 'camera');
         
-        // Initialize AR after camera is ready
+        // Initialize guidance system after camera is ready
         setTimeout(() => {
-          initializeAR();
+          initializeGuidanceSystem();
         }, 1000);
         
       } catch (error) {
@@ -609,7 +797,7 @@
       // Wait for video to load
       videoElement.addEventListener('loadedmetadata', () => {
         console.log('📹 AR Video ready:', videoElement.videoWidth, 'x', videoElement.videoHeight);
-        updateLoadingMessage('Interactive AR Video Ready!');
+        updateLoadingMessage('Guidance Video Ready!');
       });
       
       // Handle video errors
@@ -625,461 +813,226 @@
       if (mainTextEl) mainTextEl.textContent = mainText;
     }
 
-    // Initialize AR Scene - enhanced with interactive features
-    function initializeAR() {
-      updateLoadingMessage('Starting Interactive AR overlay...');
-      console.log('🎯 Starting enhanced interactive AR overlay');
+    // Initialize Guidance System
+    function initializeGuidanceSystem() {
+      updateLoadingMessage('Starting AR Guidance System...');
+      console.log('🎯 Starting AR guidance system');
       
-      // Create interactive AR objects
-      createInteractiveObjects();
-      
-      // Setup touch and gesture controls
-      setupTouchControls();
-      
-      // Setup camera movement detection
-      setupCameraTracking();
+      // Set default mode
+      setGuidanceMode('treasure');
       
       // Hide loading screen
       setTimeout(() => {
         hideLoadingScreen();
-        setupAREventListeners();
-        updateStatus('Interactive AR Ready - Touch and move objects!', 'ar');
-        
-        // Start physics simulation
-        startPhysicsSimulation();
+        updateStatus('Guidance System Ready - Choose your mode!', 'ar');
       }, 1000);
     }
 
-    // Create interactive AR objects with physics properties
-    function createInteractiveObjects() {
-      const objectsContainer = document.getElementById('ar-objects');
+    // Set guidance mode (treasure hunt or troubleshooting)
+    function setGuidanceMode(mode) {
+      currentMode = mode;
+      currentStep = 0;
+      isGuidanceActive = false;
       
-      // Clear existing objects
-      objectsContainer.innerHTML = '';
+      // Clear any existing guidance
+      clearGuidance();
       
-      // Create interactive box
-      const box = createARObject('box', {
-        x: window.innerWidth / 2,
-        y: window.innerHeight / 2,
-        width: 100,
-        height: 100,
-        type: 'box',
-        color: '#4CC3D9',
-        velocity: { x: 0, y: 0 },
-        rotation: 0,
-        rotationSpeed: 2
-      });
-      
-      // Create interactive sphere
-      const sphere = createARObject('sphere', {
-        x: window.innerWidth * 0.3,
-        y: window.innerHeight * 0.4,
-        width: 80,
-        height: 80,
-        type: 'sphere',
-        color: '#EF2D5E',
-        velocity: { x: 1, y: 1 },
-        bounce: 0.8
-      });
-      
-      // Create interactive text
-      const text = createARObject('text', {
-        x: window.innerWidth * 0.7,
-        y: window.innerHeight * 0.6,
-        width: 120,
-        height: 40,
-        type: 'text',
-        color: '#FFC65D',
-        text: 'Touch Me!',
-        velocity: { x: 0, y: 0 }
-      });
-      
-      arObjects = [box, sphere, text];
-    }
-
-    // Create a single interactive AR object
-    function createARObject(id, properties) {
-      const obj = document.createElement('div');
-      obj.id = `ar-${id}`;
-      obj.className = 'ar-object interactive';
-      
-      // Set object properties
-      Object.assign(obj, properties);
-      
-      // Apply styles based on type
-      if (properties.type === 'box') {
-        obj.style.cssText = `
-          position: absolute;
-          left: ${properties.x}px;
-          top: ${properties.y}px;
-          width: ${properties.width}px;
-          height: ${properties.height}px;
-          background: linear-gradient(45deg, ${properties.color}, #2196F3);
-          border-radius: 10px;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-          cursor: grab;
-          user-select: none;
-          transition: transform 0.1s ease;
-          z-index: 10;
-        `;
-      } else if (properties.type === 'sphere') {
-        obj.style.cssText = `
-          position: absolute;
-          left: ${properties.x}px;
-          top: ${properties.y}px;
-          width: ${properties.width}px;
-          height: ${properties.height}px;
-          background: radial-gradient(circle, ${properties.color}, #C2185B);
-          border-radius: 50%;
-          box-shadow: 0 6px 24px rgba(0,0,0,0.3);
-          cursor: grab;
-          user-select: none;
-          transition: transform 0.1s ease;
-          z-index: 10;
-        `;
-      } else if (properties.type === 'text') {
-        obj.style.cssText = `
-          position: absolute;
-          left: ${properties.x}px;
-          top: ${properties.y}px;
-          width: ${properties.width}px;
-          height: ${properties.height}px;
-          color: ${properties.color};
-          font-size: 18px;
-          font-weight: bold;
-          text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-          cursor: grab;
-          user-select: none;
-          text-align: center;
-          line-height: ${properties.height}px;
-          transition: transform 0.1s ease;
-          z-index: 10;
-        `;
-        obj.textContent = properties.text;
+      // Set guidance steps based on mode
+      if (mode === 'treasure') {
+        guidanceSteps = [...treasureSteps];
+        updateStatus('Treasure Hunt Mode - Ready to start!', 'ar');
+      } else if (mode === 'troubleshoot') {
+        guidanceSteps = [...troubleshootSteps];
+        updateStatus('Troubleshooting Mode - Ready to start!', 'ar');
       }
       
-      // Add to container
-      document.getElementById('ar-objects').appendChild(obj);
-      
-      return obj;
+      console.log(`🎯 Switched to ${mode} mode with ${guidanceSteps.length} steps`);
     }
 
-    // Setup touch controls for interactive objects
-    function setupTouchControls() {
-      const objectsContainer = document.getElementById('ar-objects');
-      
-      // Touch events for mobile
-      objectsContainer.addEventListener('touchstart', handleTouchStart);
-      objectsContainer.addEventListener('touchmove', handleTouchMove);
-      objectsContainer.addEventListener('touchend', handleTouchEnd);
-      
-      // Mouse events for desktop
-      objectsContainer.addEventListener('mousedown', handleMouseDown);
-      objectsContainer.addEventListener('mousemove', handleMouseMove);
-      objectsContainer.addEventListener('mouseup', handleMouseUp);
-      
-      // Prevent default touch behaviors
-      objectsContainer.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
-      objectsContainer.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
-    }
-
-    // Handle touch start
-    function handleTouchStart(e) {
-      const touch = e.touches[0];
-      const element = document.elementFromPoint(touch.clientX, touch.clientY);
-      
-      if (element && element.classList.contains('ar-object')) {
-        selectedObject = element;
-        isDragging = true;
-        dragStartPos = { x: touch.clientX, y: touch.clientY };
-        
-        // Add dragging visual feedback
-        element.style.transform = 'scale(1.1)';
-        element.style.cursor = 'grabbing';
-        
-        // Store initial position
-        element.initialX = parseInt(element.style.left);
-        element.initialY = parseInt(element.style.top);
-        
-        e.preventDefault();
+    // Start guidance sequence
+    function startGuidance() {
+      if (isGuidanceActive) {
+        console.log('🎯 Guidance already active');
+        return;
       }
       
-      // Handle pinch gestures for scaling
-      if (e.touches.length === 2) {
-        touchStartDistance = getDistance(e.touches[0], e.touches[1]);
-        if (selectedObject) {
-          selectedObject.initialScale = selectedObject.scale || 1;
+      isGuidanceActive = true;
+      currentStep = 0;
+      
+      console.log(`🎯 Starting ${currentMode} guidance with ${guidanceSteps.length} steps`);
+      updateStatus(`Guidance Active - ${currentMode}`, 'ar');
+      
+      // Start first step
+      showNextStep();
+    }
+
+    // Show next guidance step
+    function showNextStep() {
+      if (currentStep >= guidanceSteps.length) {
+        // Guidance complete
+        completeGuidance();
+        return;
+      }
+      
+      const step = guidanceSteps[currentStep];
+      console.log(`🎯 Step ${currentStep + 1}: ${step.text}`);
+      
+      // Create and show guidance arrow/icon
+      showGuidanceElement(step);
+      
+      // Auto-advance to next step after duration
+      setTimeout(() => {
+        if (isGuidanceActive) {
+          currentStep++;
+          showNextStep();
         }
-      }
+      }, step.duration);
     }
 
-    // Handle touch move
-    function handleTouchMove(e) {
-      if (isDragging && selectedObject) {
-        const touch = e.touches[0];
-        const deltaX = touch.clientX - dragStartPos.x;
-        const deltaY = touch.clientY - dragStartPos.y;
+    // Show guidance element (arrow or icon)
+    function showGuidanceElement(step) {
+      // Clear previous guidance
+      clearGuidance();
+      
+      // Create guidance element
+      const guidanceEl = document.createElement('div');
+      guidanceEl.className = 'guidance-element';
+      guidanceEl.id = 'current-guidance';
+      
+      let content = '';
+      let arrowClass = '';
+      
+      if (currentMode === 'treasure') {
+        // Treasure hunt uses directional arrows
+        content = step.arrow;
+        arrowClass = `arrow-${step.direction}`;
         
-        // Update object position
-        const newX = selectedObject.initialX + deltaX;
-        const newY = selectedObject.initialY + deltaY;
-        
-        // Keep object within screen bounds
-        const maxX = window.innerWidth - selectedObject.offsetWidth;
-        const maxY = window.innerHeight - selectedObject.offsetHeight;
-        
-        selectedObject.style.left = Math.max(0, Math.min(maxX, newX)) + 'px';
-        selectedObject.style.top = Math.max(0, Math.min(maxY, newY)) + 'px';
-        
-        // Update physics properties
-        selectedObject.x = parseInt(selectedObject.style.left);
-        selectedObject.y = parseInt(selectedObject.style.top);
-        
-        e.preventDefault();
+        // Add special styling for different directions
+        if (step.direction === 'hold') {
+          arrowClass = 'arrow-hold';
+        } else if (step.direction === 'dig') {
+          arrowClass = 'arrow-dig';
+        }
+      } else {
+        // Troubleshooting uses action icons
+        content = step.icon;
+        arrowClass = `action-${step.action}`;
       }
       
-      // Handle pinch scaling
-      if (e.touches.length === 2 && selectedObject) {
-        const currentDistance = getDistance(e.touches[0], e.touches[1]);
-        const scale = (currentDistance / touchStartDistance) * selectedObject.initialScale;
-        
-        // Limit scale range
-        const clampedScale = Math.max(0.5, Math.min(2.0, scale));
-        selectedObject.style.transform = `scale(${clampedScale})`;
-        selectedObject.scale = clampedScale;
-        
-        e.preventDefault();
-      }
-    }
-
-    // Handle touch end
-    function handleTouchEnd(e) {
-      if (isDragging && selectedObject) {
-        // Remove dragging visual feedback
-        selectedObject.style.transform = selectedObject.scale ? `scale(${selectedObject.scale})` : '';
-        selectedObject.style.cursor = 'grab';
-        
-        // Add some velocity based on drag speed
-        const touch = e.changedTouches[0];
-        const deltaX = touch.clientX - dragStartPos.x;
-        const deltaY = touch.clientY - dragStartPos.y;
-        
-        selectedObject.velocity.x = deltaX * 0.1;
-        selectedObject.velocity.y = deltaY * 0.1;
-        
-        isDragging = false;
-        selectedObject = null;
-      }
-    }
-
-    // Handle mouse down
-    function handleMouseDown(e) {
-      if (e.target.classList.contains('ar-object')) {
-        selectedObject = e.target;
-        isDragging = true;
-        dragStartPos = { x: e.clientX, y: e.clientY };
-        
-        selectedObject.style.transform = 'scale(1.1)';
-        selectedObject.style.cursor = 'grabbing';
-        
-        selectedObject.initialX = parseInt(selectedObject.style.left);
-        selectedObject.initialY = parseInt(selectedObject.style.top);
-        
-        e.preventDefault();
-      }
-    }
-
-    // Handle mouse move
-    function handleMouseMove(e) {
-      if (isDragging && selectedObject) {
-        const deltaX = e.clientX - dragStartPos.x;
-        const deltaY = e.clientY - dragStartPos.y;
-        
-        const newX = selectedObject.initialX + deltaX;
-        const newY = selectedObject.initialY + deltaY;
-        
-        const maxX = window.innerWidth - selectedObject.offsetWidth;
-        const maxY = window.innerHeight - selectedObject.offsetHeight;
-        
-        selectedObject.style.left = Math.max(0, Math.min(maxX, newX)) + 'px';
-        selectedObject.style.top = Math.max(0, Math.min(maxY, newY)) + 'px';
-        
-        selectedObject.x = parseInt(selectedObject.style.left);
-        selectedObject.y = parseInt(selectedObject.style.top);
-        
-        e.preventDefault();
-      }
-    }
-
-    // Handle mouse up
-    function handleMouseUp(e) {
-      if (isDragging && selectedObject) {
-        selectedObject.style.transform = selectedObject.scale ? `scale(${selectedObject.scale})` : '';
-        selectedObject.style.cursor = 'grab';
-        
-        const deltaX = e.clientX - dragStartPos.x;
-        const deltaY = e.clientY - dragStartPos.y;
-        
-        selectedObject.velocity.x = deltaX * 0.1;
-        selectedObject.velocity.y = deltaY * 0.1;
-        
-        isDragging = false;
-        selectedObject = null;
-      }
-    }
-
-    // Calculate distance between two touch points
-    function getDistance(touch1, touch2) {
-      const dx = touch1.clientX - touch2.clientX;
-      const dy = touch1.clientY - touch2.clientY;
-      return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    // Setup camera movement tracking
-    function setupCameraTracking() {
-      if (videoElement) {
-        // Track camera movement for object interaction
-        let lastFrame = null;
-        
-        function trackCameraMovement() {
-          if (videoElement.videoWidth > 0) {
-            // Simple motion detection based on video changes
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 64;
-            canvas.height = 48;
-            
-            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            
-            if (lastFrame) {
-              let motion = 0;
-              for (let i = 0; i < imageData.data.length; i += 4) {
-                const diff = Math.abs(imageData.data[i] - lastFrame[i]);
-                motion += diff;
-              }
-              
-              const motionThreshold = 1000;
-              if (motion > motionThreshold) {
-                // Camera is moving - add some randomness to object movement
-                arObjects.forEach(obj => {
-                  if (obj.velocity && !isDragging) {
-                    obj.velocity.x += (Math.random() - 0.5) * 0.5;
-                    obj.velocity.y += (Math.random() - 0.5) * 0.5;
-                  }
-                });
-              }
-            }
-            
-            lastFrame = new Uint8ClampedArray(imageData.data);
-          }
-          
-          requestAnimationFrame(trackCameraMovement);
-        }
-        
-        trackCameraMovement();
-      }
-    }
-
-    // Start physics simulation for objects
-    function startPhysicsSimulation() {
-      function updatePhysics() {
-        arObjects.forEach(obj => {
-          if (obj.velocity && !isDragging) {
-            // Update position based on velocity
-            obj.x += obj.velocity.x;
-            obj.y += obj.velocity.y;
-            
-            // Apply friction
-            obj.velocity.x *= 0.98;
-            obj.velocity.y *= 0.98;
-            
-            // Bounce off screen edges
-            const maxX = window.innerWidth - obj.offsetWidth;
-            const maxY = window.innerHeight - obj.offsetHeight;
-            
-            if (obj.x <= 0 || obj.x >= maxX) {
-              obj.velocity.x *= -0.8;
-              obj.x = Math.max(0, Math.min(maxX, obj.x));
-            }
-            
-            if (obj.y <= 0 || obj.y >= maxY) {
-              obj.velocity.y *= -0.8;
-              obj.y = Math.max(0, Math.min(maxY, obj.y));
-            }
-            
-            // Update visual position
-            obj.style.left = obj.x + 'px';
-            obj.style.top = obj.y + 'px';
-            
-            // Apply rotation for box
-            if (obj.type === 'box') {
-              obj.rotation += obj.rotationSpeed || 0;
-              obj.style.transform = `rotate(${obj.rotation}deg)`;
-            }
-          }
-        });
-        
-        requestAnimationFrame(updatePhysics);
-      }
+      guidanceEl.innerHTML = `
+        <div class="guidance-arrow ${arrowClass}">${content}</div>
+        <div class="guidance-text">${step.text}</div>
+        <div class="guidance-progress">Step ${currentStep + 1} of ${guidanceSteps.length}</div>
+      `;
       
-      updatePhysics();
+      // Position randomly on screen (but within camera area)
+      const cameraWidth = window.innerWidth - 280; // Exclude side panel
+      const x = 100 + Math.random() * (cameraWidth - 200);
+      const y = 100 + Math.random() * (window.innerHeight - 200);
+      
+      guidanceEl.style.cssText = `
+        position: absolute;
+        left: ${x}px;
+        top: ${y}px;
+        z-index: 100;
+        animation: guidancePulse 2s ease-in-out infinite;
+      `;
+      
+      // Add to AR objects container
+      const arObjects = document.getElementById('ar-objects');
+      arObjects.appendChild(guidanceEl);
+      
+      currentArrow = guidanceEl;
+      
+      // Add entrance animation
+      guidanceEl.style.opacity = '0';
+      guidanceEl.style.transform = 'scale(0.5)';
+      setTimeout(() => {
+        guidanceEl.style.transition = 'all 0.5s ease';
+        guidanceEl.style.opacity = '1';
+        guidanceEl.style.transform = 'scale(1)';
+      }, 100);
     }
 
-    // Setup marker detection events - enhanced for interactive AR
-    function setupMarkerDetection() {
-      console.log('🎯 Interactive AR mode - objects respond to touch and camera movement');
+    // Clear current guidance
+    function clearGuidance() {
+      if (currentArrow) {
+        currentArrow.remove();
+        currentArrow = null;
+      }
     }
 
-    // Animate objects when marker is found - updated for interactive AR
-    function animateObjectsIn() {
-      arObjects.forEach((obj, index) => {
-        if (obj && objectStates[obj.id]) {
-          // Fade in with staggered timing
-          obj.style.opacity = '0';
-          obj.style.transform = 'scale(0)';
-          
-          setTimeout(() => {
-            obj.style.transition = 'all 0.5s ease';
-            obj.style.opacity = '1';
-            obj.style.transform = obj.scale ? `scale(${obj.scale})` : 'scale(1)';
-          }, index * 200);
-        }
-      });
+    // Complete guidance sequence
+    function completeGuidance() {
+      isGuidanceActive = false;
+      
+      // Show completion message
+      const completionEl = document.createElement('div');
+      completionEl.className = 'guidance-completion';
+      completionEl.innerHTML = `
+        <div class="completion-icon">🎉</div>
+        <div class="completion-text">
+          ${currentMode === 'treasure' ? 'Treasure Hunt Complete!' : 'Troubleshooting Complete!'}
+        </div>
+        <div class="completion-subtext">
+          ${currentMode === 'treasure' ? 'You found the gold!' : 'You found the fault!'}
+        </div>
+      `;
+      
+      completionEl.style.cssText = `
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 200;
+        animation: completionCelebration 3s ease-in-out;
+      `;
+      
+      const arObjects = document.getElementById('ar-objects');
+      arObjects.appendChild(completionEl);
+      
+      // Remove completion message after animation
+      setTimeout(() => {
+        completionEl.remove();
+        updateStatus(`${currentMode === 'treasure' ? 'Treasure Hunt' : 'Troubleshooting'} Complete!`, 'ar');
+      }, 3000);
+      
+      console.log(`🎯 ${currentMode} guidance completed!`);
     }
 
-    // Add CSS animations for AR objects
-    function addCSSAnimations() {
-      if (!document.getElementById('ar-animations')) {
-        const style = document.createElement('style');
-        style.id = 'ar-animations';
-        style.textContent = `
-          .ar-object {
-            transition: all 0.3s ease;
-          }
-          
-          .ar-object:hover {
-            filter: brightness(1.2);
-          }
-          
-          .ar-object.interactive {
-            cursor: grab;
-          }
-          
-          .ar-object.interactive:active {
-            cursor: grabbing;
-          }
-          
-          @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-          }
-          
-          .ar-object.pulse {
-            animation: pulse 2s ease-in-out infinite;
-          }
-        `;
-        document.head.appendChild(style);
+    // Stop current guidance
+    function stopGuidance() {
+      if (isGuidanceActive) {
+        isGuidanceActive = false;
+        clearGuidance();
+        updateStatus('Guidance Stopped', 'camera');
+        console.log('🎯 Guidance stopped');
+      }
+    }
+
+    // Reset guidance to beginning
+    function resetGuidance() {
+      stopGuidance();
+      currentStep = 0;
+      updateStatus('Guidance Reset', 'ar');
+      console.log('🎯 Guidance reset');
+    }
+
+    // Skip to next step
+    function nextStep() {
+      if (isGuidanceActive) {
+        currentStep++;
+        showNextStep();
+        console.log(`🎯 Skipped to step ${currentStep + 1}`);
+      }
+    }
+
+    // Go back to previous step
+    function previousStep() {
+      if (isGuidanceActive && currentStep > 0) {
+        currentStep--;
+        showNextStep();
+        console.log(`🎯 Went back to step ${currentStep + 1}`);
       }
     }
 
@@ -1112,193 +1065,44 @@
       if (statusDot) statusDot.className = `status-dot ${type}`;
     }
 
-    // Toggle AR object visibility - enhanced for interactive AR
-    function toggleObject(objectId) {
-      const object = document.querySelector(`#${objectId}`);
-      const option = document.querySelector(`[onclick="toggleObject('${objectId}')"]`);
-      
-      if (object && option) {
-        objectStates[objectId] = !objectStates[objectId];
-        
-        if (objectStates[objectId]) {
-          // Show object with animation
-          object.style.transition = 'all 0.5s ease';
-          object.style.opacity = '1';
-          object.style.transform = object.scale ? `scale(${object.scale})` : 'scale(1)';
-        } else {
-          // Hide object with animation
-          object.style.transition = 'all 0.3s ease';
-          object.style.opacity = '0';
-          object.style.transform = 'scale(0)';
-        }
-        
-        option.classList.toggle('active', objectStates[objectId]);
-        
-        console.log(`🎲 ${objectId} ${objectStates[objectId] ? 'shown' : 'hidden'}`);
-      }
-    }
-
-    // Spawn new AR object
-    function spawnObject(type = 'random') {
-      const types = ['box', 'sphere', 'text', 'triangle', 'star'];
-      const colors = ['#4CC3D9', '#EF2D5E', '#FFC65D', '#7BC8A4', '#FF6B6B', '#9C27B0'];
-      
-      if (type === 'random') {
-        type = types[Math.floor(Math.random() * types.length)];
-      }
-      
-      const color = colors[Math.floor(Math.random() * colors.length)];
-      const x = Math.random() * (window.innerWidth - 100);
-      const y = Math.random() * (window.innerHeight - 100);
-      
-      let properties = {
-        x: x,
-        y: y,
-        width: 60 + Math.random() * 40,
-        height: 60 + Math.random() * 40,
-        type: type,
-        color: color,
-        velocity: { x: (Math.random() - 0.5) * 2, y: (Math.random() - 0.5) * 2 }
-      };
-      
-      if (type === 'box') {
-        properties.rotation = Math.random() * 360;
-        properties.rotationSpeed = 1 + Math.random() * 3;
-      } else if (type === 'text') {
-        properties.text = 'New!';
-        properties.width = 80;
-        properties.height = 30;
-      }
-      
-      const newObj = createARObject(`obj-${Date.now()}`, properties);
-      arObjects.push(newObj);
-      
-      // Animate in
-      newObj.style.opacity = '0';
-      newObj.style.transform = 'scale(0)';
-      setTimeout(() => {
-        newObj.style.transition = 'all 0.5s ease';
-        newObj.style.opacity = '1';
-        newObj.style.transform = 'scale(1)';
-      }, 100);
-      
-      console.log(`🎯 Spawned new ${type} object`);
-      updateStatus(`Spawned ${type}`, 'ar');
-    }
-
-    // Change object colors randomly
-    function changeColors() {
-      const colors = ['#4CC3D9', '#EF2D5E', '#FFC65D', '#7BC8A4', '#FF6B6B', '#9C27B0', '#00BCD4', '#E91E63'];
-      
-      arObjects.forEach(obj => {
-        if (obj.type === 'box') {
-          const newColor = colors[Math.floor(Math.random() * colors.length)];
-          obj.style.background = `linear-gradient(45deg, ${newColor}, #2196F3)`;
-        } else if (obj.type === 'sphere') {
-          const newColor = colors[Math.floor(Math.random() * colors.length)];
-          obj.style.background = `radial-gradient(circle, ${newColor}, #C2185B)`;
-        } else if (obj.type === 'text') {
-          const newColor = colors[Math.floor(Math.random() * colors.length)];
-          obj.style.color = newColor;
-        }
-      });
-      
-      console.log('🎨 Changed all object colors');
-      updateStatus('Colors Changed', 'ar');
-    }
-
-    // Toggle physics simulation
-    function togglePhysics() {
-      const physicsEnabled = !window.physicsEnabled;
-      window.physicsEnabled = physicsEnabled;
+    // Toggle guidance mode
+    function toggleGuidanceMode() {
+      const newMode = currentMode === 'treasure' ? 'troubleshoot' : 'treasure';
+      setGuidanceMode(newMode);
       
       // Update UI text
-      const physicsToggle = document.getElementById('physics-toggle');
-      if (physicsToggle) {
-        physicsToggle.textContent = physicsEnabled ? 'Physics On' : 'Physics Off';
+      const modeToggle = document.getElementById('mode-toggle');
+      if (modeToggle) {
+        modeToggle.textContent = newMode === 'treasure' ? 'Treasure Hunt' : 'Troubleshooting';
       }
       
-      arObjects.forEach(obj => {
-        if (obj.velocity) {
-          if (physicsEnabled) {
-            obj.velocity.x = (Math.random() - 0.5) * 2;
-            obj.velocity.y = (Math.random() - 0.5) * 2;
-          } else {
-            obj.velocity.x = 0;
-            obj.velocity.y = 0;
-          }
-        }
-      });
-      
-      console.log(`⚡ Physics ${physicsEnabled ? 'enabled' : 'disabled'}`);
-      updateStatus(`Physics ${physicsEnabled ? 'On' : 'Off'}`, physicsEnabled ? 'ar' : 'camera');
+      console.log(`🎯 Switched to ${newMode} mode`);
     }
 
-    // Change marker type - enhanced for interactive AR
-    function changeMarkerType() {
-      const markerTypeSpan = document.getElementById('marker-type');
-      
-      if (currentMarker === 'hiro') {
-        currentMarker = 'interactive';
-        markerTypeSpan.textContent = 'Interactive AR';
-      } else {
-        currentMarker = 'hiro';
-        markerTypeSpan.textContent = 'Hiro Marker';
-      }
-      
-      console.log(`🎯 Switched to ${currentMarker} mode`);
-    }
-
-    // Reset AR scene - enhanced for interactive AR
-    function resetScene() {
-      console.log('🔄 Resetting interactive AR scene...');
-      
-      // Remove all objects
-      arObjects.forEach(obj => obj.remove());
-      arObjects = [];
-      
-      // Reset object states
-      Object.keys(objectStates).forEach(id => {
-        objectStates[id] = true;
-        const option = document.querySelector(`[onclick="toggleObject('${id}')"]`);
-        if (option) option.classList.add('active');
-      });
-      
-      // Reset marker type
-      currentMarker = 'hiro';
-      const markerTypeSpan = document.getElementById('marker-type');
-      if (markerTypeSpan) markerTypeSpan.textContent = 'Interactive AR';
-      
-      // Recreate objects
-      createInteractiveObjects();
-      
-      updateStatus('Scene Reset', 'ar');
-    }
-
-    // Toggle camera - enhanced for interactive AR
+    // Toggle camera
     function toggleCamera() {
-      cameraActive = !cameraActive;
+      const cameraActive = !videoElement.style.display || videoElement.style.display === 'block';
       
       if (cameraActive && videoElement) {
-        videoElement.style.display = 'block';
-        updateStatus('Camera Active', 'camera');
-      } else if (videoElement) {
         videoElement.style.display = 'none';
         updateStatus('Camera Paused', 'error');
+      } else if (videoElement) {
+        videoElement.style.display = 'block';
+        updateStatus('Camera Active', 'camera');
       }
       
-      console.log(`📹 Camera ${cameraActive ? 'enabled' : 'disabled'}`);
+      console.log(`📹 Camera ${cameraActive ? 'disabled' : 'enabled'}`);
     }
 
-    // Retry camera access - enhanced for interactive AR
+    // Retry camera access
     function retryCamera() {
-      console.log('🔄 Retrying Interactive AR...');
+      console.log('🔄 Retrying AR Guidance...');
       const errorDiv = document.getElementById('error-message');
       errorDiv.style.display = 'none';
       
       const loadingScreen = document.getElementById('loading-screen');
       loadingScreen.style.display = 'flex';
-      updateLoadingMessage('Retrying Interactive AR...');
+      updateLoadingMessage('Retrying AR Guidance...');
       
       setTimeout(() => {
         initializeCamera();
@@ -1320,7 +1124,7 @@
       }
     }
 
-    // Capture screenshot - enhanced for interactive AR
+    // Capture screenshot
     function captureScreenshot() {
       try {
         // Create a canvas to capture the AR scene
@@ -1341,48 +1145,30 @@
           ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
         }
         
-        // Draw AR objects on top
-        arObjects.forEach(obj => {
-          if (obj.style.opacity !== '0') {
-            // Convert screen position to canvas position
-            const rect = obj.getBoundingClientRect();
-            const scaleX = canvas.width / window.innerWidth;
-            const scaleY = canvas.height / window.innerHeight;
-            
-            // Draw a representation of the AR object
-            if (obj.type === 'box') {
-              ctx.fillStyle = obj.style.background || '#4CC3D9';
-              ctx.fillRect(
-                rect.left * scaleX, 
-                rect.top * scaleY, 
-                rect.width * scaleX, 
-                rect.height * scaleY
-              );
-            } else if (obj.type === 'sphere') {
-              ctx.fillStyle = obj.style.background || '#EF2D5E';
-              ctx.beginPath();
-              ctx.arc(
-                (rect.left + rect.width/2) * scaleX,
-                (rect.top + rect.height/2) * scaleY,
-                Math.min(rect.width, rect.height) * scaleX / 2,
-                0, 2 * Math.PI
-              );
-              ctx.fill();
-            }
-          }
-        });
+        // Draw guidance elements on top
+        if (currentArrow) {
+          const rect = currentArrow.getBoundingClientRect();
+          const scaleX = canvas.width / window.innerWidth;
+          const scaleY = canvas.height / window.innerHeight;
+          
+          // Draw guidance element representation
+          ctx.fillStyle = '#FFC65D';
+          ctx.font = '24px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText('🎯', rect.left * scaleX, rect.top * scaleY);
+        }
         
         // Create download link
         const link = document.createElement('a');
-        link.download = `interactive-ar-${Date.now()}.png`;
+        link.download = `ar-guidance-${Date.now()}.png`;
         link.href = canvas.toDataURL();
         link.click();
         
-        console.log('📸 Interactive AR screenshot captured');
+        console.log('📸 AR Guidance screenshot captured');
         updateStatus('Screenshot Saved', 'ar');
         
         setTimeout(() => {
-          updateStatus('Interactive AR Ready - Touch and move objects!', 'ar');
+          updateStatus('Guidance System Ready', 'ar');
         }, 2000);
         
       } catch (error) {
@@ -1391,7 +1177,7 @@
       }
     }
 
-    // Setup AR event listeners - updated for HTML AR
+    // Setup AR event listeners
     function setupAREventListeners() {
       // Handle device orientation for mobile
       if (window.DeviceOrientationEvent) {
@@ -1405,11 +1191,11 @@
         // Add touch-based interactions if needed
       });
 
-      // Handle click events for AR object interaction
+      // Handle click events for guidance interaction
       document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('ar-object')) {
-          // AR object clicked - could add more interaction here
-          console.log('🎯 AR object clicked:', e.target.id);
+        if (e.target.classList.contains('guidance-element')) {
+          // Guidance element clicked - could add more interaction here
+          console.log('🎯 Guidance element clicked');
         }
       });
     }
@@ -1423,7 +1209,7 @@
       }
     }
 
-    // Quality mode detection and optimization - simplified for HTML AR
+    // Quality mode detection and optimization
     function getQualityMode() {
       const cores = navigator.hardwareConcurrency || 1;
       const memory = navigator.deviceMemory || 1;
@@ -1434,33 +1220,33 @@
       return 'high';
     }
 
-    // Apply quality optimizations - simplified for HTML AR
+    // Apply quality optimizations
     function applyQualityOptimizations() {
       const quality = getQualityMode();
       console.log(`🎮 AR Quality Mode: ${quality}`);
 
       // Adjust animation complexity based on quality
-      const arObjects = document.querySelectorAll('.ar-object');
+      const guidanceElements = document.querySelectorAll('.guidance-element');
       
       switch (quality) {
         case 'low':
           // Low quality optimizations for Pi 3B+
-          arObjects.forEach(obj => {
-            obj.style.transition = 'all 0.3s ease';
+          guidanceElements.forEach(el => {
+            el.style.transition = 'all 0.3s ease';
           });
           break;
           
         case 'medium':
           // Medium quality for Pi 4
-          arObjects.forEach(obj => {
-            obj.style.transition = 'all 0.5s ease';
+          guidanceElements.forEach(el => {
+            el.style.transition = 'all 0.5s ease';
           });
           break;
           
         case 'high':
           // High quality for Pi 5 and desktop
-          arObjects.forEach(obj => {
-            obj.style.transition = 'all 0.8s ease';
+          guidanceElements.forEach(el => {
+            el.style.transition = 'all 0.8s ease';
           });
           break;
       }
@@ -1469,17 +1255,28 @@
     // Apply optimizations when page loads
     document.addEventListener('DOMContentLoaded', applyQualityOptimizations);
 
-    // Console commands for debugging - Enhanced for Interactive AR
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      // Update AR objects container width
+      const arObjects = document.getElementById('ar-objects');
+      if (arObjects) {
+        const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+        arObjects.style.width = `calc(100vw - ${sidePanelWidth}px)`;
+      }
+    });
+
+    // Console commands for debugging - Enhanced for Guidance System
     window.arDebug = {
-      getMarkerState: () => isMarkerVisible,
-      getObjectStates: () => objectStates,
-      getCurrentMarker: () => currentMarker,
-      forceMarkerFound: () => {
-        isMarkerVisible = true;
-        animateObjectsIn();
-        updateStatus('Marker Detected (Forced)', 'ar');
-      },
-      resetAll: resetScene,
+      getCurrentMode: () => currentMode,
+      getCurrentStep: () => currentStep,
+      getGuidanceActive: () => isGuidanceActive,
+      getTotalSteps: () => guidanceSteps.length,
+      startGuidance: () => startGuidance(),
+      stopGuidance: () => stopGuidance(),
+      resetGuidance: () => resetGuidance(),
+      nextStep: () => nextStep(),
+      previousStep: () => previousStep(),
+      setMode: (mode) => setGuidanceMode(mode),
       checkCameraStatus: () => {
         if (videoElement) {
           console.log('📹 AR Video element found:', videoElement);
@@ -1528,81 +1325,53 @@
           return false;
         }
       },
-      showAllObjects: () => {
-        arObjects.forEach(obj => {
-          obj.style.opacity = '1';
-          obj.style.transform = obj.scale ? `scale(${obj.scale})` : 'scale(1)';
-        });
-        console.log('🎯 All AR objects shown');
-      },
-      hideAllObjects: () => {
-        arObjects.forEach(obj => {
-          obj.style.opacity = '0';
-          obj.style.transform = 'scale(0)';
-        });
-        console.log('🎯 All AR objects hidden');
-      },
-      spawnRandomObject: () => spawnObject('random'),
-      changeAllColors: () => changeColors(),
-      togglePhysicsSim: () => togglePhysics(),
-      getObjectCount: () => arObjects.length,
-      getObjectPositions: () => {
-        return arObjects.map(obj => ({
-          id: obj.id,
-          type: obj.type,
-          x: obj.x,
-          y: obj.y,
-          velocity: obj.velocity
-        }));
-      },
-      setObjectVelocity: (objectId, vx, vy) => {
-        const obj = arObjects.find(o => o.id === objectId);
-        if (obj && obj.velocity) {
-          obj.velocity.x = vx;
-          obj.velocity.y = vy;
-          console.log(`🎯 Set velocity for ${objectId}:`, { x: vx, y: vy });
+      showCurrentStep: () => {
+        if (currentStep < guidanceSteps.length) {
+          console.log(`🎯 Current step: ${guidanceSteps[currentStep].text}`);
+          return guidanceSteps[currentStep];
+        } else {
+          console.log('🎯 No current step - guidance complete');
+          return null;
         }
       },
-      addPulseEffect: () => {
-        arObjects.forEach(obj => {
-          obj.classList.add('pulse');
-        });
-        console.log('🎯 Added pulse effect to all objects');
-      },
-      removePulseEffect: () => {
-        arObjects.forEach(obj => {
-          obj.classList.remove('pulse');
-        });
-        console.log('🎯 Removed pulse effect from all objects');
+      jumpToStep: (stepNumber) => {
+        if (stepNumber >= 0 && stepNumber < guidanceSteps.length) {
+          currentStep = stepNumber;
+          if (isGuidanceActive) {
+            showNextStep();
+          }
+          console.log(`🎯 Jumped to step ${stepNumber + 1}`);
+        } else {
+          console.log('❌ Invalid step number');
+        }
       }
     };
 
-    console.log('🎯 Interactive AR Debug commands available:');
+    console.log('🎯 AR Guidance System Debug commands available:');
+    console.log('  arDebug.getCurrentMode() - Get current guidance mode');
+    console.log('  arDebug.getCurrentStep() - Get current step number');
+    console.log('  arDebug.getGuidanceActive() - Check if guidance is active');
+    console.log('  arDebug.getTotalSteps() - Get total number of steps');
+    console.log('  arDebug.startGuidance() - Start guidance sequence');
+    console.log('  arDebug.stopGuidance() - Stop guidance sequence');
+    console.log('  arDebug.resetGuidance() - Reset guidance to beginning');
+    console.log('  arDebug.nextStep() - Go to next step');
+    console.log('  arDebug.previousStep() - Go to previous step');
+    console.log('  arDebug.setMode("treasure"|"troubleshoot") - Set guidance mode');
     console.log('  arDebug.checkCameraStatus() - Check camera/video status');
     console.log('  arDebug.testBasicCamera() - Test basic camera access');
     console.log('  arDebug.forceHideLoading() - Force hide loading screen');
-    console.log('  arDebug.getMarkerState() - Check if marker is visible');
-    console.log('  arDebug.resetAll() - Reset entire scene');
-    console.log('  arDebug.showAllObjects() - Show all AR objects');
-    console.log('  arDebug.hideAllObjects() - Hide all AR objects');
-    console.log('  arDebug.forceMarkerFound() - Force marker detection');
-    console.log('  arDebug.spawnRandomObject() - Spawn a new random object');
-    console.log('  arDebug.changeAllColors() - Change colors of all objects');
-    console.log('  arDebug.togglePhysicsSim() - Toggle physics simulation');
-    console.log('  arDebug.getObjectCount() - Get total number of objects');
-    console.log('  arDebug.getObjectPositions() - Get positions of all objects');
-    console.log('  arDebug.setObjectVelocity(id, vx, vy) - Set object velocity');
-    console.log('  arDebug.addPulseEffect() - Add pulse animation to objects');
-    console.log('  arDebug.removePulseEffect() - Remove pulse animation');
+    console.log('  arDebug.showCurrentStep() - Show current step info');
+    console.log('  arDebug.jumpToStep(stepNumber) - Jump to specific step');
     console.log('');
-    console.log('🎮 Interactive Features:');
-    console.log('  • Touch/drag objects to move them around');
-    console.log('  • Pinch to resize objects');
-    console.log('  • Objects bounce off screen edges');
-    console.log('  • Camera movement affects object behavior');
-    console.log('  • Spawn new objects with ✨ button');
-    console.log('  • Change colors with 🎨 button');
-    console.log('  • Toggle physics with ⚡ button');
+    console.log('🎮 Guidance Features:');
+    console.log('  • Treasure Hunt Mode: Follow arrows to find gold!');
+    console.log('  • Troubleshooting Mode: Step-by-step repair guidance');
+    console.log('  • Interactive arrows and icons overlay on camera');
+    console.log('  • Auto-advancing steps with customizable timing');
+    console.log('  • Manual step navigation (next/previous)');
+    console.log('  • Mode switching between treasure hunt and troubleshooting');
+    console.log('  • Progress tracking and completion celebrations');
   </script>
 </body>
 </html>
