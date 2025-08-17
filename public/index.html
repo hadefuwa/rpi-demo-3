@@ -339,17 +339,29 @@
                <div class="icon"></div>
                <span class="label">About</span>
              </a>
-             <a href="./screens/ai-chat.html" class="card fancy theme-green">
-               <div class="border-animation"></div>
-               <div class="card-particles"></div>
-               <div class="icon"></div>
-               <span class="label">AI Chat</span>
-             </a>
+                           <a href="./screens/ai-chat.html" class="card fancy theme-green">
+                <div class="border-animation"></div>
+                <div class="card-particles"></div>
+                <div class="icon"></div>
+                <span class="label">AI Chat</span>
+              </a>
+              <a href="./screens/electrical-machines.html" class="card fancy theme-blue">
+                <div class="border-animation"></div>
+                <div class="card-particles"></div>
+                <div class="icon"></div>
+                <span class="label">Electrical Machines</span>
+              </a>
              <a href="./screens/ar.html" class="card fancy theme-purple">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
                <div class="icon"></div>
                <span class="label">AR Demo</span>
+             </a>
+             <a href="./screens/wind-tunnel.html" class="card fancy theme-cyan">
+               <div class="border-animation"></div>
+               <div class="card-particles"></div>
+               <div class="icon"></div>
+               <span class="label">Wind Tunnel</span>
              </a>
           </div>
         </section>
@@ -611,7 +623,7 @@
       #screen-home .grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr); /* Fixed 3-column layout */
-        grid-template-rows: repeat(4, 1fr); /* 4 rows to accommodate 11 cards */
+        grid-template-rows: repeat(5, 1fr); /* 5 rows to accommodate 13 cards */
         gap: clamp(8px, 2vw, 20px); /* Responsive gap */
         max-width: 90vw; /* Use viewport width instead of fixed pixels */
         width: 100%;
@@ -803,6 +815,8 @@
       #screen-home .card:nth-child(9) .icon { animation: glow 3s infinite; }
       #screen-home .card:nth-child(10) .icon { animation: pulse 2.8s infinite; }
       #screen-home .card:nth-child(11) .icon { animation: rotate3d 6s infinite; }
+      #screen-home .card:nth-child(12) .icon { animation: spin 5s linear infinite; }
+      #screen-home .card:nth-child(13) .icon { animation: wobble 2.5s ease-in-out infinite; }
       
       /* Different animations for each card's label */
       #screen-home .card:nth-child(1) .label { animation: glow 2.5s infinite; }
@@ -816,6 +830,8 @@
       #screen-home .card:nth-child(9) .label { animation: glow 3.1s infinite 0.9s; }
       #screen-home .card:nth-child(10) .label { animation: pulse 3.3s infinite 1.0s; }
       #screen-home .card:nth-child(11) .label { animation: glow 3.6s infinite 1.1s; }
+      #screen-home .card:nth-child(12) .label { animation: pulse 3.8s infinite 1.2s; }
+      #screen-home .card:nth-child(13) .label { animation: glow 3.4s infinite 1.3s; }
       
       @keyframes bounce {
         0%, 100% { transform: translateY(0); }
@@ -1024,12 +1040,34 @@
         font-family: Arial, sans-serif;
       }
       
-      /* AI Chat Card */
-      #screen-home .card:nth-child(10) .icon::before {
-        content: "🤖";
+             /* AI Chat Card */
+       #screen-home .card:nth-child(10) .icon::before {
+         content: "🤖";
+       }
+       #screen-home .card:nth-child(10) .icon::after {
+         content: "AI";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 8px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
+       
+       /* Electrical Machines Card */
+       #screen-home .card:nth-child(11) .icon::before {
+         content: "⚡";
+       }
+      
+             /* AR Demo Card */
+       #screen-home .card:nth-child(12) .icon::before {
+        content: "🥽";
       }
-      #screen-home .card:nth-child(10) .icon::after {
-        content: "AI";
+      #screen-home .card:nth-child(12) .icon::after {
+        content: "AR";
         position: absolute;
         top: 50%;
         left: 50%;
@@ -1041,17 +1079,17 @@
         font-family: Arial, sans-serif;
       }
       
-      /* AR Demo Card */
-      #screen-home .card:nth-child(11) .icon::before {
-        content: "🥽";
+      /* Wind Tunnel Card */
+      #screen-home .card:nth-child(13) .icon::before {
+        content: "🌪️";
       }
-      #screen-home .card:nth-child(11) .icon::after {
-        content: "AR";
+      #screen-home .card:nth-child(13) .icon::after {
+        content: "WIND";
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        font-size: 8px;
+        font-size: 7px;
         font-weight: bold;
         color: rgba(255,255,255,0.8);
         display: none;
