@@ -51,6 +51,7 @@
       position: relative;
       overflow: hidden;
       background: #000;
+      border-right: 2px solid #4CAF50;
     }
     
     /* AR Scene Container - Within Camera Container */
@@ -59,6 +60,13 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
+      background: #000;
+    }
+    
+    /* Video element styling */
+    #ar-video {
+      background: #000;
+      border-radius: 0;
     }
     
     /* UI Overlay - Only for camera controls */
@@ -713,7 +721,9 @@
       movementThreshold: 50, // Minimum pixels to move
       isTracking: false,
       startTime: 0,
-      guidanceTimeout: null
+      guidanceTimeout: null,
+      cameraWidth: 0, // Added for camera boundaries
+      cameraHeight: 0 // Added for camera boundaries
     };
 
     // Treasure Hunt Guidance Steps
@@ -819,7 +829,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
         z-index: 1;
       `;
       
@@ -834,6 +844,9 @@
       videoElement.addEventListener('loadedmetadata', () => {
         console.log('📹 AR Video ready:', videoElement.videoWidth, 'x', videoElement.videoHeight);
         updateLoadingMessage('Guidance Video Ready!');
+        
+        // Adjust video positioning after metadata loads
+        adjustVideoPositioning();
       });
       
       // Handle video errors
@@ -841,6 +854,52 @@
         console.error('❌ Video error:', e);
         showError('Video playback error. Please refresh the page.');
       });
+    }
+
+    // Adjust video positioning to ensure it's fully visible
+    function adjustVideoPositioning() {
+      if (!videoElement) return;
+      
+      const container = document.getElementById('ar-container');
+      const containerRect = container.getBoundingClientRect();
+      const videoRect = videoElement.getBoundingClientRect();
+      
+      // Calculate the available space (excluding side panel)
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const availableWidth = window.innerWidth - sidePanelWidth;
+      const availableHeight = window.innerHeight;
+      
+      // Calculate video dimensions while maintaining aspect ratio
+      const videoAspectRatio = videoElement.videoWidth / videoElement.videoHeight;
+      const containerAspectRatio = availableWidth / availableHeight;
+      
+      let finalWidth, finalHeight;
+      
+      if (videoAspectRatio > containerAspectRatio) {
+        // Video is wider than container - fit to width
+        finalWidth = availableWidth;
+        finalHeight = availableWidth / videoAspectRatio;
+      } else {
+        // Video is taller than container - fit to height
+        finalHeight = availableHeight;
+        finalWidth = availableHeight * videoAspectRatio;
+      }
+      
+      // Center the video
+      const leftOffset = (availableWidth - finalWidth) / 2;
+      const topOffset = (availableHeight - finalHeight) / 2;
+      
+      videoElement.style.cssText = `
+        position: absolute;
+        top: ${topOffset}px;
+        left: ${leftOffset}px;
+        width: ${finalWidth}px;
+        height: ${finalHeight}px;
+        object-fit: fill;
+        z-index: 1;
+      `;
+      
+      console.log('📹 Video repositioned:', { finalWidth, finalHeight, leftOffset, topOffset });
     }
 
     // Update loading message
@@ -872,6 +931,9 @@
       motionTracker.isTracking = true;
       motionTracker.lastPosition = { x: 0, y: 0 };
       motionTracker.currentPosition = { x: 0, y: 0 };
+      
+      // Set initial camera boundaries
+      updateCameraBoundaries();
       
       // Track camera movement using device motion/gyroscope if available
       if (window.DeviceMotionEvent) {
@@ -955,9 +1017,12 @@
         return 'hold';
       }
       
-      // Check for center (return to middle)
-      const centerX = window.innerWidth / 2;
+      // Check for center (return to middle of camera area)
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const cameraWidth = window.innerWidth - sidePanelWidth;
+      const centerX = cameraWidth / 2;
       const centerY = window.innerHeight / 2;
+      
       const distanceFromCenter = Math.sqrt(
         Math.pow(motionTracker.currentPosition.x - centerX, 2) +
         Math.pow(motionTracker.currentPosition.y - centerY, 2)
@@ -1120,10 +1185,13 @@
         <div class="guidance-validation">${step.validation}</div>
       `;
       
-      // Position randomly on screen (but within camera area)
-      const cameraWidth = window.innerWidth - 280; // Exclude side panel
-      const x = 100 + Math.random() * (cameraWidth - 200);
-      const y = 100 + Math.random() * (window.innerHeight - 200);
+      // Position within the camera view area (excluding side panel)
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const cameraWidth = window.innerWidth - sidePanelWidth;
+      
+      // Position randomly but ensure it's within the visible camera area
+      const x = 50 + Math.random() * (cameraWidth - 200);
+      const y = 50 + Math.random() * (window.innerHeight - 200);
       
       guidanceEl.style.cssText = `
         position: absolute;
@@ -1464,7 +1532,25 @@
         const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
         arObjects.style.width = `calc(100vw - ${sidePanelWidth}px)`;
       }
+      
+      // Re-adjust video positioning on resize
+      adjustVideoPositioning();
+      
+      // Update camera boundaries for motion tracking
+      updateCameraBoundaries();
     });
+
+    // Update camera boundaries for motion tracking
+    function updateCameraBoundaries() {
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const cameraWidth = window.innerWidth - sidePanelWidth;
+      
+      // Update motion tracker boundaries
+      motionTracker.cameraWidth = cameraWidth;
+      motionTracker.cameraHeight = window.innerHeight;
+      
+      console.log('📹 Camera boundaries updated:', { cameraWidth, height: window.innerHeight });
+    }
 
     // Console commands for debugging - Enhanced for Guidance System
     window.arDebug = {
