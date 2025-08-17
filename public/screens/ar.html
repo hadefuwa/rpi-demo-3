@@ -5,9 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>Augmented Reality Demo - RPI Showcase</title>
   
-  <!-- Import AR.js and A-Frame for WebXR AR -->
+  <!-- Import AR.js and A-Frame for WebXR AR - RPi Optimized -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar-nft.js"></script>
+  
+  <!-- Raspberry Pi Camera Detection Script -->
+  <script>
+    // Detect Raspberry Pi and optimize accordingly
+    (function() {
+      'use strict';
+      
+      const isRaspberryPi = () => {
+        const userAgent = navigator.userAgent.toLowerCase();
+        const platform = navigator.platform.toLowerCase();
+        
+        return userAgent.includes('armv7l') || 
+               userAgent.includes('armv6l') || 
+               userAgent.includes('aarch64') ||
+               platform.includes('linux arm') ||
+               (navigator.hardwareConcurrency <= 4 && navigator.deviceMemory <= 4);
+      };
+      
+      const isLocalHost = () => {
+        return window.location.hostname === 'localhost' || 
+               window.location.hostname === '127.0.0.1' ||
+               window.location.hostname.startsWith('192.168') ||
+               window.location.hostname.startsWith('10.') ||
+               window.location.hostname.includes('.local');
+      };
+      
+      // Set global RPi detection
+      window.isRaspberryPi = isRaspberryPi();
+      window.isLocalHost = isLocalHost();
+      
+      console.log('🥧 Raspberry Pi detected:', window.isRaspberryPi);
+      console.log('🏠 Local network:', window.isLocalHost);
+      
+      // RPi specific optimizations
+      if (window.isRaspberryPi) {
+        // Reduce performance for RPi
+        window.RPi_AR_Config = {
+          videoWidth: 320,
+          videoHeight: 240,
+          frameRate: 10,
+          detectionMode: 'mono',
+          smoothing: false,
+          precision: 'lowp'
+        };
+        console.log('🎯 RPi AR Config applied:', window.RPi_AR_Config);
+      } else {
+        // Full performance for desktop/other devices
+        window.RPi_AR_Config = {
+          videoWidth: 640,
+          videoHeight: 480,
+          frameRate: 30,
+          detectionMode: 'mono_and_matrix',
+          smoothing: true,
+          precision: 'mediump'
+        };
+      }
+    })();
+  </script>
   
   <style>
     /* Base styles for AR container */
@@ -300,19 +358,21 @@
 
   <!-- Error Message (hidden by default) -->
   <div id="error-message" class="error-message" style="display: none;">
-    <h3>🎯 AR Camera Setup Required</h3>
+    <h3>🥧 Raspberry Pi AR Setup Required</h3>
     <p id="error-text">Please allow camera access to use AR features. Refresh the page and try again.</p>
     <div style="margin-top: 15px;">
       <button onclick="retryCamera()" style="margin: 5px; padding: 10px 20px; background: white; color: #f44336; border: none; border-radius: 5px; cursor: pointer;">🔄 Retry Camera</button>
       <button onclick="goHome()" style="margin: 5px; padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer;">🏠 Go Home</button>
     </div>
     <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; font-size: 12px;">
-      <strong>💡 Troubleshooting Tips:</strong><br>
-      • Make sure no other app is using your camera<br>
-      • Check browser permissions for camera access<br>
-      • Try refreshing the page<br>
-      • Ensure you're using HTTPS or localhost<br>
-      • Your camera might take a moment to initialize
+      <strong>🥧 Raspberry Pi Setup Tips:</strong><br>
+      • Run <code>sudo raspi-config</code> → Interface Options → Camera → Enable<br>
+      • Make sure no other apps are using the camera<br>
+      • Use Chromium browser (pre-installed) for best compatibility<br>
+      • Ensure you're on local network or HTTPS<br>
+      • Try rebooting the Pi if camera fails<br>
+      • Check camera cable connection<br>
+      • Free up RAM by closing other applications
     </div>
   </div>
 
@@ -467,41 +527,57 @@
       });
     });
 
-    // Check camera permissions first
+    // Check camera permissions first - RPi Optimized
     async function checkCameraPermissions() {
       try {
-        updateLoadingMessage('Checking camera permissions...', 'Testing camera access...');
-        console.log('📹 Checking camera permissions...');
+        updateLoadingMessage('Checking camera permissions...', 'Optimizing for Raspberry Pi...', 'Testing camera access...');
+        console.log('📹 Checking camera permissions on RPi...');
         
-        // Test camera access with same constraints as working camera page
+        // RPi-optimized camera constraints
+        const config = window.RPi_AR_Config || {
+          videoWidth: 320,
+          videoHeight: 240,
+          frameRate: 10
+        };
+        
         const constraints = {
           video: {
-            width: { ideal: 640 },
-            height: { ideal: 480 },
-            frameRate: { ideal: 15, max: 30 }
+            width: { ideal: config.videoWidth, max: 640 },
+            height: { ideal: config.videoHeight, max: 480 },
+            frameRate: { ideal: config.frameRate, max: 15 },
+            facingMode: 'environment' // Use back camera if available
           }
         };
         
+        console.log('🎥 Using RPi camera constraints:', constraints);
+        
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        console.log('✅ Camera access granted');
+        console.log('✅ Camera access granted on RPi');
+        console.log('📊 Stream settings:', {
+          width: stream.getVideoTracks()[0].getSettings().width,
+          height: stream.getVideoTracks()[0].getSettings().height,
+          frameRate: stream.getVideoTracks()[0].getSettings().frameRate
+        });
         
         // Stop the test stream immediately
         stream.getTracks().forEach(track => track.stop());
         
-        updateLoadingMessage('Camera access granted!', 'Initializing AR system...');
+        updateLoadingMessage('Camera access granted!', 'Initializing AR for Raspberry Pi...', 'Setting up AR.js...');
         updateStatus('Camera Permission Granted', 'camera');
         return true;
       } catch (error) {
-        console.error('❌ Camera access failed:', error);
+        console.error('❌ Camera access failed on RPi:', error);
         
         if (error.name === 'NotAllowedError') {
-          throw new Error('Camera access denied by user. Please allow camera access and try again.');
+          throw new Error('Camera access denied. On Raspberry Pi, make sure the camera is enabled in raspi-config and not being used by another process.');
         } else if (error.name === 'NotFoundError') {
-          throw new Error('No camera found on this device. Please connect a camera and try again.');
+          throw new Error('No camera found. Please check if your RPi camera is properly connected and enabled in raspi-config.');
         } else if (error.name === 'NotSupportedError') {
-          throw new Error('Camera not supported by this browser. Please try a different browser.');
+          throw new Error('Camera not supported. Try using Chromium browser on Raspberry Pi for better camera support.');
+        } else if (error.name === 'NotReadableError') {
+          throw new Error('Camera is busy or not accessible. Make sure no other application is using the camera.');
         } else {
-          throw new Error('Failed to access camera: ' + error.message);
+          throw new Error('Failed to access camera on RPi: ' + error.message + '. Try restarting the browser or rebooting the Pi.');
         }
       }
     }
@@ -517,60 +593,76 @@
       if (detailTextEl) detailTextEl.textContent = detailText;
     }
 
-    // Initialize AR Scene
+    // Initialize AR Scene - RPi Optimized
     function initializeAR() {
-      updateLoadingMessage('Initializing AR.js...', 'Setting up augmented reality system...', 'Loading AR.js libraries and markers...');
-      console.log('🎯 Starting AR.js initialization...');
+      updateLoadingMessage('Initializing AR.js for RPi...', 'Setting up augmented reality system...', 'Loading AR.js libraries and markers...');
+      console.log('🎯 Starting AR.js initialization for Raspberry Pi...');
       arScene = document.querySelector('#ar-scene');
       
-      // Set up AR scene attributes for better camera handling
-      arScene.setAttribute('arjs', 'sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth: 640; sourceHeight: 480; displayWidth: 640; displayHeight: 480;');
+      // Get RPi-optimized configuration
+      const config = window.RPi_AR_Config || {
+        videoWidth: 320,
+        videoHeight: 240,
+        frameRate: 10,
+        detectionMode: 'mono',
+        smoothing: false,
+        precision: 'lowp'
+      };
+      
+      // Set up AR scene attributes optimized for RPi
+      const arjsConfig = `sourceType: webcam; debugUIEnabled: false; detectionMode: ${config.detectionMode}; matrixCodeType: 3x3; sourceWidth: ${config.videoWidth}; sourceHeight: ${config.videoHeight}; displayWidth: ${config.videoWidth}; displayHeight: ${config.videoHeight}; maxDetectionRate: ${config.frameRate}; canvasWidth: ${config.videoWidth}; canvasHeight: ${config.videoHeight};`;
+      
+      console.log('🔧 AR.js config for RPi:', arjsConfig);
+      arScene.setAttribute('arjs', arjsConfig);
+      
+      // Set renderer for RPi performance
+      arScene.setAttribute('renderer', `logarithmicDepthBuffer: true; precision: ${config.precision}; antialias: false; alpha: true;`);
       
       // Wait for AR.js to initialize
       arScene.addEventListener('loaded', function() {
-        console.log('📱 AR Scene loaded successfully');
+        console.log('📱 AR Scene loaded successfully on RPi');
         updateLoadingMessage('AR Scene Ready!', 'Starting camera feed...', 'Almost ready...');
         
         setTimeout(() => {
           hideLoadingScreen();
           setupAREventListeners();
-          updateStatus('AR Ready - Look for markers', 'ar');
-        }, 1000);
+          updateStatus('AR Ready - Look for Hiro marker', 'ar');
+        }, 1500); // Longer delay for RPi
       });
 
       // Handle successful camera stream
       arScene.addEventListener('arjs-video-loaded', function() {
-        console.log('📹 AR Camera stream loaded successfully');
+        console.log('📹 AR Camera stream loaded successfully on RPi');
         updateLoadingMessage('Camera Active!', 'AR system ready', 'Point your camera at a Hiro marker');
         updateStatus('AR Camera Active', 'camera');
         
         setTimeout(() => {
           hideLoadingScreen();
-        }, 500);
+        }, 1000);
       });
 
-      // Handle AR.js errors more gracefully
+      // Handle AR.js errors more gracefully for RPi
       arScene.addEventListener('arjs-video-error', function(event) {
-        console.error('❌ AR.js video error:', event);
-        showError('AR camera failed to initialize. Please check camera permissions and refresh the page.');
+        console.error('❌ AR.js video error on RPi:', event);
+        showError('AR camera failed on Raspberry Pi. Please ensure the camera is enabled in raspi-config and not being used by another application. Try refreshing the page.');
       });
 
-      // Fallback error handling
+      // RPi-specific error handling
       window.addEventListener('error', function(e) {
-        console.error('Global error:', e);
+        console.error('Global error on RPi:', e);
         if (e.message && (e.message.includes('camera') || e.message.includes('getUserMedia') || e.message.includes('video'))) {
-          showError('Camera access error. Please ensure your camera is not being used by another application and refresh the page.');
+          showError('Camera access error on Raspberry Pi. Please check: 1) Camera is enabled in raspi-config, 2) No other apps using camera, 3) Using Chromium browser, 4) Proper permissions set.');
         }
       });
 
-      // Timeout fallback - if AR doesn't load in 15 seconds, show error
+      // Longer timeout for RPi - hardware takes more time
       setTimeout(() => {
         const loadingScreen = document.getElementById('loading-screen');
         if (loadingScreen && loadingScreen.style.display !== 'none') {
-          console.warn('⚠️ AR initialization timeout');
-          showError('AR initialization is taking longer than expected. This might be due to camera permissions, hardware limitations, or network issues. Please check your camera settings and refresh the page.');
+          console.warn('⚠️ AR initialization timeout on RPi');
+          showError('AR initialization timeout on Raspberry Pi. This is common on slower hardware. Try: 1) Closing other browser tabs, 2) Rebooting the Pi, 3) Using a higher-quality SD card, 4) Ensuring good power supply.');
         }
-      }, 15000);
+      }, 25000); // 25 seconds for RPi
 
       // Setup marker detection
       setupMarkerDetection();

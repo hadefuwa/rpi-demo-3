@@ -2,10 +2,10 @@
 
 .wind-tunnel-container {
     display: grid;
-    grid-template-columns: 280px 1fr 500px;
-    gap: var(--spacing-sm);
+    grid-template-columns: 220px 1fr 320px;
+    gap: var(--spacing-xs);
     height: 100%;
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs);
     overflow: hidden;
 }
 
@@ -13,36 +13,36 @@
 .control-panel {
     background: var(--card);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs);
     border: 1px solid rgba(255,255,255,0.1);
     backdrop-filter: blur(10px);
     height: fit-content;
-    max-height: calc(100vh - 100px);
+    max-height: calc(100vh - 80px);
     overflow-y: auto;
 }
 
 .panel-section h3 {
-    margin: 0 0 var(--spacing-md) 0;
+    margin: 0 0 var(--spacing-sm) 0;
     color: var(--brand);
-    font-size: var(--font-lg);
+    font-size: var(--font-base);
     text-align: center;
     border-bottom: 2px solid var(--brand);
-    padding-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-xs);
 }
 
 /* Action Buttons */
 .action-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
 }
 
 .btn {
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--spacing-xs) var(--spacing-sm);
     border: none;
     border-radius: var(--radius-md);
-    font-size: var(--font-sm);
+    font-size: var(--font-xs);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -98,7 +98,7 @@
 
 /* Control Groups */
 .control-group {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
 }
 
 .control-group label {
@@ -142,12 +142,12 @@
 
 .value-display {
     text-align: center;
-    margin-top: var(--spacing-sm);
-    font-size: var(--font-lg);
+    margin-top: var(--spacing-xs);
+    font-size: var(--font-base);
     font-weight: 600;
     color: var(--brand);
     background: rgba(255,255,255,0.05);
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs);
     border-radius: var(--radius-md);
     border: 1px solid rgba(255,255,255,0.1);
 }
@@ -156,14 +156,14 @@
 .measurements {
     background: rgba(255,255,255,0.03);
     border-radius: var(--radius-md);
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs);
     border: 1px solid rgba(255,255,255,0.05);
 }
 
 .measurements h4 {
-    margin: 0 0 var(--spacing-md) 0;
+    margin: 0 0 var(--spacing-sm) 0;
     color: var(--accent);
-    font-size: var(--font-base);
+    font-size: var(--font-sm);
     text-align: center;
 }
 
@@ -202,8 +202,8 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(2, 1fr);
-    gap: var(--spacing-md);
-    max-width: 500px;
+    gap: var(--spacing-sm);
+    max-width: 400px;
     width: 100%;
 }
 
@@ -213,7 +213,7 @@
     align-items: center;
     background: var(--card);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs);
     border: 1px solid rgba(255,255,255,0.1);
     backdrop-filter: blur(10px);
     transition: all 0.3s ease;
@@ -228,17 +228,17 @@
     font-size: var(--font-xs);
     color: var(--muted);
     text-align: center;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 .gauge-meter {
-    width: 18px;
-    height: 100px;
+    width: 16px;
+    height: 80px;
     background: rgba(255,255,255,0.1);
-    border-radius: 9px;
+    border-radius: 8px;
     position: relative;
     overflow: hidden;
     margin-bottom: var(--spacing-sm);
@@ -257,7 +257,7 @@
 }
 
 .gauge-value {
-    font-size: var(--font-sm);
+    font-size: var(--font-xs);
     font-weight: 600;
     color: var(--brand);
     text-align: center;
@@ -267,11 +267,11 @@
 .graphing-section {
     background: var(--card);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs);
     border: 1px solid rgba(255,255,255,0.1);
     backdrop-filter: blur(10px);
     height: fit-content;
-    max-height: calc(100vh - 100px);
+    max-height: calc(100vh - 80px);
     overflow-y: auto;
 }
 
@@ -300,10 +300,10 @@
 .chart-container {
     background: rgba(255,255,255,0.02);
     border-radius: var(--radius-md);
-    padding: var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
+    padding: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
     border: 1px solid rgba(255,255,255,0.05);
-    height: 400px;
+    height: 280px;
     width: 100%;
 }
 
@@ -311,19 +311,19 @@
 .data-log {
     background: rgba(255,255,255,0.03);
     border-radius: var(--radius-md);
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs);
     border: 1px solid rgba(255,255,255,0.05);
 }
 
 .data-log h4 {
-    margin: 0 0 var(--spacing-md) 0;
+    margin: 0 0 var(--spacing-sm) 0;
     color: var(--accent);
-    font-size: var(--font-base);
+    font-size: var(--font-sm);
     text-align: center;
 }
 
 .log-content {
-    max-height: 150px;
+    max-height: 120px;
     overflow-y: auto;
     font-family: 'Courier New', monospace;
     font-size: var(--font-xs);
@@ -387,12 +387,12 @@
 /* Responsive Design */
 @media (max-width: 1200px) {
     .wind-tunnel-container {
-        grid-template-columns: 260px 1fr 450px;
-        gap: var(--spacing-sm);
+        grid-template-columns: 200px 1fr 280px;
+        gap: var(--spacing-xs);
     }
     
     .gauge-container {
-        gap: var(--spacing-sm);
+        gap: var(--spacing-xs);
     }
 }
 
