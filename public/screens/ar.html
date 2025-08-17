@@ -292,16 +292,28 @@
   <div id="loading-screen" class="loading-screen">
     <div class="loading-spinner"></div>
     <div class="loading-text">
-      <p>Initializing AR Camera...</p>
-      <p style="font-size: 14px; margin-top: 10px; opacity: 0.8;">Please allow camera access</p>
+      <p id="loading-main-text">Initializing AR Camera...</p>
+      <p id="loading-sub-text" style="font-size: 14px; margin-top: 10px; opacity: 0.8;">Please allow camera access when prompted</p>
+      <p id="loading-detail" style="font-size: 12px; margin-top: 10px; opacity: 0.6;">Setting up AR.js and camera stream...</p>
     </div>
   </div>
 
   <!-- Error Message (hidden by default) -->
   <div id="error-message" class="error-message" style="display: none;">
-    <h3>Camera Access Required</h3>
-    <p>Please allow camera access to use AR features. Refresh the page and try again.</p>
-    <button onclick="retryCamera()" style="margin-top: 15px; padding: 10px 20px; background: white; color: #f44336; border: none; border-radius: 5px; cursor: pointer;">Retry</button>
+    <h3>🎯 AR Camera Setup Required</h3>
+    <p id="error-text">Please allow camera access to use AR features. Refresh the page and try again.</p>
+    <div style="margin-top: 15px;">
+      <button onclick="retryCamera()" style="margin: 5px; padding: 10px 20px; background: white; color: #f44336; border: none; border-radius: 5px; cursor: pointer;">🔄 Retry Camera</button>
+      <button onclick="goHome()" style="margin: 5px; padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer;">🏠 Go Home</button>
+    </div>
+    <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; font-size: 12px;">
+      <strong>💡 Troubleshooting Tips:</strong><br>
+      • Make sure no other app is using your camera<br>
+      • Check browser permissions for camera access<br>
+      • Try refreshing the page<br>
+      • Ensure you're using HTTPS or localhost<br>
+      • Your camera might take a moment to initialize
+    </div>
   </div>
 
   <!-- AR Container -->
@@ -310,10 +322,11 @@
     <a-scene
       id="ar-scene"
       embedded
-      arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+      arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth: 640; sourceHeight: 480; displayWidth: 640; displayHeight: 480;"
       vr-mode-ui="enabled: false"
-      renderer="logarithmicDepthBuffer: true; precision: medium;"
-      device-orientation-permission-ui="enabled: false">
+      renderer="logarithmicDepthBuffer: true; precision: medium; antialias: false;"
+      device-orientation-permission-ui="enabled: false"
+      loading-screen="enabled: false">
       
       <!-- Assets -->
       <a-assets>
@@ -445,33 +458,119 @@
     // Initialize AR Application
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🎯 Initializing AR Demo...');
-      initializeAR();
+      // First check camera permissions before initializing AR
+      checkCameraPermissions().then(() => {
+        initializeAR();
+      }).catch((error) => {
+        console.error('Camera permission error:', error);
+        showError('Camera access is required for AR. Please allow camera access and refresh the page.');
+      });
     });
+
+    // Check camera permissions first
+    async function checkCameraPermissions() {
+      try {
+        updateLoadingMessage('Checking camera permissions...', 'Testing camera access...');
+        console.log('📹 Checking camera permissions...');
+        
+        // Test camera access with same constraints as working camera page
+        const constraints = {
+          video: {
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            frameRate: { ideal: 15, max: 30 }
+          }
+        };
+        
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        console.log('✅ Camera access granted');
+        
+        // Stop the test stream immediately
+        stream.getTracks().forEach(track => track.stop());
+        
+        updateLoadingMessage('Camera access granted!', 'Initializing AR system...');
+        updateStatus('Camera Permission Granted', 'camera');
+        return true;
+      } catch (error) {
+        console.error('❌ Camera access failed:', error);
+        
+        if (error.name === 'NotAllowedError') {
+          throw new Error('Camera access denied by user. Please allow camera access and try again.');
+        } else if (error.name === 'NotFoundError') {
+          throw new Error('No camera found on this device. Please connect a camera and try again.');
+        } else if (error.name === 'NotSupportedError') {
+          throw new Error('Camera not supported by this browser. Please try a different browser.');
+        } else {
+          throw new Error('Failed to access camera: ' + error.message);
+        }
+      }
+    }
+
+    // Update loading message
+    function updateLoadingMessage(mainText, subText = '', detailText = '') {
+      const mainTextEl = document.getElementById('loading-main-text');
+      const subTextEl = document.getElementById('loading-sub-text');
+      const detailTextEl = document.getElementById('loading-detail');
+      
+      if (mainTextEl) mainTextEl.textContent = mainText;
+      if (subTextEl) subTextEl.textContent = subText;
+      if (detailTextEl) detailTextEl.textContent = detailText;
+    }
 
     // Initialize AR Scene
     function initializeAR() {
+      updateLoadingMessage('Initializing AR.js...', 'Setting up augmented reality system...', 'Loading AR.js libraries and markers...');
+      console.log('🎯 Starting AR.js initialization...');
       arScene = document.querySelector('#ar-scene');
+      
+      // Set up AR scene attributes for better camera handling
+      arScene.setAttribute('arjs', 'sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth: 640; sourceHeight: 480; displayWidth: 640; displayHeight: 480;');
       
       // Wait for AR.js to initialize
       arScene.addEventListener('loaded', function() {
-        console.log('📱 AR Scene loaded');
-        hideLoadingScreen();
-        setupAREventListeners();
-        updateStatus('AR Ready', 'ar');
+        console.log('📱 AR Scene loaded successfully');
+        updateLoadingMessage('AR Scene Ready!', 'Starting camera feed...', 'Almost ready...');
+        
+        setTimeout(() => {
+          hideLoadingScreen();
+          setupAREventListeners();
+          updateStatus('AR Ready - Look for markers', 'ar');
+        }, 1000);
       });
 
-      // Handle AR errors
+      // Handle successful camera stream
       arScene.addEventListener('arjs-video-loaded', function() {
-        console.log('📹 Camera stream loaded');
-        updateStatus('Camera Active', 'camera');
+        console.log('📹 AR Camera stream loaded successfully');
+        updateLoadingMessage('Camera Active!', 'AR system ready', 'Point your camera at a Hiro marker');
+        updateStatus('AR Camera Active', 'camera');
+        
+        setTimeout(() => {
+          hideLoadingScreen();
+        }, 500);
       });
 
-      // Handle camera errors
+      // Handle AR.js errors more gracefully
+      arScene.addEventListener('arjs-video-error', function(event) {
+        console.error('❌ AR.js video error:', event);
+        showError('AR camera failed to initialize. Please check camera permissions and refresh the page.');
+      });
+
+      // Fallback error handling
       window.addEventListener('error', function(e) {
-        if (e.message.includes('camera') || e.message.includes('getUserMedia')) {
-          showError('Camera access denied or not available');
+        console.error('Global error:', e);
+        if (e.message && (e.message.includes('camera') || e.message.includes('getUserMedia') || e.message.includes('video'))) {
+          showError('Camera access error. Please ensure your camera is not being used by another application and refresh the page.');
         }
       });
+
+      // Timeout fallback - if AR doesn't load in 15 seconds, show error
+      setTimeout(() => {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen && loadingScreen.style.display !== 'none') {
+          console.warn('⚠️ AR initialization timeout');
+          showError('AR initialization is taking longer than expected. This might be due to camera permissions, hardware limitations, or network issues. Please check your camera settings and refresh the page.');
+        }
+      }, 15000);
 
       // Setup marker detection
       setupMarkerDetection();
@@ -542,11 +641,13 @@
 
     // Show error message
     function showError(message) {
+      console.error('❌ AR Error:', message);
       const errorDiv = document.getElementById('error-message');
-      errorDiv.querySelector('p').textContent = message;
+      const errorText = document.getElementById('error-text');
+      errorText.textContent = message;
       errorDiv.style.display = 'block';
       hideLoadingScreen();
-      updateStatus('Error', 'error');
+      updateStatus('Error: ' + message, 'error');
     }
 
     // Update status indicator
@@ -630,7 +731,30 @@
 
     // Retry camera access
     function retryCamera() {
-      location.reload();
+      console.log('🔄 Retrying camera access...');
+      const errorDiv = document.getElementById('error-message');
+      errorDiv.style.display = 'none';
+      
+      const loadingScreen = document.getElementById('loading-screen');
+      loadingScreen.style.display = 'flex';
+      updateLoadingMessage('Retrying camera access...', 'Please allow camera permissions...', 'Attempting to reconnect...');
+      
+      // Reset AR scene
+      const scene = document.querySelector('#ar-scene');
+      const parent = scene.parentNode;
+      const newScene = scene.cloneNode(true);
+      parent.removeChild(scene);
+      parent.appendChild(newScene);
+      
+      // Reinitialize
+      setTimeout(() => {
+        checkCameraPermissions().then(() => {
+          initializeAR();
+        }).catch((error) => {
+          console.error('Retry failed:', error);
+          showError('Camera access still failed: ' + error.message + '. Please check your browser settings and ensure no other application is using the camera.');
+        });
+      }, 1000);
     }
 
     // Toggle fullscreen

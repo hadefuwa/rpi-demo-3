@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>RPI Camera Showcase</title>
     <style>
         * {
@@ -80,6 +80,22 @@
             grid-template-columns: 2fr 1fr;
             gap: 30px;
             align-items: start;
+        }
+        
+        /* Touch-friendly improvements */
+        .btn {
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 5px;
+            min-width: 120px;
+            touch-action: manipulation; /* Improves touch responsiveness */
+            user-select: none; /* Prevents text selection on touch */
         }
 
         .camera-feed {
@@ -177,18 +193,20 @@
 
         .slider {
             width: 100%;
-            height: 6px;
-            border-radius: 3px;
+            height: 8px; /* Increased for better touch interaction */
+            border-radius: 4px;
             background: rgba(255, 255, 255, 0.2);
             outline: none;
             -webkit-appearance: none;
+            appearance: none; /* Added standard property */
+            touch-action: manipulation; /* Improves touch responsiveness */
         }
 
         .slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
+            appearance: none; /* Added standard property */
+            width: 24px; /* Increased for better touch */
+            height: 24px;
             border-radius: 50%;
             background: #00d4ff;
             cursor: pointer;
@@ -196,8 +214,8 @@
         }
 
         .slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 24px; /* Increased for better touch */
+            height: 24px;
             border-radius: 50%;
             background: #00d4ff;
             cursor: pointer;
@@ -226,11 +244,14 @@
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            padding: 10px;
+            padding: 12px 10px; /* Increased padding for better touch */
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 0.9rem;
+            touch-action: manipulation; /* Improves touch responsiveness */
+            user-select: none; /* Prevents text selection on touch */
+            min-height: 44px; /* Minimum touch target size */
         }
 
         .effect-btn:hover {
@@ -453,13 +474,31 @@
             50% { transform: translate(-50%, -50%) scale(1.2); }
         }
 
-        @media (max-width: 768px) {
+        /* Raspberry Pi 5-inch screen optimizations */
+        @media (max-width: 800px) {
             .camera-grid {
                 grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .header {
+                padding: 10px;
             }
             
             .header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
+                margin-bottom: 5px;
+            }
+            
+            .header p {
+                font-size: 0.9rem;
+            }
+            
+            .back-btn {
+                top: 10px;
+                left: 10px;
+                padding: 8px 16px;
+                font-size: 0.9rem;
             }
             
             .main-container {
@@ -467,7 +506,195 @@
             }
             
             .camera-section {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .camera-feed {
+                min-height: 250px;
+                margin-bottom: 15px;
+            }
+            
+            .camera-controls {
+                gap: 15px;
+            }
+            
+            .control-group {
+                padding: 15px;
+            }
+            
+            .control-group h3 {
+                font-size: 1rem;
+                margin-bottom: 10px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+                margin: 3px;
+                min-width: 100px;
+            }
+            
+            .effects-grid {
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+                gap: 8px;
+            }
+            
+            .effect-btn {
+                padding: 8px;
+                font-size: 0.8rem;
+            }
+            
+            .slider-container {
+                margin: 10px 0;
+            }
+            
+            .slider-container label {
+                font-size: 0.8rem;
+            }
+            
+            .value-display {
+                font-size: 0.8rem;
+                padding: 6px 10px;
+            }
+            
+            .info-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 10px;
+            }
+            
+            .info-item {
+                padding: 10px;
+            }
+            
+            .info-label {
+                font-size: 0.7rem;
+            }
+            
+            .info-value {
+                font-size: 0.9rem;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 10px;
+            }
+            
+            .gallery-item img {
+                height: 100px;
+            }
+            
+            .gallery-item-info {
+                padding: 10px;
+            }
+            
+            .gallery-item-info h4 {
+                font-size: 0.9rem;
+                margin-bottom: 5px;
+            }
+            
+            .gallery-item-info p {
+                font-size: 0.7rem;
+            }
+            
+            .gallery-actions .btn {
+                padding: 4px 8px;
+                font-size: 0.7rem;
+            }
+            
+            .status-indicator {
+                padding: 10px;
+                margin-top: 15px;
+            }
+            
+            .status-item {
+                margin-bottom: 8px;
+                padding: 6px 0;
+                font-size: 0.9rem;
+            }
+            
+            .notification {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                transform: translateY(-100px);
+                max-width: none;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .notification.show {
+                transform: translateY(0);
+            }
+        }
+        
+        /* Extra small screens (480px and below) - Raspberry Pi specific */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header p {
+                font-size: 0.8rem;
+            }
+            
+            .camera-feed {
+                min-height: 200px;
+            }
+            
+            .camera-grid {
+                gap: 10px;
+            }
+            
+            .camera-section {
+                padding: 10px;
+            }
+            
+            .control-group {
+                padding: 10px;
+            }
+            
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+                min-width: 80px;
+            }
+            
+            .effects-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 5px;
+            }
+            
+            .effect-btn {
+                padding: 6px;
+                font-size: 0.7rem;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            
+            .gallery-item img {
+                height: 80px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .camera-placeholder {
                 padding: 20px;
+            }
+            
+            .camera-placeholder i {
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+            }
+            
+            .focus-indicator {
+                width: 40px;
+                height: 40px;
             }
         }
 
@@ -695,10 +922,39 @@
                 this.currentEffect = 'none';
                 this.isGridVisible = false;
                 this.isNightMode = false;
+                this.isSmallScreen = window.innerWidth <= 800; // Detect Raspberry Pi screen
                 
                 this.initializeEventListeners();
                 this.initializeSliders();
                 this.updateStatus();
+                this.optimizeForSmallScreen();
+                
+                // Listen for orientation/resize changes
+                window.addEventListener('resize', () => {
+                    this.isSmallScreen = window.innerWidth <= 800;
+                    this.optimizeForSmallScreen();
+                });
+            }
+            
+            optimizeForSmallScreen() {
+                if (this.isSmallScreen) {
+                    // Reduce video quality for better performance on Raspberry Pi
+                    this.defaultConstraints = {
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            frameRate: { ideal: 15, max: 30 }
+                        }
+                    };
+                } else {
+                    this.defaultConstraints = {
+                        video: {
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 },
+                            facingMode: 'environment'
+                        }
+                    };
+                }
             }
 
             initializeEventListeners() {
@@ -740,7 +996,8 @@
                 try {
                     this.showNotification('Starting camera...', 'info');
                     
-                    const constraints = {
+                    // Use optimized constraints based on screen size
+                    const constraints = this.defaultConstraints || {
                         video: {
                             width: { ideal: 1280 },
                             height: { ideal: 720 },
@@ -751,6 +1008,12 @@
                     this.stream = await navigator.mediaDevices.getUserMedia(constraints);
                     this.video.srcObject = this.stream;
                     this.video.style.display = 'block';
+                    
+                    // Hide the camera placeholder
+                    const placeholder = document.querySelector('.camera-placeholder');
+                    if (placeholder) {
+                        placeholder.style.display = 'none';
+                    }
                     
                     // Wait for video to load
                     this.video.addEventListener('loadedmetadata', () => {
@@ -775,6 +1038,13 @@
                 }
                 
                 this.video.style.display = 'none';
+                
+                // Show the camera placeholder again
+                const placeholder = document.querySelector('.camera-placeholder');
+                if (placeholder) {
+                    placeholder.style.display = 'block';
+                }
+                
                 this.stopRecording();
                 this.updateStatus();
                 

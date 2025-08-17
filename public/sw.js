@@ -59,16 +59,67 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   
-  // Network-first strategy for critical files (always fresh)
+  // Cache-first strategy for the main document to prevent CSS loading delays
   if (event.request.destination === 'document' || 
       url.pathname === '/' || 
-      url.pathname === '/index.html' ||
-      url.pathname === '/sw.js') {
+      url.pathname === '/index.html') {
     
+    event.respondWith(
+      caches.match(event.request)
+        .then((cachedResponse) => {
+          if (cachedResponse) {
+            // Return cached version immediately for faster loading
+            return cachedResponse;
+          }
+          
+          // If not in cache, fetch from network
+          return fetch(event.request)
+            .then((response) => {
+              // Cache successful responses
+              if (response && response.status === 200) {
+                const responseToCache = response.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                  cache.put(event.request, responseToCache);
+                });
+              }
+              return response;
+            })
+            .catch(() => {
+              // Network failed and no cache - return a basic offline page
+              return new Response(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <title>Offline</title>
+                  <style>
+                    body { 
+                      font-family: Arial, sans-serif; 
+                      background: #000; 
+                      color: #fff; 
+                      text-align: center; 
+                      padding: 50px; 
+                    }
+                  </style>
+                </head>
+                <body>
+                  <h1>You're offline</h1>
+                  <p>Please check your internet connection and try again.</p>
+                </body>
+                </html>
+              `, {
+                headers: { 'Content-Type': 'text/html' }
+              });
+            });
+        })
+    );
+    return;
+  }
+  
+  // Service worker updates should always fetch fresh
+  if (url.pathname === '/sw.js') {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          // Cache successful responses for offline use
           if (response && response.status === 200) {
             const responseToCache = response.clone();
             caches.open(CACHE_NAME).then((cache) => {
@@ -77,10 +128,7 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => {
-          // Fallback to cache only if network fails
-          return caches.match(event.request);
-        })
+        .catch(() => caches.match(event.request))
     );
     return;
   }

@@ -5,6 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>RPI 5" Showcase - Home</title>
     
+    <!-- Critical CSS Loading - Prevent FOUC (Flash of Unstyled Content) -->
+    <style>
+      /* Critical styles - loaded immediately */
+      html, body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #000 !important;
+        color: #fff !important;
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+        /* Force hardware acceleration */
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        /* Optimize rendering */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeSpeed;
+      }
+      
+      /* Prevent flash of white background */
+      #app {
+        background: #000 !important;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        /* GPU acceleration */
+        transform: translateZ(0);
+        will-change: transform;
+      }
+      
+      /* Optimize for returning users */
+      .returning-user .loading-overlay {
+        animation-duration: 0.2s !important;
+        transition-duration: 0.2s !important;
+      }
+      
+      /* Loading screen to prevent FOUC */
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(to bottom, #1e0033, #3b0057, #4b0063);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 1;
+        transition: opacity 0.5s ease-out;
+      }
+      
+      .loading-overlay.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top: 3px solid #fff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .loading-text {
+        margin-top: 20px;
+        color: white;
+        font-size: 16px;
+        text-align: center;
+      }
+    </style>
+    
     <!-- Smart Quality Detection System for Pi 3/4/5 -->
     <script>
       // Device capability detection and quality mode selection
@@ -174,37 +255,89 @@
     <link rel="apple-touch-icon" sizes="167x167" href="./assets/Matrix.png" />
   </head>
   <body>
-    <!-- Automatic cache clearing script -->
+    <!-- Loading overlay to prevent FOUC -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div style="text-align: center;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Showcase...</div>
+      </div>
+    </div>
+    
+    <!-- Preload critical resources -->
+    <script>
+      // Immediate DOM ready check and loading management
+      (function() {
+        'use strict';
+        
+        // Track loading state
+        let cssLoaded = false;
+        let domReady = false;
+        let assetsLoaded = false;
+        
+        // Function to hide loading overlay when everything is ready
+        function checkAllLoaded() {
+          if (cssLoaded && domReady && assetsLoaded) {
+            setTimeout(() => {
+              const overlay = document.getElementById('loadingOverlay');
+              if (overlay) {
+                overlay.classList.add('hidden');
+                setTimeout(() => {
+                  overlay.remove();
+                }, 500);
+              }
+            }, 300); // Small delay to ensure smooth transition
+          }
+        }
+        
+        // Mark CSS as loaded (will be set when main styles are applied)
+        window.markCSSLoaded = function() {
+          cssLoaded = true;
+          checkAllLoaded();
+        };
+        
+        // Mark DOM as ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function() {
+            domReady = true;
+            checkAllLoaded();
+          });
+        } else {
+          domReady = true;
+        }
+        
+        // Mark assets as loaded
+        window.addEventListener('load', function() {
+          assetsLoaded = true;
+          checkAllLoaded();
+        });
+        
+        // Fallback: hide loading overlay after maximum 3 seconds
+        setTimeout(() => {
+          const overlay = document.getElementById('loadingOverlay');
+          if (overlay && !overlay.classList.contains('hidden')) {
+            console.log('Fallback: Hiding loading overlay after timeout');
+            overlay.classList.add('hidden');
+            setTimeout(() => overlay.remove(), 500);
+          }
+        }, 3000);
+        
+      })();
+    </script>
+    
+    <!-- Navigation Optimizer - Prevents CSS loading delays on return visits -->
+    <script src="./js/navigation-optimizer.js"></script>
+    
+    <!-- Optimized cache management script -->
     <script>
       (function() {
         'use strict';
         
-        // Add cache-busting timestamps to all critical resources
-        function addCacheBusting() {
-          const timestamp = Date.now();
-          const criticalResources = [
-            { selector: 'link[rel="manifest"]', attr: 'href' },
-            { selector: 'link[rel="apple-touch-icon"]', attr: 'href' },
-            { selector: 'img[src*="Matrix.png"]', attr: 'src' }
-          ];
-          
-          criticalResources.forEach(resource => {
-            const elements = document.querySelectorAll(resource.selector);
-            elements.forEach(element => {
-              const currentUrl = element.getAttribute(resource.attr);
-              if (currentUrl && !currentUrl.includes('?v=')) {
-                const separator = currentUrl.includes('?') ? '&' : '?';
-                element.setAttribute(resource.attr, `${currentUrl}${separator}v=${timestamp}`);
-              }
-            });
-          });
-        }
-        
-        // Clear all caches on startup
+        // Less aggressive cache clearing - only clear old versions
         async function clearOldCaches() {
           try {
             if ('caches' in window) {
               const cacheNames = await caches.keys();
+              // Only clear caches that are truly old (not current version)
               const oldCaches = cacheNames.filter(name => 
                 name.includes('rpi-5inch-showcase') && !name.includes('v4')
               );
@@ -222,51 +355,33 @@
           }
         }
         
-        // Update service worker if needed
-        async function updateServiceWorker() {
-          try {
-            if ('serviceWorker' in navigator) {
-              const registration = await navigator.serviceWorker.getRegistration();
-              if (registration) {
-                // Force update check
-                await registration.update();
-                console.log('🔄 Service worker update check completed');
-              }
-            }
-          } catch (error) {
-            console.log('⚠️ Service worker update error:', error);
-          }
+        // Check if we're returning from another page
+        const isReturning = sessionStorage.getItem('showcase-navigation');
+        
+        if (isReturning) {
+          // If returning, prioritize speed over cache clearing
+          console.log('🔄 Returning to homepage - prioritizing speed');
+        } else {
+          // If first visit, do cache maintenance
+          clearOldCaches();
+          sessionStorage.setItem('showcase-navigation', 'true');
         }
         
-        // Run cache clearing on startup
-        clearOldCaches();
-        updateServiceWorker();
-        addCacheBusting();
-        
-        // Additional development mode cache clearing
+        // Reduced development mode cache clearing
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-          console.log('🔧 Development mode detected - aggressive cache clearing');
-          // Clear localStorage and sessionStorage in dev mode
-          localStorage.clear();
-          sessionStorage.clear();
+          console.log('🔧 Development mode detected');
           
-          // Force reload if we detect stale content
+          // Only force reload if it's been more than 30 minutes since last reload
           const lastReload = sessionStorage.getItem('lastReload');
           const now = Date.now();
-          if (lastReload && (now - parseInt(lastReload)) > 300000) { // 5 minutes
-            console.log('🔄 Development mode: forcing fresh reload');
+          if (lastReload && (now - parseInt(lastReload)) > 1800000) { // 30 minutes
+            console.log('🔄 Development mode: forcing fresh reload (30min interval)');
             sessionStorage.setItem('lastReload', now.toString());
             window.location.reload(true);
-          } else {
+          } else if (!lastReload) {
             sessionStorage.setItem('lastReload', now.toString());
           }
         }
-        
-        // Auto-clear cache on page load
-        document.addEventListener('DOMContentLoaded', function() {
-          // Cache clearing is now automatic on page load
-          console.log('🔄 Cache management initialized');
-        });
       })();
     </script>
     
@@ -374,7 +489,7 @@
       </main>
     </div>
     
-    <!-- EMBEDDED CSS - No external CSS files -->
+    <!-- EMBEDDED CSS - Loaded immediately after critical styles -->
     <style>
       /* Base styles for the showcase container */
       * {
@@ -1676,6 +1791,14 @@
         }
       }
     </style>
+    
+    <!-- Mark CSS as loaded -->
+    <script>
+      // Notify that main CSS has been loaded and parsed
+      if (window.markCSSLoaded) {
+        window.markCSSLoaded();
+      }
+    </script>
     
     <!-- Quality-Based Animated Cosmic Background Script -->
     <script>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wind Tunnel Simulation</title>
+    <link rel="stylesheet" href="../styles/base.css">
+    <link rel="stylesheet" href="../styles/wind-tunnel.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="topbar">
+            <div class="title">Wind Tunnel Simulation</div>
+            <div class="top-logo">🌪️</div>
+        </div>
+        
+        <main>
+            <div class="screen active" id="wind-tunnel">
+                <div class="wind-tunnel-container">
+                    <!-- Control Panel (Left Side) -->
+                    <div class="control-panel">
+                        <div class="panel-section">
+                            <h3>Control Panel</h3>
+                            
+                            <!-- Action Buttons -->
+                            <div class="action-buttons">
+                                <button id="sweep-btn" class="btn btn-primary">Sweep</button>
+                                <button id="zero-btn" class="btn btn-secondary">Zero</button>
+                                <button id="set-btn" class="btn btn-success">Set</button>
+                                <button id="switch-off-btn" class="btn btn-danger">Switch Off</button>
+                            </div>
+                            
+                            <!-- Input Controls -->
+                            <div class="control-group">
+                                <label for="angle-slider">Angle of Attack (°)</label>
+                                <input type="range" id="angle-slider" min="-15" max="25" value="0" step="0.5">
+                                <div class="value-display" id="angle-value">0.0°</div>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label for="fan-slider">Fan Speed (%)</label>
+                                <input type="range" id="fan-slider" min="0" max="100" value="50" step="5">
+                                <div class="value-display" id="fan-value">50%</div>
+                            </div>
+                            
+                            <!-- Output Measurements -->
+                            <div class="measurements">
+                                <h4>Measurements</h4>
+                                <div class="measurement-item">
+                                    <span>Lift:</span>
+                                    <span id="lift-value">0.00 N</span>
+                                </div>
+                                <div class="measurement-item">
+                                    <span>Drag:</span>
+                                    <span id="drag-value">0.00 N</span>
+                                </div>
+                                <div class="measurement-item">
+                                    <span>Pressure:</span>
+                                    <span id="pressure-value">0.00 Pa</span>
+                                </div>
+                                <div class="measurement-item">
+                                    <span>Air Speed:</span>
+                                    <span id="airspeed-value">0.00 m/s</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Live Gauges (Center) -->
+                    <div class="gauges-section">
+                        <div class="gauge-container">
+                            <div class="gauge" id="angle-gauge">
+                                <div class="gauge-label">Angle (°)</div>
+                                <div class="gauge-meter">
+                                    <div class="gauge-fill" id="angle-fill"></div>
+                                </div>
+                                <div class="gauge-value" id="angle-gauge-value">0.0°</div>
+                            </div>
+                            
+                            <div class="gauge" id="fan-gauge">
+                                <div class="gauge-label">Fan Speed (%)</div>
+                                <div class="gauge-meter">
+                                    <div class="gauge-fill" id="fan-fill"></div>
+                                </div>
+                                <div class="gauge-value" id="fan-gauge-value">50%</div>
+                            </div>
+                            
+                            <div class="gauge" id="lift-gauge">
+                                <div class="gauge-label">Lift (N)</div>
+                                <div class="gauge-meter">
+                                    <div class="gauge-fill" id="lift-fill"></div>
+                                </div>
+                                <div class="gauge-value" id="lift-gauge-value">0.00 N</div>
+                            </div>
+                            
+                            <div class="gauge" id="drag-gauge">
+                                <div class="gauge-label">Drag (N)</div>
+                                <div class="gauge-meter">
+                                    <div class="gauge-fill" id="drag-fill"></div>
+                                </div>
+                                <div class="gauge-value" id="drag-gauge-value">0.00 N</div>
+                            </div>
+                            
+                            <div class="gauge" id="pressure-gauge">
+                                <div class="gauge-label">Pressure (Pa)</div>
+                                <div class="gauge-meter">
+                                    <div class="gauge-fill" id="pressure-fill"></div>
+                                </div>
+                                <div class="gauge-value" id="pressure-gauge-value">0.00 Pa</div>
+                            </div>
+                            
+                            <div class="gauge" id="airspeed-gauge">
+                                <div class="gauge-label">Air Speed (m/s)</div>
+                                <div class="gauge-meter">
+                                    <div class="gauge-fill" id="airspeed-fill"></div>
+                                </div>
+                                <div class="gauge-value" id="airspeed-gauge-value">0.00 m/s</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Graphing Section (Right Side) -->
+                    <div class="graphing-section">
+                        <div class="panel-section">
+                            <h3>Performance Analysis</h3>
+                            
+                            <!-- Graph Controls -->
+                            <div class="graph-controls">
+                                <button id="log-data-btn" class="btn btn-info">Log Data</button>
+                                <button id="clear-graph-btn" class="btn btn-warning">Clear Graph</button>
+                                <select id="graph-type" class="select-control">
+                                    <option value="lift">Lift vs Angle</option>
+                                    <option value="drag">Drag vs Angle</option>
+                                    <option value="both">Lift & Drag vs Angle</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Chart Container -->
+                            <div class="chart-container">
+                                <canvas id="performance-chart"></canvas>
+                            </div>
+                            
+                            <!-- Data Log -->
+                            <div class="data-log">
+                                <h4>Data Log</h4>
+                                <div class="log-content" id="log-content">
+                                    <div class="log-entry">Ready to collect data...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Educational Info Panel -->
+                <div class="educational-panel">
+                    <div class="info-toggle">
+                        <button id="info-toggle-btn" class="btn btn-outline">ℹ️ Show Info</button>
+                    </div>
+                    <div class="info-content" id="info-content">
+                        <h3>Wind Tunnel Physics</h3>
+                        <p><strong>Angle of Attack:</strong> The angle between the wing's chord line and the oncoming airflow. Critical for understanding lift generation and stall behavior.</p>
+                        <p><strong>Lift:</strong> Force perpendicular to the airflow, generated by pressure differences above and below the wing surface.</p>
+                        <p><strong>Drag:</strong> Force parallel to the airflow, caused by air resistance and pressure differences.</p>
+                        <p><strong>Stall:</strong> Occurs when the angle of attack becomes too large, causing airflow separation and loss of lift.</p>
+                        <p><strong>Fan Speed:</strong> Controls the velocity of the airflow, affecting both lift and drag forces.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="../js/wind-tunnel.js"></script>
+</body>
+</html>
