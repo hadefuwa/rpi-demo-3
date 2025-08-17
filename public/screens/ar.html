@@ -309,6 +309,48 @@
       opacity: 0.8;
     }
     
+    .guidance-validation {
+      font-size: 14px;
+      color: #FF9800;
+      font-weight: 500;
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(255, 152, 0, 0.1);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 152, 0, 0.3);
+    }
+    
+    /* Guidance Hint */
+    .guidance-hint {
+      background: rgba(33, 150, 243, 0.95);
+      border: 3px solid #2196F3;
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(33, 150, 243, 0.4);
+      min-width: 200px;
+      pointer-events: none;
+    }
+    
+    .hint-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+    
+    .hint-text {
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 8px;
+    }
+    
+    .hint-subtext {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.9);
+      opacity: 0.9;
+    }
+    
     /* Arrow Direction Styles */
     .arrow-right { color: #4CAF50; }
     .arrow-left { color: #EF2D5E; }
@@ -380,6 +422,11 @@
       0%, 100% { transform: scale(1) rotate(0deg); }
       25% { transform: scale(1.1) rotate(5deg); }
       75% { transform: scale(0.9) rotate(-5deg); }
+    }
+    
+    @keyframes hintPulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      50% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.9; }
     }
     
     /* Responsive design */
@@ -622,7 +669,6 @@
           <!-- Bottom Controls -->
           <div class="bottom-controls">
             <button class="control-btn" onclick="startGuidance()">▶️ Start</button>
-            <button class="control-btn" onclick="stopGuidance()">⏹️ Stop</button>
             <button class="control-btn" onclick="toggleCamera()">📹 Camera</button>
           </div>
         </div>
@@ -643,26 +689,6 @@
         <span>Start Guidance</span>
       </div>
       
-      <div class="ar-option" onclick="stopGuidance()">
-        <div class="ar-icon">⏹️</div>
-        <span>Stop Guidance</span>
-      </div>
-      
-      <div class="ar-option" onclick="resetGuidance()">
-        <div class="ar-icon">🔄</div>
-        <span>Reset Guidance</span>
-      </div>
-      
-      <div class="ar-option" onclick="nextStep()">
-        <div class="ar-icon">⏭️</div>
-        <span>Next Step</span>
-      </div>
-      
-      <div class="ar-option" onclick="previousStep()">
-        <div class="ar-icon">⏮️</div>
-        <span>Previous Step</span>
-      </div>
-      
       <div class="ar-option" onclick="captureScreenshot()">
         <div class="ar-icon">📸</div>
         <span>Screenshot</span>
@@ -679,25 +705,35 @@
     let currentArrow = null;
     let cameraStream = null;
     let videoElement = null;
+    
+    // Motion tracking for guidance validation
+    let motionTracker = {
+      lastPosition: { x: 0, y: 0 },
+      currentPosition: { x: 0, y: 0 },
+      movementThreshold: 50, // Minimum pixels to move
+      isTracking: false,
+      startTime: 0,
+      guidanceTimeout: null
+    };
 
     // Treasure Hunt Guidance Steps
     const treasureSteps = [
-      { direction: 'right', text: 'Go this way', duration: 3000, arrow: '→' },
-      { direction: 'left', text: 'Turn left here', duration: 2500, arrow: '←' },
-      { direction: 'up', text: 'Go up the hill', duration: 4000, arrow: '↑' },
-      { direction: 'hold', text: 'Hold it there...', duration: 2000, arrow: '●' },
-      { direction: 'right', text: 'Perfect! Now right', duration: 3000, arrow: '→' },
-      { direction: 'dig', text: 'Dig here! Gold found!', duration: 5000, arrow: '⛏️' }
+      { direction: 'right', text: 'Go this way', duration: 10000, arrow: '→', requiredMovement: 'right', validation: 'Move camera right to continue' },
+      { direction: 'left', text: 'Turn left here', duration: 10000, arrow: '←', requiredMovement: 'left', validation: 'Move camera left to continue' },
+      { direction: 'up', text: 'Go up the hill', duration: 12000, arrow: '↑', requiredMovement: 'up', validation: 'Move camera up to continue' },
+      { direction: 'hold', text: 'Hold it there...', duration: 8000, arrow: '●', requiredMovement: 'hold', validation: 'Keep camera steady for 3 seconds' },
+      { direction: 'right', text: 'Perfect! Now right', duration: 10000, arrow: '→', requiredMovement: 'right', validation: 'Move camera right to continue' },
+      { direction: 'dig', text: 'Dig here! Gold found!', duration: 15000, arrow: '⛏️', requiredMovement: 'down', validation: 'Move camera down to dig' }
     ];
 
     // Troubleshooting Guidance Steps
     const troubleshootSteps = [
-      { action: 'open', text: 'Open that panel', duration: 3000, icon: '🔧' },
-      { action: 'remove', text: 'Remove that cover', duration: 2500, icon: '🔄' },
-      { action: 'sensor', text: 'There is the sensor', duration: 2000, icon: '📡' },
-      { action: 'remove', text: 'Remove the sensor', duration: 3000, icon: '🔄' },
-      { action: 'unbolt', text: 'Unbolt that bracket', duration: 4000, icon: '🔩' },
-      { action: 'found', text: 'Perfect! There\'s the fault!', duration: 5000, icon: '✅' }
+      { action: 'open', text: 'Open that panel', duration: 10000, icon: '🔧', requiredMovement: 'right', validation: 'Move camera right to open panel' },
+      { action: 'remove', text: 'Remove that cover', duration: 10000, icon: '🔄', requiredMovement: 'left', validation: 'Move camera left to remove cover' },
+      { action: 'sensor', text: 'There is the sensor', duration: 8000, icon: '📡', requiredMovement: 'up', validation: 'Move camera up to see sensor' },
+      { action: 'remove', text: 'Remove the sensor', duration: 12000, icon: '🔄', requiredMovement: 'down', validation: 'Move camera down to remove sensor' },
+      { action: 'unbolt', text: 'Unbolt that bracket', duration: 15000, icon: '🔩', requiredMovement: 'hold', validation: 'Keep camera steady to unbolt' },
+      { action: 'found', text: 'Perfect! There\'s the fault!', duration: 10000, icon: '✅', requiredMovement: 'center', validation: 'Center camera to confirm fault' }
     ];
 
     // Initialize AR Guidance System
@@ -821,11 +857,115 @@
       // Set default mode
       setGuidanceMode('treasure');
       
+      // Start motion tracking
+      startMotionTracking();
+      
       // Hide loading screen
       setTimeout(() => {
         hideLoadingScreen();
         updateStatus('Guidance System Ready - Choose your mode!', 'ar');
       }, 1000);
+    }
+
+    // Start motion tracking for guidance validation
+    function startMotionTracking() {
+      motionTracker.isTracking = true;
+      motionTracker.lastPosition = { x: 0, y: 0 };
+      motionTracker.currentPosition = { x: 0, y: 0 };
+      
+      // Track camera movement using device motion/gyroscope if available
+      if (window.DeviceMotionEvent) {
+        window.addEventListener('devicemotion', handleDeviceMotion);
+      }
+      
+      // Fallback: track mouse/touch movement for desktop testing
+      document.addEventListener('mousemove', handleMouseMovement);
+      document.addEventListener('touchmove', handleTouchMovement);
+      
+      console.log('🎯 Motion tracking started');
+    }
+
+    // Handle device motion (mobile/tablet)
+    function handleDeviceMotion(event) {
+      if (!motionTracker.isTracking || !isGuidanceActive) return;
+      
+      const acceleration = event.accelerationIncludingGravity;
+      if (acceleration) {
+        motionTracker.currentPosition.x += acceleration.x || 0;
+        motionTracker.currentPosition.y += acceleration.y || 0;
+        
+        checkMovementValidation();
+      }
+    }
+
+    // Handle mouse movement (desktop)
+    function handleMouseMovement(event) {
+      if (!motionTracker.isTracking || !isGuidanceActive) return;
+      
+      motionTracker.currentPosition.x = event.clientX;
+      motionTracker.currentPosition.y = event.clientY;
+      
+      checkMovementValidation();
+    }
+
+    // Handle touch movement (mobile)
+    function handleTouchMovement(event) {
+      if (!motionTracker.isTracking || !isGuidanceActive) return;
+      
+      const touch = event.touches[0];
+      motionTracker.currentPosition.x = touch.clientX;
+      motionTracker.currentPosition.y = touch.clientY;
+      
+      checkMovementValidation();
+    }
+
+    // Check if movement matches required direction
+    function checkMovementValidation() {
+      if (!isGuidanceActive || currentStep >= guidanceSteps.length) return;
+      
+      const step = guidanceSteps[currentStep];
+      const movement = getMovementDirection();
+      
+      if (movement === step.requiredMovement) {
+        // Correct movement detected - advance to next step
+        console.log(`🎯 Correct movement detected: ${movement}`);
+        advanceToNextStep();
+      }
+    }
+
+    // Determine movement direction based on position change
+    function getMovementDirection() {
+      const deltaX = motionTracker.currentPosition.x - motionTracker.lastPosition.x;
+      const deltaY = motionTracker.currentPosition.y - motionTracker.lastPosition.y;
+      
+      // Update last position
+      motionTracker.lastPosition = { ...motionTracker.currentPosition };
+      
+      // Determine primary direction
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX > motionTracker.movementThreshold) return 'right';
+        if (deltaX < -motionTracker.movementThreshold) return 'left';
+      } else {
+        if (deltaY > motionTracker.movementThreshold) return 'down';
+        if (deltaY < -motionTracker.movementThreshold) return 'up';
+      }
+      
+      // Check for hold (minimal movement)
+      if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
+        return 'hold';
+      }
+      
+      // Check for center (return to middle)
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      const distanceFromCenter = Math.sqrt(
+        Math.pow(motionTracker.currentPosition.x - centerX, 2) +
+        Math.pow(motionTracker.currentPosition.y - centerY, 2)
+      );
+      
+      if (distanceFromCenter < 100) return 'center';
+      
+      return 'none';
     }
 
     // Set guidance mode (treasure hunt or troubleshooting)
@@ -866,6 +1006,25 @@
       showNextStep();
     }
 
+    // Advance to next step after successful movement validation
+    function advanceToNextStep() {
+      // Clear the guidance timeout
+      if (motionTracker.guidanceTimeout) {
+        clearTimeout(motionTracker.guidanceTimeout);
+        motionTracker.guidanceTimeout = null;
+      }
+      
+      currentStep++;
+      
+      if (currentStep >= guidanceSteps.length) {
+        // Guidance complete
+        completeGuidance();
+      } else {
+        // Show next step
+        showNextStep();
+      }
+    }
+
     // Show next guidance step
     function showNextStep() {
       if (currentStep >= guidanceSteps.length) {
@@ -880,13 +1039,48 @@
       // Create and show guidance arrow/icon
       showGuidanceElement(step);
       
-      // Auto-advance to next step after duration
-      setTimeout(() => {
-        if (isGuidanceActive) {
-          currentStep++;
-          showNextStep();
+      // Show validation instruction
+      updateStatus(`Step ${currentStep + 1}: ${step.validation}`, 'ar');
+      
+      // Set timeout fallback for stuck users (longer duration)
+      motionTracker.guidanceTimeout = setTimeout(() => {
+        if (isGuidanceActive && currentStep < guidanceSteps.length) {
+          // User is stuck - show hint
+          showStuckHint(step);
         }
-      }, step.duration);
+      }, step.duration + 5000); // Extra 5 seconds after the original duration
+    }
+
+    // Show hint when user is stuck on a step
+    function showStuckHint(step) {
+      const hintEl = document.createElement('div');
+      hintEl.className = 'guidance-hint';
+      hintEl.innerHTML = `
+        <div class="hint-icon">💡</div>
+        <div class="hint-text">Hint: ${step.validation}</div>
+        <div class="hint-subtext">Try moving your camera in the right direction!</div>
+      `;
+      
+      hintEl.style.cssText = `
+        position: absolute;
+        left: 50%;
+        top: 20%;
+        transform: translate(-50%, -50%);
+        z-index: 150;
+        animation: hintPulse 2s ease-in-out infinite;
+      `;
+      
+      const arObjects = document.getElementById('ar-objects');
+      arObjects.appendChild(hintEl);
+      
+      // Remove hint after 5 seconds
+      setTimeout(() => {
+        if (hintEl.parentNode) {
+          hintEl.remove();
+        }
+      }, 5000);
+      
+      console.log('💡 Showing stuck hint for step:', step.text);
     }
 
     // Show guidance element (arrow or icon)
@@ -923,6 +1117,7 @@
         <div class="guidance-arrow ${arrowClass}">${content}</div>
         <div class="guidance-text">${step.text}</div>
         <div class="guidance-progress">Step ${currentStep + 1} of ${guidanceSteps.length}</div>
+        <div class="guidance-validation">${step.validation}</div>
       `;
       
       // Position randomly on screen (but within camera area)
@@ -959,6 +1154,12 @@
       if (currentArrow) {
         currentArrow.remove();
         currentArrow = null;
+      }
+      
+      // Clear any active guidance timeout
+      if (motionTracker.guidanceTimeout) {
+        clearTimeout(motionTracker.guidanceTimeout);
+        motionTracker.guidanceTimeout = null;
       }
     }
 
