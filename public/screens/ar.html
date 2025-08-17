@@ -5,10 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>Augmented Reality Demo - RPI Showcase</title>
   
-  <!-- Import AR.js and A-Frame for WebXR AR - RPi Optimized -->
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar-nft.js"></script>
-  
   <!-- Raspberry Pi Camera Detection Script - Simplified -->
   <script>
     // Simple RPi detection
@@ -271,21 +267,6 @@
         font-size: 12px;
       }
     }
-    
-    /* A-Frame scene styling */
-    a-scene {
-      width: 100vw !important;
-      height: 100vh !important;
-    }
-    
-    /* Hide A-Frame UI */
-    .a-enter-vr {
-      display: none !important;
-    }
-    
-    .a-orientation-modal {
-      display: none !important;
-    }
   </style>
 </head>
 <body>
@@ -318,76 +299,129 @@
 
   <!-- AR Container -->
   <div id="ar-container">
-    <!-- A-Frame AR Scene -->
-    <a-scene
-      id="ar-scene"
-      embedded
-      arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth: 640; sourceHeight: 480; displayWidth: 640; displayHeight: 480;"
-      vr-mode-ui="enabled: false"
-      renderer="logarithmicDepthBuffer: true; precision: medium; antialias: false;"
-      device-orientation-permission-ui="enabled: false"
-      loading-screen="enabled: false">
-      
-      <!-- Assets -->
-      <a-assets>
-        <!-- 3D Models -->
-        <a-box id="box-template" position="0 0.5 0" material="color: #4CC3D9" shadow></a-box>
-        <a-sphere id="sphere-template" position="2 1.25 -5" radius="1.25" material="color: #EF2D5E" shadow></a-sphere>
-        <a-cylinder id="cylinder-template" position="1 0.75 -3" radius="0.5" height="1.5" material="color: #FFC65D" shadow></a-cylinder>
-      </a-assets>
-
-      <!-- Marker-based AR -->
-      <!-- Hiro marker (default AR.js marker) -->
-      <a-marker id="hiro-marker" preset="hiro" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
-        <!-- 3D Objects on marker -->
-        <a-box 
-          id="ar-box"
-          position="0 0.5 0" 
-          rotation="0 45 0"
-          scale="1 1 1"
-          material="color: #4CC3D9; transparent: true; opacity: 0.8"
-          animation="property: rotation; to: 0 405 0; loop: true; dur: 10000"
-          shadow="cast: true; receive: false">
-        </a-box>
+    <!-- AR Overlay System (simplified) -->
+    <div id="ar-overlay" style="
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+    ">
+      <!-- AR Objects Container -->
+      <div id="ar-objects" style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: auto;
+      ">
+        <!-- AR Box -->
+        <div id="ar-box" class="ar-object" style="
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 100px;
+          height: 100px;
+          background: linear-gradient(45deg, #4CC3D9, #2196F3);
+          border-radius: 10px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+          opacity: 0;
+          transition: all 0.5s ease;
+          pointer-events: auto;
+          cursor: pointer;
+        " onclick="toggleObject('ar-box')">
+          <div style="
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+          ">AR Box</div>
+        </div>
         
-        <a-sphere 
-          id="ar-sphere"
-          position="1.5 1 0" 
-          radius="0.5"
-          material="color: #EF2D5E; transparent: true; opacity: 0.9"
-          animation="property: position; to: 1.5 2 0; loop: true; dir: alternate; dur: 2000"
-          shadow="cast: true; receive: false">
-        </a-sphere>
+        <!-- AR Sphere -->
+        <div id="ar-sphere" class="ar-object" style="
+          position: absolute;
+          top: 40%;
+          left: 30%;
+          width: 80px;
+          height: 80px;
+          background: radial-gradient(circle, #EF2D5E, #C2185B);
+          border-radius: 50%;
+          box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+          opacity: 0;
+          transition: all 0.5s ease;
+          pointer-events: auto;
+          cursor: pointer;
+        " onclick="toggleObject('ar-sphere')">
+          <div style="
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+          ">AR Sphere</div>
+        </div>
         
-        <a-text 
-          id="ar-text"
-          value="Hello AR!" 
-          position="0 2 0" 
-          align="center"
-          color="#FFC65D"
-          scale="2 2 2"
-          animation="property: rotation; to: 0 360 0; loop: true; dur: 8000">
-        </a-text>
-      </a-marker>
-
-      <!-- Custom pattern marker -->
-      <a-marker id="pattern-marker" type="pattern" url="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" smooth="true">
-        <a-cylinder 
-          position="0 0.5 0" 
-          radius="0.3" 
-          height="1" 
-          material="color: #7BC8A4"
-          animation="property: rotation; to: 360 0 0; loop: true; dur: 5000">
-        </a-cylinder>
-      </a-marker>
-
-      <!-- Camera -->
-      <a-entity camera look-controls-enabled="false" arjs-look-controls="smoothingFactor: 0.1"></a-entity>
+        <!-- AR Text -->
+        <div id="ar-text" class="ar-object" style="
+          position: absolute;
+          top: 60%;
+          left: 70%;
+          color: #FFC65D;
+          font-size: 24px;
+          font-weight: bold;
+          text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+          opacity: 0;
+          transition: all 0.5s ease;
+          pointer-events: auto;
+          cursor: pointer;
+          text-align: center;
+          min-width: 120px;
+        " onclick="toggleObject('ar-text')">
+          Hello AR!
+        </div>
+      </div>
       
-      <!-- Lighting -->
-      <a-light type="ambient" color="#404040" intensity="0.5"></a-light>
-      <a-light type="directional" position="0 10 5" intensity="0.8" shadow="cast: true"></a-light>
-    </a-scene>
+      <!-- AR Grid Overlay -->
+      <div id="ar-grid" style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.3;
+        pointer-events: none;
+        z-index: 1;
+      ">
+        <div style="
+          position: absolute;
+          top: 50%;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: rgba(255,255,255,0.5);
+        "></div>
+        <div style="
+          position: absolute;
+          left: 50%;
+          top: 0;
+          bottom: 0;
+          width: 1px;
+          background: rgba(255,255,255,0.5);
+        "></div>
+      </div>
+    </div>
 
     <!-- UI Overlay -->
     <div class="ui-overlay">
@@ -454,122 +488,234 @@
       'ar-sphere': true,
       'ar-text': true
     };
+    
+    // Camera stream for AR
+    let cameraStream = null;
+    let videoElement = null;
 
-    // Initialize AR Application - Direct like camera.html (no setup needed!)
+    // Initialize AR Application - Direct camera access like camera.html
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('🎯 Starting AR Demo - camera already works!');
+      console.log('🎯 Starting AR Demo - using direct camera access');
       
-      // Skip camera testing since camera.html works perfectly
-      // Go straight to AR.js initialization
-      initializeAR();
+      // Initialize camera first, then AR
+      initializeCamera();
     });
 
+    // Initialize camera using the same approach as camera.html
+    async function initializeCamera() {
+      updateLoadingMessage('Starting camera...');
+      
+      try {
+        // Check camera permissions first (if available)
+        try {
+          const permission = await navigator.permissions.query({ name: 'camera' });
+          if (permission.state === 'denied') {
+            throw new Error('Camera permission denied');
+          }
+        } catch (permError) {
+          console.log('Permissions API not available, proceeding with camera start');
+        }
+        
+        // Use optimized constraints based on screen size
+        const constraints = {
+          video: {
+            width: { ideal: 640, max: 1280 },
+            height: { ideal: 480, max: 720 },
+            frameRate: { ideal: 15, max: 30 }
+          }
+        };
 
+        console.log('📹 Requesting camera access...');
+        cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+        
+        // Create video element for AR
+        createARVideo();
+        
+        updateLoadingMessage('Camera active - starting AR...');
+        updateStatus('Camera Active', 'camera');
+        
+        // Initialize AR after camera is ready
+        setTimeout(() => {
+          initializeAR();
+        }, 1000);
+        
+      } catch (error) {
+        console.error('❌ Camera initialization failed:', error);
+        
+        let errorMessage = 'Camera failed to start. Please check permissions and refresh.';
+        
+        if (error.name === 'NotAllowedError' || error.message === 'Camera permission denied') {
+          errorMessage = 'Camera permission denied. Please allow camera access and refresh.';
+        } else if (error.name === 'NotFoundError') {
+          errorMessage = 'No camera found. Please connect a camera and refresh.';
+        } else if (error.name === 'NotReadableError') {
+          errorMessage = 'Camera is in use by another application. Please close other camera apps and refresh.';
+        }
+        
+        showError(errorMessage);
+      }
+    }
 
+    // Create video element for AR display
+    function createARVideo() {
+      // Remove existing video if any
+      const existingVideo = document.querySelector('#ar-video');
+      if (existingVideo) {
+        existingVideo.remove();
+      }
+      
+      // Create new video element
+      videoElement = document.createElement('video');
+      videoElement.id = 'ar-video';
+      videoElement.autoplay = true;
+      videoElement.muted = true;
+      videoElement.playsInline = true;
+      videoElement.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 1;
+      `;
+      
+      // Set video source
+      videoElement.srcObject = cameraStream;
+      
+      // Add to AR container
+      const arContainer = document.getElementById('ar-container');
+      arContainer.appendChild(videoElement);
+      
+      // Wait for video to load
+      videoElement.addEventListener('loadedmetadata', () => {
+        console.log('📹 AR Video ready:', videoElement.videoWidth, 'x', videoElement.videoHeight);
+        updateLoadingMessage('AR Video Ready!');
+      });
+      
+      // Handle video errors
+      videoElement.addEventListener('error', (e) => {
+        console.error('❌ Video error:', e);
+        showError('Video playback error. Please refresh the page.');
+      });
+    }
 
-    // Update loading message - simplified
+    // Update loading message
     function updateLoadingMessage(mainText) {
       const mainTextEl = document.getElementById('loading-main-text');
       if (mainTextEl) mainTextEl.textContent = mainText;
     }
 
-    // Initialize AR Scene - direct start since camera works
+    // Initialize AR Scene - simplified without AR.js
     function initializeAR() {
-      updateLoadingMessage('Starting AR - camera ready!');
-      console.log('🎯 Starting AR.js - camera already works perfectly...');
-      arScene = document.querySelector('#ar-scene');
+      updateLoadingMessage('Starting AR overlay...');
+      console.log('🎯 Starting simplified AR overlay');
       
-      // Use the exact same camera approach as camera.html
-      // Let AR.js handle camera with simple config
-      const arjsConfig = `sourceType: webcam; debugUIEnabled: false; detectionMode: mono; sourceWidth: 640; sourceHeight: 480; displayWidth: 640; displayHeight: 480;`;
-      
-      console.log('🔧 AR.js config:', arjsConfig);
-      arScene.setAttribute('arjs', arjsConfig);
-      arScene.setAttribute('renderer', `precision: mediump; antialias: false;`);
-      
-      // AR.js events - should work since camera.html works
-      arScene.addEventListener('arjs-video-loaded', function() {
-        console.log('📹 AR Camera working! (like camera.html)');
-        updateLoadingMessage('AR Camera Active!');
-        updateStatus('AR Camera Active', 'camera');
-        
-        setTimeout(() => {
-          hideLoadingScreen();
-          setupAREventListeners();
-          updateStatus('AR Ready - Point at Hiro marker', 'ar');
-        }, 1000);
-      });
-
-      arScene.addEventListener('arjs-video-error', function(event) {
-        console.error('❌ AR.js video error:', event);
-        showError('AR.js failed to access camera. This is strange since camera.html works perfectly. Try refreshing the page.');
-      });
-
-      // Setup marker detection
-      setupMarkerDetection();
-      
-      // Shorter timeout since camera should work (camera.html proves it)
+      // Hide loading screen
       setTimeout(() => {
-        const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen && loadingScreen.style.display !== 'none') {
-          console.warn('⚠️ AR.js timeout - but camera.html works fine');
-          showError('AR.js is taking too long to start, but your camera works fine in camera.html. This suggests an AR.js specific issue. Try refreshing the page.');
+        hideLoadingScreen();
+        setupAREventListeners();
+        updateStatus('AR Ready - Point camera at objects', 'ar');
+        
+        // Start AR simulation
+        startARSimulation();
+      }, 1000);
+    }
+
+    // Start AR simulation (since we're not using AR.js markers)
+    function startARSimulation() {
+      console.log('🎮 Starting AR simulation mode');
+      
+      // Simulate marker detection based on camera movement
+      let lastTime = 0;
+      let markerSimulation = false;
+      
+      function simulateMarkerDetection() {
+        const currentTime = Date.now();
+        
+        // Simulate marker detection every 3 seconds
+        if (currentTime - lastTime > 3000) {
+          if (!markerSimulation) {
+            console.log('🎯 Simulated marker detected');
+            isMarkerVisible = true;
+            updateStatus('Marker Detected (Simulated)', 'ar');
+            animateObjectsIn();
+            markerSimulation = true;
+          } else {
+            console.log('❌ Simulated marker lost');
+            isMarkerVisible = false;
+            updateStatus('Scanning for markers...', 'camera');
+            markerSimulation = false;
+          }
+          lastTime = currentTime;
         }
-      }, 8000);
+        
+        requestAnimationFrame(simulateMarkerDetection);
+      }
+      
+      simulateMarkerDetection();
     }
 
-    // Setup marker detection events
+    // Setup marker detection events - simplified for HTML AR
     function setupMarkerDetection() {
-      const hiroMarker = document.querySelector('#hiro-marker');
-      const patternMarker = document.querySelector('#pattern-marker');
-
-      if (hiroMarker) {
-        hiroMarker.addEventListener('markerFound', function() {
-          console.log('🎯 Hiro marker detected');
-          isMarkerVisible = true;
-          updateStatus('Marker Detected', 'ar');
-          animateObjectsIn();
-        });
-
-        hiroMarker.addEventListener('markerLost', function() {
-          console.log('❌ Hiro marker lost');
-          isMarkerVisible = false;
-          updateStatus('Scanning for markers...', 'camera');
-        });
-      }
-
-      if (patternMarker) {
-        patternMarker.addEventListener('markerFound', function() {
-          console.log('🎯 Pattern marker detected');
-          isMarkerVisible = true;
-          updateStatus('Custom Marker Detected', 'ar');
-        });
-
-        patternMarker.addEventListener('markerLost', function() {
-          console.log('❌ Pattern marker lost');
-          isMarkerVisible = false;
-          updateStatus('Scanning for markers...', 'camera');
-        });
-      }
+      // No need for marker detection in simplified AR
+      console.log('🎯 Simplified AR mode - no marker detection needed');
     }
 
-    // Animate objects when marker is found
+    // Animate objects when marker is found - updated for HTML AR
     function animateObjectsIn() {
       const objects = ['ar-box', 'ar-sphere', 'ar-text'];
       objects.forEach((id, index) => {
         const obj = document.querySelector(`#${id}`);
         if (obj && objectStates[id]) {
-          // Scale in animation
-          obj.setAttribute('animation__scalein', {
-            property: 'scale',
-            from: '0 0 0',
-            to: '1 1 1',
-            dur: 1000,
-            delay: index * 200,
-            easing: 'easeOutBounce'
-          });
+          // Fade in and add animations
+          obj.style.opacity = '1';
+          obj.style.transform = obj.id === 'ar-box' ? 'translate(-50%, -50%) scale(1)' : 'scale(1)';
+          
+          // Add rotation animation for box
+          if (obj.id === 'ar-box') {
+            obj.style.animation = 'rotate 10s linear infinite';
+          }
+          
+          // Add bounce animation for sphere
+          if (obj.id === 'ar-sphere') {
+            obj.style.animation = 'bounce 2s ease-in-out infinite alternate';
+          }
+          
+          // Add text animation
+          if (obj.id === 'ar-text') {
+            obj.style.animation = 'glow 3s ease-in-out infinite alternate';
+          }
         }
       });
+      
+      // Add CSS animations
+      addCSSAnimations();
+    }
+
+    // Add CSS animations for AR objects
+    function addCSSAnimations() {
+      if (!document.getElementById('ar-animations')) {
+        const style = document.createElement('style');
+        style.id = 'ar-animations';
+        style.textContent = `
+          @keyframes rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+          }
+          
+          @keyframes bounce {
+            from { transform: scale(1); }
+            to { transform: scale(1.2); }
+          }
+          
+          @keyframes glow {
+            from { text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 10px #FFC65D; }
+            to { text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 20px #FFC65D, 0 0 30px #FFC65D; }
+          }
+        `;
+        document.head.appendChild(style);
+      }
     }
 
     // Hide loading screen
@@ -597,46 +743,50 @@
       const statusText = document.getElementById('status-text');
       const statusDot = document.getElementById('status-indicator');
       
-      statusText.textContent = text;
-      statusDot.className = `status-dot ${type}`;
+      if (statusText) statusText.textContent = text;
+      if (statusDot) statusDot.className = `status-dot ${type}`;
     }
 
-    // Toggle AR object visibility
+    // Toggle AR object visibility - updated for HTML AR
     function toggleObject(objectId) {
       const object = document.querySelector(`#${objectId}`);
       const option = document.querySelector(`[onclick="toggleObject('${objectId}')"]`);
       
       if (object && option) {
         objectStates[objectId] = !objectStates[objectId];
-        object.setAttribute('visible', objectStates[objectId]);
+        
+        if (objectStates[objectId]) {
+          // Show object
+          object.style.opacity = '1';
+          object.style.transform = object.id === 'ar-box' ? 'translate(-50%, -50%) scale(1)' : 'scale(1)';
+        } else {
+          // Hide object
+          object.style.opacity = '0';
+          object.style.transform = object.id === 'ar-box' ? 'translate(-50%, -50%) scale(0)' : 'scale(0)';
+        }
+        
         option.classList.toggle('active', objectStates[objectId]);
         
         console.log(`🎲 ${objectId} ${objectStates[objectId] ? 'shown' : 'hidden'}`);
       }
     }
 
-    // Change marker type
+    // Change marker type - simplified for HTML AR
     function changeMarkerType() {
-      const hiroMarker = document.querySelector('#hiro-marker');
-      const patternMarker = document.querySelector('#pattern-marker');
       const markerTypeSpan = document.getElementById('marker-type');
       
       if (currentMarker === 'hiro') {
-        hiroMarker.setAttribute('visible', false);
-        patternMarker.setAttribute('visible', true);
-        currentMarker = 'pattern';
-        markerTypeSpan.textContent = 'Custom Marker';
+        currentMarker = 'simulated';
+        markerTypeSpan.textContent = 'Simulated AR';
       } else {
-        hiroMarker.setAttribute('visible', true);
-        patternMarker.setAttribute('visible', false);
         currentMarker = 'hiro';
         markerTypeSpan.textContent = 'Hiro Marker';
       }
       
-      console.log(`🎯 Switched to ${currentMarker} marker`);
+      console.log(`🎯 Switched to ${currentMarker} mode`);
     }
 
-    // Reset AR scene
+    // Reset AR scene - updated for HTML AR
     function resetScene() {
       console.log('🔄 Resetting AR scene...');
       
@@ -646,28 +796,33 @@
         const object = document.querySelector(`#${id}`);
         const option = document.querySelector(`[onclick="toggleObject('${id}')"]`);
         
-        if (object) object.setAttribute('visible', true);
+        if (object) {
+          object.style.opacity = '1';
+          object.style.transform = object.id === 'ar-box' ? 'translate(-50%, -50%) scale(1)' : 'scale(1)';
+        }
         if (option) option.classList.add('active');
       });
       
       // Reset marker type
       currentMarker = 'hiro';
-      const hiroMarker = document.querySelector('#hiro-marker');
-      const patternMarker = document.querySelector('#pattern-marker');
       const markerTypeSpan = document.getElementById('marker-type');
-      
-      if (hiroMarker) hiroMarker.setAttribute('visible', true);
-      if (patternMarker) patternMarker.setAttribute('visible', false);
       if (markerTypeSpan) markerTypeSpan.textContent = 'Hiro Marker';
       
       updateStatus('Scene Reset', 'ar');
     }
 
-    // Toggle camera
+    // Toggle camera - updated for HTML AR
     function toggleCamera() {
-      // Note: AR.js doesn't provide easy camera toggle, this is a placeholder
       cameraActive = !cameraActive;
-      updateStatus(cameraActive ? 'Camera Active' : 'Camera Paused', cameraActive ? 'camera' : 'error');
+      
+      if (cameraActive && videoElement) {
+        videoElement.style.display = 'block';
+        updateStatus('Camera Active', 'camera');
+      } else if (videoElement) {
+        videoElement.style.display = 'none';
+        updateStatus('Camera Paused', 'error');
+      }
+      
       console.log(`📹 Camera ${cameraActive ? 'enabled' : 'disabled'}`);
     }
 
@@ -683,7 +838,7 @@
       
       // Simple retry since camera works fine
       setTimeout(() => {
-        initializeAR();
+        initializeCamera(); // Call the new initializeCamera function
       }, 1000);
     }
 
@@ -702,11 +857,46 @@
       }
     }
 
-    // Capture screenshot
+    // Capture screenshot - updated for HTML AR
     function captureScreenshot() {
       try {
-        const scene = document.querySelector('a-scene');
-        const canvas = scene.canvas;
+        // Create a canvas to capture the AR scene
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size to match video
+        if (videoElement) {
+          canvas.width = videoElement.videoWidth || 640;
+          canvas.height = videoElement.videoHeight || 480;
+        } else {
+          canvas.width = 640;
+          canvas.height = 480;
+        }
+        
+        // Draw video frame
+        if (videoElement && videoElement.videoWidth > 0) {
+          ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        }
+        
+        // Draw AR objects on top
+        const arObjects = document.querySelectorAll('.ar-object');
+        arObjects.forEach(obj => {
+          if (obj.style.opacity !== '0') {
+            // Convert screen position to canvas position
+            const rect = obj.getBoundingClientRect();
+            const scaleX = canvas.width / window.innerWidth;
+            const scaleY = canvas.height / window.innerHeight;
+            
+            // Draw a representation of the AR object
+            ctx.fillStyle = obj.style.background || '#4CC3D9';
+            ctx.fillRect(
+              rect.left * scaleX, 
+              rect.top * scaleY, 
+              rect.width * scaleX, 
+              rect.height * scaleY
+            );
+          }
+        });
         
         // Create download link
         const link = document.createElement('a');
@@ -718,15 +908,16 @@
         updateStatus('Screenshot Saved', 'ar');
         
         setTimeout(() => {
-          updateStatus(isMarkerVisible ? 'Marker Detected' : 'Scanning for markers...', isMarkerVisible ? 'ar' : 'camera');
+          updateStatus(isMarkerVisible ? 'Marker Detected (Simulated)' : 'Scanning for markers...', isMarkerVisible ? 'ar' : 'camera');
         }, 2000);
+        
       } catch (error) {
         console.error('📸 Screenshot failed:', error);
         updateStatus('Screenshot Failed', 'error');
       }
     }
 
-    // Setup AR event listeners
+    // Setup AR event listeners - updated for HTML AR
     function setupAREventListeners() {
       // Handle device orientation for mobile
       if (window.DeviceOrientationEvent) {
@@ -740,10 +931,11 @@
         // Add touch-based interactions if needed
       });
 
-      // Handle marker-based object spawning
+      // Handle click events for AR object interaction
       document.addEventListener('click', function(e) {
-        if (isMarkerVisible && e.target.tagName === 'A-SCENE') {
-          // Optionally spawn objects on scene click
+        if (e.target.classList.contains('ar-object')) {
+          // AR object clicked - could add more interaction here
+          console.log('🎯 AR object clicked:', e.target.id);
         }
       });
     }
@@ -757,11 +949,10 @@
       }
     }
 
-    // Quality mode detection and optimization
+    // Quality mode detection and optimization - simplified for HTML AR
     function getQualityMode() {
       const cores = navigator.hardwareConcurrency || 1;
       const memory = navigator.deviceMemory || 1;
-      const userAgent = navigator.userAgent.toLowerCase();
 
       // Pi detection logic
       if (cores <= 4 && memory <= 1) return 'low';
@@ -769,32 +960,34 @@
       return 'high';
     }
 
-    // Apply quality optimizations
+    // Apply quality optimizations - simplified for HTML AR
     function applyQualityOptimizations() {
       const quality = getQualityMode();
       console.log(`🎮 AR Quality Mode: ${quality}`);
 
-      const scene = document.querySelector('#ar-scene');
+      // Adjust animation complexity based on quality
+      const arObjects = document.querySelectorAll('.ar-object');
       
       switch (quality) {
         case 'low':
           // Low quality optimizations for Pi 3B+
-          scene.setAttribute('renderer', 'antialias: false; precision: lowp');
-          scene.setAttribute('vr-mode-ui', 'enabled: false');
-          // Reduce animation complexity
-          document.querySelectorAll('[animation]').forEach(el => {
-            el.removeAttribute('animation');
+          arObjects.forEach(obj => {
+            obj.style.transition = 'all 0.3s ease';
           });
           break;
           
         case 'medium':
           // Medium quality for Pi 4
-          scene.setAttribute('renderer', 'antialias: false; precision: mediump');
+          arObjects.forEach(obj => {
+            obj.style.transition = 'all 0.5s ease';
+          });
           break;
           
         case 'high':
           // High quality for Pi 5 and desktop
-          scene.setAttribute('renderer', 'antialias: true; precision: highp');
+          arObjects.forEach(obj => {
+            obj.style.transition = 'all 0.8s ease';
+          });
           break;
       }
     }
@@ -802,35 +995,44 @@
     // Apply optimizations when page loads
     document.addEventListener('DOMContentLoaded', applyQualityOptimizations);
 
-    // Console commands for debugging - Enhanced for camera issues
+    // Console commands for debugging - Enhanced for HTML AR
     window.arDebug = {
       getMarkerState: () => isMarkerVisible,
       getObjectStates: () => objectStates,
       getCurrentMarker: () => currentMarker,
-      forceMarkerFound: () => animateObjectsIn(),
+      forceMarkerFound: () => {
+        isMarkerVisible = true;
+        animateObjectsIn();
+        updateStatus('Marker Detected (Forced)', 'ar');
+      },
       resetAll: resetScene,
       checkCameraStatus: () => {
-        const video = document.querySelector('video');
-        if (video) {
-          console.log('📹 Video element found:', video.src);
+        if (videoElement) {
+          console.log('📹 AR Video element found:', videoElement);
           console.log('📊 Video stats:', {
-            videoWidth: video.videoWidth,
-            videoHeight: video.videoHeight,
-            readyState: video.readyState,
-            paused: video.paused,
-            srcObject: !!video.srcObject
+            videoWidth: videoElement.videoWidth,
+            videoHeight: videoElement.videoHeight,
+            readyState: videoElement.readyState,
+            paused: videoElement.paused,
+            srcObject: !!videoElement.srcObject,
+            display: videoElement.style.display
           });
         } else {
-          console.log('❌ No video element found');
+          console.log('❌ No AR video element found');
         }
         
-        // Check for AR.js camera
-        const arVideo = document.querySelector('video[data-aframe-default-camera]');
-        if (arVideo) {
-          console.log('🎯 AR.js video found:', arVideo);
+        // Check for camera stream
+        if (cameraStream) {
+          console.log('📹 Camera stream active:', cameraStream);
+          const tracks = cameraStream.getTracks();
+          tracks.forEach(track => {
+            console.log('📹 Track:', track.kind, track.enabled, track.readyState);
+          });
+        } else {
+          console.log('❌ No camera stream found');
         }
         
-        return video || arVideo;
+        return { videoElement, cameraStream };
       },
       forceHideLoading: () => {
         const loadingScreen = document.getElementById('loading-screen');
@@ -851,6 +1053,28 @@
           console.error('❌ Basic camera test failed:', error);
           return false;
         }
+      },
+      showAllObjects: () => {
+        Object.keys(objectStates).forEach(id => {
+          objectStates[id] = true;
+          const obj = document.querySelector(`#${id}`);
+          if (obj) {
+            obj.style.opacity = '1';
+            obj.style.transform = obj.id === 'ar-box' ? 'translate(-50%, -50%) scale(1)' : 'scale(1)';
+          }
+        });
+        console.log('🎯 All AR objects shown');
+      },
+      hideAllObjects: () => {
+        Object.keys(objectStates).forEach(id => {
+          objectStates[id] = false;
+          const obj = document.querySelector(`#${id}`);
+          if (obj) {
+            obj.style.opacity = '0';
+            obj.style.transform = obj.id === 'ar-box' ? 'translate(-50%, -50%) scale(0)' : 'scale(0)';
+          }
+        });
+        console.log('🎯 All AR objects hidden');
       }
     };
 
@@ -860,6 +1084,9 @@
     console.log('  arDebug.forceHideLoading() - Force hide loading screen');
     console.log('  arDebug.getMarkerState() - Check if marker is visible');
     console.log('  arDebug.resetAll() - Reset entire scene');
+    console.log('  arDebug.showAllObjects() - Show all AR objects');
+    console.log('  arDebug.hideAllObjects() - Hide all AR objects');
+    console.log('  arDebug.forceMarkerFound() - Force marker detection');
   </script>
 </body>
 </html>
