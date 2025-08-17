@@ -14,31 +14,13 @@
     </header>
   
     <main class="grid">
-      <!-- Card 1: Progress + ETA -->
-      <section class="card progress-card" aria-label="Job status">
-         <div class="mesh-container">
-           <div class="gear" id="rotating-mesh">
-             <!-- Gear rims (front/back) -->
-             <div class="rim front"></div>
-             <div class="rim back"></div>
-             <!-- Gear hub (hole) -->
-             <div class="hub front"></div>
-             <div class="hub back"></div>
-             <!-- Teeth (front/back for simple thickness) -->
-             <div class="tooth front t0"></div><div class="tooth back t0"></div>
-             <div class="tooth front t1"></div><div class="tooth back t1"></div>
-             <div class="tooth front t2"></div><div class="tooth back t2"></div>
-             <div class="tooth front t3"></div><div class="tooth back t3"></div>
-             <div class="tooth front t4"></div><div class="tooth back t4"></div>
-             <div class="tooth front t5"></div><div class="tooth back t5"></div>
-             <div class="tooth front t6"></div><div class="tooth back t6"></div>
-             <div class="tooth front t7"></div><div class="tooth back t7"></div>
-             <div class="tooth front t8"></div><div class="tooth back t8"></div>
-             <div class="tooth front t9"></div><div class="tooth back t9"></div>
-             <div class="tooth front t10"></div><div class="tooth back t10"></div>
-             <div class="tooth front t11"></div><div class="tooth back t11"></div>
-           </div>
-         </div>
+             <!-- Card 1: Progress + ETA -->
+       <section class="card progress-card" aria-label="Job status">
+          <div class="video-container">
+            <video id="progress-video" autoplay muted loop playsinline>
+              <source src="../assets/video.mp4" type="video/mp4">
+            </video>
+          </div>
         <div class="progress-text">
           <div class="job-name" id="job-name">No job</div>
           <div class="progress-slider">
@@ -52,24 +34,74 @@
         </div>
       </section>
   
-      <!-- Card 2: Temps -->
-      <section class="card temps-card" aria-label="Temperatures">
-        <div class="temp">
-          <div class="label">Nozzle</div>
-          <div class="bar"><div class="fill" id="nozzle-fill"></div></div>
-          <div class="vals"><span id="nozzle-actual">0</span>/<span id="nozzle-target">0</span> °C</div>
-        </div>
-        <div class="temp">
-          <div class="label">Bed</div>
-          <div class="bar"><div class="fill" id="bed-fill"></div></div>
-          <div class="vals"><span id="bed-actual">0</span>/<span id="bed-target">0</span> °C</div>
-        </div>
-        <div class="speed">
-          <label for="speed" class="label">Speed</label>
-          <input id="speed" type="range" min="50" max="150" value="100" step="5" />
-          <span class="speed-val" id="speed-val">100%</span>
-        </div>
-      </section>
+             <!-- Card 2: Temps -->
+       <section class="card temps-card" aria-label="Temperatures">
+         <div class="temp-container">
+           <div class="temp nozzle-temp">
+             <div class="temp-header">
+               <div class="temp-icon">🔥</div>
+               <div class="temp-label">Nozzle</div>
+               <div class="temp-status" id="nozzle-status">Cold</div>
+             </div>
+             <div class="temp-visual">
+               <div class="temp-circle">
+                 <svg class="temp-progress" viewBox="0 0 120 120">
+                   <circle class="temp-bg" cx="60" cy="60" r="50"></circle>
+                   <circle class="temp-fill" id="nozzle-circle" cx="60" cy="60" r="50"></circle>
+                 </svg>
+                 <div class="temp-center">
+                   <div class="temp-actual" id="nozzle-actual">0</div>
+                   <div class="temp-unit">°C</div>
+                 </div>
+               </div>
+               <div class="temp-target">Target: <span id="nozzle-target">0</span>°C</div>
+             </div>
+           </div>
+           
+           <div class="temp bed-temp">
+             <div class="temp-header">
+               <div class="temp-icon">🛏️</div>
+               <div class="temp-label">Bed</div>
+               <div class="temp-status" id="bed-status">Cold</div>
+             </div>
+             <div class="temp-visual">
+               <div class="temp-circle">
+                 <svg class="temp-progress" viewBox="0 0 120 120">
+                   <circle class="temp-bg" cx="60" cy="60" r="50"></circle>
+                   <circle class="temp-fill" id="bed-circle" cx="60" cy="60" r="50"></circle>
+                 </svg>
+                 <div class="temp-center">
+                   <div class="temp-actual" id="bed-actual">0</div>
+                   <div class="temp-unit">°C</div>
+                 </div>
+               </div>
+               <div class="temp-target">Target: <span id="bed-target">0</span>°C</div>
+             </div>
+           </div>
+         </div>
+         
+         <div class="speed-container">
+           <div class="speed-header">
+             <div class="speed-icon">⚡</div>
+             <div class="speed-label">Speed</div>
+             <div class="speed-display" id="speed-display">100%</div>
+           </div>
+           <div class="speed-control">
+             <div class="speed-slider-container">
+               <input id="speed" type="range" min="50" max="150" value="100" step="5" />
+               <div class="speed-track">
+                 <div class="speed-fill" id="speed-fill"></div>
+                 <div class="speed-knob" id="speed-knob"></div>
+               </div>
+             </div>
+             <div class="speed-markers">
+               <span class="marker">50%</span>
+               <span class="marker">100%</span>
+               <span class="marker">150%</span>
+             </div>
+           </div>
+         </div>
+       </section>
   
       <!-- Card 3: Camera -->
       <section class="card cam-card" aria-label="Camera">
@@ -136,97 +168,43 @@
       display: flex;
       flex-direction: column;
     }
-         /* Progress */
-     #screen-printer .progress-card { display:flex; align-items:center; justify-content:space-between; gap:20px; padding: 8px; }
+                   /* Progress */
+      #screen-printer .progress-card { 
+        display:flex; 
+        flex-direction: column;
+        gap:16px; 
+        padding: 16px; 
+        height: 100%;
+      }
     
-    /* 3D Mesh (gear) */
-    #screen-printer .mesh-container { 
-      width: min(120px, 25%); 
-      height: min(120px, 25%);
-      perspective: 400px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+                   /* Video Container */
+      #screen-printer .video-container { 
+        width: 70%; 
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #0f111a;
+        min-height: 200px;
+        margin: 0 auto;
+      }
+     
+     #screen-printer .video-container video {
+       width: 100%;
+       height: 100%;
+       object-fit: cover;
+       border-radius: 8px;
+     }
     
-    /* Gear object */
-    #screen-printer .gear { 
-      width: 80px; 
-      height: 80px; 
-      position: relative;
-      transform-style: preserve-3d;
-      transform-origin: 50% 50%;
-      will-change: transform;
-      animation: rotateXClockwise 16s linear infinite;
-    }
-    #screen-printer .gear .rim, 
-    #screen-printer .gear .hub, 
-    #screen-printer .gear .tooth { position: absolute; }
-    
-    /* Rims (front/back) */
-    #screen-printer .gear .rim {
-      width: 70px; height: 70px; border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #5a9eff, #2b60ff);
-      border: 2px solid #1c2030;
-      opacity: 0.9;
-    }
-    #screen-printer .gear .rim.front { transform: translateZ(8px); }
-    #screen-printer .gear .rim.back { transform: translateZ(-8px); }
-    
-    /* Hub hole (to fake a cutout) */
-    #screen-printer .gear .hub {
-      width: 24px; height: 24px; border-radius: 50%;
-      background: #0b0c10;
-      border: 2px solid #1c2030;
-      left: 50%; top: 50%; transform: translate(-50%, -50%) translateZ(9px);
-    }
-    #screen-printer .gear .hub.back { transform: translate(-50%, -50%) translateZ(-9px); }
-    
-    /* Teeth - 12 around the rim (front/back plates to give thickness) */
-    #screen-printer .gear .tooth {
-      width: 12px; height: 22px; border-radius: 2px;
-      background: linear-gradient(45deg, #6aaeff, #3b70ff);
-      border: 1px solid #1c2030;
-      left: 50%; top: 50%;
-      transform-origin: 50% 38px; /* pivot around gear center */
-      opacity: 0.95;
-    }
-    #screen-printer .gear .tooth.front { transform: translate(-50%, -50%) translateZ(10px); }
-    #screen-printer .gear .tooth.back { transform: translate(-50%, -50%) translateZ(-10px); }
-    
-    /* Position each tooth by rotation */
-    #screen-printer .gear .tooth.t0.front { transform: translate(-50%, -50%) translateZ(10px) rotate(0deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t0.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(0deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t1.front { transform: translate(-50%, -50%) translateZ(10px) rotate(30deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t1.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(30deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t2.front { transform: translate(-50%, -50%) translateZ(10px) rotate(60deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t2.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(60deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t3.front { transform: translate(-50%, -50%) translateZ(10px) rotate(90deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t3.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(90deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t4.front { transform: translate(-50%, -50%) translateZ(10px) rotate(120deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t4.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(120deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t5.front { transform: translate(-50%, -50%) translateZ(10px) rotate(150deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t5.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(150deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t6.front { transform: translate(-50%, -50%) translateZ(10px) rotate(180deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t6.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(180deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t7.front { transform: translate(-50%, -50%) translateZ(10px) rotate(210deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t7.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(210deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t8.front { transform: translate(-50%, -50%) translateZ(10px) rotate(240deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t8.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(240deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t9.front { transform: translate(-50%, -50%) translateZ(10px) rotate(270deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t9.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(270deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t10.front { transform: translate(-50%, -50%) translateZ(10px) rotate(300deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t10.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(300deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t11.front { transform: translate(-50%, -50%) translateZ(10px) rotate(330deg) translateY(-38px); }
-    #screen-printer .gear .tooth.t11.back  { transform: translate(-50%, -50%) translateZ(-10px) rotate(330deg) translateY(-38px); }
-    
-    @keyframes rotateXClockwise {
-      from { transform: rotateX(0deg); }
-      to { transform: rotateX(-360deg); }
-    }
-    
-         /* Progress Slider */
-     #screen-printer .progress-text { display:flex; flex-direction:column; gap:8px; min-width:160px; flex: 1; }
+                   /* Progress Slider */
+      #screen-printer .progress-text { 
+        display:flex; 
+        flex-direction:column; 
+        gap:12px; 
+        width: 100%;
+      }
     #screen-printer .progress-slider { 
       display: flex; 
       align-items: center; 
@@ -240,20 +218,20 @@
       border-radius: 4px; 
       overflow: hidden; 
     }
-    #screen-printer .progress-fill { 
-      height: 100%; 
-      width: 0%; 
-      background: linear-gradient(90deg, #4f8cff, #2b60ff);
-      border-radius: 4px;
-      transition: width 150ms linear;
-    }
-    #screen-printer .progress-percent { 
-      font-size: clamp(12px, 2vmin, 16px); 
-      color: #4f8cff; 
-      font-weight: bold;
-      min-width: 32px;
-      text-align: right;
-    }
+         #screen-printer .progress-fill { 
+       height: 100%; 
+       width: 0%; 
+       background: linear-gradient(90deg, #4ade80, #22c55e);
+       border-radius: 4px;
+       transition: width 150ms linear;
+     }
+         #screen-printer .progress-percent { 
+       font-size: clamp(12px, 2vmin, 16px); 
+       color: #4ade80; 
+       font-weight: bold;
+       min-width: 32px;
+       text-align: right;
+     }
          #screen-printer .job-name { 
        font-size: clamp(13px, 2.2vmin, 16px); 
        white-space:nowrap; 
@@ -265,57 +243,376 @@
       font-size: clamp(12px, 2vmin, 16px); 
       color:#aab2c5; 
     }
-    /* Temps */
-    #screen-printer .temps-card { 
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 0;
-    }
-    #screen-printer .temps-card .temp { 
-      margin-bottom: clamp(8px, 2vh, 16px); 
-    }
-    #screen-printer .temps-card .label { 
-      font-size: clamp(12px, 2vmin, 16px); 
-      color:#aab2c5; 
-      margin-bottom:4px; 
-    }
-    #screen-printer .temps-card .bar { 
-      width:100%; 
-      height: clamp(12px, 2vh, 20px); 
-      background:#22263a; 
-      border-radius:8px; 
-      overflow:hidden; 
-    }
-    #screen-printer .temps-card .fill { 
-      height:100%; 
-      width:0%; 
-      background: linear-gradient(90deg, #4a90e2, #ff6b6b);
-      transition: width 150ms linear; 
-    }
-    #screen-printer .temps-card .vals { 
-      font-size: clamp(12px, 2vmin, 16px); 
-      color:#cfd6e6; 
-      margin-top:4px; 
-    }
-    #screen-printer .speed { 
-      display:flex; 
-      align-items:center; 
-      gap:10px; 
-      margin-top: auto;
-      padding-top: clamp(8px, 2vh, 16px);
-    }
-    #screen-printer .speed input[type="range"] { 
-      flex:1; 
-      height: clamp(12px, 1.5vh, 20px);
-      min-width: 0;
-    }
-    #screen-printer .speed .speed-val { 
-      width:48px; 
-      text-align:right; 
-      font-size: clamp(12px, 2vmin, 16px); 
-      color:#cfd6e6; 
-    }
+         /* Enhanced Temps */
+     #screen-printer .temps-card { 
+       display: flex;
+       flex-direction: column;
+       gap: 20px;
+       min-height: 0;
+     }
+     
+     #screen-printer .temp-container {
+       display: flex;
+       gap: 16px;
+       flex: 1;
+     }
+     
+     #screen-printer .temp {
+       flex: 1;
+       background: rgba(255,255,255,0.02);
+       border-radius: 12px;
+       padding: 16px;
+       border: 1px solid rgba(255,255,255,0.05);
+       transition: all 0.3s ease;
+       position: relative;
+       overflow: hidden;
+     }
+     
+     #screen-printer .temp::before {
+       content: '';
+       position: absolute;
+       top: 0;
+       left: 0;
+       right: 0;
+       height: 2px;
+       background: linear-gradient(90deg, #22c55e, #4ade80);
+       transform: scaleX(0);
+       transition: transform 0.3s ease;
+     }
+     
+     #screen-printer .temp.heating::before {
+       transform: scaleX(1);
+     }
+     
+     #screen-printer .temp-header {
+       display: flex;
+       align-items: center;
+       gap: 8px;
+       margin-bottom: 12px;
+     }
+     
+     #screen-printer .temp-icon {
+       font-size: 18px;
+       animation: pulse 2s infinite;
+     }
+     
+     #screen-printer .temp.heating .temp-icon {
+       animation: heat-pulse 1s infinite;
+     }
+     
+     #screen-printer .temp-label {
+       font-size: 14px;
+       font-weight: 600;
+       color: #e4e6f1;
+       flex: 1;
+     }
+     
+     #screen-printer .temp-status {
+       font-size: 11px;
+       padding: 2px 8px;
+       border-radius: 12px;
+       background: rgba(255,255,255,0.1);
+       color: #aab2c5;
+       transition: all 0.3s ease;
+     }
+     
+     #screen-printer .temp.heating .temp-status {
+       background: #22c55e;
+       color: white;
+       animation: status-glow 2s infinite;
+     }
+     
+     #screen-printer .temp-visual {
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       gap: 8px;
+     }
+     
+     #screen-printer .temp-circle {
+       position: relative;
+       width: 80px;
+       height: 80px;
+     }
+     
+     #screen-printer .temp-progress {
+       width: 100%;
+       height: 100%;
+       transform: rotate(-90deg);
+     }
+     
+     #screen-printer .temp-bg {
+       fill: none;
+       stroke: rgba(255,255,255,0.1);
+       stroke-width: 8;
+     }
+     
+     #screen-printer .temp-fill {
+       fill: none;
+       stroke: #22c55e;
+       stroke-width: 8;
+       stroke-linecap: round;
+       stroke-dasharray: 314;
+       stroke-dashoffset: 314;
+       transition: all 0.5s ease;
+       filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.5));
+     }
+     
+     #screen-printer .temp.heating .temp-fill {
+       stroke: #ff6b6b;
+       filter: drop-shadow(0 0 12px rgba(255, 107, 107, 0.6));
+       animation: heat-glow 2s infinite;
+     }
+     
+     #screen-printer .temp-center {
+       position: absolute;
+       top: 50%;
+       left: 50%;
+       transform: translate(-50%, -50%);
+       text-align: center;
+     }
+     
+     #screen-printer .temp-actual {
+       font-size: 18px;
+       font-weight: bold;
+       color: #e4e6f1;
+       line-height: 1;
+     }
+     
+     #screen-printer .temp-unit {
+       font-size: 10px;
+       color: #aab2c5;
+       margin-top: 2px;
+     }
+     
+     #screen-printer .temp-target {
+       font-size: 11px;
+       color: #aab2c5;
+       text-align: center;
+     }
+     
+     /* Enhanced Speed */
+     #screen-printer .speed-container {
+       background: rgba(255,255,255,0.02);
+       border-radius: 12px;
+       padding: 16px;
+       border: 1px solid rgba(255,255,255,0.05);
+       position: relative;
+       overflow: hidden;
+     }
+     
+     #screen-printer .speed-container::before {
+       content: '🎛️';
+       position: absolute;
+       top: 8px;
+       right: 8px;
+       font-size: 16px;
+       opacity: 0.6;
+       animation: control-bounce 2s infinite;
+     }
+     
+     #screen-printer .speed-header {
+       display: flex;
+       align-items: center;
+       gap: 8px;
+       margin-bottom: 12px;
+     }
+     
+     #screen-printer .speed-icon {
+       font-size: 18px;
+       animation: speed-pulse 1.5s infinite;
+     }
+     
+     #screen-printer .speed-label {
+       font-size: 14px;
+       font-weight: 600;
+       color: #e4e6f1;
+       flex: 1;
+     }
+     
+     #screen-printer .speed-display {
+       font-size: 16px;
+       font-weight: bold;
+       color: #22c55e;
+       padding: 4px 8px;
+       background: rgba(34, 197, 94, 0.1);
+       border-radius: 8px;
+       min-width: 50px;
+       text-align: center;
+       transition: all 0.3s ease;
+     }
+     
+     #screen-printer .speed-control {
+       display: flex;
+       flex-direction: column;
+       gap: 8px;
+     }
+     
+     #screen-printer .speed-slider-container {
+       position: relative;
+       height: 60px;
+       display: flex;
+       align-items: center;
+       padding: 10px 0;
+     }
+     
+     #screen-printer .speed-slider-container input[type="range"] {
+       position: absolute;
+       width: 100%;
+       height: 100%;
+       opacity: 0;
+       cursor: pointer;
+       z-index: 2;
+     }
+     
+     #screen-printer .speed-track {
+       width: 100%;
+       height: 12px;
+       background: rgba(255,255,255,0.1);
+       border-radius: 6px;
+       position: relative;
+       overflow: visible;
+       box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+     }
+     
+     #screen-printer .speed-fill {
+       height: 100%;
+       width: 0%;
+       background: linear-gradient(90deg, #22c55e, #4ade80);
+       border-radius: 6px;
+       transition: width 0.3s ease;
+       position: relative;
+       box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
+     }
+     
+     #screen-printer .speed-knob {
+       position: absolute;
+       width: 32px;
+       height: 32px;
+       background: linear-gradient(135deg, #22c55e, #4ade80);
+       border-radius: 50%;
+       top: 50%;
+       transform: translate(-50%, -50%);
+       cursor: grab;
+       z-index: 3;
+       box-shadow: 
+         0 4px 12px rgba(0,0,0,0.3),
+         0 0 0 4px rgba(34, 197, 94, 0.2),
+         inset 0 2px 4px rgba(255,255,255,0.3);
+       transition: all 0.2s ease;
+       border: 2px solid rgba(255,255,255,0.8);
+     }
+     
+     #screen-printer .speed-knob:hover {
+       transform: translate(-50%, -50%) scale(1.1);
+       box-shadow: 
+         0 6px 16px rgba(0,0,0,0.4),
+         0 0 0 6px rgba(34, 197, 94, 0.3),
+         inset 0 2px 4px rgba(255,255,255,0.3);
+     }
+     
+     #screen-printer .speed-knob:active {
+       cursor: grabbing;
+       transform: translate(-50%, -50%) scale(1.05);
+     }
+     
+     #screen-printer .speed-knob::before {
+       content: '';
+       position: absolute;
+       top: 50%;
+       left: 50%;
+       transform: translate(-50%, -50%);
+       width: 8px;
+       height: 8px;
+       background: rgba(255,255,255,0.9);
+       border-radius: 50%;
+       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+     }
+     
+     #screen-printer .speed-fill::after {
+       content: '';
+       position: absolute;
+       top: 0;
+       left: 0;
+       right: 0;
+       bottom: 0;
+       background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+       animation: speed-shine 2s infinite;
+     }
+     
+     #screen-printer .speed-markers {
+       display: flex;
+       justify-content: space-between;
+       font-size: 10px;
+       color: #aab2c5;
+     }
+     
+     #screen-printer .marker {
+       opacity: 0.6;
+       transition: opacity 0.3s ease;
+     }
+     
+     #screen-printer .marker.active {
+       opacity: 1;
+       color: #22c55e;
+     }
+     
+     /* Animations */
+     @keyframes pulse {
+       0%, 100% { transform: scale(1); }
+       50% { transform: scale(1.1); }
+     }
+     
+     @keyframes heat-pulse {
+       0%, 100% { transform: scale(1); filter: brightness(1); }
+       50% { transform: scale(1.2); filter: brightness(1.3); }
+     }
+     
+     @keyframes status-glow {
+       0%, 100% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.5); }
+       50% { box-shadow: 0 0 15px rgba(34, 197, 94, 0.8); }
+     }
+     
+     @keyframes heat-glow {
+       0%, 100% { filter: drop-shadow(0 0 12px rgba(255, 107, 107, 0.6)); }
+       50% { filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.9)); }
+     }
+     
+     @keyframes speed-pulse {
+       0%, 100% { transform: scale(1); }
+       50% { transform: scale(1.1); }
+     }
+     
+     @keyframes speed-shine {
+       0% { transform: translateX(-100%); }
+       100% { transform: translateX(100%); }
+     }
+     
+     @keyframes control-bounce {
+       0%, 100% { transform: translateY(0); }
+       50% { transform: translateY(-3px); }
+     }
+     
+     @keyframes low-filament-flash {
+       0%, 100% { 
+         border-color: #ef4444;
+         box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+       }
+       50% { 
+         border-color: #dc2626;
+         box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+       }
+     }
+     
+     @keyframes text-flash {
+       0%, 100% { opacity: 1; }
+       50% { opacity: 0.5; }
+     }
+     
+     @keyframes warning-bounce {
+       0%, 100% { transform: scale(1); }
+       50% { transform: scale(1.2); }
+     }
     /* Camera */
     #screen-printer .cam-wrap { 
       position:relative; 
@@ -359,9 +656,9 @@
     #screen-printer .cam-status { position:absolute; bottom:4px; right:4px; font-size:10px; background:#1d2233; padding:2px 6px; border-radius:6px; color:#aab2c5; }
     /* Materials + controls */
     #screen-printer .ams { 
-      display:grid; 
-      grid-template-columns: repeat(2, 1fr); 
-      gap:12px; 
+      display:flex; 
+      flex-direction: row;
+      gap:8px; 
       margin-bottom: clamp(12px, 3vh, 24px); 
       flex: 1;
     }
@@ -369,33 +666,62 @@
       background:#0f111a; 
       border:1px solid #1c2030; 
       border-radius:8px; 
-      padding:8px; 
+      padding:12px; 
       display:flex; 
       flex-direction: column;
       gap:8px; 
       align-items:stretch; 
       min-height: 80px;
+      transition: all 0.2s ease;
     }
+    
+         #screen-printer .slot:hover {
+       border-color: #22c55e;
+       transform: translateY(-1px);
+     }
     #screen-printer .slot .chip { 
       width: 100%; 
       height: 100%; 
       border-radius: 8px; 
       border: 1px solid #1c2030; 
       display: block; 
-      background-size: cover; 
+      background-size: contain; 
       background-position: center; 
       background-repeat: no-repeat;
       background-color: #1a1d2a; /* fallback */
       min-height: 60px;
       flex: 1;
+      position: relative;
+      overflow: hidden;
     }
-    #screen-printer .slot .meta { 
-      font-size: clamp(11px, 1.8vmin, 14px); 
-      color:#cfd6e6; 
-      line-height:1.2; 
-      text-align: center;
-      margin-top: 4px;
-    }
+         #screen-printer .slot .meta { 
+       font-size: clamp(11px, 1.8vmin, 14px); 
+       color:#cfd6e6; 
+       line-height:1.2; 
+       text-align: center;
+       margin-top: 4px;
+       transition: all 0.3s ease;
+     }
+     
+     #screen-printer .slot.low-filament {
+       border-color: #ef4444 !important;
+       animation: low-filament-flash 2s infinite;
+     }
+     
+     #screen-printer .slot.low-filament .meta {
+       color: #ef4444;
+       font-weight: bold;
+       animation: text-flash 1s infinite;
+     }
+     
+     #screen-printer .slot.low-filament::after {
+       content: '⚠️';
+       position: absolute;
+       top: 8px;
+       right: 8px;
+       font-size: 16px;
+       animation: warning-bounce 1.5s infinite;
+     }
     #screen-printer .controls { 
       display:flex; 
       gap:10px; 
@@ -407,31 +733,60 @@
     #screen-printer .state-pill { font-size:12px; padding:4px 8px; border-radius:999px; background:#1d2233; color:#aab2c5; }
     #screen-printer .fps { font-size:12px; color:#aab2c5; }
     /* Buttons */
-    #screen-printer .btn { 
-      background:#2b60ff; 
-      color:#fff; 
-      border:none; 
-      padding: clamp(8px, 1.5vh, 12px) clamp(10px, 2vw, 16px); 
-      border-radius:8px; 
-      font-size: clamp(13px, 2vmin, 16px);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
+         #screen-printer .btn { 
+       background:#22c55e; 
+       color:#fff; 
+       border:none; 
+       padding: clamp(8px, 1.5vh, 12px) clamp(10px, 2vw, 16px); 
+       border-radius:8px; 
+       font-size: clamp(13px, 2vmin, 16px);
+       cursor: pointer;
+       transition: all 0.2s ease;
+     }
     #screen-printer .btn:active { 
       transform: translateY(1px); 
     }
     #screen-printer .btn:hover {
       filter: brightness(1.1);
     }
-    #screen-printer .btn-small { 
-      padding: clamp(6px, 1vh, 10px) clamp(8px, 1.5vw, 14px); 
-      font-size: clamp(12px, 1.8vmin, 14px); 
-      background:#38435f; 
-    }
+         #screen-printer .btn-small { 
+       padding: clamp(6px, 1vh, 10px) clamp(8px, 1.5vw, 14px); 
+       font-size: clamp(12px, 1.8vmin, 14px); 
+       background:#22c55e; 
+     }
     #screen-printer .btn-danger { 
       background:#e24c4c; 
     }
     #screen-printer .btn-back { background:#38435f; }
+    
+    /* Responsive improvements for filament images */
+    @media (max-width: 768px) {
+      #screen-printer .ams {
+        gap: 6px;
+      }
+      #screen-printer .slot {
+        padding: 6px;
+        min-height: 70px;
+        flex: 1;
+      }
+      #screen-printer .slot .chip {
+        min-height: 50px;
+      }
+    }
+    
+    @media (min-width: 1200px) {
+      #screen-printer .ams {
+        gap: 12px;
+      }
+      #screen-printer .slot {
+        padding: 12px;
+        min-height: 100px;
+        flex: 1;
+      }
+      #screen-printer .slot .chip {
+        min-height: 80px;
+      }
+    }
   </style>
   
   <script>
@@ -439,25 +794,37 @@
     'use strict';
     const root = document.getElementById('screen-printer');
   
-    // UI refs (scoped)
-    const progressFill = root.querySelector('#progress-fill');
-    const progressPercent = root.querySelector('#progress-percent');
-    const nameEl = root.querySelector('#job-name');
-    const etaEl = root.querySelector('#eta');
-    const layerEl = root.querySelector('#layer');
-    const nozFill = root.querySelector('#nozzle-fill');
-    const bedFill = root.querySelector('#bed-fill');
-    const nozAct = root.querySelector('#nozzle-actual');
-    const bedAct = root.querySelector('#bed-actual');
-    const nozTar = root.querySelector('#nozzle-target');
-    const bedTar = root.querySelector('#bed-target');
-    const speedRange = root.querySelector('#speed');
-    const speedVal = root.querySelector('#speed-val');
-    const statePill = root.querySelector('#state-pill');
-    const fpsEl = root.querySelector('#fps');
-    const netDot = root.querySelector('.net-dot');
-    const cam = root.querySelector('#cam');
-    const camStatus = root.querySelector('#cam-status');
+         // UI refs (scoped)
+     const progressFill = root.querySelector('#progress-fill');
+     const progressPercent = root.querySelector('#progress-percent');
+     const nameEl = root.querySelector('#job-name');
+     const etaEl = root.querySelector('#eta');
+     const layerEl = root.querySelector('#layer');
+     
+     // Enhanced temperature elements
+     const nozAct = root.querySelector('#nozzle-actual');
+     const bedAct = root.querySelector('#bed-actual');
+     const nozTar = root.querySelector('#nozzle-target');
+     const bedTar = root.querySelector('#bed-target');
+     const nozStatus = root.querySelector('#nozzle-status');
+     const bedStatus = root.querySelector('#bed-status');
+     const nozCircle = root.querySelector('#nozzle-circle');
+     const bedCircle = root.querySelector('#bed-circle');
+     const nozTemp = root.querySelector('.nozzle-temp');
+     const bedTemp = root.querySelector('.bed-temp');
+     
+     // Enhanced speed elements
+     const speedRange = root.querySelector('#speed');
+     const speedDisplay = root.querySelector('#speed-display');
+     const speedFill = root.querySelector('#speed-fill');
+     const speedKnob = root.querySelector('#speed-knob');
+     const speedMarkers = root.querySelectorAll('.marker');
+     
+     const statePill = root.querySelector('#state-pill');
+     const fpsEl = root.querySelector('#fps');
+     const netDot = root.querySelector('.net-dot');
+     const cam = root.querySelector('#cam');
+     const camStatus = root.querySelector('#cam-status');
   
     // AMS slots
     const slotEls = Array.from(root.querySelectorAll('.slot'));
@@ -484,12 +851,12 @@
           job: null,
           temps: { nozzle: 25, bed: 25, tNozzle: 0, tBed: 0 },
           speed: { multiplier: 100 },
-          materials: { slots: [
-            { id:"A1", type:"Yellow", color:"#f9c74f", grams:230, active:true },
-            { id:"A2", type:"Blue", color:"#577590", grams:180, active:false },
-            { id:"A3", type:"Green", color:"#90be6d", grams:150, active:false },
-            { id:"A4", type:"Tort", color:"#f97f29", grams:90, active:false }
-          ]},
+                     materials: { slots: [
+             { id:"A1", type:"Yellow", color:"#f9c74f", grams:230, active:true },
+             { id:"A2", type:"Blue", color:"#577590", grams:180, active:false },
+             { id:"A3", type:"Green", color:"#90be6d", grams:150, active:false },
+             { id:"A4", type:"Tort", color:"#f97f29", grams:10, active:false }
+           ]},
           camera: { url:"", online:false },
           ts: Date.now()
         };
@@ -629,25 +996,58 @@
       progressPercent.textContent = `${Math.round(clamped)}%`;
     }
   
-    function applyTemps(noz, nozT, bed, bedT) {
-      nozAct.textContent = Math.round(noz);
-      bedAct.textContent = Math.round(bed);
-      nozTar.textContent = Math.round(nozT);
-      bedTar.textContent = Math.round(bedT);
-      const nz = Math.min(100, Math.max(0, (nozT ? noz / nozT : 0) * 100));
-      const bd = Math.min(100, Math.max(0, (bedT ? bed / bedT : 0) * 100));
-      nozFill.style.width = `${nz}%`;
-      bedFill.style.width = `${bd}%`;
-      
-      // Dynamic colors based on temperature
-      // Nozzle: Blue (cold) to Red (hot)
-      const nozzleColor = getTempColor(noz, 25, 250);
-      nozFill.style.background = nozzleColor;
-      
-      // Bed: Blue (cold) to Red (hot)  
-      const bedColor = getTempColor(bed, 25, 120);
-      bedFill.style.background = bedColor;
-    }
+         function applyTemps(noz, nozT, bed, bedT) {
+       // Update actual temperatures
+       nozAct.textContent = Math.round(noz);
+       bedAct.textContent = Math.round(bed);
+       nozTar.textContent = Math.round(nozT);
+       bedTar.textContent = Math.round(bedT);
+       
+       // Calculate percentages for circular progress
+       const nzPercent = Math.min(100, Math.max(0, (nozT ? noz / nozT : 0) * 100));
+       const bdPercent = Math.min(100, Math.max(0, (bedT ? bed / bedT : 0) * 100));
+       
+       // Update circular progress (stroke-dashoffset)
+       const circumference = 314; // 2 * π * 50
+       nozCircle.style.strokeDashoffset = circumference - (nzPercent / 100) * circumference;
+       bedCircle.style.strokeDashoffset = circumference - (bdPercent / 100) * circumference;
+       
+       // Update status and heating animations
+       updateTempStatus(nozTemp, noz, nozT, nozStatus, nozCircle);
+       updateTempStatus(bedTemp, bed, bedT, bedStatus, bedCircle);
+       
+       // Dynamic colors based on temperature
+       const nozzleColor = getTempColor(noz, 25, 250);
+       const bedColor = getTempColor(bed, 25, 120);
+       
+       nozCircle.style.stroke = nozzleColor;
+       bedCircle.style.stroke = bedColor;
+     }
+     
+     function updateTempStatus(tempEl, actual, target, statusEl, circleEl) {
+       const isHeating = actual < target - 2;
+       const isHot = actual > target * 0.8;
+       
+       // Update status text
+       if (isHeating) {
+         statusEl.textContent = 'Heating';
+         tempEl.classList.add('heating');
+       } else if (isHot) {
+         statusEl.textContent = 'Hot';
+         tempEl.classList.remove('heating');
+         tempEl.classList.add('hot');
+       } else {
+         statusEl.textContent = 'Ready';
+         tempEl.classList.remove('heating', 'hot');
+       }
+       
+       // Add glow effect for hot temperatures
+       if (actual > target * 0.9) {
+         circleEl.style.filter = `drop-shadow(0 0 15px ${getTempColor(actual, 25, 250)})`;
+       } else {
+         circleEl.style.filter = '';
+       }
+     }
     
     function getTempColor(temp, minTemp, maxTemp) {
       // Clamp temperature between min and max
@@ -713,9 +1113,20 @@
           chipEl.style.background = s.color || '#666';
         }
 
-        // Keep grams and Active label, remove material type text
-        el.querySelector('.meta').textContent = `${s.grams} g${s.active ? ' • Active' : ''}`;
-        el.style.outline = s.active ? '2px solid #4f8cff' : 'none';
+                          // Check for low filament and apply warning effects
+         const isLowFilament = s.grams <= 20;
+         const metaText = isLowFilament ? 'Filament Low' : `${s.grams} g${s.active ? ' • Active' : ''}`;
+         el.querySelector('.meta').textContent = metaText;
+         
+         // Apply low filament warning styling
+         if (isLowFilament) {
+           el.classList.add('low-filament');
+         } else {
+           el.classList.remove('low-filament');
+         }
+         
+         // Keep active outline
+         el.style.outline = s.active ? '2px solid #22c55e' : 'none';
       });
     }
   
@@ -853,12 +1264,44 @@
       else if (demo === 'new-job') worker && worker.postMessage({ type: 'cmd', data: 'start' });
     });
   
-    // Touch parity for speed slider
-    on(speedRange, 'input', () => {
-      const v = Number(speedRange.value);
-      speedVal.textContent = `${v}%`;
-      worker && worker.postMessage({ type: 'cmd', data: { speed: v } });
-    });
+         // Enhanced speed slider
+     on(speedRange, 'input', () => {
+       const v = Number(speedRange.value);
+       speedDisplay.textContent = `${v}%`;
+       
+       // Calculate fill width and knob position
+       const percentage = ((v - 50) / 100) * 100;
+       speedFill.style.width = `${percentage}%`;
+       
+       // Position the knob
+       const knobPosition = percentage;
+       speedKnob.style.left = `${knobPosition}%`;
+       
+       // Add visual feedback
+       speedKnob.style.transform = 'translate(-50%, -50%) scale(1.1)';
+       setTimeout(() => {
+         speedKnob.style.transform = 'translate(-50%, -50%) scale(1)';
+       }, 150);
+       
+       // Update active marker
+       speedMarkers.forEach(marker => marker.classList.remove('active'));
+       if (v <= 75) {
+         speedMarkers[0].classList.add('active');
+       } else if (v <= 125) {
+         speedMarkers[1].classList.add('active');
+       } else {
+         speedMarkers[2].classList.add('active');
+       }
+       
+       worker && worker.postMessage({ type: 'cmd', data: { speed: v } });
+     });
+     
+     // Initialize knob position
+     setTimeout(() => {
+       const initialValue = Number(speedRange.value);
+       const initialPercentage = ((initialValue - 50) / 100) * 100;
+       speedKnob.style.left = `${initialPercentage}%`;
+     }, 100);
   
     // Camera fullscreen
     const camBtn = root.querySelector('#cam-fullscreen');

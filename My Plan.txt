@@ -1,6 +1,0 @@
-My Plan
-
-Touch Demo: A canvas area at the bottom of the screen. 
-
-A pallete at the top with different colours and brush styles, and a button to clear the canvas.
-

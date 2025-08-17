@@ -1,61 +1,966 @@
 <section id="screen-settings" class="screen">
-  <div class="panel">
-    <h2>Settings</h2>
-    <div class="row">
-      <label><input type="checkbox" id="chkSound" checked> Sound on taps</label>
+  <!-- Header -->
+  <div class="settings-header">
+    <div class="header-content">
+      <button class="back-btn" onclick="goHome()">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.42-1.41L7.83 13H20v-2z"/>
+        </svg>
+      </button>
+      <div class="header-title">
+        <h1>Settings</h1>
+        <p>Customize your experience</p>
+      </div>
+      <div class="header-actions">
+        <button class="action-btn" onclick="resetToDefaults()">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/>
+          </svg>
+        </button>
+        <button class="action-btn" onclick="exportSettings()">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+          </svg>
+        </button>
+      </div>
     </div>
-    <div class="row">
-      <label>Theme: </label>
-      <select id="selTheme">
-        <option value="dark">Dark</option>
-        <option value="light">Light</option>
-      </select>
+  </div>
+
+  <!-- Settings Content -->
+  <div class="settings-content">
+    <!-- General Settings Card -->
+    <div class="settings-card">
+      <div class="card-header">
+        <div class="card-icon general">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11.03L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11.03C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
+          </svg>
+        </div>
+        <div class="card-title">
+          <h3>General</h3>
+          <p>Basic application settings</p>
+        </div>
+      </div>
+      
+      <div class="settings-group">
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>Sound Effects</label>
+            <span class="setting-desc">Enable audio feedback on interactions</span>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="chkSound" checked>
+            <span class="slider"></span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>Animations</label>
+            <span class="setting-desc">Enable smooth transitions and animations</span>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="chkAnimations" checked>
+            <span class="slider"></span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>Auto-Save</label>
+            <span class="setting-desc">Automatically save changes</span>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="chkAutoSave" checked>
+            <span class="slider"></span>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="toolbar center">
-      <button id="btnSaveSettings" class="chip">Save Settings</button>
-      <button id="btnHome" class="chip">Home</button>
+
+    <!-- Appearance Settings Card -->
+    <div class="settings-card">
+      <div class="card-header">
+        <div class="card-icon appearance">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12,18C8.69,18 6,15.31 6,12S8.69,6 12,6C15.31,6 18,8.69 18,12S15.31,18 12,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+          </svg>
+        </div>
+        <div class="card-title">
+          <h3>Appearance</h3>
+          <p>Customize the visual theme</p>
+        </div>
+      </div>
+      
+      <div class="settings-group">
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>Theme</label>
+            <span class="setting-desc">Choose your preferred color scheme</span>
+          </div>
+          <div class="theme-selector">
+            <div class="theme-option active" data-theme="dark">
+              <div class="theme-preview dark"></div>
+              <span>Dark</span>
+            </div>
+            <div class="theme-option" data-theme="light">
+              <div class="theme-preview light"></div>
+              <span>Light</span>
+            </div>
+            <div class="theme-option" data-theme="auto">
+              <div class="theme-preview auto"></div>
+              <span>Auto</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>Quality Mode</label>
+            <span class="setting-desc">Adjust performance for your device</span>
+          </div>
+          <div class="select-wrapper">
+            <select id="selQuality">
+              <option value="auto">Auto (Recommended)</option>
+              <option value="high">High Quality</option>
+              <option value="medium">Medium Quality</option>
+              <option value="low">Low Quality</option>
+            </select>
+            <svg class="select-arrow" viewBox="0 0 24 24">
+              <path d="M7,10L12,15L17,10H7Z"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>Particle Effects</label>
+            <span class="setting-desc">Background particle density</span>
+          </div>
+          <div class="range-wrapper">
+            <input type="range" id="rangeParticles" min="0" max="100" value="75">
+            <div class="range-track"></div>
+            <div class="range-value">75%</div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div id="settingsNote" class="note"></div>
+
+    <!-- Performance Settings Card -->
+    <div class="settings-card">
+      <div class="card-header">
+        <div class="card-icon performance">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13,2.05V5.08C16.39,5.57 19,8.47 19,12C19,12.9 18.82,13.75 18.5,14.54L21.12,16.07C21.68,14.83 22,13.45 22,12C22,6.82 18.05,2.55 13,2.05M12,19C8.13,19 5,15.87 5,12C5,8.47 7.61,5.57 11,5.08V2.05C5.94,2.55 2,6.81 2,12C2,17.52 6.48,22 12,22C14.85,22 17.29,20.67 18.89,18.54L16.64,17.12C15.26,18.32 13.75,19 12,19Z"/>
+          </svg>
+        </div>
+        <div class="card-title">
+          <h3>Performance</h3>
+          <p>Optimize for your hardware</p>
+        </div>
+      </div>
+      
+      <div class="settings-group">
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>Hardware Acceleration</label>
+            <span class="setting-desc">Use GPU for better performance</span>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="chkHardwareAccel" checked>
+            <span class="slider"></span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>Frame Rate Limit</label>
+            <span class="setting-desc">Maximum frames per second</span>
+          </div>
+          <div class="select-wrapper">
+            <select id="selFrameRate">
+              <option value="auto">Auto</option>
+              <option value="60">60 FPS</option>
+              <option value="30">30 FPS</option>
+              <option value="15">15 FPS</option>
+            </select>
+            <svg class="select-arrow" viewBox="0 0 24 24">
+              <path d="M7,10L12,15L17,10H7Z"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>Cache Size</label>
+            <span class="setting-desc">Browser cache allocation</span>
+          </div>
+          <div class="range-wrapper">
+            <input type="range" id="rangeCacheSize" min="10" max="500" value="100">
+            <div class="range-track"></div>
+            <div class="range-value">100MB</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Developer Settings Card -->
+    <div class="settings-card">
+      <div class="card-header">
+        <div class="card-icon developer">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M14.6,16.6L19.2,12L14.6,7.4L16,6L22,12L16,18L14.6,16.6M9.4,16.6L4.8,12L9.4,7.4L8,6L2,12L8,18L9.4,16.6Z"/>
+          </svg>
+        </div>
+        <div class="card-title">
+          <h3>Developer</h3>
+          <p>Advanced debugging options</p>
+        </div>
+      </div>
+      
+      <div class="settings-group">
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>Debug Mode</label>
+            <span class="setting-desc">Show performance metrics and logs</span>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="chkDebug">
+            <span class="slider"></span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>Console Output</label>
+            <span class="setting-desc">Enable detailed console logging</span>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="chkConsole">
+            <span class="slider"></span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label>Touch Indicators</label>
+            <span class="setting-desc">Show visual touch feedback</span>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="chkTouchIndicators">
+            <span class="slider"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Info Card -->
+    <div class="settings-card info-card">
+      <div class="card-header">
+        <div class="card-icon info">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+          </svg>
+        </div>
+        <div class="card-title">
+          <h3>System Information</h3>
+          <p>Device and browser details</p>
+        </div>
+      </div>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Browser</span>
+          <span class="info-value" id="browserInfo">Chrome 118</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Platform</span>
+          <span class="info-value" id="platformInfo">Linux armv7l</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Resolution</span>
+          <span class="info-value" id="resolutionInfo">800×480</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Quality Mode</span>
+          <span class="info-value" id="qualityInfo">Medium</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Memory</span>
+          <span class="info-value" id="memoryInfo">4GB</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Cores</span>
+          <span class="info-value" id="coresInfo">4</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Bar -->
+  <div class="action-bar">
+    <button class="btn secondary" onclick="resetToDefaults()">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/>
+      </svg>
+      Reset Defaults
+    </button>
+    <button class="btn primary" onclick="saveSettings()">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z"/>
+      </svg>
+      Save Changes
+    </button>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <div class="toast-content">
+      <svg class="toast-icon" viewBox="0 0 24 24">
+        <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+      </svg>
+      <span class="toast-message">Settings saved successfully!</span>
+    </div>
   </div>
 </section>
 
 <style>
-  /* Settings screen toolbar styles */
-  #screen-settings .toolbar {
-    display: flex;
-    gap: 15px;
-    margin: 20px 0;
-    flex-wrap: wrap;
-    justify-content: center;
+  /* Modern React-like Settings Page */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
   }
-  
-  #screen-settings .chip {
-    padding: 12px 24px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-radius: 25px;
-    background: rgba(255,255,255,0.1);
+
+  #screen-settings {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    overflow: hidden;
+  }
+
+  /* Header */
+  .settings-header {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 20px;
+    flex-shrink: 0;
+  }
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
     color: white;
-    font-size: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-family: inherit;
   }
-  
-  #screen-settings .chip:hover {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.5);
+
+  .back-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateX(-2px);
+  }
+
+  .back-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .header-title h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header-title p {
+    font-size: 14px;
+    opacity: 0.8;
+    font-weight: 400;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 12px;
+  }
+
+  .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .action-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
     transform: translateY(-2px);
   }
-  
-  /* Responsive design */
-  @media (max-width: 768px) {
-    #screen-settings .toolbar {
-      gap: 10px;
+
+  .action-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Content */
+  .settings-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    scroll-behavior: smooth;
+  }
+
+  .settings-content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .settings-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+
+  .settings-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+  }
+
+  .settings-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  /* Settings Cards */
+  .settings-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    animation: slideInUp 0.6s ease forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .settings-card:nth-child(1) { animation-delay: 0.1s; }
+  .settings-card:nth-child(2) { animation-delay: 0.2s; }
+  .settings-card:nth-child(3) { animation-delay: 0.3s; }
+  .settings-card:nth-child(4) { animation-delay: 0.4s; }
+  .settings-card:nth-child(5) { animation-delay: 0.5s; }
+
+  @keyframes slideInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
-    
-    #screen-settings .chip {
-      padding: 10px 20px;
-      font-size: 14px;
+  }
+
+  .settings-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    margin-right: 16px;
+  }
+
+  .card-icon.general { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+  .card-icon.appearance { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+  .card-icon.performance { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+  .card-icon.developer { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+  .card-icon.info { background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); }
+
+  .card-icon svg {
+    width: 24px;
+    height: 24px;
+    color: rgba(0, 0, 0, 0.8);
+  }
+
+  .card-title h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .card-title p {
+    font-size: 14px;
+    opacity: 0.7;
+    font-weight: 400;
+  }
+
+  /* Settings Groups */
+  .settings-group {
+    padding: 0;
+  }
+
+  .setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s ease;
+  }
+
+  .setting-item:last-child {
+    border-bottom: none;
+  }
+
+  .setting-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .setting-info {
+    flex: 1;
+    margin-right: 20px;
+  }
+
+  .setting-info label {
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    cursor: pointer;
+  }
+
+  .setting-desc {
+    font-size: 13px;
+    opacity: 0.7;
+    line-height: 1.4;
+  }
+
+  /* Toggle Switches */
+  .toggle-switch {
+    position: relative;
+    width: 52px;
+    height: 28px;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: 0.3s ease;
+    border-radius: 28px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    transition: 0.3s ease;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  input:checked + .slider {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border-color: transparent;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(24px);
+  }
+
+  /* Theme Selector */
+  .theme-selector {
+    display: flex;
+    gap: 12px;
+  }
+
+  .theme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  .theme-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .theme-option.active {
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .theme-preview {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .theme-preview.dark {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  }
+
+  .theme-preview.light {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  }
+
+  .theme-preview.auto {
+    background: linear-gradient(135deg, #2c3e50 0%, #ffffff 50%, #34495e 100%);
+  }
+
+  .theme-option span {
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  /* Select Wrapper */
+  .select-wrapper {
+    position: relative;
+    min-width: 180px;
+  }
+
+  .select-wrapper select {
+    width: 100%;
+    padding: 12px 40px 12px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    appearance: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .select-wrapper select:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .select-wrapper select option {
+    background: #2c3e50;
+    color: white;
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    fill: rgba(255, 255, 255, 0.7);
+    pointer-events: none;
+  }
+
+  /* Range Slider */
+  .range-wrapper {
+    position: relative;
+    min-width: 180px;
+  }
+
+  .range-wrapper input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.2);
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .range-wrapper input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .range-wrapper input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+  }
+
+  .range-value {
+    position: absolute;
+    right: 0;
+    top: -30px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  /* Info Card */
+  .info-card .settings-group {
+    padding: 24px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .info-label {
+    font-size: 14px;
+    opacity: 0.8;
+    font-weight: 500;
+  }
+
+  .info-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #4facfe;
+  }
+
+  /* Action Bar */
+  .action-bar {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    text-decoration: none;
+  }
+
+  .btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .btn.primary {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(79, 172, 254, 0.4);
+  }
+
+  .btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(79, 172, 254, 0.6);
+  }
+
+  .btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+
+  /* Toast Notification */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(76, 175, 80, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 16px 20px;
+    color: white;
+    font-weight: 500;
+    z-index: 1000;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    opacity: 0;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  .toast-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .toast-icon {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+  }
+
+  .toast-message {
+    font-size: 14px;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .settings-header {
+      padding: 16px;
+    }
+
+    .header-title h1 {
+      font-size: 24px;
+    }
+
+    .settings-content {
+      padding: 16px;
+    }
+
+    .settings-card {
+      margin-bottom: 16px;
+    }
+
+    .card-header {
+      padding: 20px;
+    }
+
+    .setting-item {
+      padding: 16px 20px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+    }
+
+    .setting-info {
+      margin-right: 0;
+    }
+
+    .theme-selector {
+      justify-content: space-between;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .action-bar {
+      flex-direction: column;
+      padding: 16px;
+    }
+
+    .btn {
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .header-content {
+      gap: 12px;
+    }
+
+    .header-actions {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .card-header {
+      flex-direction: column;
+      text-align: center;
+      gap: 12px;
+    }
+
+    .card-icon {
+      margin-right: 0;
+    }
+
+    .theme-selector {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .theme-option {
+      flex-direction: row;
+      gap: 12px;
+    }
+
+    .theme-preview {
+      margin-bottom: 0;
     }
   }
 </style>
@@ -64,28 +969,473 @@
   (function() {
     'use strict';
     
-    function initApp() {
-      console.log('Settings app initialized');
-      setupEventListeners();
-    }
-    
-    function setupEventListeners() {
-      const homeButton = document.querySelector('#btnHome');
-      if (homeButton) {
-        homeButton.addEventListener('click', goHome);
+    // Settings State Management (React-like)
+    const settingsState = {
+      general: {
+        sound: true,
+        animations: true,
+        autoSave: true
+      },
+      appearance: {
+        theme: 'dark',
+        quality: 'auto',
+        particles: 75
+      },
+      performance: {
+        hardwareAccel: true,
+        frameRate: 'auto',
+        cacheSize: 100
+      },
+      developer: {
+        debug: false,
+        console: false,
+        touchIndicators: false
+      }
+    };
+
+    // Settings Management
+    class SettingsManager {
+      constructor() {
+        this.loadSettings();
+        this.bindEvents();
+        this.updateSystemInfo();
+        this.initializeControls();
+      }
+
+      // Load settings from localStorage
+      loadSettings() {
+        try {
+          const saved = localStorage.getItem('rpi-showcase-settings');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            Object.assign(settingsState, parsed);
+          }
+        } catch (error) {
+          console.warn('Failed to load settings:', error);
+        }
+      }
+
+      // Save settings to localStorage
+      saveSettings() {
+        try {
+          localStorage.setItem('rpi-showcase-settings', JSON.stringify(settingsState));
+          this.showToast('Settings saved successfully!');
+          
+          // Apply settings immediately
+          this.applySettings();
+          
+          console.log('🎛️ Settings saved:', settingsState);
+        } catch (error) {
+          console.error('Failed to save settings:', error);
+          this.showToast('Failed to save settings!', 'error');
+        }
+      }
+
+      // Apply settings to the application
+      applySettings() {
+        // Apply theme
+        document.body.setAttribute('data-theme', settingsState.appearance.theme);
+        
+        // Apply quality mode
+        if (window.setQualityMode) {
+          window.setQualityMode(settingsState.appearance.quality);
+        }
+        
+        // Apply performance settings
+        if (settingsState.performance.hardwareAccel) {
+          document.body.classList.add('hardware-accel');
+        } else {
+          document.body.classList.remove('hardware-accel');
+        }
+        
+        // Apply developer settings
+        if (settingsState.developer.debug) {
+          window.DEBUG_MODE = true;
+          console.log('🐛 Debug mode enabled');
+        }
+        
+        // Update global settings
+        window.APP_SETTINGS = settingsState;
+      }
+
+      // Initialize all controls with current values
+      initializeControls() {
+        // General settings
+        this.setToggle('chkSound', settingsState.general.sound);
+        this.setToggle('chkAnimations', settingsState.general.animations);
+        this.setToggle('chkAutoSave', settingsState.general.autoSave);
+        
+        // Appearance settings
+        this.setTheme(settingsState.appearance.theme);
+        this.setSelect('selQuality', settingsState.appearance.quality);
+        this.setRange('rangeParticles', settingsState.appearance.particles);
+        
+        // Performance settings
+        this.setToggle('chkHardwareAccel', settingsState.performance.hardwareAccel);
+        this.setSelect('selFrameRate', settingsState.performance.frameRate);
+        this.setRange('rangeCacheSize', settingsState.performance.cacheSize);
+        
+        // Developer settings
+        this.setToggle('chkDebug', settingsState.developer.debug);
+        this.setToggle('chkConsole', settingsState.developer.console);
+        this.setToggle('chkTouchIndicators', settingsState.developer.touchIndicators);
+      }
+
+      // Helper methods for setting control values
+      setToggle(id, value) {
+        const element = document.getElementById(id);
+        if (element) element.checked = value;
+      }
+
+      setSelect(id, value) {
+        const element = document.getElementById(id);
+        if (element) element.value = value;
+      }
+
+      setRange(id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+          element.value = value;
+          this.updateRangeValue(id, value);
+        }
+      }
+
+      setTheme(theme) {
+        document.querySelectorAll('.theme-option').forEach(option => {
+          option.classList.toggle('active', option.dataset.theme === theme);
+        });
+      }
+
+      // Bind all event listeners
+      bindEvents() {
+        // General settings
+        this.bindToggle('chkSound', 'general', 'sound');
+        this.bindToggle('chkAnimations', 'general', 'animations');
+        this.bindToggle('chkAutoSave', 'general', 'autoSave');
+        
+        // Appearance settings
+        this.bindThemeSelector();
+        this.bindSelect('selQuality', 'appearance', 'quality');
+        this.bindRange('rangeParticles', 'appearance', 'particles', '%');
+        
+        // Performance settings
+        this.bindToggle('chkHardwareAccel', 'performance', 'hardwareAccel');
+        this.bindSelect('selFrameRate', 'performance', 'frameRate');
+        this.bindRange('rangeCacheSize', 'performance', 'cacheSize', 'MB');
+        
+        // Developer settings
+        this.bindToggle('chkDebug', 'developer', 'debug');
+        this.bindToggle('chkConsole', 'developer', 'console');
+        this.bindToggle('chkTouchIndicators', 'developer', 'touchIndicators');
+        
+        // Auto-save functionality
+        this.setupAutoSave();
+      }
+
+      // Bind toggle switch
+      bindToggle(id, category, key) {
+        const element = document.getElementById(id);
+        if (element) {
+          element.addEventListener('change', () => {
+            settingsState[category][key] = element.checked;
+            if (settingsState.general.autoSave) {
+              this.saveSettings();
+            }
+            console.log(`🎛️ ${category}.${key}:`, element.checked);
+          });
+        }
+      }
+
+      // Bind select dropdown
+      bindSelect(id, category, key) {
+        const element = document.getElementById(id);
+        if (element) {
+          element.addEventListener('change', () => {
+            settingsState[category][key] = element.value;
+            if (settingsState.general.autoSave) {
+              this.saveSettings();
+            }
+            console.log(`🎛️ ${category}.${key}:`, element.value);
+          });
+        }
+      }
+
+      // Bind range slider
+      bindRange(id, category, key, suffix = '') {
+        const element = document.getElementById(id);
+        if (element) {
+          element.addEventListener('input', () => {
+            const value = parseInt(element.value);
+            settingsState[category][key] = value;
+            this.updateRangeValue(id, value, suffix);
+          });
+          
+          element.addEventListener('change', () => {
+            if (settingsState.general.autoSave) {
+              this.saveSettings();
+            }
+            console.log(`🎛️ ${category}.${key}:`, element.value);
+          });
+        }
+      }
+
+      // Update range value display
+      updateRangeValue(id, value, suffix = '') {
+        const element = document.getElementById(id);
+        if (element) {
+          const valueDisplay = element.parentNode.querySelector('.range-value');
+          if (valueDisplay) {
+            valueDisplay.textContent = `${value}${suffix}`;
+          }
+        }
+      }
+
+      // Bind theme selector
+      bindThemeSelector() {
+        document.querySelectorAll('.theme-option').forEach(option => {
+          option.addEventListener('click', () => {
+            const theme = option.dataset.theme;
+            settingsState.appearance.theme = theme;
+            this.setTheme(theme);
+            
+            if (settingsState.general.autoSave) {
+              this.saveSettings();
+            }
+            console.log('🎨 Theme changed to:', theme);
+          });
+        });
+      }
+
+      // Setup auto-save monitoring
+      setupAutoSave() {
+        const autoSaveToggle = document.getElementById('chkAutoSave');
+        if (autoSaveToggle) {
+          autoSaveToggle.addEventListener('change', () => {
+            if (autoSaveToggle.checked) {
+              this.showToast('Auto-save enabled');
+            } else {
+              this.showToast('Auto-save disabled');
+            }
+          });
+        }
+      }
+
+      // Update system information
+      updateSystemInfo() {
+        const systemInfo = this.getSystemInfo();
+        
+        document.getElementById('browserInfo').textContent = systemInfo.browser;
+        document.getElementById('platformInfo').textContent = systemInfo.platform;
+        document.getElementById('resolutionInfo').textContent = systemInfo.resolution;
+        document.getElementById('qualityInfo').textContent = systemInfo.quality;
+        document.getElementById('memoryInfo').textContent = systemInfo.memory;
+        document.getElementById('coresInfo').textContent = systemInfo.cores;
+      }
+
+      // Get system information
+      getSystemInfo() {
+        const userAgent = navigator.userAgent;
+        let browser = 'Unknown';
+        
+        if (userAgent.includes('Chrome')) browser = 'Chrome';
+        else if (userAgent.includes('Firefox')) browser = 'Firefox';
+        else if (userAgent.includes('Safari')) browser = 'Safari';
+        else if (userAgent.includes('Edge')) browser = 'Edge';
+        
+        const platform = navigator.platform || 'Unknown';
+        const resolution = `${screen.width}×${screen.height}`;
+        const quality = window.QUALITY_MODE || 'Medium';
+        const memory = navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'Unknown';
+        const cores = navigator.hardwareConcurrency || 'Unknown';
+        
+        return {
+          browser,
+          platform,
+          resolution,
+          quality,
+          memory,
+          cores
+        };
+      }
+
+      // Show toast notification
+      showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        const messageEl = toast.querySelector('.toast-message');
+        const iconEl = toast.querySelector('.toast-icon');
+        
+        messageEl.textContent = message;
+        
+        // Update icon based on type
+        if (type === 'error') {
+          iconEl.innerHTML = '<path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>';
+          toast.style.background = 'rgba(244, 67, 54, 0.95)';
+        } else {
+          iconEl.innerHTML = '<path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>';
+          toast.style.background = 'rgba(76, 175, 80, 0.95)';
+        }
+        
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3000);
+      }
+
+      // Reset to default settings
+      resetToDefaults() {
+        if (confirm('Are you sure you want to reset all settings to their default values?')) {
+          // Reset to defaults
+          settingsState.general = { sound: true, animations: true, autoSave: true };
+          settingsState.appearance = { theme: 'dark', quality: 'auto', particles: 75 };
+          settingsState.performance = { hardwareAccel: true, frameRate: 'auto', cacheSize: 100 };
+          settingsState.developer = { debug: false, console: false, touchIndicators: false };
+          
+          this.initializeControls();
+          this.saveSettings();
+          this.showToast('Settings reset to defaults');
+          
+          console.log('🔄 Settings reset to defaults');
+        }
+      }
+
+      // Export settings
+      exportSettings() {
+        try {
+          const dataStr = JSON.stringify(settingsState, null, 2);
+          const dataBlob = new Blob([dataStr], { type: 'application/json' });
+          const url = URL.createObjectURL(dataBlob);
+          
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `rpi-showcase-settings-${new Date().toISOString().split('T')[0]}.json`;
+          link.click();
+          
+          URL.revokeObjectURL(url);
+          this.showToast('Settings exported successfully');
+          
+          console.log('📤 Settings exported');
+        } catch (error) {
+          console.error('Export failed:', error);
+          this.showToast('Export failed', 'error');
+        }
       }
     }
-    
-    function goHome() {
-      // Direct navigation back to home
-      window.location.href = '../index.html';
+
+    // Global functions
+    window.saveSettings = function() {
+      if (window.settingsManager) {
+        window.settingsManager.saveSettings();
+      }
+    };
+
+    window.resetToDefaults = function() {
+      if (window.settingsManager) {
+        window.settingsManager.resetToDefaults();
+      }
+    };
+
+    window.exportSettings = function() {
+      if (window.settingsManager) {
+        window.settingsManager.exportSettings();
+      }
+    };
+
+    window.goHome = function() {
+      if (window.showcaseFramework && window.showcaseFramework.goHome) {
+        window.showcaseFramework.goHome();
+      } else {
+        window.location.href = '../index.html';
+      }
+    };
+
+    // Initialize the settings manager
+    function initApp() {
+      console.log('🎛️ Modern Settings App Initialized');
+      window.settingsManager = new SettingsManager();
+      
+      // Apply any saved settings immediately
+      window.settingsManager.applySettings();
+      
+      // Add stagger animation to cards
+      const cards = document.querySelectorAll('.settings-card');
+      cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+      });
+      
+      // Add smooth scroll behavior
+      document.querySelector('.settings-content').style.scrollBehavior = 'smooth';
+      
+      console.log('✨ Settings UI ready');
     }
-    
-    // Initialize app
+
+    // Performance monitoring
+    function monitorPerformance() {
+      if (settingsState.developer.debug) {
+        const perfObserver = new PerformanceObserver((list) => {
+          const entries = list.getEntries();
+          entries.forEach((entry) => {
+            if (entry.entryType === 'navigation') {
+              console.log('🚀 Page load time:', Math.round(entry.loadEventEnd - entry.loadEventStart), 'ms');
+            }
+          });
+        });
+        
+        try {
+          perfObserver.observe({ entryTypes: ['navigation', 'measure'] });
+        } catch (e) {
+          console.log('Performance monitoring not supported');
+        }
+      }
+    }
+
+    // Keyboard shortcuts
+    function setupKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        // Ctrl/Cmd + S to save
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+          e.preventDefault();
+          window.saveSettings();
+        }
+        
+        // Ctrl/Cmd + R to reset (with confirmation)
+        if ((e.ctrlKey || e.metaKey) && e.key === 'r' && e.shiftKey) {
+          e.preventDefault();
+          window.resetToDefaults();
+        }
+        
+        // Escape to go home
+        if (e.key === 'Escape') {
+          window.goHome();
+        }
+      });
+    }
+
+    // Initialize everything when DOM is ready
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initApp);
+      document.addEventListener('DOMContentLoaded', () => {
+        initApp();
+        monitorPerformance();
+        setupKeyboardShortcuts();
+      });
     } else {
       initApp();
+      monitorPerformance();
+      setupKeyboardShortcuts();
     }
+
+    // Debug utilities
+    window.settingsDebug = {
+      getState: () => settingsState,
+      setState: (newState) => Object.assign(settingsState, newState),
+      exportState: () => console.log(JSON.stringify(settingsState, null, 2)),
+      clearStorage: () => localStorage.removeItem('rpi-showcase-settings')
+    };
+
+    console.log('🎛️ Settings Debug Commands:');
+    console.log('  settingsDebug.getState() - Get current settings');
+    console.log('  settingsDebug.setState({...}) - Update settings');
+    console.log('  settingsDebug.exportState() - Log settings JSON');
+    console.log('  settingsDebug.clearStorage() - Clear saved settings');
   })();
 </script>

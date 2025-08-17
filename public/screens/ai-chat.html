@@ -1,0 +1,780 @@
+<section id="screen-ai-chat" class="screen">
+  <div class="panel">
+    <h2>AI Chat</h2>
+    
+    <!-- Connection Status -->
+    <div class="status-bar">
+      <div class="status-indicator" id="statusIndicator">
+        <span class="status-dot"></span>
+        <span class="status-text">Connecting...</span>
+      </div>
+    </div>
+
+    <!-- Chat Messages Area -->
+    <div class="chat-container">
+      <div class="messages" id="messages">
+        <div class="message ai-message">
+          <div class="message-content">
+            Hello! I'm Gemma 3, your AI assistant. How can I help you today?
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-area">
+      <div class="input-container">
+        <input type="text" id="messageInput" placeholder="Type your message..." readonly>
+        <button id="sendButton" class="send-btn" disabled>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22,2 15,22 11,13 2,9"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- On-Screen Keyboard -->
+    <div class="keyboard-container" id="keyboardContainer">
+      <div class="keyboard" id="keyboard">
+        <!-- Letter Layout (default) -->
+        <div class="keyboard-layout letters-layout" id="lettersLayout">
+          <!-- Row 1: QWERTY -->
+          <div class="keyboard-row">
+            <button class="key" data-key="q">Q</button>
+            <button class="key" data-key="w">W</button>
+            <button class="key" data-key="e">E</button>
+            <button class="key" data-key="r">R</button>
+            <button class="key" data-key="t">T</button>
+            <button class="key" data-key="y">Y</button>
+            <button class="key" data-key="u">U</button>
+            <button class="key" data-key="i">I</button>
+            <button class="key" data-key="o">O</button>
+            <button class="key" data-key="p">P</button>
+          </div>
+          
+          <!-- Row 2: ASDF -->
+          <div class="keyboard-row">
+            <button class="key" data-key="a">A</button>
+            <button class="key" data-key="s">S</button>
+            <button class="key" data-key="d">D</button>
+            <button class="key" data-key="f">F</button>
+            <button class="key" data-key="g">G</button>
+            <button class="key" data-key="h">H</button>
+            <button class="key" data-key="j">J</button>
+            <button class="key" data-key="k">K</button>
+            <button class="key" data-key="l">L</button>
+          </div>
+          
+          <!-- Row 3: ZXCV -->
+          <div class="keyboard-row">
+            <button class="key toggle-key" data-action="toggle" id="toggleKey">123</button>
+            <button class="key" data-key="z">Z</button>
+            <button class="key" data-key="x">X</button>
+            <button class="key" data-key="c">C</button>
+            <button class="key" data-key="v">V</button>
+            <button class="key" data-key="b">B</button>
+            <button class="key" data-key="n">N</button>
+            <button class="key" data-key="m">M</button>
+            <button class="key special-key" data-key="backspace">⌫</button>
+          </div>
+          
+          <!-- Row 4: Space and Basic Punctuation -->
+          <div class="keyboard-row">
+            <button class="key" data-key=" " style="flex: 3;">Space</button>
+            <button class="key" data-key=".">.</button>
+            <button class="key" data-key=",">,</button>
+            <button class="key" data-key="!">!</button>
+            <button class="key" data-key="?">?</button>
+          </div>
+        </div>
+        
+        <!-- Numbers/Punctuation Layout (hidden by default) -->
+        <div class="keyboard-layout numbers-layout" id="numbersLayout" style="display: none;">
+          <!-- Row 1: Numbers -->
+          <div class="keyboard-row">
+            <button class="key" data-key="1">1</button>
+            <button class="key" data-key="2">2</button>
+            <button class="key" data-key="3">3</button>
+            <button class="key" data-key="4">4</button>
+            <button class="key" data-key="5">5</button>
+            <button class="key" data-key="6">6</button>
+            <button class="key" data-key="7">7</button>
+            <button class="key" data-key="8">8</button>
+            <button class="key" data-key="9">9</button>
+            <button class="key" data-key="0">0</button>
+          </div>
+          
+          <!-- Row 2: Punctuation -->
+          <div class="keyboard-row">
+            <button class="key" data-key="@">@</button>
+            <button class="key" data-key="#">#</button>
+            <button class="key" data-key="$">$</button>
+            <button class="key" data-key="%">%</button>
+            <button class="key" data-key="&">&</button>
+            <button class="key" data-key="*">*</button>
+            <button class="key" data-key="(">(</button>
+            <button class="key" data-key=")">)</button>
+            <button class="key" data-key="-">-</button>
+            <button class="key" data-key="+">+</button>
+          </div>
+          
+          <!-- Row 3: More Punctuation -->
+          <div class="keyboard-row">
+            <button class="key toggle-key" data-action="toggle" id="toggleKeyNumbers">ABC</button>
+            <button class="key" data-key="=">=</button>
+            <button class="key" data-key="/">/</button>
+            <button class="key" data-key="\">\</button>
+            <button class="key" data-key="|">|</button>
+            <button class="key" data-key="~">~</button>
+            <button class="key" data-key="`">`</button>
+            <button class="key" data-key="'">'</button>
+            <button class="key special-key" data-key="backspace">⌫</button>
+          </div>
+          
+          <!-- Row 4: Space -->
+          <div class="keyboard-row">
+            <button class="key" data-key=" " style="flex: 1;">Space</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="btnHome" class="chip">Home</button>
+      <button id="clearChat" class="chip">Clear Chat</button>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* All styles STRICTLY scoped to #screen-ai-chat */
+  #screen-ai-chat {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    max-height: 100vh;
+    max-width: 100vw;
+    overflow: hidden;
+    background: #0f1424;
+    color: #e4e6f1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    touch-action: none;
+    -ms-touch-action: none;
+    overscroll-behavior: contain;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #screen-ai-chat .panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    box-sizing: border-box;
+  }
+
+  #screen-ai-chat h2 {
+    margin: 4px 0 0;
+    font-size: 24px;
+    color: #fff;
+    text-align: center;
+  }
+
+  /* Status Bar */
+  #screen-ai-chat .status-bar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  #screen-ai-chat .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 20px;
+    font-size: 12px;
+  }
+
+  #screen-ai-chat .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff6b6b;
+    animation: pulse 2s infinite;
+  }
+
+  #screen-ai-chat .status-dot.connected {
+    background: #51cf66;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* Chat Container */
+  #screen-ai-chat .chat-container {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #screen-ai-chat .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  #screen-ai-chat .message {
+    display: flex;
+    max-width: 85%;
+  }
+
+  #screen-ai-chat .user-message {
+    align-self: flex-end;
+  }
+
+  #screen-ai-chat .ai-message {
+    align-self: flex-start;
+  }
+
+  #screen-ai-chat .message-content {
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.4;
+    word-wrap: break-word;
+  }
+
+  #screen-ai-chat .user-message .message-content {
+    background: #3a6df0;
+    color: #fff;
+  }
+
+  #screen-ai-chat .ai-message .message-content {
+    background: rgba(255,255,255,0.1);
+    color: #e4e6f1;
+  }
+
+  /* Input Area */
+  #screen-ai-chat .input-area {
+    margin-bottom: 8px;
+  }
+
+  #screen-ai-chat .input-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  #screen-ai-chat #messageInput {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 25px;
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+  }
+
+  #screen-ai-chat #messageInput:focus {
+    border-color: #3a6df0;
+  }
+
+  #screen-ai-chat .send-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: #3a6df0;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  #screen-ai-chat .send-btn:hover {
+    background: #2d5bd8;
+    transform: scale(1.05);
+  }
+
+  #screen-ai-chat .send-btn:disabled {
+    background: rgba(255,255,255,0.2);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Keyboard */
+  #screen-ai-chat .keyboard-container {
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  #screen-ai-chat .keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #screen-ai-chat .keyboard-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #screen-ai-chat .keyboard-row {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  #screen-ai-chat .key {
+    flex: 1;
+    min-width: 40px;
+    height: 60px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #screen-ai-chat .key:hover {
+    background: rgba(255,255,255,0.15);
+    transform: translateY(-1px);
+  }
+
+  #screen-ai-chat .key:active {
+    background: #3a6df0;
+    transform: translateY(0);
+  }
+
+  #screen-ai-chat .special-key {
+    background: rgba(255,255,255,0.12);
+    font-weight: bold;
+  }
+
+  #screen-ai-chat .toggle-key {
+    background: rgba(255,255,255,0.15);
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  #screen-ai-chat .toggle-key.active {
+    background: #3a6df0;
+    color: #fff;
+  }
+
+  /* Toolbar */
+  #screen-ai-chat .toolbar {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  #screen-ai-chat .chip {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+    font-size: 14px;
+  }
+
+  #screen-ai-chat .chip:hover {
+    background: rgba(255,255,255,0.14);
+    transform: translateY(-1px);
+  }
+
+  #screen-ai-chat .chip:active {
+    transform: translateY(0);
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 480px) {
+    #screen-ai-chat .key {
+      min-width: 32px;
+      height: 50px;
+      font-size: 16px;
+    }
+    
+    #screen-ai-chat .message-content {
+      font-size: 13px;
+      padding: 10px 14px;
+    }
+    
+    #screen-ai-chat h2 {
+      font-size: 20px;
+    }
+  }
+
+  /* Tablet-specific optimizations */
+  @media (min-width: 768px) {
+    #screen-ai-chat .key {
+      min-width: 50px;
+      height: 70px;
+      font-size: 20px;
+      border-radius: 16px;
+    }
+    
+    #screen-ai-chat .keyboard {
+      gap: 10px;
+    }
+    
+    #screen-ai-chat .keyboard-row {
+      gap: 8px;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    'use strict';
+    
+    // Local state
+    let isConnected = false;
+    let isTyping = false;
+    let chatHistory = [];
+    let isNumbersMode = false;
+    
+    // DOM elements
+    let messageInput, sendButton, messages, statusIndicator, statusDot, statusText;
+    let keyboard, keyboardContainer, toggleKey, toggleKeyNumbers, numbersLayout, lettersLayout;
+    
+    function initApp() {
+      setupDOM();
+      setupUI();
+      setupNoZoom();
+      checkConnection();
+      loadChatHistory();
+    }
+    
+    function setupDOM() {
+      messageInput = document.querySelector('#messageInput');
+      sendButton = document.querySelector('#sendButton');
+      messages = document.querySelector('#messages');
+      statusIndicator = document.querySelector('#statusIndicator');
+      statusDot = document.querySelector('.status-dot');
+      statusText = document.querySelector('.status-text');
+      keyboard = document.querySelector('#keyboard');
+      keyboardContainer = document.querySelector('#keyboardContainer');
+      toggleKey = document.querySelector('#toggleKey');
+      toggleKeyNumbers = document.querySelector('#toggleKeyNumbers');
+      numbersLayout = document.querySelector('#numbersLayout');
+      lettersLayout = document.querySelector('#lettersLayout');
+    }
+    
+    function setupUI() {
+      // Send button
+      sendButton.addEventListener('click', sendMessage);
+      
+      // Keyboard keys
+      keyboard.addEventListener('click', handleKeyPress);
+      
+      // Home button
+      const homeButton = document.querySelector('#btnHome');
+      if (homeButton) {
+        homeButton.addEventListener('click', goHome);
+      }
+      
+      // Clear chat button
+      const clearButton = document.querySelector('#clearChat');
+      if (clearButton) {
+        clearButton.addEventListener('click', clearChat);
+      }
+      
+      // Input focus to show keyboard
+      messageInput.addEventListener('focus', () => {
+        keyboardContainer.style.display = 'block';
+      });
+      
+      // Prevent default input behavior
+      messageInput.addEventListener('keydown', (e) => {
+        e.preventDefault();
+      });
+    }
+    
+    function handleKeyPress(e) {
+      if (e.target.classList.contains('key')) {
+        const action = e.target.dataset.action;
+        
+        if (action === 'toggle') {
+          toggleKeyboardMode();
+          return;
+        }
+        
+        const key = e.target.dataset.key;
+        
+        if (key === 'backspace') {
+          messageInput.value = messageInput.value.slice(0, -1);
+        } else {
+          messageInput.value += key;
+        }
+        
+        // Enable/disable send button based on input
+        sendButton.disabled = messageInput.value.trim().length === 0;
+        
+        // Visual feedback
+        e.target.style.background = '#3a6df0';
+        setTimeout(() => {
+          e.target.style.background = '';
+        }, 100);
+      }
+    }
+    
+    function toggleKeyboardMode() {
+      isNumbersMode = !isNumbersMode;
+      
+      if (isNumbersMode) {
+        // Switch to numbers layout
+        numbersLayout.style.display = 'flex';
+        lettersLayout.style.display = 'none';
+        toggleKey.textContent = 'ABC';
+        toggleKey.classList.add('active');
+        toggleKeyNumbers.textContent = 'ABC';
+        toggleKeyNumbers.classList.add('active');
+      } else {
+        // Switch to letters layout
+        numbersLayout.style.display = 'none';
+        lettersLayout.style.display = 'flex';
+        toggleKey.textContent = '123';
+        toggleKey.classList.remove('active');
+        toggleKeyNumbers.textContent = '123';
+        toggleKeyNumbers.classList.remove('active');
+      }
+    }
+    
+    async function checkConnection() {
+      try {
+        const response = await fetch('http://localhost:11434/api/tags', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          const hasGemma = data.models && data.models.some(model => 
+            model.name && model.name.includes('gemma3:270m')
+          );
+          
+          if (hasGemma) {
+            setConnected(true);
+          } else {
+            setConnected(false, 'Gemma 3 not found');
+          }
+        } else {
+          setConnected(false, 'Ollama not running');
+        }
+      } catch (error) {
+        setConnected(false, 'Connection failed');
+      }
+    }
+    
+    function setConnected(connected, message = '') {
+      isConnected = connected;
+      
+      if (connected) {
+        statusDot.classList.add('connected');
+        statusText.textContent = 'Connected';
+        sendButton.disabled = messageInput.value.trim().length === 0;
+      } else {
+        statusDot.classList.remove('connected');
+        statusText.textContent = message || 'Disconnected';
+        sendButton.disabled = true;
+      }
+    }
+    
+    async function sendMessage() {
+      const message = messageInput.value.trim();
+      if (!message || !isConnected || isTyping) return;
+      
+      // Add user message to chat
+      addMessage(message, 'user');
+      messageInput.value = '';
+      sendButton.disabled = true;
+      
+      // Show typing indicator
+      isTyping = true;
+      const typingIndicator = addTypingIndicator();
+      
+      try {
+        const response = await fetch('http://localhost:11434/api/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'gemma3:270m',
+            prompt: message,
+            stream: false
+          })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          const aiResponse = data.response || 'Sorry, I couldn\'t generate a response.';
+          
+          // Remove typing indicator and add AI response
+          removeTypingIndicator(typingIndicator);
+          addMessage(aiResponse, 'ai');
+        } else {
+          throw new Error('Failed to get response');
+        }
+      } catch (error) {
+        removeTypingIndicator(typingIndicator);
+        addMessage('Sorry, there was an error connecting to the AI. Please check if Ollama is running.', 'ai');
+      }
+      
+      isTyping = false;
+    }
+    
+    function addMessage(text, sender) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${sender}-message`;
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'message-content';
+      contentDiv.textContent = text;
+      
+      messageDiv.appendChild(contentDiv);
+      messages.appendChild(messageDiv);
+      
+      // Scroll to bottom
+      messages.scrollTop = messages.scrollHeight;
+      
+      // Save to history
+      chatHistory.push({ text, sender, timestamp: Date.now() });
+      saveChatHistory();
+    }
+    
+    function addTypingIndicator() {
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'message ai-message typing-indicator';
+      typingDiv.innerHTML = '<div class="message-content">AI is typing...</div>';
+      messages.appendChild(typingDiv);
+      messages.scrollTop = messages.scrollHeight;
+      return typingDiv;
+    }
+    
+    function removeTypingIndicator(indicator) {
+      if (indicator && indicator.parentNode) {
+        indicator.parentNode.removeChild(indicator);
+      }
+    }
+    
+    function clearChat() {
+      messages.innerHTML = '<div class="message ai-message"><div class="message-content">Hello! I\'m Gemma 3, your AI assistant. How can I help you today?</div></div>';
+      chatHistory = [];
+      saveChatHistory();
+    }
+    
+    function saveChatHistory() {
+      try {
+        localStorage.setItem('ai-chat-history', JSON.stringify(chatHistory));
+      } catch (error) {
+        console.log('Could not save chat history');
+      }
+    }
+    
+    function loadChatHistory() {
+      try {
+        const saved = localStorage.getItem('ai-chat-history');
+        if (saved) {
+          chatHistory = JSON.parse(saved);
+          // Only show last 10 messages to avoid clutter
+          const recentMessages = chatHistory.slice(-10);
+          messages.innerHTML = '';
+          recentMessages.forEach(msg => {
+            addMessage(msg.text, msg.sender);
+          });
+        }
+      } catch (error) {
+        console.log('Could not load chat history');
+      }
+    }
+    
+    // Prevent browser zoom (pinch, ctrl+wheel, double tap) within this screen only
+    function setupNoZoom() {
+      const root = document.querySelector('#screen-ai-chat');
+      if (!root) return;
+      
+      const onGesture = (e) => { if (e.cancelable) e.preventDefault(); };
+      root.addEventListener('gesturestart', onGesture);
+      root.addEventListener('gesturechange', onGesture);
+      root.addEventListener('gestureend', onGesture);
+      
+      const onWheel = (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.cancelable) e.preventDefault();
+      };
+      root.addEventListener('wheel', onWheel, { passive: false });
+      
+      let lastTap = 0;
+      const onTouchEnd = (e) => {
+        const now = Date.now();
+        if (now - lastTap < 300 && e.cancelable) e.preventDefault();
+        lastTap = now;
+      };
+      root.addEventListener('touchend', onTouchEnd, { passive: false });
+    }
+    
+    function goHome() {
+      if (window.showcaseFramework && window.showcaseFramework.goHome) {
+        window.showcaseFramework.goHome();
+      } else {
+        window.location.href = '../index.html';
+      }
+    }
+    
+    // Lifecycle management
+    const cleanupFns = [];
+    window.appLifecycle = {
+      activate: function() {
+        checkConnection();
+      },
+      deactivate: function() {
+        // Save state if needed
+      },
+      cleanup: function() {
+        while (cleanupFns.length) { 
+          try { cleanupFns.pop()(); } catch (_) {} 
+        }
+      }
+    };
+    
+    // Initialize app
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  })();
+</script>
