@@ -241,11 +241,6 @@
     
     /* Loading screen - simplified */
     .loading-screen {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
       background: rgba(0, 0, 0, 0.9);
       display: flex;
       flex-direction: column;
@@ -292,10 +287,6 @@
     
     /* Error message */
     .error-message {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
       background: rgba(244, 67, 54, 0.95);
       padding: 25px;
       border-radius: 15px;
@@ -537,37 +528,37 @@
   </style>
 </head>
 <body>
-  <!-- Simple Loading Screen -->
-  <div id="loading-screen" class="loading-screen">
-    <div class="loading-text">
-      <p id="loading-main-text">Starting AR Guidance System...</p>
-    </div>
-  </div>
-
-  <!-- Error Message (hidden by default) -->
-  <div id="error-message" class="error-message" style="display: none;">
-    <h3>🥧 Raspberry Pi AR Setup Required</h3>
-    <p id="error-text">Please allow camera access to use AR features. Refresh the page and try again.</p>
-    <div style="margin-top: 15px;">
-      <button onclick="retryCamera()" style="margin: 5px; padding: 10px 20px; background: white; color: #f44336; border: none; border-radius: 5px; cursor: pointer;">🔄 Retry Camera</button>
-      <button onclick="goHome()" style="margin: 5px; padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer;">🏠 Go Home</button>
-    </div>
-    <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; font-size: 12px;">
-      <strong>🥧 Raspberry Pi Setup Tips:</strong><br>
-      • Run <code>sudo raspi-config</code> → Interface Options → Camera → Enable<br>
-      • Make sure no other apps are using the camera<br>
-      • Use Chromium browser (pre-installed) for best compatibility<br>
-      • Ensure you're on local network or HTTPS<br>
-      • Try rebooting the Pi if camera fails<br>
-      • Check camera cable connection<br>
-      • Free up RAM by closing other applications
-    </div>
-  </div>
-
   <!-- AR Container -->
   <div class="main-container">
     <!-- Camera Container -->
     <div class="camera-container">
+      <!-- Simple Loading Screen -->
+      <div id="loading-screen" class="loading-screen">
+        <div class="loading-text">
+          <p id="loading-main-text">Starting AR Guidance System...</p>
+        </div>
+      </div>
+      
+      <!-- Error Message (hidden by default) -->
+      <div id="error-message" class="error-message" style="display: none;">
+        <h3>🥧 Raspberry Pi AR Setup Required</h3>
+        <p id="error-text">Please allow camera access to use AR features. Refresh the page and try again.</p>
+        <div style="margin-top: 15px;">
+          <button onclick="retryCamera()" style="margin: 5px; padding: 10px 20px; background: white; color: #f44336; border: none; border-radius: 5px; cursor: pointer;">🔄 Retry Camera</button>
+          <button onclick="goHome()" style="margin: 5px; padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer;">🏠 Go Home</button>
+        </div>
+        <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; font-size: 12px;">
+          <strong>🥧 Raspberry Pi Setup Tips:</strong><br>
+          • Run <code>sudo raspi-config</code> → Interface Options → Camera → Enable<br>
+          • Make sure no other apps are using the camera<br>
+          • Use Chromium browser (pre-installed) for best compatibility<br>
+          • Ensure you're on local network or HTTPS<br>
+          • Try rebooting the Pi if camera fails<br>
+          • Check camera cable connection<br>
+          • Free up RAM by closing other applications
+        </div>
+      </div>
+      
       <div id="ar-container">
         <!-- AR Overlay System (simplified) -->
         <div id="ar-overlay" style="
@@ -721,9 +712,14 @@
     <div class="side-panel">
       <div class="panel-title">AR Guidance System</div>
       
-      <div class="ar-option active" onclick="toggleGuidanceMode()">
+      <div class="ar-option active" onclick="setGuidanceMode('treasure')">
         <div class="ar-icon">🎯</div>
-        <span id="mode-toggle">Treasure Hunt</span>
+        <span>Treasure Hunt</span>
+      </div>
+      
+      <div class="ar-option" onclick="setGuidanceMode('troubleshoot')">
+        <div class="ar-icon">🔧</div>
+        <span>Troubleshooting</span>
       </div>
       
       <div class="ar-option" onclick="startGuidance()">
@@ -790,6 +786,32 @@
 
     // Initialize camera using the same approach as camera.html
     async function initializeCamera() {
+      // Position loading screen within the camera container area
+      const loadingScreen = document.getElementById('loading-screen');
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const cameraWidth = window.innerWidth - sidePanelWidth;
+      
+      // Center the loading screen within the camera container
+      const x = (cameraWidth / 2) - 150; // Center horizontally, offset by half element width
+      const y = (window.innerHeight / 2) - 100; // Center vertically, offset by half element height
+      
+      loadingScreen.style.cssText = `
+        position: absolute;
+        top: ${y}px;
+        left: ${x}px;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        transition: opacity 0.3s ease;
+        padding: 40px;
+        border-radius: 20px;
+        min-width: 300px;
+        min-height: 200px;
+      `;
+      
       updateLoadingMessage('Starting guidance camera...');
       
       try {
@@ -803,12 +825,13 @@
           console.log('Permissions API not available, proceeding with camera start');
         }
         
-        // Use optimized constraints based on screen size
+        // Use optimized constraints based on screen size - zoomed out for wider field of view
         const constraints = {
           video: {
-            width: { ideal: 640, max: 1280 },
-            height: { ideal: 480, max: 720 },
-            frameRate: { ideal: 15, max: 30 }
+            width: { ideal: 1280, max: 1920 },
+            height: { ideal: 720, max: 1080 },
+            frameRate: { ideal: 15, max: 30 },
+            facingMode: 'environment'
           }
         };
 
@@ -1076,6 +1099,23 @@
       // Clear any existing guidance
       clearGuidance();
       
+      // Update UI to show which mode is active
+      const treasureOption = document.querySelector('.ar-option[onclick*="treasure"]');
+      const troubleshootOption = document.querySelector('.ar-option[onclick*="troubleshoot"]');
+      
+      if (treasureOption && troubleshootOption) {
+        // Remove active class from all options
+        treasureOption.classList.remove('active');
+        troubleshootOption.classList.remove('active');
+        
+        // Add active class to selected option
+        if (mode === 'treasure') {
+          treasureOption.classList.add('active');
+        } else if (mode === 'troubleshoot') {
+          troubleshootOption.classList.add('active');
+        }
+      }
+      
       // Set guidance steps based on mode
       if (mode === 'treasure') {
         guidanceSteps = [...treasureSteps];
@@ -1160,11 +1200,18 @@
         <div class="hint-subtext">Try moving your camera in the right direction!</div>
       `;
       
+      // Position within the camera view area (excluding side panel)
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const cameraWidth = window.innerWidth - sidePanelWidth;
+      
+      // Center the hint within the camera container
+      const x = (cameraWidth / 2) - 100; // Center horizontally, offset by half element width
+      const y = (window.innerHeight * 0.2); // Position at 20% from top
+      
       hintEl.style.cssText = `
         position: absolute;
-        left: 50%;
-        top: 20%;
-        transform: translate(-50%, -50%);
+        left: ${x}px;
+        top: ${y}px;
         z-index: 150;
         animation: hintPulse 2s ease-in-out infinite;
       `;
@@ -1223,9 +1270,9 @@
       const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
       const cameraWidth = window.innerWidth - sidePanelWidth;
       
-      // Position randomly but ensure it's within the visible camera area
-      const x = 50 + Math.random() * (cameraWidth - 200);
-      const y = 50 + Math.random() * (window.innerHeight - 200);
+      // Center the guidance element within the camera container
+      const x = (cameraWidth / 2) - 100; // Center horizontally, offset by half element width
+      const y = (window.innerHeight / 2) - 100; // Center vertically, offset by half element height
       
       guidanceEl.style.cssText = `
         position: absolute;
@@ -1282,11 +1329,18 @@
         </div>
       `;
       
+      // Position within the camera view area (excluding side panel)
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const cameraWidth = window.innerWidth - sidePanelWidth;
+      
+      // Center the completion message within the camera container
+      const x = (cameraWidth / 2) - 125; // Center horizontally, offset by half element width
+      const y = (window.innerHeight / 2) - 125; // Center vertically, offset by half element height
+      
       completionEl.style.cssText = `
         position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
+        left: ${x}px;
+        top: ${y}px;
         z-index: 200;
         animation: completionCelebration 3s ease-in-out;
       `;
@@ -1342,6 +1396,32 @@
     // Hide loading screen
     function hideLoadingScreen() {
       const loadingScreen = document.getElementById('loading-screen');
+      
+      // Position loading screen within the camera container area
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const cameraWidth = window.innerWidth - sidePanelWidth;
+      
+      // Center the loading screen within the camera container
+      const x = (cameraWidth / 2) - 150; // Center horizontally, offset by half element width
+      const y = (window.innerHeight / 2) - 100; // Center vertically, offset by half element height
+      
+      loadingScreen.style.cssText = `
+        position: absolute;
+        top: ${y}px;
+        left: ${x}px;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        transition: opacity 0.3s ease;
+        padding: 40px;
+        border-radius: 20px;
+        min-width: 300px;
+        min-height: 200px;
+      `;
+      
       loadingScreen.style.opacity = '0';
       setTimeout(() => {
         loadingScreen.style.display = 'none';
@@ -1354,6 +1434,30 @@
       const errorDiv = document.getElementById('error-message');
       const errorText = document.getElementById('error-text');
       errorText.textContent = message;
+      
+      // Position error message within the camera container area
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const cameraWidth = window.innerWidth - sidePanelWidth;
+      
+      // Center the error message within the camera container
+      const x = (cameraWidth / 2) - 150; // Center horizontally, offset by half element width
+      const y = (window.innerHeight / 2) - 100; // Center vertically, offset by half element height
+      
+      errorDiv.style.cssText = `
+        position: absolute;
+        top: ${y}px;
+        left: ${x}px;
+        background: rgba(244, 67, 54, 0.95);
+        padding: 25px;
+        border-radius: 15px;
+        color: white;
+        text-align: center;
+        max-width: 80%;
+        backdrop-filter: blur(15px);
+        z-index: 3000;
+        border: 2px solid #d32f2f;
+      `;
+      
       errorDiv.style.display = 'block';
       hideLoadingScreen();
       updateStatus('Error: ' + message, 'error');
@@ -1368,19 +1472,7 @@
       if (statusDot) statusDot.className = `status-dot ${type}`;
     }
 
-    // Toggle guidance mode
-    function toggleGuidanceMode() {
-      const newMode = currentMode === 'treasure' ? 'troubleshoot' : 'treasure';
-      setGuidanceMode(newMode);
-      
-      // Update UI text
-      const modeToggle = document.getElementById('mode-toggle');
-      if (modeToggle) {
-        modeToggle.textContent = newMode === 'treasure' ? 'Treasure Hunt' : 'Troubleshooting';
-      }
-      
-      console.log(`🎯 Switched to ${newMode} mode`);
-    }
+
 
     // Toggle camera
     function toggleCamera() {
@@ -1404,6 +1496,32 @@
       errorDiv.style.display = 'none';
       
       const loadingScreen = document.getElementById('loading-screen');
+      
+      // Position loading screen within the camera container area
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const cameraWidth = window.innerWidth - sidePanelWidth;
+      
+      // Center the loading screen within the camera container
+      const x = (cameraWidth / 2) - 150; // Center horizontally, offset by half element width
+      const y = (window.innerHeight / 2) - 100; // Center vertically, offset by half element height
+      
+      loadingScreen.style.cssText = `
+        position: absolute;
+        top: ${y}px;
+        left: ${x}px;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        transition: opacity 0.3s ease;
+        padding: 40px;
+        border-radius: 20px;
+        min-width: 300px;
+        min-height: 200px;
+      `;
+      
       loadingScreen.style.display = 'flex';
       updateLoadingMessage('Retrying AR Guidance...');
       
@@ -1636,7 +1754,11 @@
         try {
           console.log('🧪 Testing basic camera access...');
           const stream = await navigator.mediaDevices.getUserMedia({
-            video: { width: 320, height: 240 }
+            video: { 
+              width: { ideal: 640, max: 1280 },
+              height: { ideal: 480, max: 720 },
+              facingMode: 'environment'
+            }
           });
           console.log('✅ Basic camera access works!');
           stream.getTracks().forEach(track => track.stop());

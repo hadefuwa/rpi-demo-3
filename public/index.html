@@ -495,6 +495,12 @@
                 <div class="icon"></div>
                 <span class="label">Camera Showcase</span>
               </a>
+              <a href="./screens/balloon-pop.html" class="card fancy theme-yellow">
+                <div class="border-animation"></div>
+                <div class="card-particles"></div>
+                <div class="icon"></div>
+                <span class="label">Balloon Pop</span>
+              </a>
            </div>
         </section>
       </main>
@@ -956,6 +962,7 @@
       #screen-home .card:nth-child(12) .icon { animation: spin 5s linear infinite; }
              #screen-home .card:nth-child(13) .icon { animation: wobble 2.5s ease-in-out infinite; }
        #screen-home .card:nth-child(14) .icon { animation: flash 2s infinite; }
+       #screen-home .card:nth-child(15) .icon { animation: bounce 2.2s infinite; }
        
        /* Different animations for each card's label */
        #screen-home .card:nth-child(1) .label { animation: glow 2.5s infinite; }
@@ -972,6 +979,7 @@
        #screen-home .card:nth-child(12) .label { animation: pulse 3.8s infinite 1.2s; }
        #screen-home .card:nth-child(13) .label { animation: glow 3.4s infinite 1.3s; }
        #screen-home .card:nth-child(14) .label { animation: flash 2.5s infinite 1.4s; }
+       #screen-home .card:nth-child(15) .label { animation: glow 2.8s infinite 1.5s; }
       
       @keyframes bounce {
         0%, 100% { transform: translateY(0); }
@@ -1247,6 +1255,23 @@
        }
        #screen-home .card:nth-child(14) .icon::after {
          content: "CAM";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 7px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
+       
+       /* Balloon Pop Card */
+       #screen-home .card:nth-child(15) .icon::before {
+         content: "🎈";
+       }
+       #screen-home .card:nth-child(15) .icon::after {
+         content: "POP";
          position: absolute;
          top: 50%;
          left: 50%;

@@ -207,11 +207,6 @@
     
     /* Loading screen - simplified */
     .loading-screen {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
       background: rgba(0, 0, 0, 0.9);
       display: flex;
       flex-direction: column;
@@ -258,10 +253,6 @@
     
     /* Error message */
     .error-message {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
       background: rgba(244, 67, 54, 0.95);
       padding: 25px;
       border-radius: 15px;
@@ -487,37 +478,37 @@
   </style>
 </head>
 <body>
-  <!-- Simple Loading Screen -->
-  <div id="loading-screen" class="loading-screen">
-    <div class="loading-text">
-      <p id="loading-main-text">Starting Balloon Pop AR Game...</p>
-    </div>
-  </div>
-
-  <!-- Error Message (hidden by default) -->
-  <div id="error-message" class="error-message" style="display: none;">
-    <h3>🥧 Raspberry Pi AR Setup Required</h3>
-    <p id="error-text">Please allow camera access to use AR features. Refresh the page and try again.</p>
-    <div style="margin-top: 15px;">
-      <button onclick="retryCamera()" style="margin: 5px; padding: 10px 20px; background: white; color: #f44336; border: none; border-radius: 5px; cursor: pointer;">🔄 Retry Camera</button>
-      <button onclick="goHome()" style="margin: 5px; padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer;">🏠 Go Home</button>
-    </div>
-    <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; font-size: 12px;">
-      <strong>🥧 Raspberry Pi Setup Tips:</strong><br>
-      • Run <code>sudo raspi-config</code> → Interface Options → Camera → Enable<br>
-      • Make sure no other apps are using the camera<br>
-      • Use Chromium browser (pre-installed) for best compatibility<br>
-      • Ensure you're on local network or HTTPS<br>
-      • Try rebooting the Pi if camera fails<br>
-      • Check camera cable connection<br>
-      • Free up RAM by closing other applications
-    </div>
-  </div>
-
   <!-- AR Container -->
   <div class="main-container">
     <!-- Camera Container -->
     <div class="camera-container">
+      <!-- Simple Loading Screen -->
+      <div id="loading-screen" class="loading-screen">
+        <div class="loading-text">
+          <p id="loading-main-text">Starting Balloon Pop AR Game...</p>
+        </div>
+      </div>
+      
+      <!-- Error Message (hidden by default) -->
+      <div id="error-message" class="error-message" style="display: none;">
+        <h3>🥧 Raspberry Pi AR Setup Required</h3>
+        <p id="error-text">Please allow camera access to use AR features. Refresh the page and try again.</p>
+        <div style="margin-top: 15px;">
+          <button onclick="retryCamera()" style="margin: 5px; padding: 10px 20px; background: white; color: #f44336; border: none; border-radius: 5px; cursor: pointer;">🔄 Retry Camera</button>
+          <button onclick="goHome()" style="margin: 5px; padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer;">🏠 Go Home</button>
+        </div>
+        <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; font-size: 12px;">
+          <strong>🥧 Raspberry Pi Setup Tips:</strong><br>
+          • Run <code>sudo raspi-config</code> → Interface Options → Camera → Enable<br>
+          • Make sure no other apps are using the camera<br>
+          • Use Chromium browser (pre-installed) for best compatibility<br>
+          • Ensure you're on local network or HTTPS<br>
+          • Try rebooting the Pi if camera fails<br>
+          • Check camera cable connection<br>
+          • Free up RAM by closing other applications
+        </div>
+      </div>
+      
       <div id="ar-container">
         <!-- AR Overlay System -->
         <div id="ar-overlay" style="
@@ -636,6 +627,32 @@
 
     // Initialize camera using the same approach as camera.html
     async function initializeCamera() {
+      // Position loading screen within the camera container area
+      const loadingScreen = document.getElementById('loading-screen');
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const cameraWidth = window.innerWidth - sidePanelWidth;
+      
+      // Center the loading screen within the camera container
+      const x = (cameraWidth / 2) - 150; // Center horizontally, offset by half element width
+      const y = (window.innerHeight / 2) - 100; // Center vertically, offset by half element height
+      
+      loadingScreen.style.cssText = `
+        position: absolute;
+        top: ${y}px;
+        left: ${x}px;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        transition: opacity 0.3s ease;
+        padding: 40px;
+        border-radius: 20px;
+        min-width: 300px;
+        min-height: 200px;
+      `;
+      
       updateLoadingMessage('Starting balloon pop camera...');
       
       try {
@@ -649,12 +666,13 @@
           console.log('Permissions API not available, proceeding with camera start');
         }
         
-        // Use optimized constraints based on screen size
+        // Use optimized constraints based on screen size - zoomed out for wider field of view
         const constraints = {
           video: {
-            width: { ideal: 640, max: 1280 },
-            height: { ideal: 480, max: 720 },
-            frameRate: { ideal: 15, max: 30 }
+            width: { ideal: 1280, max: 1920 },
+            height: { ideal: 720, max: 1080 },
+            frameRate: { ideal: 15, max: 30 },
+            facingMode: 'environment'
           }
         };
 
@@ -1053,6 +1071,32 @@
     // Hide loading screen
     function hideLoadingScreen() {
       const loadingScreen = document.getElementById('loading-screen');
+      
+      // Position loading screen within the camera container area
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const cameraWidth = window.innerWidth - sidePanelWidth;
+      
+      // Center the loading screen within the camera container
+      const x = (cameraWidth / 2) - 150; // Center horizontally, offset by half element width
+      const y = (window.innerHeight / 2) - 100; // Center vertically, offset by half element height
+      
+      loadingScreen.style.cssText = `
+        position: absolute;
+        top: ${y}px;
+        left: ${x}px;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        transition: opacity 0.3s ease;
+        padding: 40px;
+        border-radius: 20px;
+        min-width: 300px;
+        min-height: 200px;
+      `;
+      
       loadingScreen.style.opacity = '0';
       setTimeout(() => {
         loadingScreen.style.display = 'none';
@@ -1065,6 +1109,30 @@
       const errorDiv = document.getElementById('error-message');
       const errorText = document.getElementById('error-text');
       errorText.textContent = message;
+      
+      // Position error message within the camera container area
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const cameraWidth = window.innerWidth - sidePanelWidth;
+      
+      // Center the error message within the camera container
+      const x = (cameraWidth / 2) - 150; // Center horizontally, offset by half element width
+      const y = (window.innerHeight / 2) - 100; // Center vertically, offset by half element height
+      
+      errorDiv.style.cssText = `
+        position: absolute;
+        top: ${y}px;
+        left: ${x}px;
+        background: rgba(244, 67, 54, 0.95);
+        padding: 25px;
+        border-radius: 15px;
+        color: white;
+        text-align: center;
+        max-width: 80%;
+        backdrop-filter: blur(15px);
+        z-index: 3000;
+        border: 2px solid #d32f2f;
+      `;
+      
       errorDiv.style.display = 'block';
       hideLoadingScreen();
       updateStatus('Error: ' + message, 'error');
@@ -1101,6 +1169,32 @@
       errorDiv.style.display = 'none';
       
       const loadingScreen = document.getElementById('loading-screen');
+      
+      // Position loading screen within the camera container area
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const cameraWidth = window.innerWidth - sidePanelWidth;
+      
+      // Center the loading screen within the camera container
+      const x = (cameraWidth / 2) - 150; // Center horizontally, offset by half element width
+      const y = (window.innerHeight / 2) - 100; // Center vertically, offset by half element height
+      
+      loadingScreen.style.cssText = `
+        position: absolute;
+        top: ${y}px;
+        left: ${x}px;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        transition: opacity 0.3s ease;
+        padding: 40px;
+        border-radius: 20px;
+        min-width: 300px;
+        min-height: 200px;
+      `;
+      
       loadingScreen.style.display = 'flex';
       updateLoadingMessage('Retrying Balloon Pop AR...');
       
