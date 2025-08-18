@@ -138,8 +138,26 @@
   </section>
   
   <style>
+    /* Global reset to prevent scrollbars and white borders */
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+    
     /* All styles strictly scoped to #screen-printer */
-    #screen-printer { width: 100%; height: 100vh; background:#0b0c10; color:#eef2f7; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; overflow:hidden; }
+    #screen-printer { 
+      width: 100%; 
+      height: 100vh; 
+      background:#0b0c10; 
+      color:#eef2f7; 
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
+      overflow:hidden; 
+      margin: 0;
+      padding: 0;
+    }
     #screen-printer * { box-sizing: border-box; touch-action: manipulation; user-select: none; }
     #screen-printer .printer-header { display:flex; align-items:center; justify-content:space-between; padding:8px 10px; background:#101218; border-bottom:1px solid #1c2030; }
     #screen-printer .title { font-size:16px; margin:0; }
@@ -157,6 +175,9 @@
       gap:12px; 
       padding:12px; 
       height: calc(100vh - 86px); /* Adjust height to fill available space (100vh - header - footer) */
+      min-height: 0; /* Prevent grid from overflowing */
+      overflow: hidden; /* Ensure no scrollbars */
+      max-height: calc(100vh - 86px); /* Ensure grid doesn't exceed viewport */
     }
     #screen-printer .card { 
       background:#121420; 
@@ -167,6 +188,7 @@
       overflow:hidden;
       display: flex;
       flex-direction: column;
+      min-height: 0; /* Prevent flex items from overflowing */
     }
                    /* Progress */
       #screen-printer .progress-card { 
@@ -189,6 +211,7 @@
         background: #0f111a;
         min-height: 200px;
         margin: 0 auto;
+        flex-shrink: 0; /* Prevent shrinking */
       }
      
      #screen-printer .video-container video {
@@ -255,6 +278,8 @@
        display: flex;
        gap: 16px;
        flex: 1;
+       min-height: 0; /* Prevent overflow */
+       overflow: hidden; /* Ensure content fits */
      }
      
      #screen-printer .temp {
@@ -399,6 +424,7 @@
        border: 1px solid rgba(255,255,255,0.05);
        position: relative;
        overflow: hidden;
+       min-height: 0; /* Prevent overflow */
      }
      
      #screen-printer .speed-container::before {
@@ -661,6 +687,8 @@
       gap:8px; 
       margin-bottom: clamp(12px, 3vh, 24px); 
       flex: 1;
+      min-height: 0; /* Prevent overflow */
+      overflow: hidden; /* Ensure content fits */
     }
     #screen-printer .slot { 
       background:#0f111a; 
@@ -761,6 +789,13 @@
     
     /* Responsive improvements for filament images */
     @media (max-width: 768px) {
+      #screen-printer .grid {
+        gap: 8px;
+        padding: 8px;
+      }
+      #screen-printer .card {
+        padding: 12px;
+      }
       #screen-printer .ams {
         gap: 6px;
       }
@@ -771,6 +806,13 @@
       }
       #screen-printer .slot .chip {
         min-height: 50px;
+      }
+      #screen-printer .temp-circle {
+        width: 60px;
+        height: 60px;
+      }
+      #screen-printer .speed-slider-container {
+        height: 50px;
       }
     }
     
@@ -785,6 +827,24 @@
       }
       #screen-printer .slot .chip {
         min-height: 80px;
+      }
+    }
+    
+    /* Ensure no scrollbars on any screen size */
+    @media (max-height: 600px) {
+      #screen-printer .grid {
+        gap: 8px;
+        padding: 8px;
+      }
+      #screen-printer .card {
+        padding: 12px;
+      }
+      #screen-printer .temp-circle {
+        width: 60px;
+        height: 60px;
+      }
+      #screen-printer .video-container {
+        min-height: 150px;
       }
     }
   </style>
