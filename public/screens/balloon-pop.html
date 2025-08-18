@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Balloon Pop AR Game - RPI Showcase</title>
+  
+  <!-- Raspberry Pi Camera Detection Script - Simplified -->
+  <script>
+    // Simple RPi detection
+    const isRaspberryPi = () => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      return userAgent.includes('armv7l') || 
+             userAgent.includes('armv6l') || 
+             userAgent.includes('aarch64') ||
+             (navigator.hardwareConcurrency <= 4 && navigator.deviceMemory <= 4);
+    };
+    
+    window.isRaspberryPi = isRaspberryPi();
+    console.log('🥧 Raspberry Pi detected:', window.isRaspberryPi);
+  </script>
+  
+  <style>
+    /* Base styles for AR container */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a1a;
+      color: #fff;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+    
+    /* Main Layout Container */
+    .main-container {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+    }
+    
+    /* Camera Container - Fixed Size */
+    .camera-container {
+      flex: 1;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+      background: #000;
+      border-right: 2px solid #FF6B9D;
+    }
+    
+    /* AR Scene Container - Within Camera Container */
+    #ar-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+    
+    /* Video element styling */
+    #ar-video {
+      background: #000;
+      border-radius: 0;
+    }
+    
+    /* UI Overlay - Only for camera controls */
+    .ui-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    
+    /* Top bar with controls - Only in camera area */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      pointer-events: auto;
+    }
+    
+    .logo {
+      height: 30px;
+      width: auto;
+    }
+    
+    .title {
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+      text-align: center;
+      flex: 1;
+    }
+    
+    /* Bottom controls - Only in camera area */
+    .bottom-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+      pointer-events: auto;
+    }
+    
+    .control-btn {
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+    
+    .control-btn.active {
+      background: rgba(255, 107, 157, 0.8);
+      border-color: #FF6B9D;
+    }
+    
+    /* Right Side Panel - Fixed, Non-transparent */
+    .side-panel {
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 280px;
+      height: 100vh;
+      background: #2d2d2d;
+      border-left: 3px solid #FF6B9D;
+      overflow-y: auto;
+      z-index: 2000;
+      box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+    }
+    
+    .panel-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 20px 20px 15px 20px;
+      color: #fff;
+      text-align: center;
+      padding: 15px;
+      background: #FF6B9D;
+      border-radius: 10px;
+    }
+    
+    .ar-option {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px 20px;
+      margin: 8px 15px;
+      background: #3d3d3d;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+    
+    .ar-option:hover {
+      background: #4d4d4d;
+      border-color: #FF6B9D;
+      transform: translateX(-5px);
+    }
+    
+    .ar-option.active {
+      background: #FF6B9D;
+      border: 2px solid #E91E63;
+      color: white;
+    }
+    
+    .ar-icon {
+      width: 25px;
+      height: 25px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    
+    .ar-option.active .ar-icon {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Loading screen - simplified */
+    .loading-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      transition: opacity 0.3s ease;
+    }
+    
+    .loading-text {
+      margin-top: 20px;
+      font-size: 18px;
+      color: white;
+      text-align: center;
+    }
+    
+    /* AR Status indicator - Only in camera area */
+    .ar-status {
+      position: absolute;
+      top: 80px;
+      left: 20px;
+      padding: 10px 20px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 25px;
+      font-size: 14px;
+      color: white;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      pointer-events: auto;
+    }
+    
+    .status-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 10px;
+      animation: pulse 2s infinite;
+    }
+    
+    .status-dot.camera { background: #4caf50; }
+    .status-dot.ar { background: #FF6B9D; }
+    .status-dot.error { background: #f44336; }
+    
+    /* Error message */
+    .error-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(244, 67, 54, 0.95);
+      padding: 25px;
+      border-radius: 15px;
+      color: white;
+      text-align: center;
+      max-width: 80%;
+      backdrop-filter: blur(15px);
+      z-index: 3000;
+      border: 2px solid #d32f2f;
+    }
+    
+    /* AR Objects Container - Constrained to camera area */
+    #ar-objects {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: calc(100vw - 280px); /* Full width minus side panel */
+      height: 100vh;
+      pointer-events: auto;
+      z-index: 10;
+    }
+    
+    /* Balloon Elements */
+    .balloon {
+      position: absolute;
+      width: 60px;
+      height: 80px;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      pointer-events: auto;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .balloon::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.8);
+    }
+    
+    .balloon:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+    
+    .balloon.popped {
+      animation: pop 0.5s ease-out forwards;
+      pointer-events: none;
+    }
+    
+    /* Balloon Colors */
+    .balloon.red { background: radial-gradient(circle at 30% 30%, #FF6B6B, #E53E3E); }
+    .balloon.blue { background: radial-gradient(circle at 30% 30%, #4ECDC4, #2C7A7B); }
+    .balloon.green { background: radial-gradient(circle at 30% 30%, #51CF66, #2F9E44); }
+    .balloon.yellow { background: radial-gradient(circle at 30% 30%, #FFD93D, #F59E0B); }
+    .balloon.purple { background: radial-gradient(circle at 30% 30%, #9775FA, #7048E8); }
+    .balloon.pink { background: radial-gradient(circle at 30% 30%, #FF6B9D, #E91E63); }
+    .balloon.orange { background: radial-gradient(circle at 30% 30%, #FFA726, #F57C00); }
+    
+    /* Game Stats */
+    .game-stats {
+      position: absolute;
+      top: 80px;
+      right: 300px;
+      padding: 15px 20px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      border: 2px solid #FF6B9D;
+      pointer-events: auto;
+      z-index: 150;
+    }
+    
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 5px 0;
+      font-size: 14px;
+    }
+    
+    .stat-value {
+      font-weight: bold;
+      color: #FF6B9D;
+    }
+    
+    /* Completion Message */
+    .game-completion {
+      background: rgba(0, 0, 0, 0.9);
+      border: 4px solid #FF6B9D;
+      border-radius: 25px;
+      padding: 30px;
+      text-align: center;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+      min-width: 250px;
+      pointer-events: none;
+      z-index: 200;
+    }
+    
+    .completion-icon {
+      font-size: 60px;
+      margin-bottom: 15px;
+    }
+    
+    .completion-text {
+      font-size: 24px;
+      font-weight: bold;
+      color: #FFD93D;
+      margin-bottom: 10px;
+    }
+    
+    .completion-subtext {
+      font-size: 18px;
+      color: #FF6B9D;
+      opacity: 0.9;
+    }
+    
+    /* Animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      25% { transform: translateY(-10px) rotate(2deg); }
+      75% { transform: translateY(10px) rotate(-2deg); }
+    }
+    
+    @keyframes pop {
+      0% { transform: scale(1) rotate(0deg); opacity: 1; }
+      50% { transform: scale(1.5) rotate(180deg); opacity: 0.8; }
+      100% { transform: scale(0) rotate(360deg); opacity: 0; }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    
+    /* Responsive design */
+    @media (max-width: 1200px) {
+      .side-panel {
+        width: 250px;
+      }
+      
+      #ar-objects {
+        width: calc(100vw - 250px);
+      }
+      
+      .game-stats {
+        right: 270px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+      
+      .camera-container {
+        height: 70vh;
+      }
+      
+      .side-panel {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        top: auto;
+        width: 100%;
+        height: 30vh;
+        border-left: none;
+        border-top: 3px solid #FF6B9D;
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+      
+      .side-panel .ar-option {
+        display: inline-block;
+        min-width: 120px;
+        margin: 8px 10px;
+        text-align: center;
+      }
+      
+      #ar-objects {
+        width: 100%;
+        height: 70vh;
+      }
+      
+      .game-stats {
+        top: 60px;
+        right: 20px;
+        left: 20px;
+        width: auto;
+      }
+      
+      .top-bar {
+        padding: 10px 15px;
+      }
+      
+      .title {
+        font-size: 16px;
+      }
+      
+      .bottom-controls {
+        bottom: 10px;
+        gap: 10px;
+      }
+      
+      .control-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Simple Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-text">
+      <p id="loading-main-text">Starting Balloon Pop AR Game...</p>
+    </div>
+  </div>
+
+  <!-- Error Message (hidden by default) -->
+  <div id="error-message" class="error-message" style="display: none;">
+    <h3>🥧 Raspberry Pi AR Setup Required</h3>
+    <p id="error-text">Please allow camera access to use AR features. Refresh the page and try again.</p>
+    <div style="margin-top: 15px;">
+      <button onclick="retryCamera()" style="margin: 5px; padding: 10px 20px; background: white; color: #f44336; border: none; border-radius: 5px; cursor: pointer;">🔄 Retry Camera</button>
+      <button onclick="goHome()" style="margin: 5px; padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer;">🏠 Go Home</button>
+    </div>
+    <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; font-size: 12px;">
+      <strong>🥧 Raspberry Pi Setup Tips:</strong><br>
+      • Run <code>sudo raspi-config</code> → Interface Options → Camera → Enable<br>
+      • Make sure no other apps are using the camera<br>
+      • Use Chromium browser (pre-installed) for best compatibility<br>
+      • Ensure you're on local network or HTTPS<br>
+      • Try rebooting the Pi if camera fails<br>
+      • Check camera cable connection<br>
+      • Free up RAM by closing other applications
+    </div>
+  </div>
+
+  <!-- AR Container -->
+  <div class="main-container">
+    <!-- Camera Container -->
+    <div class="camera-container">
+      <div id="ar-container">
+        <!-- AR Overlay System -->
+        <div id="ar-overlay" style="
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 2;
+          pointer-events: none;
+        ">
+          <!-- AR Objects Container -->
+          <div id="ar-objects" style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: auto;
+          ">
+            <!-- Balloons will be dynamically created here -->
+          </div>
+        </div>
+
+        <!-- UI Overlay -->
+        <div class="ui-overlay">
+          <!-- Top Bar -->
+          <div class="top-bar">
+            <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo" />
+            <div class="title">Balloon Pop AR Game</div>
+            <button id="btn-home" class="control-btn" onclick="goHome()">🏠 Home</button>
+          </div>
+
+          <!-- AR Status -->
+          <div class="ar-status">
+            <span id="status-indicator" class="status-dot camera"></span>
+            <span id="status-text">Camera Active</span>
+          </div>
+
+          <!-- Game Stats -->
+          <div class="game-stats">
+            <div class="stat-item">
+              <span>🎈 Balloons:</span>
+              <span class="stat-value" id="balloons-popped">0</span>
+            </div>
+            <div class="stat-item">
+              <span>⭐ Score:</span>
+              <span class="stat-value" id="current-score">0</span>
+            </div>
+            <div class="stat-item">
+              <span>⏱️ Time:</span>
+              <span class="stat-value" id="game-time">0s</span>
+            </div>
+          </div>
+
+          <!-- Bottom Controls -->
+          <div class="bottom-controls">
+            <button class="control-btn" onclick="startGame()">▶️ Start Game</button>
+            <button class="control-btn" onclick="toggleCamera()">📹 Camera</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side Panel -->
+    <div class="side-panel">
+      <div class="panel-title">Balloon Pop AR</div>
+      
+      <div class="ar-option active" onclick="toggleGameMode()">
+        <div class="ar-icon">🎮</div>
+        <span id="mode-toggle">Classic Mode</span>
+      </div>
+      
+      <div class="ar-option" onclick="startGame()">
+        <div class="ar-icon">▶️</div>
+        <span>Start Game</span>
+      </div>
+      
+      <div class="ar-option" onclick="captureScreenshot()">
+        <div class="ar-icon">📸</div>
+        <span>Screenshot</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Balloon Pop AR Game State
+    let currentMode = 'classic'; // 'classic' or 'timeAttack'
+    let isGameActive = false;
+    let balloons = [];
+    let cameraStream = null;
+    let videoElement = null;
+    let gameStats = {
+      balloonsPopped: 0,
+      score: 0,
+      startTime: 0,
+      gameTimer: null
+    };
+    
+    // Game configuration
+    const gameConfig = {
+      maxBalloons: 10,
+      spawnInterval: 2000,
+      balloonLifetime: 8000,
+      scorePerBalloon: 10,
+      bonusMultiplier: 1.5
+    };
+
+    // Initialize Balloon Pop AR Game
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🎈 Starting Balloon Pop AR Game');
+      
+      // Initialize camera first, then game system
+      initializeCamera();
+    });
+
+    // Initialize camera using the same approach as camera.html
+    async function initializeCamera() {
+      updateLoadingMessage('Starting balloon pop camera...');
+      
+      try {
+        // Check camera permissions first (if available)
+        try {
+          const permission = await navigator.permissions.query({ name: 'camera' });
+          if (permission.state === 'denied') {
+            throw new Error('Camera permission denied');
+          }
+        } catch (permError) {
+          console.log('Permissions API not available, proceeding with camera start');
+        }
+        
+        // Use optimized constraints based on screen size
+        const constraints = {
+          video: {
+            width: { ideal: 640, max: 1280 },
+            height: { ideal: 480, max: 720 },
+            frameRate: { ideal: 15, max: 30 }
+          }
+        };
+
+        console.log('📹 Requesting camera access...');
+        cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+        
+        // Create video element for AR
+        createARVideo();
+        
+        updateLoadingMessage('Camera active - starting balloon game...');
+        updateStatus('Camera Active', 'camera');
+        
+        // Initialize game system after camera is ready
+        setTimeout(() => {
+          initializeGameSystem();
+        }, 1000);
+        
+      } catch (error) {
+        console.error('❌ Camera initialization failed:', error);
+        
+        let errorMessage = 'Camera failed to start. Please check permissions and refresh.';
+        
+        if (error.name === 'NotAllowedError' || error.message === 'Camera permission denied') {
+          errorMessage = 'Camera permission denied. Please allow camera access and refresh.';
+        } else if (error.name === 'NotFoundError') {
+          errorMessage = 'No camera found. Please connect a camera and refresh.';
+        } else if (error.name === 'NotReadableError') {
+          errorMessage = 'Camera is in use by another application. Please close other camera apps and refresh.';
+        }
+        
+        showError(errorMessage);
+      }
+    }
+
+    // Create video element for AR display
+    function createARVideo() {
+      // Remove existing video if any
+      const existingVideo = document.querySelector('#ar-video');
+      if (existingVideo) {
+        existingVideo.remove();
+      }
+      
+      // Create new video element
+      videoElement = document.createElement('video');
+      videoElement.id = 'ar-video';
+      videoElement.autoplay = true;
+      videoElement.muted = true;
+      videoElement.playsInline = true;
+      videoElement.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        z-index: 1;
+      `;
+      
+      // Set video source
+      videoElement.srcObject = cameraStream;
+      
+      // Add to AR container
+      const arContainer = document.getElementById('ar-container');
+      arContainer.appendChild(videoElement);
+      
+      // Wait for video to load
+      videoElement.addEventListener('loadedmetadata', () => {
+        console.log('📹 AR Video ready:', videoElement.videoWidth, 'x', videoElement.videoHeight);
+        updateLoadingMessage('Balloon Game Video Ready!');
+        
+        // Adjust video positioning after metadata loads
+        adjustVideoPositioning();
+      });
+      
+      // Handle video errors
+      videoElement.addEventListener('error', (e) => {
+        console.error('❌ Video error:', e);
+        showError('Video playback error. Please refresh the page.');
+      });
+    }
+
+    // Adjust video positioning to ensure it's fully visible
+    function adjustVideoPositioning() {
+      if (!videoElement) return;
+      
+      const container = document.getElementById('ar-container');
+      const containerRect = container.getBoundingClientRect();
+      
+      // Calculate the available space (excluding side panel)
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const availableWidth = window.innerWidth - sidePanelWidth;
+      const availableHeight = window.innerHeight;
+      
+      // Calculate video dimensions while maintaining aspect ratio
+      const videoAspectRatio = videoElement.videoWidth / videoElement.videoHeight;
+      const containerAspectRatio = availableWidth / availableHeight;
+      
+      let finalWidth, finalHeight;
+      
+      if (videoAspectRatio > containerAspectRatio) {
+        // Video is wider than container - fit to width
+        finalWidth = availableWidth;
+        finalHeight = availableWidth / videoAspectRatio;
+      } else {
+        // Video is taller than container - fit to height
+        finalHeight = availableHeight;
+        finalWidth = availableHeight * videoAspectRatio;
+      }
+      
+      // Center the video
+      const leftOffset = (availableWidth - finalWidth) / 2;
+      const topOffset = (availableHeight - finalHeight) / 2;
+      
+      videoElement.style.cssText = `
+        position: absolute;
+        top: ${topOffset}px;
+        left: ${leftOffset}px;
+        width: ${finalWidth}px;
+        height: ${finalHeight}px;
+        object-fit: fill;
+        z-index: 1;
+      `;
+      
+      console.log('📹 Video repositioned:', { finalWidth, finalHeight, leftOffset, topOffset });
+    }
+
+    // Update loading message
+    function updateLoadingMessage(mainText) {
+      const mainTextEl = document.getElementById('loading-main-text');
+      if (mainTextEl) mainTextEl.textContent = mainText;
+    }
+
+    // Initialize Game System
+    function initializeGameSystem() {
+      updateLoadingMessage('Starting Balloon Pop AR Game...');
+      console.log('🎈 Starting balloon pop game system');
+      
+      // Set default mode
+      setGameMode('classic');
+      
+      // Hide loading screen
+      setTimeout(() => {
+        hideLoadingScreen();
+        updateStatus('Balloon Game Ready - Start popping!', 'ar');
+      }, 1000);
+    }
+
+    // Set game mode (classic or time attack)
+    function setGameMode(mode) {
+      currentMode = mode;
+      resetGame();
+      
+      if (mode === 'classic') {
+        updateStatus('Classic Mode - Pop as many balloons as you can!', 'ar');
+      } else if (mode === 'timeAttack') {
+        updateStatus('Time Attack Mode - Pop balloons before time runs out!', 'ar');
+      }
+      
+      console.log(`🎮 Switched to ${mode} mode`);
+    }
+
+    // Start the balloon popping game
+    function startGame() {
+      if (isGameActive) {
+        console.log('🎈 Game already active');
+        return;
+      }
+      
+      isGameActive = true;
+      resetGame();
+      
+      console.log(`🎈 Starting ${currentMode} balloon game`);
+      updateStatus(`Game Active - ${currentMode}`, 'ar');
+      
+      // Start spawning balloons
+      startBalloonSpawning();
+      
+      // Start game timer
+      startGameTimer();
+    }
+
+    // Start spawning balloons at regular intervals
+    function startBalloonSpawning() {
+      const spawnBalloon = () => {
+        if (isGameActive && balloons.length < gameConfig.maxBalloons) {
+          createBalloon();
+        }
+      };
+      
+      // Spawn first balloon immediately
+      spawnBalloon();
+      
+      // Continue spawning at intervals
+      const spawnInterval = setInterval(() => {
+        if (!isGameActive) {
+          clearInterval(spawnInterval);
+          return;
+        }
+        spawnBalloon();
+      }, gameConfig.spawnInterval);
+    }
+
+    // Create a new balloon at random position
+    function createBalloon() {
+      const balloon = document.createElement('div');
+      balloon.className = 'balloon';
+      
+      // Random balloon properties
+      const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'pink', 'orange'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      balloon.classList.add(color);
+      
+      // Random position within camera view area
+      const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+      const cameraWidth = window.innerWidth - sidePanelWidth;
+      
+      const x = 50 + Math.random() * (cameraWidth - 100);
+      const y = 50 + Math.random() * (window.innerHeight - 150);
+      
+      balloon.style.left = x + 'px';
+      balloon.style.top = y + 'px';
+      
+      // Random balloon emoji
+      const emojis = ['🎈', '🎊', '🎉', '✨', '💫', '🌟', '💎'];
+      const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+      balloon.textContent = emoji;
+      
+      // Add click/touch event
+      balloon.addEventListener('click', () => popBalloon(balloon));
+      balloon.addEventListener('touchend', () => popBalloon(balloon));
+      
+      // Add to AR objects container
+      const arObjects = document.getElementById('ar-objects');
+      arObjects.appendChild(balloon);
+      
+      // Add to balloons array
+      balloons.push(balloon);
+      
+      // Remove balloon after lifetime
+      setTimeout(() => {
+        if (balloon.parentNode && !balloon.classList.contains('popped')) {
+          removeBalloon(balloon);
+        }
+      }, gameConfig.balloonLifetime);
+      
+      console.log('🎈 Balloon created at:', { x, y, color });
+    }
+
+    // Pop a balloon
+    function popBalloon(balloon) {
+      if (balloon.classList.contains('popped')) return;
+      
+      // Mark as popped
+      balloon.classList.add('popped');
+      
+      // Update game stats
+      gameStats.balloonsPopped++;
+      gameStats.score += gameConfig.scorePerBalloon;
+      
+      // Update UI
+      updateGameStats();
+      
+      // Remove balloon after pop animation
+      setTimeout(() => {
+        removeBalloon(balloon);
+      }, 500);
+      
+      console.log('💥 Balloon popped! Score:', gameStats.score);
+      
+      // Check for game completion
+      if (currentMode === 'timeAttack' && gameStats.balloonsPopped >= 50) {
+        completeGame();
+      }
+    }
+
+    // Remove balloon from game
+    function removeBalloon(balloon) {
+      const index = balloons.indexOf(balloon);
+      if (index > -1) {
+        balloons.splice(index, 1);
+      }
+      
+      if (balloon.parentNode) {
+        balloon.remove();
+      }
+    }
+
+    // Start game timer
+    function startGameTimer() {
+      gameStats.startTime = Date.now();
+      
+      gameStats.gameTimer = setInterval(() => {
+        if (!isGameActive) {
+          clearInterval(gameStats.gameTimer);
+          return;
+        }
+        
+        const elapsed = Math.floor((Date.now() - gameStats.startTime) / 1000);
+        document.getElementById('game-time').textContent = elapsed + 's';
+        
+        // Time attack mode: check if time is up
+        if (currentMode === 'timeAttack' && elapsed >= 60) {
+          completeGame();
+        }
+      }, 1000);
+    }
+
+    // Complete the game
+    function completeGame() {
+      isGameActive = false;
+      
+      // Stop spawning and clear timer
+      clearInterval(gameStats.gameTimer);
+      
+      // Show completion message
+      const completionEl = document.createElement('div');
+      completionEl.className = 'game-completion';
+      completionEl.innerHTML = `
+        <div class="completion-icon">🎉</div>
+        <div class="completion-text">
+          ${currentMode === 'classic' ? 'Game Complete!' : 'Time\'s Up!'}
+        </div>
+        <div class="completion-subtext">
+          Final Score: ${gameStats.score} | Balloons Popped: ${gameStats.balloonsPopped}
+        </div>
+      `;
+      
+      completionEl.style.cssText = `
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 200;
+      `;
+      
+      const arObjects = document.getElementById('ar-objects');
+      arObjects.appendChild(completionEl);
+      
+      // Remove completion message after 5 seconds
+      setTimeout(() => {
+        completionEl.remove();
+        updateStatus(`Game Complete! Score: ${gameStats.score}`, 'ar');
+      }, 5000);
+      
+      console.log(`🎈 ${currentMode} game completed! Final score: ${gameStats.score}`);
+    }
+
+    // Reset game state
+    function resetGame() {
+      isGameActive = false;
+      
+      // Clear existing balloons
+      balloons.forEach(balloon => {
+        if (balloon.parentNode) {
+          balloon.remove();
+        }
+      });
+      balloons = [];
+      
+      // Reset stats
+      gameStats.balloonsPopped = 0;
+      gameStats.score = 0;
+      gameStats.startTime = 0;
+      
+      // Clear timer
+      if (gameStats.gameTimer) {
+        clearInterval(gameStats.gameTimer);
+        gameStats.gameTimer = null;
+      }
+      
+      // Update UI
+      updateGameStats();
+      document.getElementById('game-time').textContent = '0s';
+    }
+
+    // Update game statistics display
+    function updateGameStats() {
+      document.getElementById('balloons-popped').textContent = gameStats.balloonsPopped;
+      document.getElementById('current-score').textContent = gameStats.score;
+    }
+
+    // Toggle game mode
+    function toggleGameMode() {
+      const newMode = currentMode === 'classic' ? 'timeAttack' : 'classic';
+      setGameMode(newMode);
+      
+      // Update UI text
+      const modeToggle = document.getElementById('mode-toggle');
+      if (modeToggle) {
+        modeToggle.textContent = newMode === 'classic' ? 'Classic Mode' : 'Time Attack';
+      }
+      
+      console.log(`🎮 Switched to ${newMode} mode`);
+    }
+
+    // Hide loading screen
+    function hideLoadingScreen() {
+      const loadingScreen = document.getElementById('loading-screen');
+      loadingScreen.style.opacity = '0';
+      setTimeout(() => {
+        loadingScreen.style.display = 'none';
+      }, 500);
+    }
+
+    // Show error message
+    function showError(message) {
+      console.error('❌ AR Error:', message);
+      const errorDiv = document.getElementById('error-message');
+      const errorText = document.getElementById('error-text');
+      errorText.textContent = message;
+      errorDiv.style.display = 'block';
+      hideLoadingScreen();
+      updateStatus('Error: ' + message, 'error');
+    }
+
+    // Update status indicator
+    function updateStatus(text, type) {
+      const statusText = document.getElementById('status-text');
+      const statusDot = document.getElementById('status-indicator');
+      
+      if (statusText) statusText.textContent = text;
+      if (statusDot) statusDot.className = `status-dot ${type}`;
+    }
+
+    // Toggle camera
+    function toggleCamera() {
+      const cameraActive = !videoElement.style.display || videoElement.style.display === 'block';
+      
+      if (cameraActive && videoElement) {
+        videoElement.style.display = 'none';
+        updateStatus('Camera Paused', 'error');
+      } else if (videoElement) {
+        videoElement.style.display = 'block';
+        updateStatus('Camera Active', 'camera');
+      }
+      
+      console.log(`📹 Camera ${cameraActive ? 'disabled' : 'enabled'}`);
+    }
+
+    // Retry camera access
+    function retryCamera() {
+      console.log('🔄 Retrying Balloon Pop AR...');
+      const errorDiv = document.getElementById('error-message');
+      errorDiv.style.display = 'none';
+      
+      const loadingScreen = document.getElementById('loading-screen');
+      loadingScreen.style.display = 'flex';
+      updateLoadingMessage('Retrying Balloon Pop AR...');
+      
+      setTimeout(() => {
+        initializeCamera();
+      }, 1000);
+    }
+
+    // Capture screenshot
+    function captureScreenshot() {
+      try {
+        // Create a canvas to capture the AR scene
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size to match video
+        if (videoElement) {
+          canvas.width = videoElement.videoWidth || 640;
+          canvas.height = videoElement.videoHeight || 480;
+        } else {
+          canvas.width = 640;
+          canvas.height = 480;
+        }
+        
+        // Draw video frame
+        if (videoElement && videoElement.videoWidth > 0) {
+          ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        }
+        
+        // Draw balloon representations on top
+        balloons.forEach(balloon => {
+          if (!balloon.classList.contains('popped')) {
+            const rect = balloon.getBoundingClientRect();
+            const scaleX = canvas.width / window.innerWidth;
+            const scaleY = canvas.height / window.innerHeight;
+            
+            // Draw balloon representation
+            ctx.fillStyle = '#FF6B9D';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🎈', rect.left * scaleX, rect.top * scaleY);
+          }
+        });
+        
+        // Create download link
+        const link = document.createElement('a');
+        link.download = `balloon-pop-ar-${Date.now()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+        
+        console.log('📸 Balloon Pop AR screenshot captured');
+        updateStatus('Screenshot Saved', 'ar');
+        
+        setTimeout(() => {
+          updateStatus('Balloon Game Ready', 'ar');
+        }, 2000);
+        
+      } catch (error) {
+        console.error('📸 Screenshot failed:', error);
+        updateStatus('Screenshot Failed', 'error');
+      }
+    }
+
+    // Navigation
+    function goHome() {
+      if (window.showcaseFramework && window.showcaseFramework.goHome) {
+        window.showcaseFramework.goHome();
+      } else {
+        window.location.href = '../index.html';
+      }
+    }
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      // Update AR objects container width
+      const arObjects = document.getElementById('ar-objects');
+      if (arObjects) {
+        const sidePanelWidth = window.innerWidth <= 1200 ? 250 : 280;
+        arObjects.style.width = `calc(100vw - ${sidePanelWidth}px)`;
+      }
+      
+      // Re-adjust video positioning on resize
+      adjustVideoPositioning();
+    });
+
+    // Console commands for debugging
+    window.balloonDebug = {
+      getGameMode: () => currentMode,
+      getGameActive: () => isGameActive,
+      getBalloonCount: () => balloons.length,
+      getScore: () => gameStats.score,
+      startGame: () => startGame(),
+      resetGame: () => resetGame(),
+      createBalloon: () => createBalloon(),
+      popAllBalloons: () => {
+        balloons.forEach(balloon => popBalloon(balloon));
+      },
+      setMode: (mode) => setGameMode(mode),
+      checkCameraStatus: () => {
+        if (videoElement) {
+          console.log('📹 AR Video element found:', videoElement);
+          console.log('📊 Video stats:', {
+            videoWidth: videoElement.videoWidth,
+            videoHeight: videoElement.videoHeight,
+            readyState: videoElement.readyState,
+            paused: videoElement.paused,
+            srcObject: !!videoElement.srcObject,
+            display: videoElement.style.display
+          });
+        } else {
+          console.log('❌ No AR video element found');
+        }
+        
+        return { videoElement, cameraStream };
+      }
+    };
+
+    console.log('🎈 Balloon Pop AR Game Debug commands available:');
+    console.log('  balloonDebug.getGameMode() - Get current game mode');
+    console.log('  balloonDebug.getGameActive() - Check if game is active');
+    console.log('  balloonDebug.getBalloonCount() - Get current balloon count');
+    console.log('  balloonDebug.getScore() - Get current score');
+    console.log('  balloonDebug.startGame() - Start the game');
+    console.log('  balloonDebug.resetGame() - Reset the game');
+    console.log('  balloonDebug.createBalloon() - Create a test balloon');
+    console.log('  balloonDebug.popAllBalloons() - Pop all balloons');
+    console.log('  balloonDebug.setMode("classic"|"timeAttack") - Set game mode');
+    console.log('  balloonDebug.checkCameraStatus() - Check camera/video status');
+    console.log('');
+    console.log('🎮 Game Features:');
+    console.log('  • Classic Mode: Pop balloons for unlimited fun!');
+    console.log('  • Time Attack Mode: Pop as many as you can in 60 seconds!');
+    console.log('  • Colorful balloons with floating animations');
+    console.log('  • Score tracking and statistics');
+    console.log('  • Touch/click to pop balloons');
+    console.log('  • Responsive AR camera integration');
+  </script>
+</body>
+</html>
