@@ -81,11 +81,13 @@
   #screen-snake #snakeCanvas {
     width: 100%;
     max-width: min(520px, 90vw);
-    height: clamp(200px, 40vh, 400px);
+    height: clamp(300px, 50vh, 520px);
     background: #111418;
     border-radius: 10px;
     border: 2px solid rgba(255,255,255,0.1);
     box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    touch-action: none; /* Prevent scrolling on touch */
+    user-select: none; /* Prevent text selection */
   }
   
   #screen-snake .game-info {
@@ -124,6 +126,8 @@
     let canvas, ctx;
     const gridSize = 20;
     let canvasSize = 400;
+    let gridWidth = 20;
+    let gridHeight = 20;
     
     function initApp() {
       setupCanvas();
@@ -136,17 +140,29 @@
       canvas = document.querySelector('#snakeCanvas');
       ctx = canvas.getContext('2d');
       
-      // Set canvas size based on CSS dimensions
+      // Set canvas size based on CSS dimensions but ensure it's divisible by gridSize
       const rect = canvas.getBoundingClientRect();
-      canvasSize = Math.min(rect.width, rect.height);
+      const idealSize = Math.min(rect.width, rect.height);
+      
+      // Make sure canvas size is divisible by gridSize for perfect grid alignment
+      canvasSize = Math.floor(idealSize / gridSize) * gridSize;
       canvas.width = canvasSize;
       canvas.height = canvasSize;
       
-      // Initialize snake
+      // Calculate grid dimensions
+      gridWidth = canvasSize / gridSize;
+      gridHeight = canvasSize / gridSize;
+      
+      console.log(`Canvas: ${canvasSize}x${canvasSize}, Grid: ${gridWidth}x${gridHeight}`);
+      
+      // Initialize snake in center of grid
+      const centerX = Math.floor(gridWidth / 2);
+      const centerY = Math.floor(gridHeight / 2);
+      
       snake = [
-        {x: 10, y: 10},
-        {x: 9, y: 10},
-        {x: 8, y: 10}
+        {x: centerX, y: centerY},
+        {x: centerX - 1, y: centerY},
+        {x: centerX - 2, y: centerY}
       ];
       
       // Initialize food
@@ -176,31 +192,60 @@
       // Keyboard controls
       document.addEventListener('keydown', handleKeyPress);
       
-      // Touch controls for mobile
+      // Window resize handler
+      window.addEventListener('resize', function() {
+        // Debounce resize events
+        clearTimeout(this.resizeTimeout);
+        this.resizeTimeout = setTimeout(() => {
+          const wasRunning = isGameRunning;
+          if (wasRunning) stopGame();
+          setupCanvas();
+          drawGame();
+          if (wasRunning) startGame();
+        }, 250);
+      });
+      
+      // Touch controls for mobile - improved sensitivity
       let touchStartX = 0;
       let touchStartY = 0;
+      let minSwipeDistance = 30; // Minimum distance for a swipe
       
       canvas.addEventListener('touchstart', function(e) {
         e.preventDefault();
         const touch = e.touches[0];
         touchStartX = touch.clientX;
         touchStartY = touch.clientY;
-      });
+      }, { passive: false });
       
       canvas.addEventListener('touchend', function(e) {
         e.preventDefault();
+        if (!isGameRunning) return; // Only respond to touches during game
+        
         const touch = e.changedTouches[0];
         const deltaX = touch.clientX - touchStartX;
         const deltaY = touch.clientY - touchStartY;
         
+        // Check if swipe is long enough
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        if (distance < minSwipeDistance) return;
+        
+        // Determine swipe direction
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
-          if (deltaX > 0 && direction !== 'left') direction = 'right';
-          else if (deltaX < 0 && direction !== 'right') direction = 'left';
+          // Horizontal swipe
+          if (deltaX > 0 && direction !== 'left') {
+            direction = 'right';
+          } else if (deltaX < 0 && direction !== 'right') {
+            direction = 'left';
+          }
         } else {
-          if (deltaY > 0 && direction !== 'up') direction = 'down';
-          else if (deltaY < 0 && direction !== 'down') direction = 'up';
+          // Vertical swipe
+          if (deltaY > 0 && direction !== 'up') {
+            direction = 'down';
+          } else if (deltaY < 0 && direction !== 'down') {
+            direction = 'up';
+          }
         }
-      });
+      }, { passive: false });
     }
     
     function handleKeyPress(e) {
@@ -276,8 +321,8 @@
       }
       
       // Check collision with walls
-      if (head.x < 0 || head.x >= canvasSize/gridSize || 
-          head.y < 0 || head.y >= canvasSize/gridSize) {
+      if (head.x < 0 || head.x >= gridWidth || 
+          head.y < 0 || head.y >= gridHeight) {
         gameOver();
         return;
       }
@@ -306,8 +351,8 @@
     function generateFood() {
       do {
         food = {
-          x: Math.floor(Math.random() * (canvasSize/gridSize)),
-          y: Math.floor(Math.random() * (canvasSize/gridSize))
+          x: Math.floor(Math.random() * gridWidth),
+          y: Math.floor(Math.random() * gridHeight)
         };
       } while (snake.some(segment => segment.x === food.x && segment.y === food.y));
     }
@@ -317,21 +362,46 @@
       ctx.fillStyle = '#111418';
       ctx.fillRect(0, 0, canvasSize, canvasSize);
       
+      // Draw grid lines for debugging (remove in production)
+      if (false) { // Set to true for debugging
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= gridWidth; i++) {
+          ctx.beginPath();
+          ctx.moveTo(i * gridSize, 0);
+          ctx.lineTo(i * gridSize, canvasSize);
+          ctx.stroke();
+        }
+        for (let i = 0; i <= gridHeight; i++) {
+          ctx.beginPath();
+          ctx.moveTo(0, i * gridSize);
+          ctx.lineTo(canvasSize, i * gridSize);
+          ctx.stroke();
+        }
+      }
+      
       // Draw snake
       snake.forEach((segment, index) => {
         if (index === 0) {
-          // Head
+          // Head - brighter color
           ctx.fillStyle = '#8BC34A';
         } else {
-          // Body
+          // Body - slightly dimmer
           ctx.fillStyle = '#4CAF50';
         }
-        ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 1, gridSize - 1);
+        
+        // Ensure coordinates are within bounds
+        const x = Math.max(0, Math.min(segment.x * gridSize, canvasSize - gridSize));
+        const y = Math.max(0, Math.min(segment.y * gridSize, canvasSize - gridSize));
+        
+        ctx.fillRect(x, y, gridSize - 1, gridSize - 1);
       });
       
       // Draw food
       ctx.fillStyle = '#FF5722';
-      ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 1, gridSize - 1);
+      const foodX = Math.max(0, Math.min(food.x * gridSize, canvasSize - gridSize));
+      const foodY = Math.max(0, Math.min(food.y * gridSize, canvasSize - gridSize));
+      ctx.fillRect(foodX, foodY, gridSize - 1, gridSize - 1);
     }
     
     function gameOver() {
@@ -344,10 +414,13 @@
       }
       
       // Reset game
+      const centerX = Math.floor(gridWidth / 2);
+      const centerY = Math.floor(gridHeight / 2);
+      
       snake = [
-        {x: 10, y: 10},
-        {x: 9, y: 10},
-        {x: 8, y: 10}
+        {x: centerX, y: centerY},
+        {x: centerX - 1, y: centerY},
+        {x: centerX - 2, y: centerY}
       ];
       direction = 'right';
       score = 0;

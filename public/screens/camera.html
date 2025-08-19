@@ -1054,14 +1054,35 @@
 
                     this.showNotification('Starting camera...', 'info');
                     
-                    // Use optimized constraints based on screen size
-                    const constraints = this.defaultConstraints || {
-                        video: {
-                            width: { ideal: 1280 },
-                            height: { ideal: 720 },
-                            facingMode: 'environment'
-                        }
-                    };
+                    // Force HTTPS check for Raspberry Pi 5
+                    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                        throw new Error('Camera access requires HTTPS on Raspberry Pi 5. Please use HTTPS or localhost.');
+                    }
+                    
+                    // Pi 5 specific camera constraints
+                    let constraints;
+                    if (navigator.userAgent.includes('aarch64') || navigator.userAgent.includes('armv8')) {
+                        // Pi 5 specific settings - try multiple device IDs
+                        constraints = {
+                            video: {
+                                width: { ideal: 640, max: 1280 },
+                                height: { ideal: 480, max: 720 },
+                                frameRate: { ideal: 15, max: 30 },
+                                facingMode: 'environment'
+                                // Removed deviceId constraint to let browser auto-detect
+                            }
+                        };
+                        console.log('Using Pi 5 optimized camera constraints');
+                    } else {
+                        // Use optimized constraints based on screen size
+                        constraints = this.defaultConstraints || {
+                            video: {
+                                width: { ideal: 1280 },
+                                height: { ideal: 720 },
+                                facingMode: 'environment'
+                            }
+                        };
+                    }
 
                     this.stream = await navigator.mediaDevices.getUserMedia(constraints);
                     this.video.srcObject = this.stream;
@@ -1091,12 +1112,29 @@
                     
                 } catch (error) {
                     console.error('Error starting camera:', error);
-                    this.showNotification('Failed to start camera: ' + error.message, 'error');
+                    
+                    // Provide specific error messages for Raspberry Pi 5
+                    let errorMessage = 'Failed to start camera: ' + error.message;
+                    
+                    if (error.name === 'NotAllowedError') {
+                        errorMessage = 'Camera permission denied. Click the camera icon in the address bar and select "Allow".';
+                    } else if (error.name === 'NotFoundError') {
+                        errorMessage = 'No camera found. Please check camera connection and run: sudo raspi-config nonint do_camera 0';
+                    } else if (error.name === 'NotReadableError') {
+                        errorMessage = 'Camera is in use by another app. Close other camera applications and refresh.';
+                    } else if (error.message.includes('HTTPS')) {
+                        errorMessage = 'Camera access requires HTTPS on Raspberry Pi 5. Use localhost or HTTPS.';
+                    } else if (navigator.userAgent.includes('aarch64') || navigator.userAgent.includes('armv8')) {
+                        // Pi 5 specific error handling
+                        errorMessage = 'Pi 5 camera issue detected. Try: 1) Install libcamera-tools: sudo apt install libcamera-tools 2) Test with: libcamera-still -o test.jpg 3) Check browser permissions';
+                    }
+                    
+                    this.showNotification(errorMessage, 'error');
                     
                     // Update placeholder text to show error
                     const placeholder = document.querySelector('.camera-placeholder p');
                     if (placeholder) {
-                        placeholder.textContent = 'Camera failed to start. Please check permissions and refresh.';
+                        placeholder.textContent = errorMessage;
                     }
                 }
             }

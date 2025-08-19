@@ -1,0 +1,921 @@
+<section id="screen-curriculum" class="screen"></section>
+  <!-- Header with logo and navigation -->
+  <header class="header">
+    <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo matrix-logo" />
+    <button id="btnHome" class="home-button" aria-label="Home">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+    </button>
+  </header>
+  
+  <div class="curriculum-container">
+    <div class="curriculum-header">
+      <h2>Microcontroller Quiz</h2>
+      <p>Test your knowledge about microcontrollers for beginners</p>
+    </div>
+    
+    <div class="quiz-content">
+      <div class="quiz-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <span class="progress-text" id="progressText">Question 1 of 10</span>
+      </div>
+      
+      <div class="quiz-area">
+        <div class="question-container" id="questionContainer">
+          <h3 class="question-text" id="questionText">Loading question...</h3>
+          <div class="answers-container" id="answersContainer">
+            <!-- Answers will be dynamically inserted here -->
+          </div>
+        </div>
+        
+        <div class="quiz-controls">
+          <button class="quiz-btn" id="nextBtn" disabled>Next Question</button>
+          <button class="quiz-btn secondary" id="resetBtn">Start Over</button>
+        </div>
+      </div>
+      
+      <div class="results-container" id="resultsContainer" style="display: none;">
+        <div class="results-content">
+          <h3>Quiz Complete!</h3>
+          <div class="score-display" id="scoreDisplay">
+            <div class="score-circle">
+              <span class="score-text" id="scoreText">0/10</span>
+            </div>
+          </div>
+          <div class="score-message" id="scoreMessage">Great effort!</div>
+          <button class="quiz-btn" id="restartBtn">Take Quiz Again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Curriculum Quiz Styles - All scoped to #screen-curriculum */
+  #screen-curriculum {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    max-height: 100vh;
+    max-width: 100vw;
+    overflow: hidden;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
+    background-size: 300% 300%;
+    animation: gradientFlow 20s ease infinite;
+    color: #ecf0f1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 0;
+    position: relative;
+    box-sizing: border-box;
+  }
+  
+  @keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  /* Subtle overlay pattern */
+  #screen-curriculum::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(600px 600px at 25% 25%, rgba(52, 152, 219, 0.1) 0%, transparent 50%),
+      radial-gradient(400px 400px at 75% 75%, rgba(155, 89, 182, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  /* Header styles */
+  #screen-curriculum .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 100;
+    flex-shrink: 0;
+    position: relative;
+  }
+  
+  /* Home button styles */
+  #screen-curriculum .home-button {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ecf0f1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  
+  #screen-curriculum .home-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+  }
+  
+  #screen-curriculum .home-button:active {
+    transform: scale(0.95);
+  }
+  
+  /* Matrix logo styles */
+  #screen-curriculum .matrix-logo {
+    height: 36px;
+    width: auto;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+  }
+  
+  #screen-curriculum .matrix-logo:hover {
+    opacity: 1;
+  }
+  
+  /* Main container */
+  #screen-curriculum .curriculum-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 72px);
+    padding: 16px;
+    gap: 16px;
+    box-sizing: border-box;
+    overflow: hidden;
+    flex: 1;
+    position: relative;
+    z-index: 2;
+  }
+
+  #screen-curriculum .curriculum-header {
+    text-align: center;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+  }
+
+  #screen-curriculum .curriculum-header h2 {
+    margin: 0 0 8px 0;
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  #screen-curriculum .curriculum-header p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 16px;
+    font-weight: 400;
+  }
+
+  /* Quiz content area */
+  #screen-curriculum .quiz-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 0;
+  }
+
+  /* Progress section */
+  #screen-curriculum .quiz-progress {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+  }
+
+  #screen-curriculum .progress-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  #screen-curriculum .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+    width: 10%;
+  }
+
+  #screen-curriculum .progress-text {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  /* Quiz area */
+  #screen-curriculum .quiz-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 0;
+  }
+
+  #screen-curriculum .question-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    min-height: 0;
+  }
+
+  #screen-curriculum .question-text {
+    margin: 0;
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.5;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  #screen-curriculum .answers-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    flex: 1;
+    align-content: start;
+  }
+
+  #screen-curriculum .answer-option {
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: #ecf0f1;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: left;
+    position: relative;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  #screen-curriculum .answer-option:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+  }
+
+  #screen-curriculum .answer-option.selected {
+    background: rgba(52, 152, 219, 0.2);
+    border-color: #3498db;
+    color: #ffffff;
+  }
+
+  #screen-curriculum .answer-option.correct {
+    background: rgba(46, 204, 113, 0.2);
+    border-color: #2ecc71;
+    color: #ffffff;
+    animation: correctPulse 0.6s ease;
+  }
+
+  #screen-curriculum .answer-option.incorrect {
+    background: rgba(231, 76, 60, 0.2);
+    border-color: #e74c3c;
+    color: #ffffff;
+    animation: incorrectShake 0.6s ease;
+  }
+
+  #screen-curriculum .answer-option.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  @keyframes correctPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes incorrectShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
+  /* Answer feedback icons */
+  #screen-curriculum .answer-option::after {
+    content: "";
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  #screen-curriculum .answer-option.correct::after {
+    content: "✓";
+    color: #2ecc71;
+    font-size: 20px;
+    font-weight: bold;
+    opacity: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(46, 204, 113, 0.2);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+  }
+
+  #screen-curriculum .answer-option.incorrect::after {
+    content: "✗";
+    color: #e74c3c;
+    font-size: 20px;
+    font-weight: bold;
+    opacity: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(231, 76, 60, 0.2);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Controls */
+  #screen-curriculum .quiz-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 8px 0;
+  }
+
+  #screen-curriculum .quiz-btn {
+    padding: 12px 24px;
+    background: #3498db;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    font-weight: 600;
+    min-width: 140px;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+  }
+
+  #screen-curriculum .quiz-btn:hover:not(:disabled) {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+  }
+
+  #screen-curriculum .quiz-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+  }
+
+  #screen-curriculum .quiz-btn:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.4);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  #screen-curriculum .quiz-btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  #screen-curriculum .quiz-btn.secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Results section */
+  #screen-curriculum .results-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(44, 62, 80, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  #screen-curriculum .results-content {
+    text-align: center;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+  }
+
+  #screen-curriculum .results-content h3 {
+    margin: 0 0 24px 0;
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  #screen-curriculum .score-display {
+    margin: 24px 0 32px 0;
+  }
+
+  #screen-curriculum .score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3498db, #2ecc71);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px auto;
+    box-shadow: 0 8px 24px rgba(52, 152, 219, 0.3);
+  }
+
+  #screen-curriculum .score-text {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  #screen-curriculum .score-message {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    #screen-curriculum .curriculum-container {
+      padding: 12px;
+      gap: 12px;
+    }
+    
+    #screen-curriculum .curriculum-header h2 {
+      font-size: 24px;
+    }
+    
+    #screen-curriculum .curriculum-header p {
+      font-size: 14px;
+    }
+    
+    #screen-curriculum .question-container {
+      padding: 20px;
+    }
+    
+    #screen-curriculum .question-text {
+      font-size: 18px;
+    }
+    
+    #screen-curriculum .answer-option {
+      padding: 14px 16px;
+      font-size: 15px;
+      min-height: 54px;
+    }
+    
+    #screen-curriculum .quiz-btn {
+      padding: 10px 20px;
+      font-size: 15px;
+      min-width: 120px;
+    }
+    
+    #screen-curriculum .results-content {
+      padding: 32px 24px;
+    }
+    
+    #screen-curriculum .results-content h3 {
+      font-size: 22px;
+    }
+    
+    #screen-curriculum .score-circle {
+      width: 100px;
+      height: 100px;
+    }
+    
+    #screen-curriculum .score-text {
+      font-size: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    #screen-curriculum .header {
+      padding: 8px 12px;
+    }
+    
+    #screen-curriculum .home-button {
+      width: 44px;
+      height: 44px;
+    }
+    
+    #screen-curriculum .matrix-logo {
+      height: 32px;
+    }
+    
+    #screen-curriculum .curriculum-container {
+      padding: 8px;
+      gap: 8px;
+    }
+    
+    #screen-curriculum .curriculum-header h2 {
+      font-size: 20px;
+    }
+    
+    #screen-curriculum .quiz-progress {
+      padding: 12px 16px;
+      gap: 12px;
+    }
+    
+    #screen-curriculum .question-container {
+      padding: 16px;
+      gap: 16px;
+    }
+    
+    #screen-curriculum .question-text {
+      font-size: 16px;
+    }
+    
+    #screen-curriculum .answer-option {
+      padding: 12px 14px;
+      font-size: 14px;
+      min-height: 50px;
+    }
+    
+    #screen-curriculum .quiz-controls {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    #screen-curriculum .quiz-btn {
+      width: 100%;
+      max-width: 200px;
+    }
+  }
+
+  /* Touch-friendly sizing */
+  @media (pointer: coarse) {
+    #screen-curriculum .answer-option {
+      min-height: 60px;
+      padding: 16px 18px;
+    }
+    
+    #screen-curriculum .quiz-btn {
+      padding: 14px 24px;
+      font-size: 16px;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    #screen-curriculum {
+      background: #000000;
+    }
+    
+    #screen-curriculum .answer-option {
+      border-width: 3px;
+    }
+    
+    #screen-curriculum .answer-option.correct {
+      background: #006600;
+      border-color: #00ff00;
+    }
+    
+    #screen-curriculum .answer-option.incorrect {
+      background: #660000;
+      border-color: #ff0000;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    'use strict';
+    
+    // Quiz data
+    const quizData = [
+      {
+        question: "What is a microcontroller?",
+        answers: [
+          "A small computer on a single chip with CPU, memory, and I/O peripherals",
+          "A type of memory storage device",
+          "A software programming language",
+          "A type of electronic resistor"
+        ],
+        correct: 0
+      },
+      {
+        question: "Which of these is NOT a common microcontroller brand?",
+        answers: [
+          "Arduino",
+          "PIC",
+          "Intel",
+          "AVR"
+        ],
+        correct: 2
+      },
+      {
+        question: "What does GPIO stand for in microcontroller terminology?",
+        answers: [
+          "General Purpose Input Output",
+          "Global Processing Input Option",
+          "Graphics Processing Interface Output",
+          "General Programming Interface Operation"
+        ],
+        correct: 0
+      },
+      {
+        question: "What is the typical operating voltage for most Arduino boards?",
+        answers: [
+          "12V",
+          "3.3V",
+          "5V",
+          "9V"
+        ],
+        correct: 2
+      },
+      {
+        question: "Which programming language is commonly used to program Arduino microcontrollers?",
+        answers: [
+          "Python",
+          "JavaScript",
+          "C/C++",
+          "Java"
+        ],
+        correct: 2
+      },
+      {
+        question: "What is PWM in microcontroller context?",
+        answers: [
+          "Power Wire Management",
+          "Pulse Width Modulation",
+          "Programmable Wire Module",
+          "Processing Work Memory"
+        ],
+        correct: 1
+      },
+      {
+        question: "Which component is essential for providing a clock signal to a microcontroller?",
+        answers: [
+          "Resistor",
+          "Capacitor",
+          "Crystal oscillator",
+          "LED"
+        ],
+        correct: 2
+      },
+      {
+        question: "What is the purpose of analog-to-digital converter (ADC) in a microcontroller?",
+        answers: [
+          "To convert digital signals to analog signals",
+          "To convert analog signals to digital signals",
+          "To amplify electrical signals",
+          "To filter electrical noise"
+        ],
+        correct: 1
+      },
+      {
+        question: "Which communication protocol is commonly used for short-distance communication between microcontrollers?",
+        answers: [
+          "HTTP",
+          "I2C",
+          "FTP",
+          "SMTP"
+        ],
+        correct: 1
+      },
+      {
+        question: "What happens when a microcontroller runs out of program memory?",
+        answers: [
+          "It automatically expands the memory",
+          "The program cannot be uploaded or may not function correctly",
+          "It switches to external memory",
+          "It runs faster"
+        ],
+        correct: 1
+      }
+    ];
+    
+    // Quiz state
+    let currentQuestion = 0;
+    let score = 0;
+    let selectedAnswer = null;
+    let quizCompleted = false;
+    
+    // DOM elements
+    let questionText, answersContainer, nextBtn, resetBtn, restartBtn;
+    let progressFill, progressText, resultsContainer, scoreText, scoreMessage;
+    
+    function initApp() {
+      console.log('Curriculum Quiz app initialized');
+      setupDOMElements();
+      setupEventListeners();
+      startQuiz();
+    }
+    
+    function setupDOMElements() {
+      questionText = document.getElementById('questionText');
+      answersContainer = document.getElementById('answersContainer');
+      nextBtn = document.getElementById('nextBtn');
+      resetBtn = document.getElementById('resetBtn');
+      restartBtn = document.getElementById('restartBtn');
+      progressFill = document.getElementById('progressFill');
+      progressText = document.getElementById('progressText');
+      resultsContainer = document.getElementById('resultsContainer');
+      scoreText = document.getElementById('scoreText');
+      scoreMessage = document.getElementById('scoreMessage');
+    }
+    
+    function setupEventListeners() {
+      // Home button
+      const homeButton = document.querySelector('#btnHome');
+      if (homeButton) {
+        homeButton.addEventListener('click', goHome);
+      }
+      
+      // Quiz control buttons
+      nextBtn.addEventListener('click', nextQuestion);
+      resetBtn.addEventListener('click', resetQuiz);
+      restartBtn.addEventListener('click', resetQuiz);
+    }
+    
+    function startQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      selectedAnswer = null;
+      quizCompleted = false;
+      resultsContainer.style.display = 'none';
+      displayQuestion();
+    }
+    
+    function displayQuestion() {
+      const question = quizData[currentQuestion];
+      questionText.textContent = question.question;
+      
+      // Update progress
+      const progress = ((currentQuestion + 1) / quizData.length) * 100;
+      progressFill.style.width = progress + '%';
+      progressText.textContent = `Question ${currentQuestion + 1} of ${quizData.length}`;
+      
+      // Clear previous answers
+      answersContainer.innerHTML = '';
+      
+      // Create answer options
+      question.answers.forEach((answer, index) => {
+        const answerDiv = document.createElement('div');
+        answerDiv.className = 'answer-option';
+        answerDiv.textContent = answer;
+        answerDiv.addEventListener('click', () => selectAnswer(index, answerDiv));
+        answersContainer.appendChild(answerDiv);
+      });
+      
+      // Reset state
+      selectedAnswer = null;
+      nextBtn.disabled = true;
+    }
+    
+    function selectAnswer(answerIndex, answerElement) {
+      // Remove previous selections
+      document.querySelectorAll('.answer-option').forEach(option => {
+        option.classList.remove('selected');
+      });
+      
+      // Mark selected answer
+      answerElement.classList.add('selected');
+      selectedAnswer = answerIndex;
+      
+      // Enable next button
+      nextBtn.disabled = false;
+    }
+    
+    function nextQuestion() {
+      if (selectedAnswer === null) return;
+      
+      // Show correct/incorrect feedback
+      const question = quizData[currentQuestion];
+      const answerOptions = document.querySelectorAll('.answer-option');
+      
+      answerOptions.forEach((option, index) => {
+        option.classList.add('disabled');
+        if (index === question.correct) {
+          option.classList.add('correct');
+        } else if (index === selectedAnswer && index !== question.correct) {
+          option.classList.add('incorrect');
+        }
+      });
+      
+      // Update score
+      if (selectedAnswer === question.correct) {
+        score++;
+      }
+      
+      // Delay before moving to next question
+      setTimeout(() => {
+        currentQuestion++;
+        
+        if (currentQuestion >= quizData.length) {
+          showResults();
+        } else {
+          displayQuestion();
+        }
+      }, 1500);
+      
+      // Disable next button during feedback
+      nextBtn.disabled = true;
+    }
+    
+    function showResults() {
+      quizCompleted = true;
+      const percentage = Math.round((score / quizData.length) * 100);
+      
+      scoreText.textContent = `${score}/${quizData.length}`;
+      
+      // Determine message based on score
+      if (percentage >= 90) {
+        scoreMessage.textContent = "Excellent! You're a microcontroller expert! 🏆";
+      } else if (percentage >= 70) {
+        scoreMessage.textContent = "Great job! You have a solid understanding! 👍";
+      } else if (percentage >= 50) {
+        scoreMessage.textContent = "Good effort! Keep learning and practicing! 📚";
+      } else {
+        scoreMessage.textContent = "Don't give up! Review the basics and try again! 💪";
+      }
+      
+      resultsContainer.style.display = 'flex';
+    }
+    
+    function resetQuiz() {
+      resultsContainer.style.display = 'none';
+      startQuiz();
+    }
+    
+    function goHome() {
+      // Direct navigation back to home
+      window.location.href = '../index.html';
+    }
+    
+    // Lifecycle management
+    window.appLifecycle = {
+      activate: function() {
+        console.log('Curriculum Quiz app activated');
+      },
+      
+      deactivate: function() {
+        console.log('Curriculum Quiz app deactivated');
+      },
+      
+      cleanup: function() {
+        console.log('Curriculum Quiz app cleanup');
+        // Reset quiz if needed
+        if (quizCompleted) {
+          resetQuiz();
+        }
+      }
+    };
+    
+    // Initialize app
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  })();
+</script>

@@ -1,6 +1,13 @@
 <section id="screen-ai-chat" class="screen">
   <div class="panel">
-    <h2>AI Chat</h2>
+    <div class="header">
+      <h2>AI Chat</h2>
+      <button class="home-btn" onclick="goHome()">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+        </svg>
+      </button>
+    </div>
     
     <!-- Connection Status -->
     <div class="status-bar">
@@ -176,11 +183,41 @@
     box-sizing: border-box;
   }
 
+  /* Header */
+  #screen-ai-chat .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
   #screen-ai-chat h2 {
-    margin: 4px 0 0;
+    margin: 0;
     font-size: 24px;
     color: #fff;
-    text-align: center;
+  }
+
+  #screen-ai-chat .home-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  #screen-ai-chat .home-btn:hover {
+    background: rgba(255,255,255,0.2);
+    transform: scale(1.05);
+  }
+
+  #screen-ai-chat .home-btn:active {
+    transform: scale(0.95);
   }
 
   /* Status Bar */
