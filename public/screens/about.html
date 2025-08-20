@@ -9,7 +9,6 @@
 <body>
 
 <section id="screen-about">
-  <button class="nav-btn" id="btnHome" aria-label="Home">🏠</button>
   
   <div class="content">
     <!-- Floating Header -->
@@ -17,7 +16,10 @@
       <div class="logo-badge">
         <span class="badge-text">Matrix TSL Showcase</span>
       </div>
-      <div class="version-badge">v3.0.0</div>
+      <div class="header-right">
+        <div class="version-badge">v3.0.0</div>
+        <button class="home-btn" id="btnHome" aria-label="Home">HOME</button>
+      </div>
     </div>
 
     <!-- Hero Images Section - Main Focus -->
@@ -92,10 +94,7 @@
           <span class="btn-icon">🚀</span>
           <span class="btn-text">Explore Now</span>
         </button>
-        <button class="action-btn secondary" id="fullscreenBtn">
-          <span class="btn-icon">🔍</span>
-          <span class="btn-text">Fullscreen</span>
-        </button>
+
       </div>
     </div>
 
@@ -151,9 +150,13 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 0, 128, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(128, 0, 255, 0.05) 0%, transparent 50%),
+      linear-gradient(135deg, #0a0a0a 0%, #1a0d1a 50%, #0d0d1a 100%);
     overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-family: 'Courier New', 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', monospace;
   }
 
   /* Navigation Button */
@@ -163,11 +166,11 @@
     left: 20px;
     width: 50px;
     height: 50px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(0, 255, 255, 0.1);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(0, 255, 255, 0.3);
     border-radius: 50%;
-    color: white;
+    color: #00ffff;
     font-size: 20px;
     cursor: pointer;
     z-index: 1000;
@@ -175,11 +178,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
   }
 
   .nav-btn:hover {
-    background: rgba(255,255,255,0.2);
+    background: rgba(0, 255, 255, 0.2);
     transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+    border-color: rgba(0, 255, 255, 0.6);
   }
 
   /* Floating Header */
@@ -199,28 +205,62 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(20px);
     padding: 8px 16px;
     border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
   }
 
   .badge-text {
-    color: white;
+    color: #00ffff;
     font-weight: 600;
     font-size: 14px;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
   }
 
   .version-badge {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 0, 128, 0.2);
     backdrop-filter: blur(20px);
     padding: 6px 12px;
     border-radius: 15px;
-    color: white;
+    color: #ff0080;
     font-size: 12px;
-    font-weight: 500;
-    border: 1px solid rgba(255,255,255,0.3);
+    font-weight: 600;
+    border: 1px solid rgba(255, 0, 128, 0.4);
+    box-shadow: 0 0 15px rgba(255, 0, 128, 0.3);
+    text-shadow: 0 0 8px rgba(255, 0, 128, 0.6);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .home-btn {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(20px);
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: #00ff00;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid rgba(0, 255, 0, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+  }
+
+  .home-btn:hover {
+    background: rgba(0, 255, 0, 0.1);
+    transform: scale(1.05);
+    border-color: rgba(0, 255, 0, 0.6);
+    box-shadow: 0 0 25px rgba(0, 255, 0, 0.4);
   }
 
   /* Content Container */
@@ -301,9 +341,17 @@
     height: 100%;
     border-radius: 20px;
     overflow: hidden;
-    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+    background: linear-gradient(45deg, 
+      rgba(0, 255, 255, 0.2), 
+      rgba(255, 0, 128, 0.2), 
+      rgba(128, 0, 255, 0.2), 
+      rgba(0, 255, 0, 0.2));
     background-size: 300% 300%;
-    animation: gradientShift 8s ease infinite;
+    animation: cyberpunkGradientShift 8s ease infinite;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    box-shadow: 
+      0 0 20px rgba(0, 255, 255, 0.2),
+      inset 0 0 20px rgba(0, 0, 0, 0.3);
   }
 
   .hero-image {
@@ -311,12 +359,12 @@
     height: 100%;
     object-fit: cover;
     transition: transform 0.6s ease;
-    filter: brightness(1.1) contrast(1.1);
+    filter: brightness(0.8) contrast(1.3) saturate(1.2) hue-rotate(10deg);
   }
 
   .image-card:hover .hero-image {
     transform: scale(1.1);
-    filter: brightness(1.2) contrast(1.2) saturate(1.3);
+    filter: brightness(1.1) contrast(1.4) saturate(1.5) hue-rotate(20deg);
   }
 
   /* Shimmer Effect */
@@ -326,9 +374,12 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+    background: linear-gradient(45deg, 
+      transparent 30%, 
+      rgba(0, 255, 255, 0.4) 50%, 
+      transparent 70%);
     transform: rotate(45deg);
-    animation: shimmer 3s linear infinite;
+    animation: cyberpunkShimmer 3s linear infinite;
     pointer-events: none;
   }
 
@@ -338,10 +389,11 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
     padding: 30px 20px 20px;
     transform: translateY(100%);
     transition: transform 0.4s ease;
+    border-top: 1px solid rgba(0, 255, 255, 0.3);
   }
 
   .image-card:hover .image-overlay {
@@ -349,7 +401,7 @@
   }
 
   .overlay-content {
-    color: white;
+    color: #ffffff;
   }
 
   .image-title {
@@ -357,6 +409,9 @@
     font-weight: 700;
     margin: 0 0 8px 0;
     animation: slideUpFade 0.6s ease 0.2s both;
+    color: #00ffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+    font-family: 'Courier New', monospace;
   }
 
   .image-desc {
@@ -364,6 +419,8 @@
     margin: 0 0 12px 0;
     opacity: 0.9;
     animation: slideUpFade 0.6s ease 0.4s both;
+    color: #ffffff;
+    font-family: 'Courier New', monospace;
   }
 
   .image-stats {
@@ -373,12 +430,16 @@
   }
 
   .stat {
-    background: rgba(255,255,255,0.2);
+    background: rgba(0, 0, 0, 0.6);
     padding: 4px 8px;
     border-radius: 12px;
     font-size: 12px;
     font-weight: 500;
     backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    color: #00ffff;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+    font-family: 'Courier New', monospace;
   }
 
   /* Featured Badge */
@@ -386,14 +447,18 @@
     position: absolute;
     top: 15px;
     right: 15px;
-    background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+    background: linear-gradient(45deg, #ff0080, #ff4040);
     color: white;
     padding: 6px 12px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
-    animation: pulse 2s infinite;
+    box-shadow: 0 0 20px rgba(255, 0, 128, 0.6);
+    animation: cyberpunkPulse 2s infinite;
+    border: 1px solid rgba(255, 0, 128, 0.5);
+    text-shadow: 0 0 8px rgba(255, 0, 128, 0.8);
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
   }
 
   /* Dots Navigation */
@@ -407,10 +472,12 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.3);
+    background: rgba(0, 255, 255, 0.3);
     cursor: pointer;
     transition: all 0.3s ease;
-    animation: dotPulse 2s ease-in-out infinite;
+    animation: cyberpunkDotPulse 2s ease-in-out infinite;
+    border: 1px solid rgba(0, 255, 255, 0.5);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
   }
 
   .dot:nth-child(1) { animation-delay: 0s; }
@@ -418,14 +485,16 @@
   .dot:nth-child(3) { animation-delay: 0.6s; }
 
   .dot.active {
-    background: white;
+    background: #00ffff;
     transform: scale(1.2);
-    box-shadow: 0 0 20px rgba(255,255,255,0.5);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+    border-color: rgba(0, 255, 255, 0.8);
   }
 
   .dot:hover {
-    background: rgba(255,255,255,0.8);
+    background: rgba(0, 255, 255, 0.8);
     transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
   }
 
   /* Floating Action Buttons */
@@ -439,21 +508,29 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: white;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    color: #00ffff;
     padding: 12px 20px;
     border-radius: 25px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    animation: buttonFloat 4s ease-in-out infinite;
+    animation: cyberpunkButtonFloat 4s ease-in-out infinite;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
   .action-btn.primary {
-    background: linear-gradient(45deg, #ff6b6b, #ff8e53);
-    border: none;
+    background: linear-gradient(45deg, rgba(255, 0, 128, 0.3), rgba(255, 64, 64, 0.3));
+    border: 1px solid rgba(255, 0, 128, 0.5);
+    color: #ff0080;
+    text-shadow: 0 0 8px rgba(255, 0, 128, 0.8);
+    box-shadow: 0 0 20px rgba(255, 0, 128, 0.3);
     animation-delay: 0.5s;
   }
 
@@ -463,7 +540,13 @@
 
   .action-btn:hover {
     transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 25px rgba(0, 255, 255, 0.4);
+    border-color: rgba(0, 255, 255, 0.6);
+  }
+
+  .action-btn.primary:hover {
+    box-shadow: 0 10px 25px rgba(255, 0, 128, 0.5);
+    border-color: rgba(255, 0, 128, 0.8);
   }
 
   .action-btn:active {
@@ -492,9 +575,16 @@
   .floating-orb {
     position: absolute;
     border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
+    background: radial-gradient(circle at 30% 30%, 
+      rgba(0, 255, 255, 0.3), 
+      rgba(255, 0, 128, 0.2), 
+      rgba(128, 0, 255, 0.1));
     backdrop-filter: blur(20px);
-    animation: orbFloat 8s ease-in-out infinite;
+    animation: cyberpunkOrbFloat 8s ease-in-out infinite;
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    box-shadow: 
+      0 0 30px rgba(0, 255, 255, 0.3),
+      inset 0 0 30px rgba(255, 0, 128, 0.2);
   }
 
   .orb-1 {
@@ -539,9 +629,10 @@
     position: absolute;
     width: 4px;
     height: 4px;
-    background: white;
+    background: #00ffff;
     border-radius: 50%;
-    animation: particleFloat 6s linear infinite;
+    animation: cyberpunkParticleFloat 6s linear infinite;
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
   }
 
   .particle:nth-child(1) {
@@ -579,46 +670,51 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
-    background: rgba(255,255,255,0.1);
+    background: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(20px);
     border-radius: 20px;
     padding: 12px 20px;
     margin-top: 20px;
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(0, 255, 255, 0.3);
     animation: slideUpFade 1s ease 1.5s both;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
   }
 
   .info-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: white;
+    color: #00ffff;
+    font-family: 'Courier New', monospace;
   }
 
   .info-icon {
     font-size: 16px;
+    filter: hue-rotate(180deg);
   }
 
   .info-text {
     font-size: 12px;
     font-weight: 500;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
   }
 
-  /* Crazy Modern Animations */
+  /* Cyberpunk Modern Animations */
   @keyframes cardFloat {
     0%, 100% { transform: translateY(0) rotateY(var(--rotate-y, 0deg)) rotateX(var(--rotate-x, 0deg)); }
     50% { transform: translateY(-10px) rotateY(var(--rotate-y, 0deg)) rotateX(var(--rotate-x, 0deg)); }
   }
 
-  @keyframes gradientShift {
-    0% { background-position: 0% 0%; }
-    50% { background-position: 100% 100%; }
-    100% { background-position: 0% 0%; }
+  @keyframes cyberpunkGradientShift {
+    0% { background-position: 0% 0%; filter: hue-rotate(0deg); }
+    50% { background-position: 100% 100%; filter: hue-rotate(180deg); }
+    100% { background-position: 0% 0%; filter: hue-rotate(360deg); }
   }
 
-  @keyframes shimmer {
-    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+  @keyframes cyberpunkShimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
   }
 
   @keyframes slideUpFade {
@@ -632,41 +728,74 @@
     }
   }
 
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+  @keyframes cyberpunkPulse {
+    0%, 100% { 
+      transform: scale(1); 
+      box-shadow: 0 0 20px rgba(255, 0, 128, 0.6);
+    }
+    50% { 
+      transform: scale(1.05); 
+      box-shadow: 0 0 30px rgba(255, 0, 128, 0.9);
+    }
   }
 
-  @keyframes dotPulse {
-    0%, 100% { opacity: 0.6; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.2); }
+  @keyframes cyberpunkDotPulse {
+    0%, 100% { 
+      opacity: 0.6; 
+      transform: scale(1);
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    }
+    50% { 
+      opacity: 1; 
+      transform: scale(1.2);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+    }
   }
 
-  @keyframes buttonFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-3px); }
+  @keyframes cyberpunkButtonFloat {
+    0%, 100% { 
+      transform: translateY(0);
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+    }
+    50% { 
+      transform: translateY(-3px);
+      box-shadow: 0 5px 25px rgba(0, 255, 255, 0.4);
+    }
   }
 
-  @keyframes orbFloat {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    33% { transform: translate(30px, -30px) rotate(120deg); }
-    66% { transform: translate(-20px, 20px) rotate(240deg); }
+  @keyframes cyberpunkOrbFloat {
+    0%, 100% { 
+      transform: translate(0, 0) rotate(0deg);
+      filter: hue-rotate(0deg);
+    }
+    33% { 
+      transform: translate(30px, -30px) rotate(120deg);
+      filter: hue-rotate(120deg);
+    }
+    66% { 
+      transform: translate(-20px, 20px) rotate(240deg);
+      filter: hue-rotate(240deg);
+    }
   }
 
-  @keyframes particleFloat {
+  @keyframes cyberpunkParticleFloat {
     0% {
       transform: translateY(100vh) rotate(0deg);
       opacity: 0;
+      box-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
     }
     10% {
       opacity: 1;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 1);
     }
     90% {
       opacity: 1;
+      box-shadow: 0 0 15px rgba(255, 0, 128, 1);
     }
     100% {
       transform: translateY(-10vh) rotate(360deg);
       opacity: 0;
+      box-shadow: 0 0 8px rgba(255, 0, 128, 0.8);
     }
   }
 
@@ -684,13 +813,13 @@
   /* Mobile Responsiveness */
   @media (max-width: 768px) {
     .images-container {
-      flex-direction: column;
-      gap: 30px;
+      gap: 15px;
+      padding: 0 10px;
     }
 
     .image-card {
-      width: 250px;
-      height: 300px;
+      width: 200px;
+      height: 250px;
     }
 
     .image-card:nth-child(1),
@@ -708,7 +837,7 @@
     .floating-actions {
       flex-direction: column;
       width: 100%;
-      max-width: 250px;
+      max-width: 200px;
     }
 
     .action-btn {
@@ -721,18 +850,58 @@
     }
   }
 
+  @media (max-width: 600px) {
+    .images-container {
+      gap: 10px;
+      padding: 0 5px;
+    }
+
+    .image-card {
+      width: 160px;
+      height: 200px;
+    }
+
+    .floating-header {
+      position: relative;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+    }
+
+    .content {
+      padding: 50px 10px 10px;
+    }
+  }
+
   @media (max-width: 480px) {
     .content {
       padding: 60px 15px 15px;
     }
 
     .image-card {
-      width: 220px;
-      height: 280px;
+      width: 120px;
+      height: 150px;
+    }
+
+    .images-container {
+      gap: 8px;
     }
 
     .floating-orb {
       display: none;
+    }
+
+    .image-title {
+      font-size: 14px;
+    }
+
+    .image-desc {
+      font-size: 12px;
+    }
+
+    .stat {
+      font-size: 10px;
+      padding: 2px 6px;
     }
   }
 </style>
@@ -765,11 +934,6 @@
           // Navigate to games or main experience
           window.location.href = '../screens/games.html';
         });
-      }
-
-      const fullscreenBtn = document.querySelector('#fullscreenBtn');
-      if (fullscreenBtn) {
-        fullscreenBtn.addEventListener('click', enterFullscreen);
       }
     }
 
@@ -935,13 +1099,6 @@
           }
         }
       });
-    }
-
-    function enterFullscreen() {
-      if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen();
-      }
-      console.log('📱 Entered fullscreen mode');
     }
 
     function goHome() {

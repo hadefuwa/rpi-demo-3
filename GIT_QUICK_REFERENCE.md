@@ -4,9 +4,10 @@
 ```bash
 cd ~/rpi-demo-3
 git add .
-git commit -m "Reduced Particle System"
+git commit -m "Scroll Test Button"
 git push origin main
 ```
+## sudo systemctl start rpidemo.service
 
 ## Pull 
 ```bash

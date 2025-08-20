@@ -2,11 +2,7 @@
   <div class="panel">
     <div class="header">
       <h2>AI Chat</h2>
-      <button class="home-btn" onclick="goHome()">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-        </svg>
-      </button>
+      <button class="home-btn" onclick="goHome()">HOME</button>
     </div>
     
     <!-- Connection Status -->
@@ -198,22 +194,24 @@
   }
 
   #screen-ai-chat .home-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.2);
     background: rgba(255,255,255,0.1);
-    color: #fff;
+    backdrop-filter: blur(20px);
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.2);
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
   #screen-ai-chat .home-btn:hover {
     background: rgba(255,255,255,0.2);
     transform: scale(1.05);
+    border-color: rgba(255,255,255,0.4);
   }
 
   #screen-ai-chat .home-btn:active {
@@ -790,6 +788,9 @@
         window.location.href = '../index.html';
       }
     }
+    
+    // Make goHome globally accessible for inline onclick
+    window.goHome = goHome;
     
     // Lifecycle management
     const cleanupFns = [];

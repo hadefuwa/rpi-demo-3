@@ -1,8 +1,8 @@
-# Matrix TSL 3.5" Screen Showcase App Plan
+# Matrix TSL 5" Screen Showcase App Plan
 
 ## App Intention & Vision
 
-The primary goal of this application is to **impress users and demonstrate the capabilities of Matrix TSL devices on a 3.5" screen**. This showcase app will be simple, fast, and visually appealing - perfect for the small display size.
+The primary goal of this application is to **impress users and demonstrate the capabilities of Matrix TSL devices on a 5" screen**. This showcase app will be simple, fast, and visually appealing - perfect for the small display size.
 
 ### Key Objectives:
 - **Simple & Fast**: Quick loading, minimal complexity
@@ -131,9 +131,9 @@ matrix-tsl-showcase/
 }
 ```
 
-### CSS for 3.5" Screen
+### CSS for 5" Screen
 ```css
-/* Fixed size for 3.5" screen */
+/* Fixed size for 5" screen */
 body {
   width: 480px;
   height: 320px;
