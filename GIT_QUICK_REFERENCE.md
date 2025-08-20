@@ -4,7 +4,7 @@
 ```bash
 cd ~/rpi-demo-3
 git add .
-git commit -m "Update message here"
+git commit -m "Reduced Particle System"
 git push origin main
 ```
 
