@@ -1,0 +1,19 @@
+[Unit]
+Description=Chromium Kiosk
+After=startx.service rpidemo.service
+Requires=rpidemo.service
+
+[Service]
+Type=simple
+User=pi
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/pi/.Xauthority
+ExecStartPre=/bin/sleep 10
+ExecStart=/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk --no-sandbox --disable-dev-shm-usage --user-data-dir=/home/pi/.config/kiosk-profile --unsafely-treat-insecure-origin-as-secure=http://localhost:3000 --use-fake-ui-for-media-stream http://localhost:3000
+StandardOutput=null
+StandardError=null
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
