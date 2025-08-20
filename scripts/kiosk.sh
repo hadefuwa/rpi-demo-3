@@ -38,47 +38,41 @@ echo "✅ HTTP server is running on port 3000"
 # Create a unique cache-busting timestamp
 STAMP=$(date +%s)
 
-# Create a completely fresh, disposable profile directory
-PROFILE=$(mktemp -d -t kiosk-XXXXXX)
+# Create a persistent profile directory for camera permissions
+PROFILE_DIR="$HOME/.config/rpi-showcase-profile"
+mkdir -p "$PROFILE_DIR"
 
-echo "📁 Using temporary profile: $PROFILE"
+echo "📁 Using persistent profile: $PROFILE_DIR"
 echo "🔄 Cache-busting timestamp: $STAMP"
 
-# Start chromium in kiosk mode with optimized flags for PWA
-# Key fixes: disposable profile, cache-busting URL, disabled caching
+# Start chromium in kiosk mode with camera permission support
+# Key changes: persistent profile, removed incognito, camera permissions
 chromium-browser \
   --kiosk "http://localhost:3000?v=${STAMP}" \
-  --user-data-dir="$PROFILE" \
+  --user-data-dir="$PROFILE_DIR" \
   --no-first-run \
   --no-default-browser-check \
-  --disable-http-cache \
-  --disk-cache-size=1 \
-  --media-cache-size=1 \
   --disable-background-timer-throttling \
   --disable-backgrounding-occluded-windows \
   --disable-renderer-backgrounding \
   --disable-features=TranslateUI \
-  --disable-ipc-flooding-protection \
-  --disable-background-networking \
   --disable-default-apps \
   --disable-sync \
-  --metrics-recording-only \
   --no-sandbox \
   --disable-dev-shm-usage \
   --disable-gpu \
   --disable-software-rasterizer \
-  --disable-application-cache \
-  --disable-offline-load-stale-cache \
-  --disable-background-networking \
-  --disable-sync-preferences \
-  --incognito &
+  --use-fake-ui-for-media-stream \
+  --allow-running-insecure-content \
+  --unsafely-treat-insecure-origin-as-secure=http://localhost:3000 \
+  --auto-accept-camera-and-microphone-capture &
 
-echo "✅ Kiosk mode started!"
+echo "✅ Kiosk mode started with camera support!"
 echo "🔄 To exit kiosk mode: Press Alt+F4 or Ctrl+Shift+Q"
 echo "🌐 PWA is running at: http://localhost:3000?v=${STAMP}"
-echo "📁 Profile directory: $PROFILE"
+echo "📁 Profile directory: $PROFILE_DIR"
 echo "🔧 Server PID: $SERVER_PID"
 echo ""
-echo "💡 This profile will be automatically cleaned up on exit"
+echo "� Camera permissions should work automatically"
 echo "🔧 For development, use: npm run dev"
 echo "🛑 To stop everything: pkill -f http-server && pkill -f chromium"

@@ -42,12 +42,17 @@ for i in {1..10}; do
     fi
 done
 
-# Start browser (try different approaches)
-echo "🖥️  Starting browser..."
+# Start browser with camera permission support
+echo "🖥️  Starting browser with camera support..."
 
-# Try method 1: Direct chromium
+# Create persistent profile for camera permissions
+PROFILE_DIR="/home/pi/.config/rpi-showcase-profile"
+mkdir -p "$PROFILE_DIR"
+
+# Start browser with camera-friendly flags
 DISPLAY=:0 chromium-browser \
   --kiosk \
+  --user-data-dir="$PROFILE_DIR" \
   --no-first-run \
   --no-default-browser-check \
   --disable-translate \
@@ -56,6 +61,9 @@ DISPLAY=:0 chromium-browser \
   --no-sandbox \
   --disable-dev-shm-usage \
   --disable-gpu \
+  --auto-accept-camera-and-microphone-capture \
+  --allow-running-insecure-content \
+  --unsafely-treat-insecure-origin-as-secure=http://localhost:3000 \
   "http://localhost:3000?autostart=$(date +%s)" \
   > /tmp/chromium.log 2>&1 &
 
