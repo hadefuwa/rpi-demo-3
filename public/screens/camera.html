@@ -60,6 +60,25 @@
             transform: translateY(-2px);
         }
 
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
         .main-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -501,6 +520,13 @@
                 font-size: 0.9rem;
             }
             
+            .home-btn {
+                top: 10px;
+                right: 10px;
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+            
             .main-container {
                 padding: 10px;
             }
@@ -747,6 +773,7 @@
 <body>
     <div class="header">
         <a href="../index.html" class="back-btn">← Back</a>
+        <a href="../index.html" class="home-btn">HOME</a>
         <h1>📸 Camera Showcase</h1>
         <p>Explore the Raspberry Pi's advanced camera capabilities</p>
     </div>
@@ -1054,15 +1081,22 @@
 
                     this.showNotification('Starting camera...', 'info');
                     
-                    // Force HTTPS check for Raspberry Pi 5
-                    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-                        throw new Error('Camera access requires HTTPS on Raspberry Pi 5. Please use HTTPS or localhost.');
+                    // Handle HTTPS/localhost for Raspberry Pi 5
+                    // Pi 5 with touchscreen should work with localhost
+                    const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+                    const isHTTPS = location.protocol === 'https:';
+                    
+                    if (!isHTTPS && !isLocalhost) {
+                        console.warn('Camera access may require HTTPS on some configurations');
+                        // Don't throw error, just warn - let the browser handle it
                     }
                     
-                    // Pi 5 specific camera constraints
+                    // Pi 5 specific camera constraints and permission handling
                     let constraints;
-                    if (navigator.userAgent.includes('aarch64') || navigator.userAgent.includes('armv8')) {
-                        // Pi 5 specific settings - try multiple device IDs
+                    const isRaspberryPi5 = navigator.userAgent.includes('aarch64') || navigator.userAgent.includes('armv8');
+                    
+                    if (isRaspberryPi5) {
+                        // Pi 5 specific settings - optimized for touchscreen kiosk
                         constraints = {
                             video: {
                                 width: { ideal: 640, max: 1280 },
@@ -1072,7 +1106,7 @@
                                 // Removed deviceId constraint to let browser auto-detect
                             }
                         };
-                        console.log('Using Pi 5 optimized camera constraints');
+                        console.log('Using Pi 5 optimized camera constraints for touchscreen');
                     } else {
                         // Use optimized constraints based on screen size
                         constraints = this.defaultConstraints || {
@@ -1117,16 +1151,20 @@
                     let errorMessage = 'Failed to start camera: ' + error.message;
                     
                     if (error.name === 'NotAllowedError') {
-                        errorMessage = 'Camera permission denied. Click the camera icon in the address bar and select "Allow".';
+                        if (isRaspberryPi5) {
+                            errorMessage = 'Camera permission needed. If in kiosk mode, restart with the updated kiosk script. Otherwise, click Allow in the permission popup.';
+                        } else {
+                            errorMessage = 'Camera permission denied. Click the camera icon in the address bar and select "Allow".';
+                        }
                     } else if (error.name === 'NotFoundError') {
                         errorMessage = 'No camera found. Please check camera connection and run: sudo raspi-config nonint do_camera 0';
                     } else if (error.name === 'NotReadableError') {
                         errorMessage = 'Camera is in use by another app. Close other camera applications and refresh.';
                     } else if (error.message.includes('HTTPS')) {
-                        errorMessage = 'Camera access requires HTTPS on Raspberry Pi 5. Use localhost or HTTPS.';
-                    } else if (navigator.userAgent.includes('aarch64') || navigator.userAgent.includes('armv8')) {
+                        errorMessage = 'Camera access may require HTTPS. Try using HTTPS or ensure localhost access.';
+                    } else if (isRaspberryPi5) {
                         // Pi 5 specific error handling
-                        errorMessage = 'Pi 5 camera issue detected. Try: 1) Install libcamera-tools: sudo apt install libcamera-tools 2) Test with: libcamera-still -o test.jpg 3) Check browser permissions';
+                        errorMessage = 'Pi 5 camera issue detected. Try: 1) Restart kiosk mode with updated script 2) Install libcamera-tools: sudo apt install libcamera-tools 3) Test with: libcamera-still -o test.jpg 4) Check browser permissions';
                     }
                     
                     this.showNotification(errorMessage, 'error');

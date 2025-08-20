@@ -11,7 +11,7 @@ Environment=DISPLAY=:0
 Environment=XAUTHORITY=/home/pi/.Xauthority
 Environment=HOME=/home/pi
 WorkingDirectory=/home/pi/rpi-demo-3
-ExecStart=/home/pi/rpi-demo-3/scripts/simple-autostart.sh
+ExecStart=/home/pi/rpi-demo-3/scripts/kiosk.sh
 Restart=always
 RestartSec=10
 StandardOutput=journal

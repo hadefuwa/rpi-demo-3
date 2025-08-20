@@ -489,6 +489,12 @@
                <div class="icon"></div>
                <span class="label">Touch Demo</span>
              </a>
+             <a href="./screens/video.html" class="card fancy theme-indigo">
+               <div class="border-animation"></div>
+               <div class="card-particles"></div>
+               <div class="icon"></div>
+               <span class="label">Video Player</span>
+             </a>
              <a href="./screens/visuals.html" class="card fancy theme-lime">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
@@ -1261,11 +1267,28 @@
         font-family: Arial, sans-serif;
       }
       
-      /* Visuals Card - 14th position */
+      /* Video Player Card - 14th position */
       #screen-home .card:nth-child(14) .icon::before {
-        content: "🎨";
+        content: "🎬";
       }
       #screen-home .card:nth-child(14) .icon::after {
+        content: "VIDEO";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 8px;
+        font-weight: bold;
+        color: rgba(255,255,255,0.8);
+        display: none;
+        font-family: Arial, sans-serif;
+      }
+      
+      /* Visuals Card - 15th position */
+      #screen-home .card:nth-child(15) .icon::before {
+        content: "🎨";
+      }
+      #screen-home .card:nth-child(15) .icon::after {
         content: "ART";
         position: absolute;
         top: 50%;
@@ -1278,11 +1301,11 @@
         font-family: Arial, sans-serif;
       }
       
-      /* Wind Tunnel Card - 15th position */
-      #screen-home .card:nth-child(15) .icon::before {
+      /* Wind Tunnel Card - 16th position */
+      #screen-home .card:nth-child(16) .icon::before {
         content: "🌪️";
       }
-      #screen-home .card:nth-child(15) .icon::after {
+      #screen-home .card:nth-child(16) .icon::after {
         content: "WIND";
         position: absolute;
         top: 50%;
@@ -1522,6 +1545,11 @@
         border-color: #9c27b0; 
         background: linear-gradient(135deg, #ea80fc, #9c27b0, #7b1fa2);
         box-shadow: 0 5px 15px rgba(156, 39, 176, 0.6);
+      }
+      #screen-home .theme-indigo { 
+        border-color: #3f51b5; 
+        background: linear-gradient(135deg, #7986cb, #3f51b5, #303f9f);
+        box-shadow: 0 5px 15px rgba(63, 81, 181, 0.6);
       }
       #screen-home .theme-gold { 
         border-color: #ff9800; 
@@ -2443,6 +2471,7 @@
       /* Theme-specific particle colors */
       .theme-cyan .card-particle { background: rgba(0, 229, 255, 0.8); }
       .theme-purple .card-particle { background: rgba(234, 128, 252, 0.8); }
+      .theme-indigo .card-particle { background: rgba(121, 134, 203, 0.8); }
       .theme-gold .card-particle { background: rgba(255, 215, 64, 0.8); }
              .theme-white .card-particle { background: rgba(255, 255, 255, 0.8); }
        .theme-grey .card-particle { background: rgba(136, 136, 136, 0.8); }

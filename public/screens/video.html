@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player - Raspberry Pi Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .video-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .video-player {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .video-controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        .control-btn.secondary {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+        }
+
+        .control-btn.secondary:hover {
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        }
+
+        .control-btn.danger {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+        }
+
+        .control-btn.danger:hover {
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+        }
+
+        .video-info {
+            margin-top: 30px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .video-info h3 {
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+
+        .video-info p {
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 800px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            .video-container {
+                margin: 20px auto;
+                padding: 0 15px;
+            }
+
+            .video-player {
+                padding: 15px;
+            }
+
+            .video-controls {
+                gap: 10px;
+            }
+
+            .control-btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+            .back-btn, .home-btn {
+                top: 10px;
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+
+            .back-btn {
+                left: 10px;
+            }
+
+            .home-btn {
+                right: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .video-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .control-btn {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="../index.html" class="back-btn">← Back</a>
+        <a href="../index.html" class="home-btn">HOME</a>
+        <h1>🎬 Video Player</h1>
+        <p>Watch the demo video with full controls</p>
+    </div>
+
+    <div class="video-container">
+        <div class="video-player">
+            <div class="video-wrapper">
+                <video id="mainVideo" controls preload="metadata">
+                    <source src="../assets/video2.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+
+            <div class="video-controls">
+                <button class="control-btn" onclick="playVideo()">▶️ Play</button>
+                <button class="control-btn secondary" onclick="pauseVideo()">⏸️ Pause</button>
+                <button class="control-btn secondary" onclick="restartVideo()">🔄 Restart</button>
+                <button class="control-btn secondary" onclick="toggleMute()">🔊 Mute/Unmute</button>
+                <button class="control-btn danger" onclick="fullscreenVideo()">⛶ Fullscreen</button>
+            </div>
+        </div>
+
+        <div class="video-info">
+            <h3>📹 Video Information</h3>
+            <p>This video player features full HTML5 video controls with custom buttons for easy navigation. 
+            The video is optimized for the Raspberry Pi display and includes responsive design for different screen sizes.</p>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('mainVideo');
+
+        function playVideo() {
+            video.play();
+        }
+
+        function pauseVideo() {
+            video.pause();
+        }
+
+        function restartVideo() {
+            video.currentTime = 0;
+            video.play();
+        }
+
+        function toggleMute() {
+            video.muted = !video.muted;
+        }
+
+        function fullscreenVideo() {
+            if (video.requestFullscreen) {
+                video.requestFullscreen();
+            } else if (video.webkitRequestFullscreen) {
+                video.webkitRequestFullscreen();
+            } else if (video.msRequestFullscreen) {
+                video.msRequestFullscreen();
+            }
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case ' ':
+                    event.preventDefault();
+                    if (video.paused) {
+                        video.play();
+                    } else {
+                        video.pause();
+                    }
+                    break;
+                case 'ArrowLeft':
+                    video.currentTime -= 10;
+                    break;
+                case 'ArrowRight':
+                    video.currentTime += 10;
+                    break;
+                case 'ArrowUp':
+                    video.volume = Math.min(1, video.volume + 0.1);
+                    break;
+                case 'ArrowDown':
+                    video.volume = Math.max(0, video.volume - 0.1);
+                    break;
+                case 'm':
+                    video.muted = !video.muted;
+                    break;
+                case 'f':
+                    fullscreenVideo();
+                    break;
+            }
+        });
+
+        // Auto-hide controls after inactivity (optional)
+        let controlsTimeout;
+        const videoWrapper = document.querySelector('.video-wrapper');
+        const videoControls = document.querySelector('.video-controls');
+
+        function showControls() {
+            videoControls.style.opacity = '1';
+            clearTimeout(controlsTimeout);
+            controlsTimeout = setTimeout(() => {
+                if (!video.paused) {
+                    videoControls.style.opacity = '0.3';
+                }
+            }, 3000);
+        }
+
+        videoWrapper.addEventListener('mousemove', showControls);
+        videoWrapper.addEventListener('click', showControls);
+    </script>
+</body>
+</html>
