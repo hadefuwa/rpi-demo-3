@@ -85,14 +85,18 @@
 }
 
 /* Specific icons for each theme */
-#screen-home .card.fancy.theme-cyan .icon::before { content: '⊹'; font-size: clamp(18px, 4.5vw, 28px); }
-#screen-home .card.fancy.theme-purple .icon::before { content: '▣'; font-size: clamp(16px, 4vw, 24px); }
-#screen-home .card.fancy.theme-gold .icon::before { content: '♦'; font-size: clamp(16px, 4vw, 26px); }
-#screen-home .card.fancy.theme-white .icon::before { content: '⟐'; font-size: clamp(16px, 4vw, 24px); }
-#screen-home .card.fancy.theme-lime .icon::before { content: '◈'; font-size: clamp(16px, 4vw, 26px); }
-#screen-home .card.fancy.theme-orange .icon::before { content: '◯'; font-size: clamp(16px, 4vw, 26px); }
-#screen-home .card.fancy.theme-blue .icon::before { content: '⚙'; font-size: clamp(16px, 4vw, 24px); }
-#screen-home .card.fancy.theme-silver .icon::before { content: 'ⓘ'; font-size: clamp(16px, 4vw, 24px); }
+#screen-home .card.fancy.theme-cyan .icon::before { content: '🌪️'; font-size: clamp(16px, 4vw, 24px); }
+#screen-home .card.fancy.theme-purple .icon::before { content: '🔮'; font-size: clamp(16px, 4vw, 24px); }
+#screen-home .card.fancy.theme-gold .icon::before { content: '🎮'; font-size: clamp(16px, 4vw, 24px); }
+#screen-home .card.fancy.theme-white .icon::before { content: '📜'; font-size: clamp(16px, 4vw, 24px); }
+#screen-home .card.fancy.theme-lime .icon::before { content: '🎨'; font-size: clamp(16px, 4vw, 24px); }
+#screen-home .card.fancy.theme-orange .icon::before { content: '🔲'; font-size: clamp(16px, 4vw, 24px); }
+#screen-home .card.fancy.theme-blue .icon::before { content: '⚙️'; font-size: clamp(16px, 4vw, 24px); }
+#screen-home .card.fancy.theme-silver .icon::before { content: 'ℹ️'; font-size: clamp(16px, 4vw, 24px); }
+#screen-home .card.fancy.theme-red .icon::before { content: '🖨️'; font-size: clamp(16px, 4vw, 24px); }
+#screen-home .card.fancy.theme-green .icon::before { content: '🤖'; font-size: clamp(16px, 4vw, 24px); }
+#screen-home .card.fancy.theme-pink .icon::before { content: '📷'; font-size: clamp(16px, 4vw, 24px); }
+#screen-home .card.fancy.theme-yellow .icon::before { content: '🎈'; font-size: clamp(16px, 4vw, 24px); }
 
 #screen-home .card.fancy:hover .icon {
   transform: scale(1.1) rotate(90deg);

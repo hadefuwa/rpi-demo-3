@@ -411,36 +411,6 @@
         <section id="screen-home" class="screen active">
           <div class="particles" id="particles"></div>
           <div class="grid">
-             <a href="./screens/touch.html" class="card fancy theme-cyan">
-               <div class="border-animation"></div>
-               <div class="card-particles"></div>
-               <div class="icon"></div>
-               <span class="label">Touch Demo</span>
-             </a>
-             <a href="./screens/info.html" class="card fancy theme-purple">
-               <div class="border-animation"></div>
-               <div class="card-particles"></div>
-               <div class="icon"></div>
-               <span class="label">System Info</span>
-             </a>
-             <a href="./screens/games.html" class="card fancy theme-gold">
-               <div class="border-animation"></div>
-               <div class="card-particles"></div>
-               <div class="icon"></div>
-               <span class="label">Games Hub</span>
-             </a>
-             <a href="./screens/scroll.html" class="card fancy theme-white">
-               <div class="border-animation"></div>
-               <div class="card-particles"></div>
-               <div class="icon"></div>
-               <span class="label">Scroll Test</span>
-             </a>
-             <a href="./screens/visuals.html" class="card fancy theme-lime">
-               <div class="border-animation"></div>
-               <div class="card-particles"></div>
-               <div class="icon"></div>
-               <span class="label">Visuals</span>
-             </a>
              <a href="./screens/stl.html" class="card fancy theme-orange">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
@@ -452,12 +422,6 @@
                <div class="card-particles"></div>
                <div class="icon"></div>
                <span class="label">3D Printer Demo</span>
-             </a>
-             <a href="./screens/settings.html" class="card fancy theme-blue">
-               <div class="border-animation"></div>
-               <div class="card-particles"></div>
-               <div class="icon"></div>
-               <span class="label">Settings</span>
              </a>
              <a href="./screens/about.html" class="card fancy theme-silver">
                <div class="border-animation"></div>
@@ -471,23 +435,17 @@
                 <div class="icon"></div>
                 <span class="label">AI Chat</span>
               </a>
-              <a href="./screens/electrical-machines.html" class="card fancy theme-blue">
-                <div class="border-animation"></div>
-                <div class="card-particles"></div>
-                <div class="icon"></div>
-                <span class="label">Electrical Machines</span>
-              </a>
              <a href="./screens/ar.html" class="card fancy theme-purple">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
                <div class="icon"></div>
                <span class="label">AR Demo</span>
              </a>
-                           <a href="./screens/wind-tunnel.html" class="card fancy theme-cyan">
+              <a href="./screens/balloon-pop.html" class="card fancy theme-yellow">
                 <div class="border-animation"></div>
                 <div class="card-particles"></div>
                 <div class="icon"></div>
-                <span class="label">Wind Tunnel</span>
+                <span class="label">Balloon Pop AR</span>
               </a>
               <a href="./screens/camera.html" class="card fancy theme-pink">
                 <div class="border-animation"></div>
@@ -495,11 +453,53 @@
                 <div class="icon"></div>
                 <span class="label">Camera Showcase</span>
               </a>
-              <a href="./screens/balloon-pop.html" class="card fancy theme-yellow">
+              <a href="./screens/electrical-machines.html" class="card fancy theme-blue">
                 <div class="border-animation"></div>
                 <div class="card-particles"></div>
                 <div class="icon"></div>
-                <span class="label">Balloon Pop AR</span>
+                <span class="label">Electrical Machines</span>
+              </a>
+             <a href="./screens/games.html" class="card fancy theme-gold">
+               <div class="border-animation"></div>
+               <div class="card-particles"></div>
+               <div class="icon"></div>
+               <span class="label">Games Hub</span>
+             </a>
+             <a href="./screens/scroll.html" class="card fancy theme-white">
+               <div class="border-animation"></div>
+               <div class="card-particles"></div>
+               <div class="icon"></div>
+               <span class="label">Scroll Test</span>
+             </a>
+             <a href="./screens/settings.html" class="card fancy theme-blue">
+               <div class="border-animation"></div>
+               <div class="card-particles"></div>
+               <div class="icon"></div>
+               <span class="label">Settings</span>
+             </a>
+             <a href="./screens/info.html" class="card fancy theme-purple">
+               <div class="border-animation"></div>
+               <div class="card-particles"></div>
+               <div class="icon"></div>
+               <span class="label">System Info</span>
+             </a>
+             <a href="./screens/touch.html" class="card fancy theme-cyan">
+               <div class="border-animation"></div>
+               <div class="card-particles"></div>
+               <div class="icon"></div>
+               <span class="label">Touch Demo</span>
+             </a>
+             <a href="./screens/visuals.html" class="card fancy theme-lime">
+               <div class="border-animation"></div>
+               <div class="card-particles"></div>
+               <div class="icon"></div>
+               <span class="label">Visuals</span>
+             </a>
+                           <a href="./screens/wind-tunnel.html" class="card fancy theme-cyan">
+                <div class="border-animation"></div>
+                <div class="card-particles"></div>
+                <div class="icon"></div>
+                <span class="label">Wind Tunnel</span>
               </a>
            </div>
         </section>
@@ -2017,26 +2017,30 @@
           const x1 = (Math.random() * moveFactor) - (moveFactor/2);
           const y1 = (Math.random() * moveFactor) - (moveFactor/2);
           
+          // COMMENTED OUT: Dynamic keyframe generation causing performance issues
           // Create a unique keyframe animation for each particle
-          const uniqueName = 'star-' + Math.floor(Math.random() * 1000000);
+          // const uniqueName = 'star-' + Math.floor(Math.random() * 1000000);
           
           // Create keyframe animation - slower and more subtle for stars
-          const keyframes = `
-            @keyframes ${uniqueName} {
-              0%, 100% { transform: translate(0, 0); }
-              50% { transform: translate(${x1}px, ${y1}px); }
-            }
-          `;
+          // const keyframes = `
+          //   @keyframes ${uniqueName} {
+          //     0%, 100% { transform: translate(0, 0); }
+          //     50% { transform: translate(${x1}px, ${y1}px); }
+          //   }
+          // `;
           
           // Add keyframes to document
-          const style = document.createElement('style');
-          style.innerHTML = keyframes;
-          document.head.appendChild(style);
+          // const style = document.createElement('style');
+          // style.innerHTML = keyframes;
+          // document.head.appendChild(style);
           
           // Apply animation to particle - much longer for cosmic effect
           const duration = Math.random() * 40 + 60; // 60-100s
           const delay = Math.random() * 10;
-          particle.style.animation = `${uniqueName} ${duration}s ease-in-out ${delay}s infinite alternate`;
+          // particle.style.animation = `${uniqueName} ${duration}s ease-in-out ${delay}s infinite alternate`;
+          
+          // TEMPORARY FIX: Use simple CSS animation instead of dynamic keyframes
+          particle.style.animation = `twinkle ${duration}s ease-in-out ${delay}s infinite alternate`;
         }
         
         // Create a galaxy cluster
@@ -2062,22 +2066,26 @@
           // Add to container
           container.appendChild(galaxy);
           
+          // COMMENTED OUT: Dynamic keyframe generation causing performance issues
           // Add subtle animation
-          const uniqueName = 'galaxy-' + Math.floor(Math.random() * 1000000);
-          const keyframes = `
-            @keyframes ${uniqueName} {
-              0%, 100% { transform: rotate(${rotation}deg) scale(1); opacity: 0.3; }
-              50% { transform: rotate(${rotation + 5}deg) scale(1.1); opacity: 0.4; }
-            }
-          `;
+          // const uniqueName = 'galaxy-' + Math.floor(Math.random() * 1000000);
+          // const keyframes = `
+          //   @keyframes ${uniqueName} {
+          //     0%, 100% { transform: rotate(${rotation}deg) scale(1); opacity: 0.3; }
+          //     50% { transform: rotate(${rotation + 5}deg) scale(1.1); opacity: 0.4; }
+          //   }
+          // `;
           
-          const style = document.createElement('style');
-          style.innerHTML = keyframes;
-          document.head.appendChild(style);
+          // const style = document.createElement('style');
+          // style.innerHTML = keyframes;
+          // document.head.appendChild(style);
           
           // Apply animation
           const duration = Math.random() * 20 + 30; // 30-50s
-          galaxy.style.animation = `${uniqueName} ${duration}s ease-in-out infinite alternate`;
+          // galaxy.style.animation = `${uniqueName} ${duration}s ease-in-out infinite alternate`;
+          
+          // TEMPORARY FIX: Use simple CSS animation instead of dynamic keyframes
+          galaxy.style.animation = `twinkle ${duration}s ease-in-out infinite alternate`;
         }
         
         // Create a shooting star
@@ -2242,30 +2250,34 @@
         
         // Set random subtle movement for cards
         function setRandomCardMovement(card, index) {
+          // COMMENTED OUT: Dynamic keyframe generation causing performance issues
           // Create a unique animation for each card
-          const uniqueName = 'card-move-' + index;
+          // const uniqueName = 'card-move-' + index;
           const rotateX = (Math.random() * 3) - 1.5; // -1.5 to 1.5 degrees
           const rotateY = (Math.random() * 3) - 1.5; // -1.5 to 1.5 degrees
           const translateZ = Math.random() * 10 + 5; // 5 to 15px
           
           // Create keyframe animation
-          const keyframes = `
-            @keyframes ${uniqueName} {
-              0%, 100% { transform: rotateX(0deg) rotateY(0deg) translateZ(0); }
-              25% { transform: rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px); }
-              75% { transform: rotateX(${-rotateX}deg) rotateY(${-rotateY}deg) translateZ(${translateZ/2}px); }
-            }
-          `;
+          // const keyframes = `
+          //   @keyframes ${uniqueName} {
+          //     0%, 100% { transform: rotateX(0deg) rotateY(0deg) translateZ(0); }
+          //     25% { transform: rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px); }
+          //     75% { transform: rotateX(${-rotateX}deg) rotateY(${-rotateY}deg) translateZ(${translateZ/2}px); }
+          //   }
+          // `;
           
           // Add keyframes to document
-          const style = document.createElement('style');
-          style.innerHTML = keyframes;
-          document.head.appendChild(style);
+          // const style = document.createElement('style');
+          // style.innerHTML = keyframes;
+          // document.head.appendChild(style);
           
           // Apply animation to card
           const duration = Math.random() * 5 + 8; // 8-13 seconds
           const delay = Math.random() * 2; // 0-2 second delay
-          card.style.animation = `${card.style.animation}, ${uniqueName} ${duration}s ease-in-out ${delay}s infinite`;
+          // card.style.animation = `${card.style.animation}, ${uniqueName} ${duration}s ease-in-out ${delay}s infinite`;
+          
+          // TEMPORARY FIX: Use existing float animation instead of dynamic keyframes
+          // Note: This removes the unique movement per card but maintains performance
         }
         
         // Create particles inside each card
