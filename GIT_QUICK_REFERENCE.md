@@ -4,7 +4,7 @@
 ```bash
 cd ~/rpi-demo-3
 git add .
-git commit -m "Scroll Test Button"
+git commit -m ".."
 git push origin main
 ```
 ## sudo systemctl start rpidemo.service

@@ -1093,20 +1093,24 @@
                     
                     // Pi 5 specific camera constraints and permission handling
                     let constraints;
-                    const isRaspberryPi5 = navigator.userAgent.includes('aarch64') || navigator.userAgent.includes('armv8');
+                    const isRaspberryPi5 = navigator.userAgent.includes('aarch64') || 
+                                           navigator.userAgent.includes('armv8') || 
+                                           navigator.userAgent.includes('Linux armv8l') ||
+                                           navigator.platform.includes('Linux armv8l');
                     
                     if (isRaspberryPi5) {
-                        // Pi 5 specific settings - optimized for touchscreen kiosk
+                        // Pi 5 specific settings - optimized for libcamera and touchscreen kiosk
                         constraints = {
                             video: {
-                                width: { ideal: 640, max: 1280 },
-                                height: { ideal: 480, max: 720 },
-                                frameRate: { ideal: 15, max: 30 },
-                                facingMode: 'environment'
-                                // Removed deviceId constraint to let browser auto-detect
-                            }
+                                width: { ideal: 640, min: 320, max: 1280 },
+                                height: { ideal: 480, min: 240, max: 720 },
+                                frameRate: { ideal: 15, min: 10, max: 30 },
+                                // Don't specify facingMode to avoid device conflicts
+                                aspectRatio: { ideal: 4/3 }
+                            },
+                            audio: false // Disable audio for better performance
                         };
-                        console.log('Using Pi 5 optimized camera constraints for touchscreen');
+                        console.log('Using Pi 5 optimized camera constraints with libcamera support');
                     } else {
                         // Use optimized constraints based on screen size
                         constraints = this.defaultConstraints || {
@@ -1157,14 +1161,22 @@
                             errorMessage = 'Camera permission denied. Click the camera icon in the address bar and select "Allow".';
                         }
                     } else if (error.name === 'NotFoundError') {
-                        errorMessage = 'No camera found. Please check camera connection and run: sudo raspi-config nonint do_camera 0';
+                        if (isRaspberryPi5) {
+                            errorMessage = 'Pi 5 camera not found. Check: 1) Camera cable connection 2) Run: sudo raspi-config -> Interface Options -> Camera -> Enable 3) Reboot Pi 4) Install libcamera: sudo apt update && sudo apt install libcamera-apps';
+                        } else {
+                            errorMessage = 'No camera found. Please check camera connection and run: sudo raspi-config nonint do_camera 0';
+                        }
                     } else if (error.name === 'NotReadableError') {
-                        errorMessage = 'Camera is in use by another app. Close other camera applications and refresh.';
+                        if (isRaspberryPi5) {
+                            errorMessage = 'Pi 5 camera in use. Stop other camera processes: sudo pkill libcamera && sudo pkill raspistill && restart browser';
+                        } else {
+                            errorMessage = 'Camera is in use by another app. Close other camera applications and refresh.';
+                        }
                     } else if (error.message.includes('HTTPS')) {
                         errorMessage = 'Camera access may require HTTPS. Try using HTTPS or ensure localhost access.';
                     } else if (isRaspberryPi5) {
-                        // Pi 5 specific error handling
-                        errorMessage = 'Pi 5 camera issue detected. Try: 1) Restart kiosk mode with updated script 2) Install libcamera-tools: sudo apt install libcamera-tools 3) Test with: libcamera-still -o test.jpg 4) Check browser permissions';
+                        // Pi 5 specific error handling for general issues
+                        errorMessage = 'Pi 5 camera error: ' + error.message + '. Solutions: 1) Restart with updated kiosk service 2) Check libcamera: libcamera-still --list-cameras 3) Verify browser flags include camera permissions';
                     }
                     
                     this.showNotification(errorMessage, 'error');

@@ -9,7 +9,7 @@ User=pi
 Environment=DISPLAY=:0
 Environment=XAUTHORITY=/home/pi/.Xauthority
 ExecStartPre=/bin/sleep 10
-ExecStart=/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk --no-sandbox --disable-dev-shm-usage --user-data-dir=/home/pi/.config/kiosk-profile --unsafely-treat-insecure-origin-as-secure=http://localhost:3000 --use-fake-ui-for-media-stream http://localhost:3000
+ExecStart=/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk --no-sandbox --disable-dev-shm-usage --user-data-dir=/home/pi/.config/kiosk-profile --unsafely-treat-insecure-origin-as-secure=http://localhost:3000 --use-fake-ui-for-media-stream --use-fake-device-for-media-stream --autoplay-policy=no-user-gesture-required --allow-running-insecure-content --disable-web-security --enable-features=VaapiVideoDecoder --use-gl=egl http://localhost:3000
 StandardOutput=null
 StandardError=null
 Restart=on-failure
