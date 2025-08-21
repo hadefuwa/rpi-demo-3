@@ -8,8 +8,8 @@ Type=simple
 User=pi
 Environment=DISPLAY=:0
 Environment=XAUTHORITY=/home/pi/.Xauthority
-ExecStartPre=/bin/sleep 10
-ExecStart=/usr/bin/chromium-browser --kiosk --no-sandbox --disable-dev-shm-usage --user-data-dir=/home/pi/.config/rpi-showcase-profile --unsafely-treat-insecure-origin-as-secure=http://localhost:3000 --use-fake-ui-for-media-stream --auto-accept-camera-and-microphone-capture --disable-web-security --allow-running-insecure-content http://localhost:3000
+ExecStartPre=/bin/sleep 15
+ExecStart=/usr/bin/chromium-browser --kiosk --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/home/pi/.config/rpi-showcase-profile --unsafely-treat-insecure-origin-as-secure=http://localhost:3000 --use-fake-ui-for-media-stream --auto-accept-camera-and-microphone-capture --allow-running-insecure-content http://localhost:3000
 StandardOutput=null
 StandardError=null
 Restart=on-failure
