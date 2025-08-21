@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Camera Test</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #000; color: white; font-family: Arial; }
+        video { width: 100%; max-width: 640px; height: auto; background: #333; }
+        .status { padding: 10px; margin: 10px 0; background: #333; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 5px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>Camera Test</h1>
+    <div class="status" id="status">Initializing...</div>
+    
+    <video id="video" autoplay muted playsinline></video>
+    
+    <button onclick="startCamera()">Start Camera</button>
+    <button onclick="stopCamera()">Stop Camera</button>
+    
+    <script>
+        let stream = null;
+        const video = document.getElementById('video');
+        const status = document.getElementById('status');
+        
+        function updateStatus(msg) {
+            status.textContent = msg;
+            console.log(msg);
+        }
+        
+        async function startCamera() {
+            try {
+                updateStatus('Requesting camera...');
+                
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    }
+                });
+                
+                video.srcObject = stream;
+                updateStatus('Camera started successfully!');
+                
+            } catch (error) {
+                updateStatus('Error: ' + error.name + ' - ' + error.message);
+            }
+        }
+        
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+                video.srcObject = null;
+                updateStatus('Camera stopped');
+            }
+        }
+        
+        // Auto-start
+        startCamera();
+    </script>
+</body>
+</html>
