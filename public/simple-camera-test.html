@@ -30,20 +30,42 @@
         
         async function startCamera() {
             try {
-                updateStatus('Requesting camera...');
+                updateStatus('Step 1: Checking devices...');
+                
+                // Check if getUserMedia is available
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    updateStatus('Error: getUserMedia not supported');
+                    return;
+                }
+                
+                updateStatus('Step 2: Listing devices...');
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                updateStatus(`Step 3: Found ${videoDevices.length} video devices`);
+                
+                if (videoDevices.length === 0) {
+                    updateStatus('Error: No video devices found');
+                    return;
+                }
+                
+                updateStatus('Step 4: Requesting camera permission...');
                 
                 stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        width: { ideal: 640 },
-                        height: { ideal: 480 }
-                    }
+                    video: true
                 });
                 
+                updateStatus('Step 5: Setting video source...');
                 video.srcObject = stream;
-                updateStatus('Camera started successfully!');
+                
+                video.onloadedmetadata = () => {
+                    updateStatus('SUCCESS: Camera started!');
+                };
                 
             } catch (error) {
-                updateStatus('Error: ' + error.name + ' - ' + error.message);
+                updateStatus('ERROR: ' + error.name + ' - ' + error.message);
+                if (error.name === 'NotAllowedError') {
+                    updateStatus('Camera permission denied - check kiosk flags');
+                }
             }
         }
         
