@@ -61,6 +61,14 @@
       cursor: pointer !important;
     }
     
+    /* Ensure home button is always visible */
+    #btnHome {
+      position: relative;
+      z-index: 1001;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
     /* Header styling */
     .topbar {
       display: flex;
@@ -73,6 +81,28 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       position: relative;
       z-index: 1000;
+    }
+    
+    /* Home button styling */
+    #btnHome {
+      padding: 8px 16px;
+      background: #dc3545;
+      border: 2px solid #dc3545;
+      color: white;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-block;
+      min-width: 60px;
+      text-align: center;
+    }
+    
+    #btnHome:hover {
+      background: #c82333;
+      border-color: #bd2130;
+      transform: translateY(-1px);
     }
     
     .topbar .title {
@@ -218,6 +248,9 @@
         background: #dc3545;
         border-color: #dc3545;
         color: white;
+        padding: 10px 20px;
+        font-size: 1rem;
+        margin-top: 5px;
       }
       
       #btnHome:hover {
@@ -496,6 +529,9 @@
           const scale = 2 / maxDim;
           currentModel.scale.setScalar(scale);
           
+          // Rotate the model 90 degrees around X-axis to make it stand upright
+          currentModel.rotation.x = -Math.PI / 2; // -90 degrees in radians
+          
           scene.add(currentModel);
           loadingIndicator.style.display = 'none';
           console.log(`Loaded model: ${filename}`);
@@ -556,7 +592,8 @@
       camera.position.set(0, 0, 2.5); // Doubled zoom (halved distance)
       controls.reset();
       if (currentModel) {
-        currentModel.rotation.set(0, 0, 0);
+        // Reset to upright position (90-degree rotation on X-axis)
+        currentModel.rotation.set(-Math.PI / 2, 0, 0);
       }
     }
     

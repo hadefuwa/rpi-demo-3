@@ -42,14 +42,14 @@ for i in {1..10}; do
     fi
 done
 
-# Start browser with camera permission support
-echo "🖥️  Starting browser with camera support..."
+# Start browser with optimized settings
+echo "🖥️  Starting browser..."
 
-# Create persistent profile for camera permissions
+# Create persistent profile for better performance
 PROFILE_DIR="/home/pi/.config/rpi-showcase-profile"
 mkdir -p "$PROFILE_DIR"
 
-# Start browser with camera-friendly flags
+# Start browser with optimized flags
 DISPLAY=:0 chromium-browser \
   --kiosk \
   --user-data-dir="$PROFILE_DIR" \
@@ -61,7 +61,7 @@ DISPLAY=:0 chromium-browser \
   --no-sandbox \
   --disable-dev-shm-usage \
   --disable-gpu \
-  --auto-accept-camera-and-microphone-capture \
+
   --allow-running-insecure-content \
   --unsafely-treat-insecure-origin-as-secure=http://localhost:3000 \
   "http://localhost:3000?autostart=$(date +%s)" \

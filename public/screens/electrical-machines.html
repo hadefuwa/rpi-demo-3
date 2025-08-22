@@ -533,14 +533,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  width: 100%;
+  gap: 4px;
+  height: 120px;
   padding: 1px;
 }
 
 .slider-track {
-  width: 100%;
-  height: 12px;
+  width: 12px;
+  height: 100px;
   background: #222;
   border-radius: 6px;
   position: relative;
@@ -562,17 +562,17 @@
 .slider-fill {
   position: absolute;
   left: 0;
-  top: 0;
-  height: 100%;
-  background: linear-gradient(to right, #4CAF50, #8BC34A);
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(to top, #4CAF50, #8BC34A);
   border-radius: 2px;
-  transition: width 0.3s ease;
+  transition: height 0.3s ease;
   box-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
 }
 
 .slider-thumb {
   position: absolute;
-  top: -8px;
+  left: -8px;
   width: 28px;
   height: 28px;
   background: #fff;
@@ -581,30 +581,34 @@
   cursor: grab;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  transform: translateX(-50%);
+  transform: translateY(50%);
 }
 
 .slider-thumb:active {
   cursor: grabbing;
-  transform: translateX(-50%) scale(1.2);
+  transform: translateY(50%) scale(1.2);
   box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
 .slider-thumb:hover {
   background: #4CAF50;
   border-color: #45a049;
-  transform: translateX(-50%) scale(1.1);
+  transform: translateY(50%) scale(1.1);
   box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 8px rgba(76, 175, 80, 0.5);
 }
 
 .slider-scale {
   display: flex;
+  flex-direction: column-reverse;
   justify-content: space-between;
   font-size: 8px;
   color: #999;
-  width: 100%;
+  height: 100px;
   font-weight: 500;
-  padding: 0 1px;
+  padding: 1px 0;
+  position: absolute;
+  right: -20px;
+  top: 0;
 }
 
 .control-btn {
@@ -1740,25 +1744,26 @@
      updateSlider('frequency', frequency);
   }
   
-  // Update slider visual
+  // Update slider visual for vertical sliders
   function updateSlider(name, value) {
     const fill = root.querySelector(`#${name}-fill`);
     const thumb = root.querySelector(`#${name}-thumb`);
     
     if (fill && thumb) {
       const percent = Math.min(100, Math.max(0, value));
-      fill.style.width = `${percent}%`;
-      thumb.style.left = `${percent}%`;
+      fill.style.height = `${percent}%`;
+      thumb.style.bottom = `${percent}%`;
     }
   }
   
-     // Handle slider interaction
+     // Handle slider interaction for vertical sliders
    function handleSliderInteraction(sliderName, event) {
      const track = event.currentTarget;
      const rect = track.getBoundingClientRect();
-     const clickX = event.clientX - rect.left;
-     const width = rect.width;
-     const percent = Math.max(0, Math.min(100, (clickX / width) * 100));
+     const clickY = event.clientY - rect.top;
+     const height = rect.height;
+     // Invert Y coordinate for vertical slider (top = 100%, bottom = 0%)
+     const percent = Math.max(0, Math.min(100, 100 - (clickY / height) * 100));
      
      // Update slider value
      sliderValues[sliderName] = percent;
@@ -1890,7 +1895,7 @@
        isDragging = true;
        currentSlider = sliderName;
        const touch = e.touches[0];
-       handleSliderInteraction(sliderName, { clientX: touch.clientX, currentTarget: track });
+       handleSliderInteraction(sliderName, { clientY: touch.clientY, currentTarget: track });
        
        // Add visual feedback
        track.style.borderColor = '#4CAF50';
@@ -1914,7 +1919,7 @@
        const track = root.querySelector(`#${currentSlider}-track`);
        if (track) {
          const touch = e.touches[0];
-         handleSliderInteraction(currentSlider, { clientX: touch.clientX, currentTarget: track });
+         handleSliderInteraction(currentSlider, { clientY: touch.clientY, currentTarget: track });
        }
      }
    });

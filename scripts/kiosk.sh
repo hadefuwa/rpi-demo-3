@@ -38,15 +38,15 @@ echo "✅ HTTP server is running on port 3000"
 # Create a unique cache-busting timestamp
 STAMP=$(date +%s)
 
-# Create a persistent profile directory for camera permissions
+# Create a persistent profile directory for better performance
 PROFILE_DIR="$HOME/.config/rpi-showcase-profile"
 mkdir -p "$PROFILE_DIR"
 
 echo "📁 Using persistent profile: $PROFILE_DIR"
 echo "🔄 Cache-busting timestamp: $STAMP"
 
-# Start chromium in kiosk mode with camera permission support
-# Key changes: persistent profile, removed incognito, camera permissions
+# Start chromium in kiosk mode with optimized settings
+# Key changes: persistent profile, removed incognito, optimized performance
 chromium-browser \
   --kiosk "http://localhost:3000?v=${STAMP}" \
   --user-data-dir="$PROFILE_DIR" \
@@ -62,17 +62,14 @@ chromium-browser \
   --disable-dev-shm-usage \
   --disable-gpu \
   --disable-software-rasterizer \
-  --use-fake-ui-for-media-stream \
   --allow-running-insecure-content \
-  --unsafely-treat-insecure-origin-as-secure=http://localhost:3000 \
-  --auto-accept-camera-and-microphone-capture &
+  --unsafely-treat-insecure-origin-as-secure=http://localhost:3000 &
 
-echo "✅ Kiosk mode started with camera support!"
+echo "✅ Kiosk mode started!"
 echo "🔄 To exit kiosk mode: Press Alt+F4 or Ctrl+Shift+Q"
 echo "🌐 PWA is running at: http://localhost:3000?v=${STAMP}"
 echo "📁 Profile directory: $PROFILE_DIR"
 echo "🔧 Server PID: $SERVER_PID"
 echo ""
-echo "� Camera permissions should work automatically"
 echo "🔧 For development, use: npm run dev"
 echo "🛑 To stop everything: pkill -f http-server && pkill -f chromium"

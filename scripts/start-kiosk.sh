@@ -8,7 +8,7 @@ pkill -f chromium
 # Wait a moment
 sleep 2
 
-# Start chromium in kiosk mode with optimized flags for PWA and camera support
+# Start chromium in kiosk mode with optimized flags for PWA
 chromium-browser \
   --kiosk \
   --disable-web-security \
@@ -28,8 +28,7 @@ chromium-browser \
   --metrics-recording-only \
   --no-sandbox \
   --disable-dev-shm-usage \
-  --use-fake-ui-for-media-stream \
-  --use-fake-device-for-media-stream \
+
   --autoplay-policy=no-user-gesture-required \
   --allow-running-insecure-content \
   --enable-features=VaapiVideoDecoder \
