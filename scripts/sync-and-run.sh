@@ -3,7 +3,7 @@
 echo "🔄 Syncing RPI 5Inch Showcase from PC..."
 
 # Navigate to project directory
-cd ~/rpi-5inch-2
+cd ~/rpi-demo-3
 
 # Fetch latest changes
 echo "📥 Fetching latest changes..."

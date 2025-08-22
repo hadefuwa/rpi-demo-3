@@ -429,36 +429,25 @@
                <div class="icon"></div>
                <span class="label">About</span>
              </a>
-                           <a href="./screens/ai-chat.html" class="card fancy theme-green">
+                                        <a href="./screens/ai-chat.html" class="card fancy theme-green">
                 <div class="border-animation"></div>
                 <div class="card-particles"></div>
                 <div class="icon"></div>
                 <span class="label">AI Chat</span>
               </a>
-             <a href="./screens/ar.html" class="card fancy theme-purple">
-               <div class="border-animation"></div>
-               <div class="card-particles"></div>
-               <div class="icon"></div>
-               <span class="label">AR Demo</span>
-             </a>
-              <a href="./screens/balloon-pop.html" class="card fancy theme-yellow">
+              <a href="./screens/curriculum.html" class="card fancy theme-teal">
                 <div class="border-animation"></div>
                 <div class="card-particles"></div>
                 <div class="icon"></div>
-                <span class="label">Balloon Pop AR</span>
+                <span class="label">Curriculum</span>
               </a>
-              <a href="./screens/camera.html" class="card fancy theme-pink">
-                <div class="border-animation"></div>
-                <div class="card-particles"></div>
-                <div class="icon"></div>
-                <span class="label">Camera Showcase</span>
-              </a>
-              <a href="./screens/electrical-machines.html" class="card fancy theme-blue">
-                <div class="border-animation"></div>
-                <div class="card-particles"></div>
-                <div class="icon"></div>
-                <span class="label">Electrical Machines</span>
-              </a>
+
+               <a href="./screens/electrical-machines.html" class="card fancy theme-blue">
+                 <div class="border-animation"></div>
+                 <div class="card-particles"></div>
+                 <div class="icon"></div>
+                 <span class="label">Electrical Machines</span>
+               </a>
              <a href="./screens/games.html" class="card fancy theme-gold">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
@@ -1097,226 +1086,243 @@
         font-family: Arial, sans-serif;
       }
       
-      /* AI Chat Card - 4th position */
-      #screen-home .card:nth-child(4) .icon::before {
-        content: "🤖";
-      }
-      #screen-home .card:nth-child(4) .icon::after {
-        content: "AI";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 8px;
-        font-weight: bold;
-        color: rgba(255,255,255,0.8);
-        display: none;
-        font-family: Arial, sans-serif;
-      }
+             /* AI Chat Card - 4th position */
+       #screen-home .card:nth-child(4) .icon::before {
+         content: "🤖";
+       }
+       #screen-home .card:nth-child(4) .icon::after {
+         content: "AI";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 8px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
+       
+       /* Curriculum Card - 5th position */
+       #screen-home .card:nth-child(5) .icon::before {
+         content: "📚";
+       }
+       #screen-home .card:nth-child(5) .icon::after {
+         content: "CURR";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 7px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
       
-      /* AR Demo Card - 5th position */
-      #screen-home .card:nth-child(5) .icon::before {
-        content: "🔮";
-      }
-      #screen-home .card:nth-child(5) .icon::after {
-        content: "AR";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 8px;
-        font-weight: bold;
-        color: rgba(255,255,255,0.8);
-        display: none;
-        font-family: Arial, sans-serif;
-      }
+             /* AR Demo Card - 6th position */
+       #screen-home .card:nth-child(6) .icon::before {
+         content: "🔮";
+       }
+       #screen-home .card:nth-child(6) .icon::after {
+         content: "AR";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 8px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
       
-      /* Balloon Pop Card - 6th position */
-      #screen-home .card:nth-child(6) .icon::before {
-        content: "🎈";
-      }
-      #screen-home .card:nth-child(6) .icon::after {
-        content: "POP";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 7px;
-        font-weight: bold;
-        color: rgba(255,255,255,0.8);
-        display: none;
-        font-family: Arial, sans-serif;
-      }
-      
-      /* Camera Showcase Card - 7th position */
-      #screen-home .card:nth-child(7) .icon::before {
-        content: "📷";
-      }
-      #screen-home .card:nth-child(7) .icon::after {
-        content: "CAM";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 7px;
-        font-weight: bold;
-        color: rgba(255,255,255,0.8);
-        display: none;
-        font-family: Arial, sans-serif;
-      }
-      
-      /* Electrical Machines Card - 8th position */
-      #screen-home .card:nth-child(8) .icon::before {
-        content: "⚙️";
-      }
-      #screen-home .card:nth-child(8) .icon::after {
-        content: "MACH";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 7px;
-        font-weight: bold;
-        color: rgba(255,255,255,0.8);
-        display: none;
-        font-family: Arial, sans-serif;
-      }
-      
-      /* Games Hub Card - 9th position */
-      #screen-home .card:nth-child(9) .icon::before {
-        content: "🎮";
-      }
-      #screen-home .card:nth-child(9) .icon::after {
-        content: "GAME";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 8px;
-        font-weight: bold;
-        color: rgba(255,255,255,0.8);
-        display: none;
-        font-family: Arial, sans-serif;
-      }
-      
-      /* Scroll Test Card - 10th position */
-      #screen-home .card:nth-child(10) .icon::before {
-        content: "📜";
-      }
-      #screen-home .card:nth-child(10) .icon::after {
-        content: "SCROLL";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 7px;
-        font-weight: bold;
-        color: rgba(255,255,255,0.8);
-        display: none;
-        font-family: Arial, sans-serif;
-      }
-      
-      /* Settings Card - 11th position */
-      #screen-home .card:nth-child(11) .icon::before {
-        content: "⚙️";
-      }
-      #screen-home .card:nth-child(11) .icon::after {
-        content: "SET";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 8px;
-        font-weight: bold;
-        color: rgba(255,255,255,0.8);
-        display: none;
-        font-family: Arial, sans-serif;
-      }
-      
-      /* System Info Card - 12th position */
-      #screen-home .card:nth-child(12) .icon::before {
-        content: "📊";
-      }
-      #screen-home .card:nth-child(12) .icon::after {
-        content: "INFO";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 8px;
-        font-weight: bold;
-        color: rgba(255,255,255,0.8);
-        display: none;
-        font-family: Arial, sans-serif;
-      }
-      
-      /* Touch Demo Card - 13th position */
-      #screen-home .card:nth-child(13) .icon::before {
-        content: "👆";
-      }
-      #screen-home .card:nth-child(13) .icon::after {
-        content: "TOUCH";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 8px;
-        font-weight: bold;
-        color: rgba(255,255,255,0.8);
-        display: none;
-        font-family: Arial, sans-serif;
-      }
-      
-      /* Video Player Card - 14th position */
-      #screen-home .card:nth-child(14) .icon::before {
-        content: "🎬";
-      }
-      #screen-home .card:nth-child(14) .icon::after {
-        content: "VIDEO";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 8px;
-        font-weight: bold;
-        color: rgba(255,255,255,0.8);
-        display: none;
-        font-family: Arial, sans-serif;
-      }
-      
-      /* Visuals Card - 15th position */
-      #screen-home .card:nth-child(15) .icon::before {
-        content: "🎨";
-      }
-      #screen-home .card:nth-child(15) .icon::after {
-        content: "ART";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 8px;
-        font-weight: bold;
-        color: rgba(255,255,255,0.8);
-        display: none;
-        font-family: Arial, sans-serif;
-      }
-      
-      /* Wind Tunnel Card - 16th position */
-      #screen-home .card:nth-child(16) .icon::before {
-        content: "🌪️";
-      }
-      #screen-home .card:nth-child(16) .icon::after {
-        content: "WIND";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 7px;
-        font-weight: bold;
-        color: rgba(255,255,255,0.8);
-        display: none;
-        font-family: Arial, sans-serif;
-      }
+             /* Balloon Pop Card - 7th position */
+       #screen-home .card:nth-child(7) .icon::before {
+         content: "🎈";
+       }
+       #screen-home .card:nth-child(7) .icon::after {
+         content: "POP";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 7px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
+       
+       /* Camera Showcase Card - 8th position */
+       #screen-home .card:nth-child(8) .icon::before {
+         content: "📷";
+       }
+       #screen-home .card:nth-child(8) .icon::after {
+         content: "CAM";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 7px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
+       
+       /* Electrical Machines Card - 9th position */
+       #screen-home .card:nth-child(9) .icon::before {
+         content: "⚙️";
+       }
+       #screen-home .card:nth-child(9) .icon::after {
+         content: "MACH";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 7px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
+       
+       /* Games Hub Card - 10th position */
+       #screen-home .card:nth-child(10) .icon::before {
+         content: "🎮";
+       }
+       #screen-home .card:nth-child(10) .icon::after {
+         content: "GAME";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 8px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
+       
+       /* Scroll Test Card - 11th position */
+       #screen-home .card:nth-child(11) .icon::before {
+         content: "📜";
+       }
+       #screen-home .card:nth-child(11) .icon::after {
+         content: "SCROLL";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 7px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
+       
+       /* Settings Card - 12th position */
+       #screen-home .card:nth-child(12) .icon::before {
+         content: "⚙️";
+       }
+       #screen-home .card:nth-child(12) .icon::after {
+         content: "SET";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 8px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
+       
+       /* System Info Card - 13th position */
+       #screen-home .card:nth-child(13) .icon::before {
+         content: "📊";
+       }
+       #screen-home .card:nth-child(13) .icon::after {
+         content: "INFO";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 8px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
+       
+       /* Touch Demo Card - 14th position */
+       #screen-home .card:nth-child(14) .icon::before {
+         content: "👆";
+       }
+       #screen-home .card:nth-child(14) .icon::after {
+         content: "TOUCH";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 8px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
+       
+       /* Video Player Card - 15th position */
+       #screen-home .card:nth-child(15) .icon::before {
+         content: "🎬";
+       }
+       #screen-home .card:nth-child(15) .icon::after {
+         content: "VIDEO";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 8px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
+       
+       /* Visuals Card - 16th position */
+       #screen-home .card:nth-child(16) .icon::before {
+         content: "🎨";
+       }
+       #screen-home .card:nth-child(16) .icon::after {
+         content: "ART";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 8px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
+       
+       /* Wind Tunnel Card - 17th position */
+       #screen-home .card:nth-child(17) .icon::before {
+         content: "🌪️";
+       }
+       #screen-home .card:nth-child(17) .icon::after {
+         content: "WIND";
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         font-size: 7px;
+         font-weight: bold;
+         color: rgba(255,255,255,0.8);
+         display: none;
+         font-family: Arial, sans-serif;
+       }
       
       /* Touch Demo Card - Glow Effect */
       #screen-home .card:nth-child(1) {
@@ -1601,6 +1607,12 @@
          border-color: #e91e63; 
          background: linear-gradient(135deg, #f48fb1, #e91e63, #c2185b);
          box-shadow: 0 5px 15px rgba(233, 30, 99, 0.6);
+       }
+       
+       .theme-teal { 
+         border-color: #009688; 
+         background: linear-gradient(135deg, #4db6ac, #009688, #00695c);
+         box-shadow: 0 5px 15px rgba(0, 150, 136, 0.6);
        }
       
       /* Quality-based optimizations */
@@ -2482,6 +2494,7 @@
       .theme-silver .card-particle { background: rgba(224, 224, 224, 0.8); }
              .theme-green .card-particle { background: rgba(129, 199, 132, 0.8); }
        .theme-pink .card-particle { background: rgba(244, 143, 177, 0.8); }
+       .theme-teal .card-particle { background: rgba(0, 150, 136, 0.8); }
       
       /* Particle animations */
       @keyframes float-up {
