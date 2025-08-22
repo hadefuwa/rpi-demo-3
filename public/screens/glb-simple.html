@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple GLB Viewer - No Server Needed</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    
+    .file-input-section {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 2px dashed #dee2e6;
+    }
+    
+    .file-input {
+      display: none;
+    }
+    
+    .file-input-label {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    
+    .file-input-label:hover {
+      background: #0056b3;
+    }
+    
+    .canvas-container {
+      width: 100%;
+      height: 600px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      position: relative;
+      background: #87CEEB;
+    }
+    
+    #glbCanvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+    }
+    
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      z-index: 100;
+    }
+    
+    .controls {
+      margin-top: 20px;
+      text-align: center;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      margin: 0 5px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    .btn:hover {
+      background: #218838;
+    }
+    
+    .btn:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .instructions {
+      background: #e7f3ff;
+      border: 1px solid #b3d9ff;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .instructions h3 {
+      margin-top: 0;
+      color: #0056b3;
+    }
+    
+    .instructions ol {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+    
+    .instructions li {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Simple GLB Viewer - No Server Required!</h1>
+    
+    <div class="instructions">
+      <h3>How to Use:</h3>
+      <ol>
+        <li>Click "Choose GLB File" below</li>
+        <li>Select any .glb file from your computer</li>
+        <li>The 3D model will load and display automatically</li>
+        <li>Use mouse to rotate, scroll to zoom</li>
+      </ol>
+    </div>
+    
+    <div class="file-input-section">
+      <input type="file" id="fileInput" class="file-input" accept=".glb">
+      <label for="fileInput" class="file-input-label">Choose GLB File</label>
+      <p style="margin-top: 10px; color: #666;">Select any .glb file from your computer</p>
+    </div>
+    
+    <div class="canvas-container">
+      <canvas id="glbCanvas"></canvas>
+      <div id="loadingIndicator" class="loading" style="display: none;">Loading 3D model...</div>
+    </div>
+    
+    <div class="controls">
+      <button id="btnZoomIn" class="btn">Zoom In</button>
+      <button id="btnZoomOut" class="btn">Zoom Out</button>
+      <button id="btnReset" class="btn">Reset View</button>
+      <button id="btnAutoRotate" class="btn">Auto Rotate</button>
+    </div>
+  </div>
+
+  <script>
+    let scene, camera, renderer, controls;
+    let currentModel = null;
+    let autoRotate = false;
+    
+    // Load Three.js from CDN
+    function loadThreeJS() {
+      return new Promise((resolve, reject) => {
+        // Load Three.js
+        const threeScript = document.createElement('script');
+        threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+        threeScript.onload = () => {
+          // Load GLTFLoader
+          const gltfScript = document.createElement('script');
+          gltfScript.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+          gltfScript.onload = () => {
+            // Load OrbitControls
+            const controlsScript = document.createElement('script');
+            controlsScript.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';
+            controlsScript.onload = resolve;
+            controlsScript.onerror = reject;
+            document.head.appendChild(controlsScript);
+          };
+          gltfScript.onerror = reject;
+          document.head.appendChild(gltfScript);
+        };
+        threeScript.onerror = reject;
+        document.head.appendChild(threeScript);
+      });
+    }
+    
+    async function init() {
+      try {
+        await loadThreeJS();
+        setupThreeJS();
+        setupEventListeners();
+        console.log('GLB Viewer ready! Choose a file to load.');
+      } catch (error) {
+        console.error('Failed to load Three.js:', error);
+        alert('Failed to load 3D libraries. Please check your internet connection.');
+      }
+    }
+    
+    function setupThreeJS() {
+      const canvas = document.getElementById('glbCanvas');
+      
+      // Scene
+      scene = new THREE.Scene();
+      
+      // Camera
+      camera = new THREE.PerspectiveCamera(75, canvas.offsetWidth / canvas.offsetHeight, 0.1, 1000);
+      camera.position.set(0, 0, 5);
+      
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+      renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+      renderer.setClearColor(0x87CEEB, 1);
+      
+      // Controls
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.1;
+      
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+      
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(10, 10, 5);
+      scene.add(directionalLight);
+      
+      // Handle resize
+      window.addEventListener('resize', onWindowResize);
+      
+      // Start render loop
+      animate();
+    }
+    
+    function setupEventListeners() {
+      // File input
+      document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+      
+      // Control buttons
+      document.getElementById('btnZoomIn').addEventListener('click', () => zoomCamera(-0.3));
+      document.getElementById('btnZoomOut').addEventListener('click', () => zoomCamera(0.3));
+      document.getElementById('btnReset').addEventListener('click', resetView);
+      document.getElementById('btnAutoRotate').addEventListener('click', toggleAutoRotate);
+    }
+    
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (file && file.name.toLowerCase().endsWith('.glb')) {
+        loadGLBFile(file);
+      } else {
+        alert('Please select a valid .glb file');
+      }
+    }
+    
+    function loadGLBFile(file) {
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      loadingIndicator.style.display = 'block';
+      loadingIndicator.textContent = 'Loading 3D model...';
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const loader = new THREE.GLTFLoader();
+        loader.parse(e.target.result, '', 
+          function(gltf) {
+            // Remove current model
+            if (currentModel) {
+              scene.remove(currentModel);
+            }
+            
+            currentModel = gltf.scene;
+            
+            // Center and scale the model
+            const box = new THREE.Box3().setFromObject(currentModel);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            
+            // Center the model
+            currentModel.position.sub(center);
+            
+            // Scale the model to fit in view
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 3 / maxDim;
+            currentModel.scale.setScalar(scale);
+            
+            scene.add(currentModel);
+            loadingIndicator.style.display = 'none';
+            
+            console.log(`Successfully loaded: ${file.name}`);
+          },
+          function(error) {
+            console.error('Error loading GLB:', error);
+            loadingIndicator.textContent = 'Error loading model. Please try a different file.';
+            setTimeout(() => {
+              loadingIndicator.style.display = 'none';
+            }, 3000);
+          }
+        );
+      };
+      reader.readAsArrayBuffer(file);
+    }
+    
+    function zoomCamera(delta) {
+      camera.position.multiplyScalar(1 + delta);
+      camera.updateProjectionMatrix();
+    }
+    
+    function resetView() {
+      camera.position.set(0, 0, 5);
+      controls.reset();
+      if (currentModel) {
+        currentModel.rotation.set(0, 0, 0);
+      }
+    }
+    
+    function toggleAutoRotate() {
+      autoRotate = !autoRotate;
+      const btn = document.getElementById('btnAutoRotate');
+      btn.textContent = autoRotate ? 'Stop Auto' : 'Auto Rotate';
+      btn.style.background = autoRotate ? '#dc3545' : '#28a745';
+    }
+    
+    function onWindowResize() {
+      const canvas = document.getElementById('glbCanvas');
+      camera.aspect = canvas.offsetWidth / canvas.offsetHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+    }
+    
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      if (autoRotate && currentModel) {
+        currentModel.rotation.y += 0.01;
+      }
+      
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    
+    // Initialize when page loads
+    init();
+  </script>
+</body>
+</html>

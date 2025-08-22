@@ -1,273 +1,483 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wind Tunnel Simulation</title>
-    <link rel="stylesheet" href="../styles/base.css">
-    <link rel="stylesheet" href="../styles/wind-tunnel.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Wind Tunnel GUI</title>
+<style>
+  :root{
+    --bg:#16181d; --panel:#22262e; --muted:#8ea0b5; --acc:#7c4dff; --good:#37c5ab; --danger:#ff6b6b;
+    --text:#e7eef7;
+  }
+  *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+  body{margin:0;background:var(--bg);color:var(--text)}
+  header{padding:12px 16px;border-bottom:1px solid #2c323c;display:flex;align-items:center;gap:12px}
+  header h1{font-size:18px;margin:0;font-weight:600;letter-spacing:.5px}
+  .grid{
+    display:grid;
+    grid-template-columns: 300px 380px 1fr;
+    gap:12px;
+    padding:12px;
+  }
+  @media (max-width:1200px){
+    .grid{grid-template-columns: 260px 340px 1fr}
+  }
+  @media (max-width:980px){
+    .grid{grid-template-columns: 1fr}
+  }
+  .card{
+    background:var(--panel); border:1px solid #2c323c; border-radius:14px; padding:12px;
+  }
+  .section-title{font-size:13px;color:var(--muted);margin:0 0 8px 0;letter-spacing:.4px;text-transform:uppercase}
+  .controls .row{display:grid;grid-template-columns: 90px 1fr 80px; align-items:center; gap:12px; margin:12px 0; min-height:48px}
+  label{font-size:16px;font-weight:500}
+  input[type="range"]{
+    width:100%; touch-action:none; height:32px; -webkit-appearance:none; appearance:none;
+    background:#1f232b; border-radius:16px; outline:none;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:24px; height:24px; border-radius:50%;
+    background:var(--acc); cursor:pointer;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:24px; height:24px; border-radius:50%; background:var(--acc);
+    border:none; cursor:pointer;
+  }
+  .btn{
+    background:#2e3440;border:1px solid #394152;color:#dbe7ff;border-radius:10px;padding:12px 16px;
+    font-size:16px;cursor:pointer;min-height:48px;touch-action:manipulation
+  }
+  .btn:active{transform:scale(.98)}
+  .btn.secondary{background:#252a34;color:#bcd0ea}
+  .btn.warn{background:#3a1f1f;border-color:#5a2b2b;color:#ffdcdc}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  select, input[type="text"]{
+    width:100%;padding:12px 16px;background:#1f232b;border:1px solid #323a46;border-radius:10px;color:#e6eefb;
+    font-size:16px;min-height:48px;touch-action:manipulation
+  }
+  /* Gauges */
+  .gauges{display:grid;grid-template-columns: repeat(4,1fr); gap:10px}
+  .gauge{display:flex;flex-direction:column;gap:6px}
+  .gauge .face{
+    position:relative;height:160px;border:1px solid #2f3540;border-radius:10px;background:#1b1f27;padding:6px
+  }
+  .bar{
+    position:absolute;left:6px;right:6px;bottom:6px;height:0;background:linear-gradient(#3f8cff,#7c4dff);
+    border-radius:8px
+  }
+  .ticks{position:absolute;inset:6px;display:flex;flex-direction:column;justify-content:space-between;color:#607089;font-size:11px}
+  .g-header{display:flex;justify-content:space-between;align-items:baseline}
+  .g-name{font-size:13px;color:#b6c7db}
+  .g-val{font-size:18px;font-weight:600}
+  .units{font-size:12px;color:#9cb2cb}
+  output{font-size:18px;font-weight:600;min-width:60px;text-align:center}
+  /* Graph */
+  .graph-wrap{display:flex;flex-direction:column;gap:8px;height:100%}
+  canvas{background:#12151a;border:1px solid #2f3540;border-radius:12px;width:100%;height:420px}
+  .log-list{max-height:110px;overflow:auto;background:#11151a;border:1px solid #2c323c;border-radius:10px;padding:6px;font-size:13px}
+  .row small{color:#9cb2cb}
+  .spacer{height:4px}
+</style>
 </head>
 <body>
-    <div id="app">
-        <!-- HEADER SECTION -->
-        <header class="app-header">
-            <div class="header-container">
-                <div class="header-title">Wind Tunnel Simulation</div>
-                <div class="header-logo">🌪️</div>
-            </div>
-        </header>
-        
-        <!-- MAIN CONTENT AREA -->
-        <main class="main-content">
-            <div class="screen active" id="wind-tunnel">
-                
-                <!-- PRIMARY CONTENT GRID -->
-                <div class="content-grid">
-                    
-                    <!-- LEFT COLUMN: CONTROL PANEL -->
-                    <section class="control-panel-section">
-                        <div class="panel-container">
-                            <div class="panel-header">
-                                <h3 class="panel-title">Control Panel</h3>
-                            </div>
-                            
-                            <!-- ACTION BUTTONS COMPONENT -->
-                            <div class="component action-buttons-component">
-                                <div class="component-header">
-                                    <h4 class="component-title">Actions</h4>
-                                </div>
-                                <div class="component-content">
-                                    <div class="button-grid">
-                                        <button id="sweep-btn" class="btn btn-primary">Sweep</button>
-                                        <button id="zero-btn" class="btn btn-secondary">Zero</button>
-                                        <button id="set-btn" class="btn btn-success">Set</button>
-                                        <button id="switch-off-btn" class="btn btn-danger">Switch Off</button>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- INPUT CONTROLS COMPONENT -->
-                            <div class="component input-controls-component">
-                                <div class="component-header">
-                                    <h4 class="component-title">Input Controls</h4>
-                                </div>
-                                <div class="component-content">
-                                    <div class="control-group">
-                                        <label for="angle-slider">Angle of Attack (°)</label>
-                                        <input type="range" id="angle-slider" min="-15" max="25" value="0" step="0.5">
-                                        <div class="value-display" id="angle-value">0.0°</div>
-                                    </div>
-                                    
-                                    <div class="control-group">
-                                        <label for="fan-slider">Fan Speed (%)</label>
-                                        <input type="range" id="fan-slider" min="0" max="100" value="50" step="5">
-                                        <div class="value-display" id="fan-value">50%</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- MEASUREMENTS COMPONENT -->
-                            <div class="component measurements-component">
-                                <div class="component-header">
-                                    <h4 class="component-title">Live Measurements</h4>
-                                </div>
-                                <div class="component-content">
-                                    <div class="measurements-grid">
-                                        <div class="measurement-item">
-                                            <span class="measurement-label">Lift:</span>
-                                            <span class="measurement-value" id="lift-value">0.00 N</span>
-                                        </div>
-                                        <div class="measurement-item">
-                                            <span class="measurement-label">Drag:</span>
-                                            <span class="measurement-value" id="drag-value">0.00 N</span>
-                                        </div>
-                                        <div class="measurement-item">
-                                            <span class="measurement-label">Pressure:</span>
-                                            <span class="measurement-value" id="pressure-value">0.00 Pa</span>
-                                        </div>
-                                        <div class="measurement-item">
-                                            <span class="measurement-label">Air Speed:</span>
-                                            <span class="measurement-value" id="airspeed-value">0.00 m/s</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                    
-                    <!-- CENTER COLUMN: GAUGES -->
-                    <section class="gauges-section">
-                        <div class="gauges-container">
-                            <div class="component-header">
-                                <h3 class="component-title">Live Gauges</h3>
-                            </div>
-                            <div class="component-content">
-                                <div class="gauges-grid">
-                                    <!-- ANGLE GAUGE -->
-                                    <div class="gauge-component" id="angle-gauge">
-                                        <div class="gauge-header">
-                                            <div class="gauge-label">Angle (°)</div>
-                                        </div>
-                                        <div class="gauge-body">
-                                            <div class="gauge-meter">
-                                                <div class="gauge-fill" id="angle-fill"></div>
-                                            </div>
-                                            <div class="gauge-value" id="angle-gauge-value">0.0°</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- FAN SPEED GAUGE -->
-                                    <div class="gauge-component" id="fan-gauge">
-                                        <div class="gauge-header">
-                                            <div class="gauge-label">Fan Speed (%)</div>
-                                        </div>
-                                        <div class="gauge-body">
-                                            <div class="gauge-meter">
-                                                <div class="gauge-fill" id="fan-fill"></div>
-                                            </div>
-                                            <div class="gauge-value" id="fan-gauge-value">50%</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- LIFT GAUGE -->
-                                    <div class="gauge-component" id="lift-gauge">
-                                        <div class="gauge-header">
-                                            <div class="gauge-label">Lift (N)</div>
-                                        </div>
-                                        <div class="gauge-body">
-                                            <div class="gauge-meter">
-                                                <div class="gauge-fill" id="lift-fill"></div>
-                                            </div>
-                                            <div class="gauge-value" id="lift-gauge-value">0.00 N</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- DRAG GAUGE -->
-                                    <div class="gauge-component" id="drag-gauge">
-                                        <div class="gauge-header">
-                                            <div class="gauge-label">Drag (N)</div>
-                                        </div>
-                                        <div class="gauge-body">
-                                            <div class="gauge-meter">
-                                                <div class="gauge-fill" id="drag-fill"></div>
-                                            </div>
-                                            <div class="gauge-value" id="drag-gauge-value">0.00 N</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- PRESSURE GAUGE -->
-                                    <div class="gauge-component" id="pressure-gauge">
-                                        <div class="gauge-header">
-                                            <div class="gauge-label">Pressure (Pa)</div>
-                                        </div>
-                                        <div class="gauge-body">
-                                            <div class="gauge-meter">
-                                                <div class="gauge-fill" id="pressure-fill"></div>
-                                            </div>
-                                            <div class="gauge-value" id="pressure-gauge-value">0.00 Pa</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- AIRSPEED GAUGE -->
-                                    <div class="gauge-component" id="airspeed-gauge">
-                                        <div class="gauge-header">
-                                            <div class="gauge-label">Air Speed (m/s)</div>
-                                        </div>
-                                        <div class="gauge-body">
-                                            <div class="gauge-meter">
-                                                <div class="gauge-fill" id="airspeed-fill"></div>
-                                            </div>
-                                            <div class="gauge-value" id="airspeed-gauge-value">0.00 m/s</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                    
-                    <!-- RIGHT COLUMN: GRAPHING -->
-                    <section class="graphing-section">
-                        <div class="graphing-container">
-                            <div class="component-header">
-                                <h3 class="component-title">📊 Lift vs Drag Analysis</h3>
-                            </div>
-                            
-                            <!-- GRAPH CONTROLS COMPONENT -->
-                            <div class="component graph-controls-component">
-                                <div class="component-header">
-                                    <h4 class="component-title">Graph Controls</h4>
-                                </div>
-                                <div class="component-content">
-                                    <div class="controls-grid">
-                                        <button id="log-data-btn" class="btn btn-info">Log Data</button>
-                                        <button id="clear-graph-btn" class="btn btn-warning">Clear Graph</button>
-                                        <select id="graph-type" class="select-control">
-                                            <option value="lift">Lift vs Angle</option>
-                                            <option value="drag">Drag vs Angle</option>
-                                            <option value="both">Lift & Drag vs Angle</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- CHART COMPONENT -->
-                            <div class="component chart-component">
-                                <div class="component-header">
-                                    <h4 class="component-title">Performance Chart</h4>
-                                </div>
-                                <div class="component-content">
-                                    <div class="chart-container">
-                                        <canvas id="performance-chart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- DATA LOG COMPONENT -->
-                            <div class="component data-log-component">
-                                <div class="component-header">
-                                    <h4 class="component-title">Data Log</h4>
-                                </div>
-                                <div class="component-content">
-                                    <div class="log-content" id="log-content">
-                                        <div class="log-entry">Ready to collect data...</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                    
-                </div>
-                
-                <!-- FOOTER SECTION: EDUCATIONAL PANEL -->
-                <footer class="educational-footer">
-                    <div class="educational-container">
-                        <div class="component educational-component">
-                            <div class="component-header">
-                                <div class="info-toggle">
-                                    <button id="info-toggle-btn" class="btn btn-outline">ℹ️ Show Info</button>
-                                </div>
-                            </div>
-                            <div class="component-content">
-                                <div class="info-content" id="info-content">
-                                    <h3 class="info-title">Wind Tunnel Physics</h3>
-                                    <div class="info-text">
-                                        <p><strong>Angle of Attack:</strong> The angle between the wing's chord line and the oncoming airflow. Critical for understanding lift generation and stall behavior.</p>
-                                        <p><strong>Lift:</strong> Force perpendicular to the airflow, generated by pressure differences above and below the wing surface.</p>
-                                        <p><strong>Drag:</strong> Force parallel to the airflow, caused by air resistance and pressure differences.</p>
-                                        <p><strong>Stall:</strong> Occurs when the angle of attack becomes too large, causing airflow separation and loss of lift.</p>
-                                        <p><strong>Fan Speed:</strong> Controls the velocity of the airflow, affecting both lift and drag forces.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </footer>
-                
-            </div>
-        </main>
+  <header>
+    <h1>Matrix Wind Tunnel 125</h1>
+    <div style="flex:1"></div>
+    <div style="min-width:280px">
+      <select id="experiment">
+        <option value="baseline">Select Experiment...</option>
+        <option value="lift-curve">Lift Curve vs AoA</option>
+        <option value="drag-polar">Drag Polar</option>
+        <option value="pressure-speed">Pressure vs Speed</option>
+      </select>
     </div>
+  </header>
+
+  <main class="grid">
+    <!-- Controls -->
+    <section class="card controls">
+      <h3 class="section-title">Controls</h3>
+
+      <div class="row">
+        <label for="angle">Angle</label>
+        <input id="angle" type="range" min="-45" max="45" value="0" step="1" />
+        <output id="angleOut">0°</output>
+      </div>
+
+      <div class="row">
+        <label for="speed">Fan speed</label>
+        <input id="speed" type="range" min="0" max="100" value="0" step="1" />
+        <output id="speedOut">0%</output>
+      </div>
+
+      <div class="toolbar">
+        <button id="btnZero" class="btn">Zero</button>
+        <button id="btnSet" class="btn secondary">Set</button>
+        <button id="btnSweep" class="btn secondary">Sweep</button>
+        <button id="btnOff" class="btn warn">Switch Off</button>
+      </div>
+
+      <small style="color:#9cb2cb">Only Angle and Fan speed are user-controlled. All gauges are visual-only.</small>
+    </section>
+
+    <!-- Gauges -->
+    <section class="card">
+      <h3 class="section-title">Measurements</h3>
+      <div class="gauges">
+        <div class="gauge" data-key="lift">
+          <div class="g-header">
+            <span class="g-name">Lift</span>
+            <span class="g-val" id="liftVal">0.00</span>
+          </div>
+          <div class="units">mN</div>
+          <div class="face">
+            <div class="ticks"><span>max</span><span>0</span></div>
+            <div class="bar" id="liftBar"></div>
+          </div>
+        </div>
+
+        <div class="gauge" data-key="drag">
+          <div class="g-header">
+            <span class="g-name">Drag</span>
+            <span class="g-val" id="dragVal">0.00</span>
+          </div>
+          <div class="units">mN</div>
+          <div class="face">
+            <div class="ticks"><span>max</span><span>0</span></div>
+            <div class="bar" id="dragBar"></div>
+          </div>
+        </div>
+
+        <div class="gauge" data-key="pressure">
+          <div class="g-header">
+            <span class="g-name">Pressure</span>
+            <span class="g-val" id="pressVal">0.0</span>
+          </div>
+          <div class="units">Pa</div>
+          <div class="face">
+            <div class="ticks"><span>max</span><span>0</span></div>
+            <div class="bar" id="pressBar"></div>
+          </div>
+        </div>
+
+        <div class="gauge" data-key="airspeed">
+          <div class="g-header">
+            <span class="g-name">Air speed</span>
+            <span class="g-val" id="spdVal">0.0</span>
+          </div>
+          <div class="units">m/s</div>
+          <div class="face">
+            <div class="ticks"><span>50</span><span>0</span></div>
+            <div class="bar" id="spdBar"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Graph + Log -->
+    <section class="card">
+      <h3 class="section-title">Log and Graph</h3>
+      <div class="graph-wrap">
+        <div class="toolbar">
+          <button id="btnLog" class="btn">Log</button>
+          <button id="btnClear" class="btn secondary">Clear Graph</button>
+        </div>
+        <canvas id="plot" width="900" height="420" aria-label="Fan speed vs Pressure"></canvas>
+        <div class="log-list" id="logList"></div>
+      </div>
+    </section>
+  </main>
+
+<script>
+(() => {
+  // Constants
+  const rho = 1.2;     // air density kg/m^3
+  const S = 0.01;      // ref area m^2
+  const Cd0 = 0.05;
+  const k = 0.07;
+
+  // State
+  const state = {
+    mode: 'manual', // manual, sweep, off
+    angleDeg: 0,
+    speedPct: 0,
+    offsets: {lift:0, drag:0, pressure:0},
+    airspeed: 0,
+    pressure: 0,
+    lift: 0,
+    drag: 0,
+    dataPoints: [] // {x: speedPct, y: pressure}
+  };
+
+  // DOM
+  const angleEl = document.getElementById('angle');
+  const speedEl = document.getElementById('speed');
+  const angleOut = document.getElementById('angleOut');
+  const speedOut = document.getElementById('speedOut');
+
+  const liftVal = document.getElementById('liftVal');
+  const dragVal = document.getElementById('dragVal');
+  const pressVal = document.getElementById('pressVal');
+  const spdVal  = document.getElementById('spdVal');
+
+  const liftBar = document.getElementById('liftBar');
+  const dragBar = document.getElementById('dragBar');
+  const pressBar= document.getElementById('pressBar');
+  const spdBar  = document.getElementById('spdBar');
+
+  const btnZero = document.getElementById('btnZero');
+  const btnSet  = document.getElementById('btnSet');
+  const btnSweep= document.getElementById('btnSweep');
+  const btnOff  = document.getElementById('btnOff');
+  const btnLog  = document.getElementById('btnLog');
+  const btnClear= document.getElementById('btnClear');
+  const logList = document.getElementById('logList');
+  const experimentEl = document.getElementById('experiment');
+
+  const canvas = document.getElementById('plot');
+  const ctx = canvas.getContext('2d');
+
+  // Helpers
+  function pct(v, min, max){ return ((v-min)/(max-min))*100 }
+  function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)) }
+  function fmt(n, d=2){ return Number(n).toFixed(d) }
+
+  // Simulation model (visual-only outputs)
+  function simulate() {
+    // Map speed% to airspeed 0..50 m/s using sqrt curve for nicer feel
+    const V = 50 * Math.sqrt(state.speedPct/100);
+    const q = 0.5 * rho * V * V;               // dynamic pressure Pa
+    const alpha = state.angleDeg * Math.PI/180;
+
+    // Simple lift/drag model with proper clamping
+    let Cl = 2*Math.PI*alpha;
+    Cl = clamp(Cl, -1.8, 1.8);
+    const Cd = Cd0 + k*Cl*Cl;
+
+    const L = q * S * Cl; // N
+    const D = q * S * Cd; // N
+
+    // Add small realistic noise (±1% of reading)
+    const noise = () => (Math.random() - 0.5) * 0.02;
     
-    <script src="../js/wind-tunnel.js"></script>
+    state.airspeed = V * (1 + noise());
+    state.pressure = (q - state.offsets.pressure) * (1 + noise());
+    state.lift = (L - state.offsets.lift) * 1000 * (1 + noise()); // mN
+    state.drag = (D - state.offsets.drag) * 1000 * (1 + noise()); // mN
+  }
+
+  function renderGauges() {
+    liftVal.textContent = fmt(state.lift,2);
+    dragVal.textContent = fmt(state.drag,2);
+    pressVal.textContent= fmt(state.pressure,1);
+    spdVal.textContent  = fmt(state.airspeed,1);
+
+    // Normalise bars to practical scales
+    const liftPct = clamp(Math.abs(state.lift)/4000, 0, 1);
+    const dragPct = clamp(Math.abs(state.drag)/4000, 0, 1);
+    const pressPct= clamp(Math.abs(state.pressure)/1000, 0, 1);
+    const spdPct  = clamp(state.airspeed/50, 0, 1);
+
+    liftBar.style.height = (liftPct*100) + '%';
+    dragBar.style.height = (dragPct*100) + '%';
+    pressBar.style.height= (pressPct*100) + '%';
+    spdBar.style.height  = (spdPct*100) + '%';
+  }
+
+  function drawAxes() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const pad = 48;
+    const w = canvas.width - 2*pad;
+    const h = canvas.height - 2*pad;
+    
+    // Grid lines
+    ctx.strokeStyle = '#1a1f28';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    // Vertical grid lines (every 20%)
+    for(let i = 0; i <= 5; i++) {
+      const x = pad + (i/5) * w;
+      ctx.moveTo(x, pad);
+      ctx.lineTo(x, canvas.height - pad);
+    }
+    // Horizontal grid lines (every 200 Pa)
+    for(let i = 0; i <= 5; i++) {
+      const y = canvas.height - pad - (i/5) * h;
+      ctx.moveTo(pad, y);
+      ctx.lineTo(canvas.width - pad, y);
+    }
+    ctx.stroke();
+    
+    // Main axes
+    ctx.strokeStyle = '#2f3540';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(pad, pad);
+    ctx.lineTo(pad, canvas.height - pad);
+    ctx.lineTo(canvas.width - pad, canvas.height - pad);
+    ctx.stroke();
+
+    // Axis labels and tick marks
+    ctx.fillStyle = '#9cb2cb';
+    ctx.font = '12px system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText('Pressure [Pa]', 10, 16);
+    ctx.textAlign = 'center';
+    ctx.fillText('Fan Speed [%]', canvas.width/2, canvas.height - 10);
+    
+    // Y-axis tick labels
+    ctx.textAlign = 'right';
+    for(let i = 0; i <= 5; i++) {
+      const y = canvas.height - pad - (i/5) * h;
+      const val = i * 200;
+      ctx.fillText(val.toString(), pad - 8, y + 4);
+    }
+    
+    // X-axis tick labels
+    ctx.textAlign = 'center';
+    for(let i = 0; i <= 5; i++) {
+      const x = pad + (i/5) * w;
+      const val = i * 20;
+      ctx.fillText(val.toString(), x, canvas.height - pad + 16);
+    }
+  }
+
+  function drawPoints() {
+    const pad = 48;
+    const w = canvas.width - 2*pad;
+    const h = canvas.height - 2*pad;
+
+    // Scale
+    const xMax = 100;
+    const yMax = 1000; // plot up to 1000 Pa
+    ctx.fillStyle = '#7c4dff';
+
+    for(const p of state.dataPoints){
+      const x = pad + (p.x/xMax)*w;
+      const y = canvas.height - pad - (clamp(p.y,0,yMax)/yMax)*h;
+      ctx.beginPath();
+      ctx.arc(x,y,3,0,Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  function renderPlot() {
+    drawAxes();
+    drawPoints();
+  }
+
+  // Event handlers
+  angleEl.addEventListener('input', e => {
+    state.angleDeg = Number(e.target.value);
+    angleOut.textContent = `${state.angleDeg}°`;
+    simulate(); renderGauges();
+  });
+
+  speedEl.addEventListener('input', e => {
+    state.speedPct = Number(e.target.value);
+    speedOut.textContent = `${state.speedPct}%`;
+    simulate(); renderGauges();
+  });
+
+  btnZero.addEventListener('click', () => {
+    // Tare current readings
+    simulate();
+    state.offsets.lift = state.lift/1000;
+    state.offsets.drag = state.drag/1000;
+    state.offsets.pressure = state.pressure;
+    simulate(); renderGauges();
+    log('Zero applied');
+  });
+
+  btnSet.addEventListener('click', () => {
+    log(`Set angle ${state.angleDeg}°, speed ${state.speedPct}%`);
+  });
+
+  let sweeping = false, sweepDir = 1;
+  btnSweep.addEventListener('click', () => {
+    sweeping = !sweeping;
+    state.mode = sweeping ? 'sweep' : 'manual';
+    btnSweep.textContent = sweeping ? 'Stop Sweep' : 'Sweep';
+  });
+
+  btnOff.addEventListener('click', () => {
+    state.mode = 'off';
+    state.speedPct = 0;
+    speedEl.value = 0;
+    speedOut.textContent = '0%';
+    sweeping = false;
+    btnSweep.textContent = 'Sweep';
+    simulate(); renderGauges();
+    log('Fan switched off');
+  });
+
+  btnLog.addEventListener('click', () => {
+    state.dataPoints.push({x: state.speedPct, y: Math.max(0,state.pressure)});
+    renderPlot();
+    log(`Logged point: speed ${state.speedPct}%, pressure ${fmt(state.pressure,1)} Pa`);
+  });
+
+  btnClear.addEventListener('click', () => {
+    state.dataPoints.length = 0;
+    renderPlot();
+    log('Graph cleared');
+  });
+
+  // Experiment automation
+  experimentEl.addEventListener('change', e => {
+    const exp = e.target.value;
+    if (exp === 'baseline') return;
+    
+    log(`Starting experiment: ${exp}`);
+    
+    if (exp === 'lift-curve') {
+      // Sweep angle from -30 to 30 degrees at 50% speed
+      state.speedPct = 50;
+      speedEl.value = 50;
+      speedOut.textContent = '50%';
+      log('Set speed to 50% for lift curve analysis');
+    } else if (exp === 'drag-polar') {
+      // Sweep angle from 0 to 20 degrees at 75% speed
+      state.speedPct = 75;
+      speedEl.value = 75;
+      speedOut.textContent = '75%';
+      log('Set speed to 75% for drag polar analysis');
+    } else if (exp === 'pressure-speed') {
+      // Keep angle at 0, will sweep speed automatically
+      state.angleDeg = 0;
+      angleEl.value = 0;
+      angleOut.textContent = '0°';
+      log('Set angle to 0° for pressure vs speed analysis');
+    }
+    simulate(); renderGauges();
+  });
+
+  function log(msg){
+    const t = new Date().toLocaleTimeString();
+    const line = document.createElement('div');
+    line.textContent = `[${t}] ${msg}`;
+    logList.prepend(line);
+    if (logList.children.length > 50) {
+      logList.removeChild(logList.lastChild);
+    }
+  }
+
+  // Main loop for optional sweep and steady refresh
+  setInterval(() => {
+    if(sweeping){
+      let v = state.speedPct + sweepDir*1.5;
+      if(v >= 100){ v = 100; sweepDir = -1; }
+      if(v <= 0){ v = 0; sweepDir = 1; }
+      state.speedPct = v;
+      speedEl.value = Math.round(v);
+      speedOut.textContent = `${Math.round(v)}%`;
+    }
+    simulate(); renderGauges();
+  }, 100);
+
+  // Init
+  simulate(); renderGauges(); renderPlot();
+})();
+</script>
 </body>
 </html>

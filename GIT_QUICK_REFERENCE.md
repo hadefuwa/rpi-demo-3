@@ -2,7 +2,9 @@
 
 ## Push
 ```bash
+
 cd ~/rpi-demo-3
+git pull
 git add .
 git commit -m ".."
 git push origin main

@@ -1,3 +1,5 @@
+<!-- Offline-compatible sliders - no external dependencies - UPDATED -->
+
 <section id="screen-electrical-machines" class="screen" aria-label="Electrical Machines">
     <header class="em-header">
     <div class="logo-section">
@@ -17,103 +19,78 @@
   </header>
 
   <main class="em-main">
-         <!-- Left Control Panel -->
-     <section class="control-panel">
-       <div class="control-column">
-         <div class="control-label">Load</div>
-         <div class="control-value" id="load-value">50.0%</div>
-          <div class="vertical-slider">
-            <div class="slider-container">
-              <div class="slider-track" id="load-track">
-                <div class="slider-fill" id="load-fill"></div>
-                <div class="slider-thumb" id="load-thumb" data-slider="load"></div>
+                   <!-- Left Control Panel -->
+          <section class="control-panel">
+            <div class="control-column">
+              <div class="control-label">Motor Load</div>
+              <div class="slider-container">
+                <div class="custom-slider" id="load-slider" data-min="0" data-max="100" data-value="50">
+                  <div class="slider-track"></div>
+                  <div class="slider-thumb"></div>
+                </div>
+                <div class="slider-scale">
+                  <span>100%</span>
+                  <span>75%</span>
+                  <span>50%</span>
+                  <span>25%</span>
+                  <span>0%</span>
+                </div>
               </div>
-              <div class="slider-scale">
-                <span>100</span>
-                <span>75</span>
-                <span>50</span>
-                <span>25</span>
-                <span>0</span>
-              </div>
+              <div class="control-value" id="load-value">50.0%</div>
             </div>
-          </div>
-         <button class="control-btn">Set %</button>
-       </div>
-
-       <div class="control-column">
-         <div class="control-label">Voltage 1</div>
-         <div class="control-value" id="voltage1-value">66.7% - 20.0V</div>
-          <div class="vertical-slider">
-            <div class="slider-container">
-              <div class="slider-track" id="voltage1-track">
-                <div class="slider-fill" id="voltage1-fill"></div>
-                <div class="slider-thumb" id="voltage1-thumb" data-slider="voltage1"></div>
+            
+            <div class="control-column">
+              <div class="control-label">Voltage 1</div>
+              <div class="slider-container">
+                <div class="custom-slider" id="voltage1-slider" data-min="0" data-max="100" data-value="50">
+                  <div class="slider-track"></div>
+                  <div class="slider-thumb"></div>
+                </div>
+                <div class="slider-scale">
+                  <span>100%</span>
+                  <span>75%</span>
+                  <span>50%</span>
+                  <span>25%</span>
+                  <span>0%</span>
+                </div>
               </div>
-              <div class="slider-scale">
-                <span>100</span>
-                <span>75</span>
-                <span>50</span>
-                <span>25</span>
-                <span>0</span>
-              </div>
+              <div class="control-value" id="voltage1-value">50.0% - 15.0V</div>
             </div>
-          </div>
-         <button class="control-btn">Set V</button>
-         <button class="control-btn">Set %</button>
-       </div>
-
-       <div class="control-column">
-         <div class="control-label">Frequency</div>
-         <div class="control-value" id="frequency-value">50Hz</div>
-          <div class="vertical-slider">
-            <div class="slider-container">
-              <div class="slider-track" id="frequency-track">
-                <div class="slider-fill" id="frequency-fill"></div>
-                <div class="slider-thumb" id="frequency-thumb" data-slider="frequency"></div>
+            
+            <div class="control-column">
+              <div class="control-label">Frequency</div>
+              <div class="slider-container">
+                <div class="custom-slider" id="frequency-slider" data-min="0" data-max="50" data-value="25">
+                  <div class="slider-track"></div>
+                  <div class="slider-thumb"></div>
+                </div>
+                <div class="slider-scale">
+                  <span>50Hz</span>
+                  <span>37Hz</span>
+                  <span>25Hz</span>
+                  <span>12Hz</span>
+                  <span>0Hz</span>
+                </div>
               </div>
-              <div class="slider-scale">
-                <span>100</span>
-                <span>75</span>
-                <span>50</span>
-                <span>25</span>
-                <span>0</span>
-              </div>
+              <div class="control-value" id="frequency-value">25Hz</div>
             </div>
-          </div>
-         <button class="control-btn">Set</button>
-       </div>
+          </section>
 
-       
-
-       <!-- Readings Panel in the pink box area -->
-       <div class="readings-panel">
-         <div class="power-readings">
-           <div class="reading">
-             <span class="reading-label">⚡ Power In</span>
-             <span id="power-in">2.127W</span>
-           </div>
-           <div class="reading">
-             <span class="reading-label">🔌 Power Out</span>
-             <span id="power-out">36.836W</span>
-           </div>
-           <div class="reading">
-             <span class="reading-label">📐 Phase Angle</span>
-             <span id="phase-angle">55°</span>
-           </div>
-         </div>
-         
-         <div class="voltage-readings">
-           <div class="reading">
-             <span class="reading-label">⚡ Supply Voltage</span>
-             <span id="supply-voltage">35.9V</span>
-           </div>
-           <div class="reading">
-             <span class="reading-label">🛡️ Limit Voltage</span>
-             <span id="limit-voltage">30.0V</span>
-           </div>
-         </div>
-       </div>
-     </section>
+          <!-- Action Buttons Section -->
+          <section class="action-buttons-section">
+            <div class="action-btn">
+              <div class="btn-indicator"></div>
+              <span>Capture</span>
+            </div>
+            <div class="action-btn">
+              <div class="btn-indicator"></div>
+              <span>Sweep</span>
+            </div>
+            <div class="action-btn">
+              <div class="btn-indicator"></div>
+              <span>Clear</span>
+            </div>
+          </section>
 
          <!-- Bottom Left Gauges -->
      <section class="gauges-section">
@@ -192,21 +169,7 @@
        </div>
     </section>
 
-    <!-- Bottom Right Action Buttons -->
-    <section class="action-buttons">
-      <div class="action-btn">
-        <div class="btn-indicator"></div>
-        <span>Capture</span>
-      </div>
-      <div class="action-btn">
-        <div class="btn-indicator"></div>
-        <span>Sweep</span>
-      </div>
-      <div class="action-btn">
-        <div class="btn-indicator"></div>
-        <span>Clear</span>
-      </div>
-    </section>
+    
 
     <!-- Right Chart Area -->
     <section class="charts-section">
@@ -280,6 +243,21 @@
   position: fixed;
   top: 0;
   left: 0;
+}
+
+/* Hide cursor on touch devices and small screens */
+@media (pointer: coarse) {
+  #screen-electrical-machines,
+  #screen-electrical-machines * {
+    cursor: none !important;
+  }
+}
+
+@media (max-width: 850px) and (max-height: 500px) {
+  #screen-electrical-machines,
+  #screen-electrical-machines * {
+    cursor: none !important;
+  }
 }
 
 #screen-electrical-machines * { 
@@ -562,91 +540,56 @@ body, html {
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
 }
 
-.vertical-slider {
-  width: 100%;
-  height: 140px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px 0;
-}
-
-.slider-container {
+/* Minimal CSS for custom vertical sliders */
+.custom-slider {
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  width: 20px;
+  height: 180px;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 10px;
+  cursor: pointer;
 }
 
 .slider-track {
-  width: 8px;
-  height: 120px;
-  background: #222;
-  border-radius: 4px;
-  position: relative;
-  border: 1px solid #555;
-  cursor: pointer;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
-  transition: all 0.2s ease;
-}
-
-.slider-track:hover {
-  border-color: #4CAF50;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5), 0 0 6px rgba(76, 175, 80, 0.4);
-}
-
-.slider-fill {
   position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  background: linear-gradient(to top, #4CAF50 0%, #66BB6A 50%, #81C784 100%);
-  border-radius: 3px;
-  transition: height 0.2s ease;
-  box-shadow: 0 0 3px rgba(76, 175, 80, 0.6);
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 160px;
+  background: #333;
+  border-radius: 2px;
 }
 
 .slider-thumb {
   position: absolute;
   left: 50%;
-  width: 20px;
-  height: 20px;
-  background: #fff;
-  border-radius: 50%;
-  border: 2px solid #4CAF50;
-  cursor: grab;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   transform: translateX(-50%);
-  z-index: 10;
-}
-
-.slider-thumb:active {
-  cursor: grabbing;
-  transform: translateX(-50%) scale(1.3);
-  box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+  width: 16px;
+  height: 16px;
   background: #4CAF50;
-}
-
-.slider-thumb:hover {
-  transform: translateX(-50%) scale(1.15);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 0 6px rgba(76, 175, 80, 0.6);
-  border-color: #45a049;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  cursor: pointer;
+  top: 50%;
 }
 
 .slider-scale {
+  position: absolute;
+  right: -25px;
+  top: 0;
+  height: 180px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  font-size: 7px;
-  color: #aaa;
-  height: 120px;
-  font-weight: 500;
-  padding: 0;
-  line-height: 1;
-  text-align: center;
-  min-width: 20px;
+  font-size: 8px;
+  color: #ccc;
 }
+
+
+
+
 
 .control-btn {
   background: #555;
@@ -863,21 +806,19 @@ body, html {
   background: #777;
 }
 
-/* Action Buttons */
-.action-buttons {
+/* Action Buttons Section */
+.action-buttons-section {
   background: linear-gradient(135deg, #333 0%, #2a2a2a 100%);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 8px;
+  padding: 8px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  grid-column: 2;
-  grid-row: 2;
-  align-self: end;
-  width: 150px;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
   border: 1px solid #444;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   position: relative;
+  margin-top: 8px;
 }
 
 .action-buttons::before {
@@ -893,17 +834,19 @@ body, html {
 
 .action-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
+  gap: 4px;
+  padding: 8px 12px;
   background: linear-gradient(135deg, #555 0%, #444 100%);
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid #666;
   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   position: relative;
   overflow: hidden;
+  min-width: 60px;
 }
 
 .action-btn::before {
@@ -1126,24 +1069,7 @@ body, html {
     padding: 6px 8px;
   }
   
-  .horizontal-slider {
-    width: 100%;
-  }
-  
-  .slider-track {
-    height: 6px;
-  }
-  
-  .slider-thumb {
-    width: 18px;
-    height: 18px;
-    top: -5px;
-  }
-  
-  .slider-scale {
-    font-size: 8px;
-    padding: 0 1px;
-  }
+
   
   .control-value {
     font-size: 11px;
@@ -1237,30 +1163,30 @@ body, html {
     padding: 2px 3px;
   }
   
-  .vertical-slider {
-    height: 100px;
-    padding: 5px 0;
-  }
-  
-  .slider-container {
-    gap: 4px;
+  .custom-slider {
+    width: 16px;
+    height: 120px;
   }
   
   .slider-track {
-    width: 6px;
-    height: 90px;
+    width: 3px;
+    height: 100px;
   }
   
   .slider-thumb {
-    width: 16px;
-    height: 16px;
+    width: 12px;
+    height: 12px;
   }
   
   .slider-scale {
+    right: -20px;
+    height: 120px;
     font-size: 6px;
-    height: 90px;
-    min-width: 15px;
   }
+  
+
+  
+
   
   .control-btn {
     padding: 4px 6px;
@@ -1323,15 +1249,15 @@ body, html {
     padding: 0px 1px;
   }
   
-  .action-buttons {
-    width: 100px;
-    padding: 8px;
-    gap: 6px;
+  .action-buttons-section {
+    padding: 4px;
+    gap: 4px;
   }
   
   .action-btn {
-    padding: 6px 8px;
+    padding: 4px 6px;
     font-size: 7px;
+    min-width: 40px;
   }
   
   .btn-indicator {
@@ -1390,23 +1316,7 @@ body, html {
     gap: 12px;
   }
   
-  .horizontal-slider {
-    width: 100%;
-  }
-  
-  .slider-track {
-    height: 5px;
-  }
-  
-  .slider-thumb {
-    width: 16px;
-    height: 16px;
-    top: -4px;
-  }
-  
-  .slider-scale {
-    font-size: 8px;
-  }
+
   
   .charts-section {
     padding: 15px;
@@ -1480,23 +1390,7 @@ body, html {
     max-width: 150px;
   }
   
-  .horizontal-slider {
-    width: 100%;
-  }
-  
-  .slider-track {
-    height: 4px;
-  }
-  
-  .slider-thumb {
-    width: 14px;
-    height: 14px;
-    top: -3px;
-  }
-  
-  .slider-scale {
-    font-size: 7px;
-  }
+
   
   .charts-section {
     grid-row: 2;
@@ -1527,7 +1421,7 @@ body, html {
     height: 100px;
   }
   
-  .action-buttons {
+  .action-buttons-section {
     grid-row: 4;
     grid-column: 1;
     flex-direction: row;
@@ -1575,23 +1469,7 @@ body, html {
     max-width: 120px;
   }
   
-  .horizontal-slider {
-    width: 100%;
-  }
-  
-  .slider-track {
-    height: 3px;
-  }
-  
-  .slider-thumb {
-    width: 12px;
-    height: 12px;
-    top: -2px;
-  }
-  
-  .slider-scale {
-    font-size: 6px;
-  }
+
   
   .control-value {
     font-size: 10px;
@@ -1654,12 +1532,12 @@ body, html {
   const speedNeedle = root.querySelector('#speed-needle');
   const torqueNeedle = root.querySelector('#torque-needle');
   
-  // Power readings
-  const powerIn = root.querySelector('#power-in');
-  const powerOut = root.querySelector('#power-out');
-  const phaseAngle = root.querySelector('#phase-angle');
-  const supplyVoltage = root.querySelector('#supply-voltage');
-  const limitVoltage = root.querySelector('#limit-voltage');
+     // Power readings - these elements don't exist in the current HTML
+   // const powerIn = root.querySelector('#power-in');
+   // const powerOut = root.querySelector('#power-out');
+   // const phaseAngle = root.querySelector('#phase-angle');
+   // const supplyVoltage = root.querySelector('#supply-voltage');
+   // const limitVoltage = root.querySelector('#limit-voltage');
   
   // State
   let animationId = 0;
@@ -1670,9 +1548,9 @@ body, html {
   
   // Slider values
   let sliderValues = {
-    load: 50,
-    voltage1: 66.7,
-    frequency: 50
+    load: 100,
+    voltage1: 100,
+    frequency: 18
   };
   
   // Initialize charts
@@ -1825,64 +1703,32 @@ body, html {
     
     // Add some variation to the slider values
     const time = Date.now() / 1000;
-         const loadVariation = Math.sin(time * 0.3) * 5;
-     const voltageVariation = Math.sin(time * 0.4) * 3;
-     const frequencyVariation = Math.sin(time * 0.2) * 1;
-     
-     const load = Math.max(0, Math.min(100, sliderValues.load + loadVariation));
-     const voltage1 = Math.max(0, Math.min(100, sliderValues.voltage1 + voltageVariation));
-     const frequency = Math.max(0, Math.min(100, sliderValues.frequency + frequencyVariation));
-     
-     loadValue.textContent = `${load.toFixed(1)}%`;
-     voltage1Value.textContent = `${voltage1.toFixed(1)}% - ${(voltage1 * 0.3).toFixed(1)}V`;
-     frequencyValue.textContent = `${frequency.toFixed(0)}Hz`;
-     
-     // Update slider indicators
-     updateSlider('load', load);
-     updateSlider('voltage1', voltage1);
-     updateSlider('frequency', frequency);
-  }
-  
-  // Update slider visual for vertical sliders - REWRITTEN
-  function updateSlider(name, value) {
-    updateSliderVisual(name, value);
-  }
-  
-  // Handle slider interaction for vertical sliders - COMPLETELY REWRITTEN
-  function handleSliderInteraction(sliderName, clientY, trackElement) {
-    const track = trackElement || root.querySelector(`#${sliderName}-track`);
-    if (!track) return;
+    const loadVariation = Math.sin(time * 0.3) * 5;
+    const voltageVariation = Math.sin(time * 0.4) * 3;
+    const frequencyVariation = Math.sin(time * 0.2) * 1;
     
-    const rect = track.getBoundingClientRect();
-    const clickY = clientY - rect.top;
-    const height = rect.height;
+    const load = Math.max(0, Math.min(100, sliderValues.load + loadVariation));
+    const voltage1 = Math.max(0, Math.min(100, sliderValues.voltage1 + voltageVariation));
+    const frequency = Math.max(0, Math.min(100, sliderValues.frequency + frequencyVariation));
     
-    // For vertical sliders: top = 100%, bottom = 0%
-    const percent = Math.max(0, Math.min(100, 100 - (clickY / height) * 100));
+    loadValue.textContent = `${load.toFixed(1)}%`;
+    voltage1Value.textContent = `${voltage1.toFixed(1)}% - ${(voltage1 * 0.3).toFixed(1)}V`;
+    frequencyValue.textContent = `${frequency.toFixed(0)}Hz`;
     
-    // Update slider value
-    sliderValues[sliderName] = percent;
-    
-    // Update visual immediately
-    updateSliderVisual(sliderName, percent);
-    
-    // Update display value
-    updateControlDisplay(sliderName);
-  }
-  
-  // New function to update slider visual
-  function updateSliderVisual(sliderName, percent) {
-    const fill = root.querySelector(`#${sliderName}-fill`);
-    const thumb = root.querySelector(`#${sliderName}-thumb`);
-    
-    if (fill) {
-      fill.style.height = `${percent}%`;
+    // Update slider values (but don't override user input)
+    if (!isDragging) {
+      updateSlider('load', load);
+      updateSlider('voltage1', voltage1);
+      updateSlider('frequency', frequency);
     }
-    
-    if (thumb) {
-      // Position thumb from bottom (0% = bottom, 100% = top)
-      thumb.style.bottom = `${percent}%`;
-      thumb.style.transform = 'translateX(-50%) translateY(50%)';
+  }
+  
+  // Update slider values (now handled by HTML5 range inputs)
+  function updateSlider(name, value) {
+    const slider = root.querySelector(`#${name}-slider`);
+    if (slider) {
+      slider.value = value;
+      sliderValues[name] = value;
     }
   }
   
@@ -1902,21 +1748,7 @@ body, html {
      }
    }
   
-  // Update power readings
-  function updatePowerReadings() {
-    if (!isRunning) return;
-    
-    const time = Date.now() / 1000;
-    const powerInVal = 2.127 + Math.sin(time) * 0.5;
-    const powerOutVal = 36.836 + Math.sin(time * 0.5) * 2;
-    const phaseAngleVal = 55 + Math.sin(time * 0.3) * 5;
-    const supplyVoltageVal = 35.9 + Math.sin(time * 0.7) * 1;
-    
-    powerIn.textContent = `${powerInVal.toFixed(3)}W`;
-    powerOut.textContent = `${powerOutVal.toFixed(3)}W`;
-    phaseAngle.textContent = `${Math.round(phaseAngleVal)}°`;
-    supplyVoltage.textContent = `${supplyVoltageVal.toFixed(1)}V`;
-  }
+  
   
   // Update speed and torque
   function updateSpeedTorque() {
@@ -1932,15 +1764,15 @@ body, html {
     updateGauges();
   }
   
-  // Animation loop
-  function animate() {
-    updateControls();
-    updatePowerReadings();
-    updateSpeedTorque();
-    drawCharts();
-    
-    animationId = requestAnimationFrame(animate);
-  }
+     // Animation loop
+   function animate() {
+     updateControls();
+     // updatePowerReadings(); // Removed - power reading elements don't exist
+     updateSpeedTorque();
+     drawCharts();
+     
+     animationId = requestAnimationFrame(animate);
+   }
   
   // Event handlers
   function setupEventHandlers() {
@@ -1964,135 +1796,76 @@ body, html {
       });
     });
     
-    // COMPLETELY REWRITTEN SLIDER INTERACTIONS
-    const sliderTracks = root.querySelectorAll('.slider-track');
-    const sliderThumbs = root.querySelectorAll('.slider-thumb');
-    
-    // Initialize sliders with default values
-    Object.keys(sliderValues).forEach(sliderName => {
-      updateSliderVisual(sliderName, sliderValues[sliderName]);
-      updateControlDisplay(sliderName);
-    });
-    
-    // Track click events
-    sliderTracks.forEach(track => {
-      const sliderName = track.id.replace('-track', '');
-      
-      track.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        isDragging = true;
-        currentSlider = sliderName;
-        handleSliderInteraction(sliderName, e.clientY, track);
+                                                                               // Custom Vertical Slider Initialization
+        const loadSlider = root.querySelector('#load-slider');
+        const voltage1Slider = root.querySelector('#voltage1-slider');
+        const frequencySlider = root.querySelector('#frequency-slider');
         
-        // Visual feedback
-        track.style.borderColor = '#4CAF50';
-        track.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.5), 0 0 8px rgba(76, 175, 80, 0.6)';
-      });
-      
-      track.addEventListener('click', (e) => {
-        if (!isDragging) {
-          handleSliderInteraction(sliderName, e.clientY, track);
-        }
-      });
-    });
-    
-    // Thumb drag events
-    sliderThumbs.forEach(thumb => {
-      const sliderName = thumb.dataset.slider;
-      
-      thumb.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        isDragging = true;
-        currentSlider = sliderName;
+        // Initialize custom sliders
+        initCustomSlider(loadSlider, 'load');
+        initCustomSlider(voltage1Slider, 'voltage1');
+        initCustomSlider(frequencySlider, 'frequency');
         
-        const track = root.querySelector(`#${sliderName}-track`);
-        if (track) {
-          track.style.borderColor = '#4CAF50';
-          track.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.5), 0 0 8px rgba(76, 175, 80, 0.6)';
+        // Custom slider function
+        function initCustomSlider(sliderElement, sliderName) {
+          if (!sliderElement) return;
+          
+          const track = sliderElement.querySelector('.slider-track');
+          const thumb = sliderElement.querySelector('.slider-thumb');
+          const min = parseInt(sliderElement.dataset.min);
+          const max = parseInt(sliderElement.dataset.max);
+          const value = parseInt(sliderElement.dataset.value);
+          
+          // Set initial position
+          const percent = ((value - min) / (max - min)) * 100;
+          thumb.style.top = (100 - percent) + '%';
+          
+          // Add drag functionality
+          let isDragging = false;
+          
+          function handleMouseDown(e) {
+            isDragging = true;
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+          }
+          
+          function handleMouseMove(e) {
+            if (!isDragging) return;
+            
+            const rect = sliderElement.getBoundingClientRect();
+            const y = e.clientY - rect.top;
+            const height = rect.height;
+            let percent = Math.max(0, Math.min(100, (1 - y / height) * 100));
+            
+            thumb.style.top = (100 - percent) + '%';
+            
+            const newValue = Math.round(min + (percent / 100) * (max - min));
+            sliderValues[sliderName] = newValue;
+            updateControlDisplay(sliderName);
+          }
+          
+          function handleMouseUp() {
+            isDragging = false;
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+          }
+          
+          sliderElement.addEventListener('mousedown', handleMouseDown);
+          sliderElement.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = sliderElement.getBoundingClientRect();
+            const y = touch.clientY - rect.top;
+            const height = rect.height;
+            let percent = Math.max(0, Math.min(100, (1 - y / height) * 100));
+            
+            thumb.style.top = (100 - percent) + '%';
+            
+            const newValue = Math.round(min + (percent / 100) * (max - min));
+            sliderValues[sliderName] = newValue;
+            updateControlDisplay(sliderName);
+          });
         }
-      });
-    });
-    
-    // Global mouse events for dragging
-    document.addEventListener('mousemove', (e) => {
-      if (isDragging && currentSlider) {
-        e.preventDefault();
-        const track = root.querySelector(`#${currentSlider}-track`);
-        if (track) {
-          handleSliderInteraction(currentSlider, e.clientY, track);
-        }
-      }
-    });
-    
-    document.addEventListener('mouseup', () => {
-      if (isDragging && currentSlider) {
-        const track = root.querySelector(`#${currentSlider}-track`);
-        if (track) {
-          track.style.borderColor = '#555';
-          track.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.5)';
-        }
-      }
-      isDragging = false;
-      currentSlider = null;
-    });
-    
-    // Touch events for mobile - REWRITTEN
-    sliderTracks.forEach(track => {
-      const sliderName = track.id.replace('-track', '');
-      
-      track.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        isDragging = true;
-        currentSlider = sliderName;
-        const touch = e.touches[0];
-        handleSliderInteraction(sliderName, touch.clientY, track);
-        
-        // Visual feedback
-        track.style.borderColor = '#4CAF50';
-        track.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.5), 0 0 8px rgba(76, 175, 80, 0.6)';
-      });
-    });
-    
-    sliderThumbs.forEach(thumb => {
-      const sliderName = thumb.dataset.slider;
-      
-      thumb.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        isDragging = true;
-        currentSlider = sliderName;
-        
-        const track = root.querySelector(`#${sliderName}-track`);
-        if (track) {
-          track.style.borderColor = '#4CAF50';
-          track.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.5), 0 0 8px rgba(76, 175, 80, 0.6)';
-        }
-      });
-    });
-    
-    document.addEventListener('touchmove', (e) => {
-      if (isDragging && currentSlider) {
-        e.preventDefault();
-        const touch = e.touches[0];
-        const track = root.querySelector(`#${currentSlider}-track`);
-        if (track) {
-          handleSliderInteraction(currentSlider, touch.clientY, track);
-        }
-      }
-    }, { passive: false });
-    
-    document.addEventListener('touchend', () => {
-      if (isDragging && currentSlider) {
-        const track = root.querySelector(`#${currentSlider}-track`);
-        if (track) {
-          track.style.borderColor = '#555';
-          track.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.5)';
-        }
-      }
-      isDragging = false;
-      currentSlider = null;
-    });
     
     // Action buttons
     const actionButtons = root.querySelectorAll('.action-btn');

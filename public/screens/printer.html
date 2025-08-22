@@ -1377,7 +1377,7 @@
        speedRange.value = clampedValue;
        
        // Update display
-       speedDisplay.textContent = `${clampedValue}%`;
+       speedDisplay.textContent = `${Math.round(clampedValue)}%`;
        
        // Calculate fill width and knob position
        const percentage = ((clampedValue - 50) / 100) * 100;

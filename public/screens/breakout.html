@@ -346,7 +346,7 @@
     
     <main class="game-container">
       <div class="game-area">
-        <canvas id="gameCanvas" class="game-canvas" width="400" height="500"></canvas>
+        <canvas id="gameCanvas" class="game-canvas" width="600" height="500"></canvas>
       </div>
       
       <div class="side-panel">
@@ -416,14 +416,14 @@
         [],
         [],
         [],
-        ['R','R','R','R','R','R','R','R','R','R','R','R','R','R'],
-        ['R','R','R','R','R','R','R','R','R','R','R','R','R','R'],
-        ['O','O','O','O','O','O','O','O','O','O','O','O','O','O'],
-        ['O','O','O','O','O','O','O','O','O','O','O','O','O','O'],
-        ['G','G','G','G','G','G','G','G','G','G','G','G','G','G'],
-        ['G','G','G','G','G','G','G','G','G','G','G','G','G','G'],
-        ['Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y'],
-        ['Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y']
+        ['R','R','R','R','R','R','R','R','R','R','R','R','R','R','R','R'],
+        ['R','R','R','R','R','R','R','R','R','R','R','R','R','R','R','R'],
+        ['O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O'],
+        ['O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O'],
+        ['G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G'],
+        ['G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G'],
+        ['Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y'],
+        ['Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y']
       ];
       
       // Color mapping
@@ -436,8 +436,8 @@
       
       // Game constants
       const brickGap = 2;
-      const brickWidth = 25;
-      const brickHeight = 12;
+      const brickWidth = 35;
+      const brickHeight = 16;
       const wallSize = 12;
       
       // Game objects
@@ -453,8 +453,8 @@
       let ball = {
         x: 130,
         y: 260,
-        width: 5,
-        height: 5,
+        width: 8,
+        height: 8,
         color: 'black',
         speed: 2,
         dx: 0,
@@ -492,8 +492,8 @@
         ball.dx = 0;
         ball.dy = 0;
         
-        // Show start message
-        startMessage.style.display = 'block';
+        // Hide start message - game starts automatically
+        startMessage.style.display = 'none';
         gameOverScreen.style.display = 'none';
       }
       
@@ -631,7 +631,6 @@
         if (gameStarted) return;
         
         gameStarted = true;
-        startMessage.style.display = 'none';
         ball.dx = ball.speed;
         ball.dy = ball.speed;
         gameLoop();
@@ -693,6 +692,7 @@
       // Restart button
       restartButton.addEventListener('click', function() {
         initGame();
+        startGame();
         gameLoop();
       });
       
@@ -726,6 +726,8 @@
       
       // Initialize game
       initGame();
+      // Start game automatically
+      startGame();
       gameLoop();
       
     })();

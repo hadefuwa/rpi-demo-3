@@ -29,7 +29,6 @@
         
         <div class="quiz-controls">
           <button class="quiz-btn" id="nextBtn" disabled>Next Question</button>
-          <button class="quiz-btn secondary" id="resetBtn">Start Over</button>
         </div>
       </div>
       
@@ -67,6 +66,30 @@
     padding: 0;
     position: relative;
     box-sizing: border-box;
+  }
+  
+  /* Hide cursor on touch devices and small screens (5-inch displays) */
+  @media (pointer: coarse) {
+    #screen-curriculum,
+    #screen-curriculum * {
+      cursor: none !important;
+    }
+  }
+  
+  /* Hide cursor on very small screens (likely 5-inch displays) */
+  @media (max-width: 850px) and (max-height: 500px) {
+    #screen-curriculum,
+    #screen-curriculum * {
+      cursor: none !important;
+    }
+  }
+  
+  /* Hide cursor on mobile devices */
+  @media (max-width: 768px) {
+    #screen-curriculum,
+    #screen-curriculum * {
+      cursor: none !important;
+    }
   }
   
   @keyframes gradientFlow {
@@ -828,7 +851,7 @@
     let quizCompleted = false;
     
     // DOM elements
-    let questionText, answersContainer, nextBtn, resetBtn, restartBtn;
+    let questionText, answersContainer, nextBtn, restartBtn;
     let progressFill, progressText, resultsContainer, scoreText, scoreMessage;
     
     function initApp() {
@@ -842,7 +865,6 @@
       questionText = document.getElementById('questionText');
       answersContainer = document.getElementById('answersContainer');
       nextBtn = document.getElementById('nextBtn');
-      resetBtn = document.getElementById('resetBtn');
       restartBtn = document.getElementById('restartBtn');
       progressFill = document.getElementById('progressFill');
       progressText = document.getElementById('progressText');
@@ -860,7 +882,6 @@
       
       // Quiz control buttons
       nextBtn.addEventListener('click', nextQuestion);
-      resetBtn.addEventListener('click', resetQuiz);
       restartBtn.addEventListener('click', resetQuiz);
     }
     

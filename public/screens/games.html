@@ -52,16 +52,39 @@
 </section>
 
 <style>
+  /* Reset and prevent white borders */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+  }
+
   /* Games Hub Specific Styles - All scoped to #screen-games */
   #screen-games {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 100vh;
+    width: 100vw;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     font-family: 'Arial', sans-serif;
-    padding: 20px;
-    position: relative;
+    padding: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    margin: 0;
+    border: none;
+    outline: none;
+    box-sizing: border-box;
+    overflow: hidden;
   }
   
   /* Home button styles */
@@ -111,7 +134,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
+    padding: 15px;
+    justify-content: center;
+    min-height: 0;
   }
   
   #screen-games .toolbar {
@@ -123,9 +149,11 @@
   }
   
   #screen-games h2 {
-    font-size: 2.5em;
-    margin: 0;
+    font-size: clamp(1.8em, 5vw, 2.5em);
+    margin: 10px 0;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    text-align: center;
+    flex-shrink: 0;
   }
   
   #screen-games .chip {
@@ -148,17 +176,21 @@
   
   #screen-games .games-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
     width: 100%;
-    max-width: 800px;
+    max-width: 900px;
+    flex: 1;
+    align-content: center;
+    padding: 0;
+    min-height: 0;
   }
   
   #screen-games .game-card {
     background: rgba(255,255,255,0.1);
-    border: 3px solid rgba(255,255,255,0.3);
-    border-radius: 20px;
-    padding: 30px 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 15px;
+    padding: 15px 12px;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -167,66 +199,178 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 8px;
+    min-height: 120px;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   }
   
   #screen-games .game-card:hover {
     background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.5);
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border-color: rgba(255,255,255,0.6);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
   }
   
   #screen-games .game-icon {
-    font-size: 3em;
+    font-size: clamp(2em, 6vw, 2.8em);
     display: block;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
   }
   
   #screen-games .game-title {
-    font-size: 1.5em;
+    font-size: clamp(1.1em, 3vw, 1.4em);
     font-weight: bold;
     margin: 0;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
   }
   
   #screen-games .game-desc {
-    font-size: 1em;
-    opacity: 0.8;
+    font-size: clamp(0.8em, 2.5vw, 0.95em);
+    opacity: 0.85;
     margin: 0;
+    line-height: 1.2;
+    text-align: center;
   }
   
   #screen-games .note {
     text-align: center;
-    font-size: 1.2em;
-    opacity: 0.8;
-    margin-top: 20px;
+    font-size: clamp(0.9em, 2.5vw, 1.1em);
+    opacity: 0.9;
+    margin-top: 15px;
+    padding: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    flex-shrink: 0;
   }
   
-  /* Theme variations */
-  #screen-games .theme-gold { border-color: #ffd700; }
-  #screen-games .theme-teal { border-color: #20b2aa; }
-  #screen-games .theme-pink { border-color: #ff69b4; }
-  #screen-games .theme-red { border-color: #ff6347; }
-  #screen-games .theme-purple { border-color: #a855f7; }
-  #screen-games .theme-green { border-color: #22c55e; }
-  #screen-games .theme-blue { border-color: #5cf; }
+  /* Enhanced Theme variations with subtle glows */
+  #screen-games .theme-gold { 
+    border-color: #ffd700; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2), 0 0 10px rgba(255, 215, 0, 0.2);
+  }
+  #screen-games .theme-teal { 
+    border-color: #20b2aa; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2), 0 0 10px rgba(32, 178, 170, 0.2);
+  }
+  #screen-games .theme-pink { 
+    border-color: #ff69b4; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2), 0 0 10px rgba(255, 105, 180, 0.2);
+  }
+  #screen-games .theme-red { 
+    border-color: #ff6347; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2), 0 0 10px rgba(255, 99, 71, 0.2);
+  }
+  #screen-games .theme-purple { 
+    border-color: #a855f7; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2), 0 0 10px rgba(168, 85, 247, 0.2);
+  }
+  #screen-games .theme-green { 
+    border-color: #22c55e; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2), 0 0 10px rgba(34, 197, 94, 0.2);
+  }
+  #screen-games .theme-blue { 
+    border-color: #5cf; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2), 0 0 10px rgba(85, 204, 255, 0.2);
+  }
   
-  /* Responsive design */
-  @media (max-width: 768px) {
+  /* 5-inch touchscreen optimization (800x480) */
+  @media (max-width: 850px) and (max-height: 500px) {
+    #screen-games {
+      padding: 0;
+    }
+    
+    #screen-games .panel {
+      padding: 8px;
+      gap: 8px;
+    }
+    
+    #screen-games .matrix-logo {
+      height: 25px;
+      top: 6px;
+      left: 6px;
+    }
+    
+    #screen-games .home-button {
+      top: 6px;
+      right: 6px;
+      width: 28px;
+      height: 28px;
+      font-size: 12px;
+    }
+    
+    #screen-games h2 {
+      font-size: 1.3em;
+      margin: 3px 0;
+    }
+    
     #screen-games .games-grid {
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      max-width: none;
     }
     
     #screen-games .game-card {
-      padding: 20px 15px;
+      padding: 8px 6px;
+      min-height: 80px;
+      gap: 4px;
     }
     
     #screen-games .game-icon {
-      font-size: 2.5em;
+      font-size: 1.5em;
     }
     
     #screen-games .game-title {
-      font-size: 1.3em;
+      font-size: 0.9em;
+    }
+    
+    #screen-games .game-desc {
+      font-size: 0.7em;
+      display: none; /* Hide descriptions on very small screens */
+    }
+    
+    #screen-games .note {
+      font-size: 0.75em;
+      padding: 3px;
+      margin-top: 4px;
+    }
+  }
+
+  /* General mobile responsive design */
+  @media (max-width: 768px) {
+    #screen-games {
+      padding: 12px;
+    }
+    
+    #screen-games .games-grid {
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+    
+    #screen-games .game-card {
+      padding: 16px 12px;
+      min-height: 120px;
+    }
+    
+    #screen-games .game-icon {
+      font-size: 2.2em;
+    }
+    
+    #screen-games .game-title {
+      font-size: 1.2em;
+    }
+    
+    #screen-games .game-desc {
+      font-size: 0.85em;
+    }
+  }
+
+  /* Extra small screens */
+  @media (max-width: 480px) {
+    #screen-games .games-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
     }
   }
 </style>

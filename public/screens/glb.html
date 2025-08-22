@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLB Model Viewer</title>
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/stl.css">
+  
+  <!-- Simple initialization -->
+  <script>
+    // Simple quality mode - just use low quality for RPi compatibility
+    window.QUALITY_MODE = 'low';
+    console.log('GLB Viewer initialized in low quality mode for reliability');
+    
+    // Detect touch device and set cursor visibility
+    function detectTouchDevice() {
+      const isTouchDevice = (
+        ('ontouchstart' in window) ||
+        (navigator.maxTouchPoints > 0) ||
+        (navigator.msMaxTouchPoints > 0) ||
+        (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+      );
+      
+      if (isTouchDevice) {
+        document.body.classList.add('touch-device');
+        console.log('Touch device detected - cursor hidden');
+      } else {
+        document.body.classList.remove('touch-device');
+        console.log('Non-touch device detected - cursor visible');
+      }
+    }
+    
+    // Run detection after DOM is loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        detectTouchDevice();
+        window.addEventListener('resize', detectTouchDevice);
+      });
+    } else {
+      detectTouchDevice();
+      window.addEventListener('resize', detectTouchDevice);
+    }
+  </script>
+  
+  <style>
+    /* GLB Viewer Custom Styles */
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      touch-action: none; /* Prevent default touch behaviors */
+    }
+    
+    /* Default cursor visibility - show cursor */
+    * {
+      cursor: auto !important;
+    }
+    
+    /* Hide cursor on touch devices */
+    body.touch-device * {
+      cursor: none !important;
+    }
+    
+    /* Ensure interactive elements still show pointer on non-touch */
+    body:not(.touch-device) .chip,
+    body:not(.touch-device) button {
+      cursor: pointer !important;
+    }
+    
+    /* Ensure home button is always visible */
+    #btnHome {
+      position: relative;
+      z-index: 1001;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    /* Header styling */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background: #f8f9fa;
+      color: #333;
+      border-bottom: 2px solid #e9ecef;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 1000;
+    }
+    
+    /* Home button styling */
+    #btnHome {
+      padding: 8px 16px;
+      background: #dc3545;
+      border: 2px solid #dc3545;
+      color: white;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-block;
+      min-width: 60px;
+      text-align: center;
+    }
+    
+    #btnHome:hover {
+      background: #c82333;
+      border-color: #bd2130;
+      transform: translateY(-1px);
+    }
+    
+    .topbar .title {
+      font-size: 1.2rem;
+      margin: 0;
+    }
+    
+    .model-selector {
+      display: flex;
+      gap: 8px;
+      flex: 1;
+      justify-content: center;
+    }
+    
+    .model-selector .chip {
+      padding: 8px 16px;
+      background: #fff;
+      border: 2px solid #dee2e6;
+      color: #495057;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .model-selector .chip:hover {
+      background: #e9ecef;
+      border-color: #adb5bd;
+      transform: translateY(-1px);
+    }
+    
+    .model-selector .chip.active {
+      background: #007bff;
+      border-color: #007bff;
+      color: white;
+    }
+    
+    /* Prevent zoom on entire page */
+    #app {
+      touch-action: pan-x pan-y;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+    
+    /* Canvas container - allow 3D interactions only */
+    .glb-wrap {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 80px); /* Reduced from 120px to expand canvas */
+      touch-action: none; /* Allow Three.js to handle all touch events */
+    }
+    
+    #glbCanvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+      touch-action: none; /* Critical for proper 3D interaction */
+    }
+    
+    /* Loading indicator */
+    .loading-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      z-index: 100;
+    }
+    
+    /* Simplified controls */
+    .glb-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      background: rgba(248, 249, 250, 0.95);
+      padding: 10px;
+      border-radius: 25px;
+      border: 2px solid #dee2e6;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      z-index: 10;
+    }
+    
+    .glb-controls .chip {
+      padding: 10px 15px;
+      background: #fff;
+      border: 2px solid #dee2e6;
+      color: #495057;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      touch-action: manipulation;
+      font-weight: 500;
+    }
+    
+    .glb-controls .chip:hover {
+      background: #e9ecef;
+      border-color: #adb5bd;
+      transform: translateY(-1px);
+    }
+    
+    .glb-controls .chip.active {
+      background: #28a745;
+      border-color: #28a745;
+      color: white;
+    }
+    
+    .note {
+      text-align: center;
+      color: #6c757d;
+      font-size: 0.9rem;
+      padding: 10px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+      font-weight: 500;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .topbar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+      }
+      
+      .model-selector {
+        order: 2;
+      }
+      
+      .topbar .title {
+        order: 1;
+        font-size: 1rem;
+      }
+      
+      #btnHome {
+        order: 3;
+        background: #dc3545;
+        border-color: #dc3545;
+        color: white;
+        padding: 10px 20px;
+        font-size: 1rem;
+        margin-top: 5px;
+      }
+      
+      #btnHome:hover {
+        background: #c82333;
+        border-color: #bd2130;
+      }
+      
+      .glb-wrap {
+        height: calc(100vh - 120px); /* Reduced padding for mobile */
+      }
+      
+      .glb-controls {
+        bottom: 10px;
+        gap: 5px;
+        padding: 8px;
+      }
+      
+      .glb-controls .chip {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <h1 class="title">GLB Model Viewer</h1>
+      <div class="model-selector">
+        <button class="chip model-btn active" data-model="model1.glb">Model 1</button>
+        <button class="chip model-btn" data-model="model2.glb">Model 2</button>
+        <button class="chip model-btn" data-model="model3.glb">Model 3</button>
+      </div>
+      <button id="btnHome" class="chip">Home</button>
+    </header>
+    
+    <main>
+      <section id="screen-glb" class="screen active">
+        <div class="container" style="padding: 0; margin: 0;">
+          <div class="panel" style="padding: var(--spacing-xs); margin: 0;">
+            <div class="note">Drag to rotate • Scroll to zoom</div>
+            
+            <div class="glb-wrap">
+              <canvas id="glbCanvas"></canvas>
+              <div id="loadingIndicator" class="loading-indicator">Loading 3D model...</div>
+              
+              <div class="glb-controls">
+                <button id="btnGlbZoomIn" class="chip big">＋</button>
+                <button id="btnGlbAuto" class="chip big">Auto</button>
+                <button id="btnGlbReset" class="chip big">Reset</button>
+                <button id="btnGlbZoomOut" class="chip big">－</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+
+
+<script>
+  (function() {
+    'use strict';
+    
+    let scene, camera, renderer, controls;
+    let currentModel = null;
+    let autoRotate = false;
+    
+    // Simple script loading
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error(`Failed to load ${src}`));
+        document.head.appendChild(script);
+      });
+    }
+    
+    // Load dependencies with simple fallback
+    async function loadDependencies() {
+      try {
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
+        await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js');
+        await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js');
+        console.log('Three.js loaded successfully');
+        initApp();
+      } catch (error) {
+        console.error('Failed to load Three.js:', error);
+        document.getElementById('loadingIndicator').textContent = 'Failed to load 3D libraries. Please refresh.';
+      }
+    }
+    
+    function initApp() {
+      setupThreeJS();
+      setupEventListeners();
+      loadModel('model1.glb'); // Changed back to model1.glb as default
+    }
+    
+    function setupThreeJS() {
+      const canvas = document.getElementById('glbCanvas');
+      
+      // Scene
+      scene = new THREE.Scene();
+      
+      // Camera
+      camera = new THREE.PerspectiveCamera(75, canvas.offsetWidth / canvas.offsetHeight, 0.1, 1000);
+      camera.position.set(0, 0, 2.5); // Doubled zoom (halved distance)
+      
+      // Simple renderer setup
+      renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        alpha: true,
+        antialias: false
+      });
+      
+      renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+      renderer.setClearColor(0x87CEEB, 1); // Sky blue background for classroom
+      
+      // Controls
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.1;
+      
+      // Enhanced lighting for maximum GLB visibility
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); // Even brighter ambient light
+      scene.add(ambientLight);
+      
+      // Main directional light (classroom overhead lighting)
+      const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2.0); // Increased intensity
+      directionalLight1.position.set(10, 15, 5);
+      directionalLight1.castShadow = false; // Disable shadows for performance
+      scene.add(directionalLight1);
+      
+      // Secondary directional light from different angle
+      const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1.5); // Increased intensity
+      directionalLight2.position.set(-10, 10, -5);
+      scene.add(directionalLight2);
+      
+      // Front fill light to eliminate dark areas
+      const directionalLight3 = new THREE.DirectionalLight(0xffffff, 1.2); // Increased intensity
+      directionalLight3.position.set(0, 5, 10);
+      scene.add(directionalLight3);
+      
+      // Back light to illuminate from behind
+      const directionalLight4 = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight4.position.set(0, 5, -10);
+      scene.add(directionalLight4);
+      
+      // Side lights for complete illumination
+      const leftLight = new THREE.DirectionalLight(0xffffff, 0.7);
+      leftLight.position.set(-15, 5, 0);
+      scene.add(leftLight);
+      
+      const rightLight = new THREE.DirectionalLight(0xffffff, 0.7);
+      rightLight.position.set(15, 5, 0);
+      scene.add(rightLight);
+      
+      // Add hemisphere light for natural classroom lighting
+      const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x666666, 0.8); // Brighter and more balanced
+      hemisphereLight.position.set(0, 20, 0);
+      scene.add(hemisphereLight);
+      
+      // Point lights for additional illumination
+      const pointLight1 = new THREE.PointLight(0xffffff, 1.0, 50);
+      pointLight1.position.set(5, 5, 5);
+      scene.add(pointLight1);
+      
+      const pointLight2 = new THREE.PointLight(0xffffff, 1.0, 50);
+      pointLight2.position.set(-5, 5, 5);
+      scene.add(pointLight2);
+      
+      const pointLight3 = new THREE.PointLight(0xffffff, 0.8, 50);
+      pointLight3.position.set(0, 8, -5);
+      scene.add(pointLight3);
+      
+      // Add classroom environment
+      createClassroomEnvironment();
+      
+      // Handle resize
+      window.addEventListener('resize', onWindowResize, false);
+      
+      // Start render loop
+      animate();
+    }
+    
+    function createClassroomEnvironment() {
+      // Create classroom floor
+      const floorGeometry = new THREE.PlaneGeometry(50, 50);
+      const floorMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0x8B4513, // Brown wooden floor
+        transparent: true,
+        opacity: 0.8
+      });
+      const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.y = -10;
+      scene.add(floor);
+      
+      // Create classroom walls
+      // Back wall
+      const wallGeometry = new THREE.PlaneGeometry(50, 30);
+      const wallMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0xF5F5DC, // Beige wall color
+        transparent: true,
+        opacity: 0.7
+      });
+      const backWall = new THREE.Mesh(wallGeometry, wallMaterial);
+      backWall.position.set(0, 5, -25);
+      scene.add(backWall);
+      
+      // Side walls
+      const leftWall = new THREE.Mesh(wallGeometry, wallMaterial);
+      leftWall.rotation.y = Math.PI / 2;
+      leftWall.position.set(-25, 5, 0);
+      scene.add(leftWall);
+      
+      const rightWall = new THREE.Mesh(wallGeometry, wallMaterial);
+      rightWall.rotation.y = -Math.PI / 2;
+      rightWall.position.set(25, 5, 0);
+      scene.add(rightWall);
+      
+      // Create whiteboard on back wall
+      const whiteboardGeometry = new THREE.PlaneGeometry(15, 8);
+      const whiteboardMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0xFFFFFF // White
+      });
+      const whiteboard = new THREE.Mesh(whiteboardGeometry, whiteboardMaterial);
+      whiteboard.position.set(0, 8, -24.9);
+      scene.add(whiteboard);
+      
+      // Add whiteboard frame
+      const frameGeometry = new THREE.PlaneGeometry(16, 9);
+      const frameMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0x333333 // Dark frame
+      });
+      const frame = new THREE.Mesh(frameGeometry, frameMaterial);
+      frame.position.set(0, 8, -24.95);
+      scene.add(frame);
+      
+      // Create desks
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 2; j++) {
+          const deskGeometry = new THREE.BoxGeometry(3, 1.5, 2);
+          const deskMaterial = new THREE.MeshLambertMaterial({ 
+            color: 0xDEB887 // Light wood color
+          });
+          const desk = new THREE.Mesh(deskGeometry, deskMaterial);
+          desk.position.set((i - 1) * 8, -8, (j - 0.5) * 6 + 5);
+          scene.add(desk);
+          
+          // Add chairs
+          const chairGeometry = new THREE.BoxGeometry(1.5, 3, 1.5);
+          const chairMaterial = new THREE.MeshLambertMaterial({ 
+            color: 0x4169E1 // Blue chairs
+          });
+          const chair = new THREE.Mesh(chairGeometry, chairMaterial);
+          chair.position.set((i - 1) * 8, -6, (j - 0.5) * 6 + 8);
+          scene.add(chair);
+        }
+      }
+      
+      // Add ceiling lights (visual only)
+      for (let i = 0; i < 3; i++) {
+        const lightGeometry = new THREE.BoxGeometry(4, 0.2, 1);
+        const lightMaterial = new THREE.MeshBasicMaterial({ 
+          color: 0xFFFFFF,
+          emissive: 0x404040
+        });
+        const ceilingLight = new THREE.Mesh(lightGeometry, lightMaterial);
+        ceilingLight.position.set((i - 1) * 10, 18, 0);
+        scene.add(ceilingLight);
+      }
+    }
+    
+         function loadModel(filename) {
+       const loadingIndicator = document.getElementById('loadingIndicator');
+       loadingIndicator.style.display = 'block';
+       loadingIndicator.textContent = 'Loading 3D model...';
+       
+       console.log(`Attempting to load GLB model: ${filename}`);
+       
+       // Remove current model
+       if (currentModel) {
+         scene.remove(currentModel);
+       }
+       
+       const loader = new THREE.GLTFLoader();
+       const modelPath = `../assets/${filename}`;
+       console.log(`Loading from path: ${modelPath}`);
+       
+       loader.load(
+         modelPath,
+         function(gltf) {
+           console.log('GLB model loaded successfully:', gltf);
+           
+           // GLB files can contain their own materials, so we use the loaded scene
+           currentModel = gltf.scene;
+           
+           // Center and scale the model
+           const box = new THREE.Box3().setFromObject(currentModel);
+           const center = box.getCenter(new THREE.Vector3());
+           const size = box.getSize(new THREE.Vector3());
+           
+           console.log('Model dimensions:', size);
+           console.log('Model center:', center);
+           
+           // Center the model
+           currentModel.position.sub(center);
+           
+           // Scale the model to fit in view
+           const maxDim = Math.max(size.x, size.y, size.z);
+           const scale = 2 / maxDim;
+           currentModel.scale.setScalar(scale);
+           
+           console.log(`Model scaled by: ${scale}`);
+           
+           // GLB models often come with proper orientation, so we don't need to rotate
+           // But if needed, you can add rotation here
+           // currentModel.rotation.x = -Math.PI / 2;
+           
+           scene.add(currentModel);
+           loadingIndicator.style.display = 'none';
+           console.log(`Successfully loaded and added GLB model: ${filename}`);
+         },
+         function(progress) {
+           if (progress.total > 0) {
+             const percent = Math.round(progress.loaded / progress.total * 100);
+             loadingIndicator.textContent = `Loading... ${percent}%`;
+             console.log(`Loading progress: ${percent}%`);
+           }
+         },
+         function(error) {
+           console.error('Error loading GLB:', error);
+           console.error('Error details:', {
+             message: error.message,
+             type: error.type,
+             target: error.target
+           });
+           loadingIndicator.textContent = `Error loading ${filename}. Check console for details.`;
+           setTimeout(() => {
+             loadingIndicator.style.display = 'none';
+           }, 5000);
+         }
+       );
+     }
+    
+    function setupEventListeners() {
+      // Model selection buttons
+      document.querySelectorAll('.model-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.model-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          loadModel(this.dataset.model);
+        });
+      });
+      
+      // Simplified control buttons
+      document.getElementById('btnGlbZoomIn').addEventListener('click', () => zoomCamera(-0.5));
+      document.getElementById('btnGlbZoomOut').addEventListener('click', () => zoomCamera(0.5));
+      document.getElementById('btnGlbReset').addEventListener('click', resetView);
+      document.getElementById('btnGlbAuto').addEventListener('click', toggleAutoRotate);
+      document.getElementById('btnHome').addEventListener('click', goHome);
+      
+      // Prevent default touch behaviors on the entire app
+      document.addEventListener('touchstart', function(e) {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+      
+      document.addEventListener('touchmove', function(e) {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+    }
+    
+    function zoomCamera(delta) {
+      camera.position.multiplyScalar(1 + delta);
+      camera.updateProjectionMatrix();
+    }
+    
+    function resetView() {
+      camera.position.set(0, 0, 2.5); // Doubled zoom (halved distance)
+      controls.reset();
+      if (currentModel) {
+        // Reset model rotation if needed
+        currentModel.rotation.set(0, 0, 0);
+      }
+    }
+    
+    function toggleAutoRotate() {
+      autoRotate = !autoRotate;
+      const btn = document.getElementById('btnGlbAuto');
+      btn.textContent = autoRotate ? 'Stop Auto' : 'Auto';
+      btn.classList.toggle('active', autoRotate);
+    }
+    
+    function onWindowResize() {
+      const canvas = document.getElementById('glbCanvas');
+      camera.aspect = canvas.offsetWidth / canvas.offsetHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+    }
+    
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      // Auto rotate model
+      if (autoRotate && currentModel) {
+        currentModel.rotation.y += 0.01;
+      }
+      
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    
+    function goHome() {
+      window.location.href = '../index.html';
+    }
+    
+    // Start loading dependencies when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadDependencies);
+    } else {
+      loadDependencies();
+    }
+  })();
+</script>
+</body>
+</html>
