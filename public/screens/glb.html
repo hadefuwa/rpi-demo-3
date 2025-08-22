@@ -155,13 +155,13 @@
       width: 100vw;
     }
     
-    /* Canvas container - allow 3D interactions only */
-    .glb-wrap {
-      position: relative;
-      width: 100%;
-      height: calc(100vh - 80px); /* Reduced from 120px to expand canvas */
-      touch-action: none; /* Allow Three.js to handle all touch events */
-    }
+         /* Canvas container - allow 3D interactions only */
+     .glb-wrap {
+       position: relative;
+       width: 100%;
+       height: calc(100vh - 60px); /* Reduced padding to expand canvas further */
+       touch-action: none; /* Allow Three.js to handle all touch events */
+     }
     
     #glbCanvas {
       width: 100% !important;
@@ -265,9 +265,9 @@
         border-color: #bd2130;
       }
       
-      .glb-wrap {
-        height: calc(100vh - 120px); /* Reduced padding for mobile */
-      }
+             .glb-wrap {
+         height: calc(100vh - 100px); /* Reduced padding for mobile */
+       }
       
       .glb-controls {
         bottom: 10px;
@@ -295,12 +295,10 @@
     </header>
     
     <main>
-      <section id="screen-glb" class="screen active">
-        <div class="container" style="padding: 0; margin: 0;">
-          <div class="panel" style="padding: var(--spacing-xs); margin: 0;">
-            <div class="note">Drag to rotate • Scroll to zoom</div>
-            
-            <div class="glb-wrap">
+             <section id="screen-glb" class="screen active">
+         <div class="container" style="padding: 0; margin: 0;">
+           <div class="panel" style="padding: 0; margin: 0;">
+             <div class="glb-wrap">
               <canvas id="glbCanvas"></canvas>
               <div id="loadingIndicator" class="loading-indicator">Loading 3D model...</div>
               
