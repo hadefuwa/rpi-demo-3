@@ -22,13 +22,19 @@
        <div class="control-column">
          <div class="control-label">Load</div>
          <div class="control-value" id="load-value">50.0%</div>
-                            <div class="horizontal-slider">
-            <div class="slider-track" id="load-track">
-              <div class="slider-fill" id="load-fill"></div>
-              <div class="slider-thumb" id="load-thumb"></div>
-            </div>
-            <div class="slider-scale">
-              <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+          <div class="vertical-slider">
+            <div class="slider-container">
+              <div class="slider-track" id="load-track">
+                <div class="slider-fill" id="load-fill"></div>
+                <div class="slider-thumb" id="load-thumb" data-slider="load"></div>
+              </div>
+              <div class="slider-scale">
+                <span>100</span>
+                <span>75</span>
+                <span>50</span>
+                <span>25</span>
+                <span>0</span>
+              </div>
             </div>
           </div>
          <button class="control-btn">Set %</button>
@@ -37,13 +43,19 @@
        <div class="control-column">
          <div class="control-label">Voltage 1</div>
          <div class="control-value" id="voltage1-value">66.7% - 20.0V</div>
-                            <div class="horizontal-slider">
-            <div class="slider-track" id="voltage1-track">
-              <div class="slider-fill" id="voltage1-fill"></div>
-              <div class="slider-thumb" id="voltage1-thumb"></div>
-            </div>
-            <div class="slider-scale">
-              <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+          <div class="vertical-slider">
+            <div class="slider-container">
+              <div class="slider-track" id="voltage1-track">
+                <div class="slider-fill" id="voltage1-fill"></div>
+                <div class="slider-thumb" id="voltage1-thumb" data-slider="voltage1"></div>
+              </div>
+              <div class="slider-scale">
+                <span>100</span>
+                <span>75</span>
+                <span>50</span>
+                <span>25</span>
+                <span>0</span>
+              </div>
             </div>
           </div>
          <button class="control-btn">Set V</button>
@@ -53,13 +65,19 @@
        <div class="control-column">
          <div class="control-label">Frequency</div>
          <div class="control-value" id="frequency-value">50Hz</div>
-                            <div class="horizontal-slider">
-            <div class="slider-track" id="frequency-track">
-              <div class="slider-fill" id="frequency-fill"></div>
-              <div class="slider-thumb" id="frequency-thumb"></div>
-            </div>
-            <div class="slider-scale">
-              <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+          <div class="vertical-slider">
+            <div class="slider-container">
+              <div class="slider-track" id="frequency-track">
+                <div class="slider-fill" id="frequency-fill"></div>
+                <div class="slider-thumb" id="frequency-thumb" data-slider="frequency"></div>
+              </div>
+              <div class="slider-scale">
+                <span>100</span>
+                <span>75</span>
+                <span>50</span>
+                <span>25</span>
+                <span>0</span>
+              </div>
             </div>
           </div>
          <button class="control-btn">Set</button>
@@ -251,7 +269,7 @@
 <style>
 /* All styles strictly scoped to #screen-electrical-machines */
 #screen-electrical-machines { 
-  width: 100%; 
+  width: 100vw; 
   height: 100vh; 
   background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%); 
   color: #ffffff; 
@@ -259,12 +277,26 @@
   overflow: hidden; 
   display: flex;
   flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
 #screen-electrical-machines * { 
   box-sizing: border-box; 
   touch-action: manipulation; 
   user-select: none; 
+}
+
+/* Prevent all scrollbars */
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden !important;
+  width: 100%;
+  height: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
 }
 
 /* Header - Compact for 5-inch screens */
@@ -466,14 +498,15 @@
 /* Main Layout - Compact for 5-inch screens */
 .em-main {
   display: grid;
-  grid-template-columns: 300px 1fr;
-  grid-template-rows: 1fr 150px;
-  gap: 10px;
-  padding: 10px;
+  grid-template-columns: 280px 1fr;
+  grid-template-rows: 1fr 140px;
+  gap: 8px;
+  padding: 8px;
   flex: 1;
   height: calc(100vh - 90px);
   min-height: 0;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* Control Panel - Compact for 5-inch screens */
@@ -529,34 +562,37 @@
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
 }
 
-.horizontal-slider {
+.vertical-slider {
+  width: 100%;
+  height: 140px;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 4px;
-  height: 120px;
-  padding: 1px;
+  padding: 10px 0;
+}
+
+.slider-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .slider-track {
-  width: 12px;
-  height: 100px;
+  width: 8px;
+  height: 120px;
   background: #222;
-  border-radius: 6px;
+  border-radius: 4px;
   position: relative;
-  border: 2px solid #555;
+  border: 1px solid #555;
   cursor: pointer;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-  transition: all 0.3s ease;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+  transition: all 0.2s ease;
 }
 
 .slider-track:hover {
   border-color: #4CAF50;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 0 8px rgba(76, 175, 80, 0.3);
-}
-
-.slider-track:active {
-  border-color: #45a049;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5), 0 0 6px rgba(76, 175, 80, 0.4);
 }
 
 .slider-fill {
@@ -564,51 +600,52 @@
   left: 0;
   bottom: 0;
   width: 100%;
-  background: linear-gradient(to top, #4CAF50, #8BC34A);
-  border-radius: 2px;
-  transition: height 0.3s ease;
-  box-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
+  background: linear-gradient(to top, #4CAF50 0%, #66BB6A 50%, #81C784 100%);
+  border-radius: 3px;
+  transition: height 0.2s ease;
+  box-shadow: 0 0 3px rgba(76, 175, 80, 0.6);
 }
 
 .slider-thumb {
   position: absolute;
-  left: -8px;
-  width: 28px;
-  height: 28px;
+  left: 50%;
+  width: 20px;
+  height: 20px;
   background: #fff;
   border-radius: 50%;
   border: 2px solid #4CAF50;
   cursor: grab;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  transform: translateY(50%);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transform: translateX(-50%);
+  z-index: 10;
 }
 
 .slider-thumb:active {
   cursor: grabbing;
-  transform: translateY(50%) scale(1.2);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  transform: translateX(-50%) scale(1.3);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+  background: #4CAF50;
 }
 
 .slider-thumb:hover {
-  background: #4CAF50;
+  transform: translateX(-50%) scale(1.15);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 0 6px rgba(76, 175, 80, 0.6);
   border-color: #45a049;
-  transform: translateY(50%) scale(1.1);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 8px rgba(76, 175, 80, 0.5);
 }
 
 .slider-scale {
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   justify-content: space-between;
-  font-size: 8px;
-  color: #999;
-  height: 100px;
+  font-size: 7px;
+  color: #aaa;
+  height: 120px;
   font-weight: 500;
-  padding: 1px 0;
-  position: absolute;
-  right: -20px;
-  top: 0;
+  padding: 0;
+  line-height: 1;
+  text-align: center;
+  min-width: 20px;
 }
 
 .control-btn {
@@ -1121,15 +1158,30 @@
   }
 }
 
-/* Specific optimization for 5-inch RPi screens (800x480) */
+/* ENHANCED 5-inch RPi screen optimization (800x480) */
 @media (max-width: 850px) and (max-height: 500px) {
+  body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  #screen-electrical-machines {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+  }
+  
   .em-header {
-    height: 30px;
-    padding: 2px 6px;
+    height: 35px;
+    padding: 3px 8px;
+    min-height: 35px;
+    flex-shrink: 0;
   }
   
   .matrix-logo {
-    font-size: 14px;
+    font-size: 12px;
   }
   
   .subtitle {
@@ -1141,141 +1193,188 @@
   }
   
   .status-indicators {
-    gap: 4px;
-    padding: 1px 3px;
+    gap: 3px;
+    padding: 2px 4px;
   }
   
   .indicator {
     font-size: 7px;
-    padding: 1px 2px;
+    padding: 1px 3px;
   }
   
   .em-main {
-    grid-template-columns: 250px 1fr;
-    grid-template-rows: 1fr 120px;
-    gap: 6px;
-    padding: 6px;
-    height: calc(100vh - 70px);
+    grid-template-columns: 220px 1fr;
+    grid-template-rows: 1fr 100px;
+    gap: 4px;
+    padding: 4px;
+    height: calc(100vh - 35px);
+    max-height: calc(100vh - 35px);
+    overflow: hidden;
   }
   
   .control-panel {
-    padding: 6px;
-    gap: 6px;
+    padding: 4px;
+    gap: 4px;
+    overflow: hidden;
   }
   
   .control-column {
-    gap: 4px;
-    padding: 6px 4px;
-    min-height: 150px;
-    min-width: 70px;
-    max-width: 80px;
+    gap: 3px;
+    padding: 4px 3px;
+    min-height: 120px;
+    min-width: 60px;
+    max-width: 68px;
   }
   
   .control-label {
-    font-size: 9px;
+    font-size: 8px;
+    margin-bottom: 2px;
   }
   
   .control-value {
-    font-size: 8px;
-    min-width: 50px;
+    font-size: 7px;
+    min-width: 45px;
     padding: 2px 3px;
   }
   
+  .vertical-slider {
+    height: 100px;
+    padding: 5px 0;
+  }
+  
+  .slider-container {
+    gap: 4px;
+  }
+  
   .slider-track {
-    height: 10px;
+    width: 6px;
+    height: 90px;
   }
   
   .slider-thumb {
-    width: 24px;
-    height: 24px;
-    top: -7px;
+    width: 16px;
+    height: 16px;
   }
   
   .slider-scale {
-    font-size: 7px;
+    font-size: 6px;
+    height: 90px;
+    min-width: 15px;
   }
   
   .control-btn {
-    padding: 6px 8px;
-    font-size: 9px;
-    min-width: 60px;
+    padding: 4px 6px;
+    font-size: 7px;
+    min-width: 45px;
   }
   
   .readings-panel {
-    min-height: 150px;
-    gap: 6px;
-    min-width: 80px;
+    min-height: 120px;
+    gap: 4px;
+    min-width: 70px;
   }
   
   .power-readings, .voltage-readings {
-    min-width: 80px;
-    padding: 4px 6px;
+    min-width: 70px;
+    padding: 3px 5px;
   }
   
   .reading {
-    font-size: 8px;
+    font-size: 7px;
   }
   
   .reading-label {
-    font-size: 8px;
+    font-size: 7px;
   }
   
   .reading span:not(.reading-label) {
-    font-size: 9px;
+    font-size: 8px;
     padding: 1px 2px;
   }
   
   .gauges-section {
-    padding: 6px;
-    gap: 6px;
+    padding: 4px;
+    gap: 4px;
+    overflow: hidden;
   }
   
   .gauge-visual {
-    width: 60px;
-    height: 60px;
-    padding: 4px;
+    width: 50px;
+    height: 50px;
+    padding: 3px;
+  }
+  
+  .gauge-value {
+    font-size: 10px;
+  }
+  
+  .gauge-label {
+    font-size: 8px;
   }
   
   .gauge-scale {
-    bottom: -15px;
-    font-size: 6px;
-    padding: 0 2px;
+    bottom: -12px;
+    font-size: 5px;
+    padding: 0 1px;
   }
   
   .scale-mark {
-    font-size: 5px;
-    padding: 1px 1px;
+    font-size: 4px;
+    padding: 0px 1px;
   }
   
-  .charts-section {
-    padding: 6px;
+  .action-buttons {
+    width: 100px;
+    padding: 8px;
     gap: 6px;
   }
   
+  .action-btn {
+    padding: 6px 8px;
+    font-size: 7px;
+  }
+  
+  .btn-indicator {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .charts-section {
+    padding: 4px;
+    gap: 4px;
+    overflow: hidden;
+  }
+  
   .chart-title {
-    font-size: 10px;
-    margin-bottom: 4px;
+    font-size: 8px;
+    margin-bottom: 2px;
   }
   
   .chart-container {
-    padding: 6px;
+    padding: 4px;
+    overflow: hidden;
   }
   
   .chart-legend {
-    right: 6px;
-    top: 6px;
-    padding: 4px;
-    gap: 2px;
+    right: 4px;
+    top: 4px;
+    padding: 3px;
+    gap: 1px;
   }
   
   .legend-item {
-    font-size: 7px;
-    gap: 3px;
+    font-size: 6px;
+    gap: 2px;
+  }
+  
+  .legend-color {
+    width: 8px;
+    height: 2px;
   }
   
   .home-button {
-    padding: 4px 8px;
-    font-size: 9px;
+    padding: 3px 6px;
+    font-size: 8px;
   }
 }
 
@@ -1744,36 +1843,48 @@
      updateSlider('frequency', frequency);
   }
   
-  // Update slider visual for vertical sliders
+  // Update slider visual for vertical sliders - REWRITTEN
   function updateSlider(name, value) {
-    const fill = root.querySelector(`#${name}-fill`);
-    const thumb = root.querySelector(`#${name}-thumb`);
-    
-    if (fill && thumb) {
-      const percent = Math.min(100, Math.max(0, value));
-      fill.style.height = `${percent}%`;
-      thumb.style.bottom = `${percent}%`;
-    }
+    updateSliderVisual(name, value);
   }
   
-     // Handle slider interaction for vertical sliders
-   function handleSliderInteraction(sliderName, event) {
-     const track = event.currentTarget;
-     const rect = track.getBoundingClientRect();
-     const clickY = event.clientY - rect.top;
-     const height = rect.height;
-     // Invert Y coordinate for vertical slider (top = 100%, bottom = 0%)
-     const percent = Math.max(0, Math.min(100, 100 - (clickY / height) * 100));
-     
-     // Update slider value
-     sliderValues[sliderName] = percent;
-     
-     // Update visual
-     updateSlider(sliderName, sliderValues[sliderName]);
-     
-     // Update display value
-     updateControlDisplay(sliderName);
-   }
+  // Handle slider interaction for vertical sliders - COMPLETELY REWRITTEN
+  function handleSliderInteraction(sliderName, clientY, trackElement) {
+    const track = trackElement || root.querySelector(`#${sliderName}-track`);
+    if (!track) return;
+    
+    const rect = track.getBoundingClientRect();
+    const clickY = clientY - rect.top;
+    const height = rect.height;
+    
+    // For vertical sliders: top = 100%, bottom = 0%
+    const percent = Math.max(0, Math.min(100, 100 - (clickY / height) * 100));
+    
+    // Update slider value
+    sliderValues[sliderName] = percent;
+    
+    // Update visual immediately
+    updateSliderVisual(sliderName, percent);
+    
+    // Update display value
+    updateControlDisplay(sliderName);
+  }
+  
+  // New function to update slider visual
+  function updateSliderVisual(sliderName, percent) {
+    const fill = root.querySelector(`#${sliderName}-fill`);
+    const thumb = root.querySelector(`#${sliderName}-thumb`);
+    
+    if (fill) {
+      fill.style.height = `${percent}%`;
+    }
+    
+    if (thumb) {
+      // Position thumb from bottom (0% = bottom, 100% = top)
+      thumb.style.bottom = `${percent}%`;
+      thumb.style.transform = 'translateX(-50%) translateY(50%)';
+    }
+  }
   
      // Update control display
    function updateControlDisplay(sliderName) {
@@ -1853,88 +1964,135 @@
       });
     });
     
-    // Slider interactions
+    // COMPLETELY REWRITTEN SLIDER INTERACTIONS
     const sliderTracks = root.querySelectorAll('.slider-track');
+    const sliderThumbs = root.querySelectorAll('.slider-thumb');
+    
+    // Initialize sliders with default values
+    Object.keys(sliderValues).forEach(sliderName => {
+      updateSliderVisual(sliderName, sliderValues[sliderName]);
+      updateControlDisplay(sliderName);
+    });
+    
+    // Track click events
     sliderTracks.forEach(track => {
       const sliderName = track.id.replace('-track', '');
       
-      // Click to set value
-      track.addEventListener('click', (e) => {
-        handleSliderInteraction(sliderName, e);
-      });
-      
-      // Drag functionality
       track.addEventListener('mousedown', (e) => {
+        e.preventDefault();
         isDragging = true;
         currentSlider = sliderName;
-        handleSliderInteraction(sliderName, e);
+        handleSliderInteraction(sliderName, e.clientY, track);
+        
+        // Visual feedback
+        track.style.borderColor = '#4CAF50';
+        track.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.5), 0 0 8px rgba(76, 175, 80, 0.6)';
+      });
+      
+      track.addEventListener('click', (e) => {
+        if (!isDragging) {
+          handleSliderInteraction(sliderName, e.clientY, track);
+        }
+      });
+    });
+    
+    // Thumb drag events
+    sliderThumbs.forEach(thumb => {
+      const sliderName = thumb.dataset.slider;
+      
+      thumb.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        isDragging = true;
+        currentSlider = sliderName;
+        
+        const track = root.querySelector(`#${sliderName}-track`);
+        if (track) {
+          track.style.borderColor = '#4CAF50';
+          track.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.5), 0 0 8px rgba(76, 175, 80, 0.6)';
+        }
       });
     });
     
     // Global mouse events for dragging
     document.addEventListener('mousemove', (e) => {
       if (isDragging && currentSlider) {
+        e.preventDefault();
         const track = root.querySelector(`#${currentSlider}-track`);
         if (track) {
-          handleSliderInteraction(currentSlider, e);
+          handleSliderInteraction(currentSlider, e.clientY, track);
         }
       }
     });
     
     document.addEventListener('mouseup', () => {
+      if (isDragging && currentSlider) {
+        const track = root.querySelector(`#${currentSlider}-track`);
+        if (track) {
+          track.style.borderColor = '#555';
+          track.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.5)';
+        }
+      }
       isDragging = false;
       currentSlider = null;
     });
     
-             // Touch events for mobile
-   sliderTracks.forEach(track => {
-     const sliderName = track.id.replace('-track', '');
-     
-     track.addEventListener('touchstart', (e) => {
-       e.preventDefault();
-       isDragging = true;
-       currentSlider = sliderName;
-       const touch = e.touches[0];
-       handleSliderInteraction(sliderName, { clientY: touch.clientY, currentTarget: track });
-       
-       // Add visual feedback
-       track.style.borderColor = '#4CAF50';
-       track.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.3), 0 0 12px rgba(76, 175, 80, 0.5)';
-     });
-     
-     track.addEventListener('touchend', (e) => {
-       e.preventDefault();
-       isDragging = false;
-       currentSlider = null;
-       
-       // Remove visual feedback
-       track.style.borderColor = '#555';
-       track.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.3)';
-     });
-   });
-   
-   document.addEventListener('touchmove', (e) => {
-     if (isDragging && currentSlider) {
-       e.preventDefault();
-       const track = root.querySelector(`#${currentSlider}-track`);
-       if (track) {
-         const touch = e.touches[0];
-         handleSliderInteraction(currentSlider, { clientY: touch.clientY, currentTarget: track });
-       }
-     }
-   });
-   
-   document.addEventListener('touchend', () => {
-     if (isDragging && currentSlider) {
-       const track = root.querySelector(`#${currentSlider}-track`);
-       if (track) {
-         track.style.borderColor = '#555';
-         track.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.3)';
-       }
-     }
-     isDragging = false;
-     currentSlider = null;
-   });
+    // Touch events for mobile - REWRITTEN
+    sliderTracks.forEach(track => {
+      const sliderName = track.id.replace('-track', '');
+      
+      track.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        isDragging = true;
+        currentSlider = sliderName;
+        const touch = e.touches[0];
+        handleSliderInteraction(sliderName, touch.clientY, track);
+        
+        // Visual feedback
+        track.style.borderColor = '#4CAF50';
+        track.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.5), 0 0 8px rgba(76, 175, 80, 0.6)';
+      });
+    });
+    
+    sliderThumbs.forEach(thumb => {
+      const sliderName = thumb.dataset.slider;
+      
+      thumb.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        isDragging = true;
+        currentSlider = sliderName;
+        
+        const track = root.querySelector(`#${sliderName}-track`);
+        if (track) {
+          track.style.borderColor = '#4CAF50';
+          track.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.5), 0 0 8px rgba(76, 175, 80, 0.6)';
+        }
+      });
+    });
+    
+    document.addEventListener('touchmove', (e) => {
+      if (isDragging && currentSlider) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const track = root.querySelector(`#${currentSlider}-track`);
+        if (track) {
+          handleSliderInteraction(currentSlider, touch.clientY, track);
+        }
+      }
+    }, { passive: false });
+    
+    document.addEventListener('touchend', () => {
+      if (isDragging && currentSlider) {
+        const track = root.querySelector(`#${currentSlider}-track`);
+        if (track) {
+          track.style.borderColor = '#555';
+          track.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.5)';
+        }
+      }
+      isDragging = false;
+      currentSlider = null;
+    });
     
     // Action buttons
     const actionButtons = root.querySelectorAll('.action-btn');

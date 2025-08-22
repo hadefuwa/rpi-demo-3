@@ -376,30 +376,57 @@
       controls.enableDamping = true;
       controls.dampingFactor = 0.1;
       
-      // Enhanced lighting for better STL visibility
-      const ambientLight = new THREE.AmbientLight(0xffffff, 1.2); // Brighter ambient light
+      // Enhanced lighting for maximum STL visibility
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); // Even brighter ambient light
       scene.add(ambientLight);
       
       // Main directional light (classroom overhead lighting)
-      const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1.5);
+      const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2.0); // Increased intensity
       directionalLight1.position.set(10, 15, 5);
       directionalLight1.castShadow = false; // Disable shadows for performance
       scene.add(directionalLight1);
       
       // Secondary directional light from different angle
-      const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1.0);
+      const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1.5); // Increased intensity
       directionalLight2.position.set(-10, 10, -5);
       scene.add(directionalLight2);
       
       // Front fill light to eliminate dark areas
-      const directionalLight3 = new THREE.DirectionalLight(0xffffff, 0.8);
+      const directionalLight3 = new THREE.DirectionalLight(0xffffff, 1.2); // Increased intensity
       directionalLight3.position.set(0, 5, 10);
       scene.add(directionalLight3);
       
+      // Back light to illuminate from behind
+      const directionalLight4 = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight4.position.set(0, 5, -10);
+      scene.add(directionalLight4);
+      
+      // Side lights for complete illumination
+      const leftLight = new THREE.DirectionalLight(0xffffff, 0.7);
+      leftLight.position.set(-15, 5, 0);
+      scene.add(leftLight);
+      
+      const rightLight = new THREE.DirectionalLight(0xffffff, 0.7);
+      rightLight.position.set(15, 5, 0);
+      scene.add(rightLight);
+      
       // Add hemisphere light for natural classroom lighting
-      const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+      const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x666666, 0.8); // Brighter and more balanced
       hemisphereLight.position.set(0, 20, 0);
       scene.add(hemisphereLight);
+      
+      // Point lights for additional illumination
+      const pointLight1 = new THREE.PointLight(0xffffff, 1.0, 50);
+      pointLight1.position.set(5, 5, 5);
+      scene.add(pointLight1);
+      
+      const pointLight2 = new THREE.PointLight(0xffffff, 1.0, 50);
+      pointLight2.position.set(-5, 5, 5);
+      scene.add(pointLight2);
+      
+      const pointLight3 = new THREE.PointLight(0xffffff, 0.8, 50);
+      pointLight3.position.set(0, 8, -5);
+      scene.add(pointLight3);
       
       // Add classroom environment
       createClassroomEnvironment();
@@ -514,8 +541,14 @@
       loader.load(
         `../assets/${filename}`,
         function(geometry) {
-          // Simple white material
-          const material = new THREE.MeshPhongMaterial({ color: 0xffffff });
+          // Enhanced material for better visibility
+          const material = new THREE.MeshPhongMaterial({ 
+            color: 0xffffff,
+            shininess: 100,     // Make it more reflective
+            specular: 0x111111, // Add subtle specular highlights
+            transparent: false,
+            opacity: 1.0
+          });
           currentModel = new THREE.Mesh(geometry, material);
           
           // Center and scale the model

@@ -16,11 +16,14 @@
     <main class="grid">
              <!-- Card 1: Progress + ETA -->
        <section class="card progress-card" aria-label="Job status">
-          <div class="video-container">
-            <video id="progress-video" autoplay muted loop playsinline>
-              <source src="../assets/video.mp4" type="video/mp4">
-            </video>
-          </div>
+                     <div class="video-container">
+             <video id="progress-video" autoplay muted loop playsinline>
+               <source src="../assets/video.mp4" type="video/mp4">
+             </video>
+             <div class="video-overlay">
+               <div class="gcode-name">gear_rev3.gcode</div>
+             </div>
+           </div>
         <div class="progress-text">
           <div class="job-name" id="job-name">No job</div>
           <div class="progress-slider">
@@ -214,12 +217,38 @@
         flex-shrink: 0; /* Prevent shrinking */
       }
      
-     #screen-printer .video-container video {
-       width: 100%;
-       height: 100%;
-       object-fit: cover;
-       border-radius: 8px;
-     }
+           #screen-printer .video-container video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+      
+      #screen-printer .video-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 12px;
+        pointer-events: none;
+      }
+      
+      #screen-printer .gcode-name {
+        background: rgba(0, 0, 0, 0.7);
+        color: #22c55e;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: 'Courier New', monospace;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        backdrop-filter: blur(4px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
     
                    /* Progress Slider */
       #screen-printer .progress-text { 
@@ -1334,43 +1363,126 @@
       else if (demo === 'new-job') worker && worker.postMessage({ type: 'cmd', data: 'start' });
     });
   
-         // Enhanced speed slider
-     on(speedRange, 'input', () => {
-       const v = Number(speedRange.value);
-       speedDisplay.textContent = `${v}%`;
+         // Enhanced speed slider with drag functionality
+     let isDragging = false;
+     let startX = 0;
+     let startLeft = 0;
+     
+     // Function to update slider value and visual elements
+     function updateSliderValue(value) {
+       // Clamp value between min and max
+       const clampedValue = Math.max(50, Math.min(150, value));
+       
+       // Update the range input
+       speedRange.value = clampedValue;
+       
+       // Update display
+       speedDisplay.textContent = `${clampedValue}%`;
        
        // Calculate fill width and knob position
-       const percentage = ((v - 50) / 100) * 100;
+       const percentage = ((clampedValue - 50) / 100) * 100;
        speedFill.style.width = `${percentage}%`;
        
        // Position the knob
-       const knobPosition = percentage;
-       speedKnob.style.left = `${knobPosition}%`;
-       
-       // Add visual feedback
-       speedKnob.style.transform = 'translate(-50%, -50%) scale(1.1)';
-       setTimeout(() => {
-         speedKnob.style.transform = 'translate(-50%, -50%) scale(1)';
-       }, 150);
+       speedKnob.style.left = `${percentage}%`;
        
        // Update active marker
        speedMarkers.forEach(marker => marker.classList.remove('active'));
-       if (v <= 75) {
+       if (clampedValue <= 75) {
          speedMarkers[0].classList.add('active');
-       } else if (v <= 125) {
+       } else if (clampedValue <= 125) {
          speedMarkers[1].classList.add('active');
        } else {
          speedMarkers[2].classList.add('active');
        }
        
-       worker && worker.postMessage({ type: 'cmd', data: { speed: v } });
+       // Send to worker
+       worker && worker.postMessage({ type: 'cmd', data: { speed: clampedValue } });
+     }
+     
+     // Mouse events for dragging
+     on(speedKnob, 'mousedown', (e) => {
+       e.preventDefault();
+       isDragging = true;
+       startX = e.clientX;
+       startLeft = parseFloat(speedKnob.style.left) || 0;
+       
+       // Add dragging visual feedback
+       speedKnob.style.transform = 'translate(-50%, -50%) scale(1.05)';
+       speedKnob.style.cursor = 'grabbing';
+     });
+     
+     on(document, 'mousemove', (e) => {
+       if (!isDragging) return;
+       
+       const deltaX = e.clientX - startX;
+       const trackWidth = speedRange.offsetWidth;
+       const percentageChange = (deltaX / trackWidth) * 100;
+       const newPercentage = Math.max(0, Math.min(100, startLeft + percentageChange));
+       
+       // Calculate new value based on percentage
+       const newValue = 50 + (newPercentage / 100) * 100;
+       updateSliderValue(newValue);
+     });
+     
+     on(document, 'mouseup', () => {
+       if (isDragging) {
+         isDragging = false;
+         speedKnob.style.transform = 'translate(-50%, -50%) scale(1)';
+         speedKnob.style.cursor = 'grab';
+       }
+     });
+     
+     // Touch events for mobile dragging
+     on(speedKnob, 'touchstart', (e) => {
+       e.preventDefault();
+       isDragging = true;
+       startX = e.touches[0].clientX;
+       startLeft = parseFloat(speedKnob.style.left) || 0;
+       
+       // Add dragging visual feedback
+       speedKnob.style.transform = 'translate(-50%, -50%) scale(1.05)';
+       speedKnob.style.cursor = 'grabbing';
+     });
+     
+     on(document, 'touchmove', (e) => {
+       if (!isDragging) return;
+       e.preventDefault();
+       
+       const deltaX = e.touches[0].clientX - startX;
+       const trackWidth = speedRange.offsetWidth;
+       const percentageChange = (deltaX / trackWidth) * 100;
+       const newPercentage = Math.max(0, Math.min(100, startLeft + percentageChange));
+       
+       // Calculate new value based on percentage
+       const newValue = 50 + (newPercentage / 100) * 100;
+       updateSliderValue(newValue);
+     });
+     
+     on(document, 'touchend', () => {
+       if (isDragging) {
+         isDragging = false;
+         speedKnob.style.transform = 'translate(-50%, -50%) scale(1)';
+         speedKnob.style.cursor = 'grab';
+       }
+     });
+     
+     // Keep the original input event for when user clicks on the track
+     on(speedRange, 'input', () => {
+       const v = Number(speedRange.value);
+       updateSliderValue(v);
+       
+       // Add visual feedback for track clicks
+       speedKnob.style.transform = 'translate(-50%, -50%) scale(1.1)';
+       setTimeout(() => {
+         speedKnob.style.transform = 'translate(-50%, -50%) scale(1)';
+       }, 150);
      });
      
      // Initialize knob position
      setTimeout(() => {
        const initialValue = Number(speedRange.value);
-       const initialPercentage = ((initialValue - 50) / 100) * 100;
-       speedKnob.style.left = `${initialPercentage}%`;
+       updateSliderValue(initialValue);
      }, 100);
   
     // Camera fullscreen

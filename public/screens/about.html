@@ -81,12 +81,6 @@
         </div>
       </div>
 
-      <!-- Interactive Dots Navigation -->
-      <div class="dots-navigation">
-        <div class="dot active" data-image="1"></div>
-        <div class="dot" data-image="2"></div>
-        <div class="dot" data-image="3"></div>
-      </div>
 
       <!-- Floating Action Buttons -->
       <div class="floating-actions">
@@ -468,41 +462,6 @@
     text-transform: uppercase;
   }
 
-  /* Dots Navigation */
-  .dots-navigation {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 30px;
-  }
-
-  .dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: rgba(0, 255, 255, 0.3);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    animation: cyberpunkDotPulse 2s ease-in-out infinite;
-    border: 1px solid rgba(0, 255, 255, 0.5);
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-  }
-
-  .dot:nth-child(1) { animation-delay: 0s; }
-  .dot:nth-child(2) { animation-delay: 0.3s; }
-  .dot:nth-child(3) { animation-delay: 0.6s; }
-
-  .dot.active {
-    background: #00ffff;
-    transform: scale(1.2);
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
-    border-color: rgba(0, 255, 255, 0.8);
-  }
-
-  .dot:hover {
-    background: rgba(0, 255, 255, 0.8);
-    transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
-  }
 
   /* Floating Action Buttons */
   .floating-actions {
@@ -817,81 +776,142 @@
     }
   }
 
-  /* Mobile Responsiveness */
-  @media (max-width: 768px) {
+  /* Enhanced Mobile Responsiveness for 5-inch touchscreen */
+  @media (max-width: 900px) {
+    .content {
+      padding: 80px 15px 10px;
+    }
+    
+    .floating-header {
+      position: relative;
+      top: 5px;
+      left: 10px;
+      right: 10px;
+      padding: 8px 12px;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .header-right {
+      flex-direction: row;
+      gap: 10px;
+    }
+    
     .images-container {
+      flex-direction: column;
       gap: 15px;
       padding: 0 10px;
     }
-
+    
     .image-card {
-      width: 200px;
-      height: 190px;
-    }
-
-    .image-card:nth-child(1),
-    .image-card:nth-child(3) {
-      transform: rotateY(0deg) rotateX(0deg);
-    }
-
-    .floating-header {
-      flex-direction: column;
-      gap: 10px;
-      align-items: flex-start;
-      left: 20px;
-    }
-
-    .floating-actions {
-      flex-direction: column;
       width: 100%;
-      max-width: 200px;
+      max-width: 300px;
+      height: 200px;
     }
-
-    .action-btn {
+    
+    .image-card:nth-child(1),
+    .image-card:nth-child(2), 
+    .image-card:nth-child(3) {
+      transform: rotateY(0deg) rotateX(0deg) !important;
+    }
+    
+    .floating-actions {
+      flex-direction: row;
       justify-content: center;
+      width: 100%;
+      max-width: 300px;
     }
-
+    
+    .action-btn {
+      flex: 1;
+      justify-content: center;
+      padding: 15px 20px;
+      font-size: 16px;
+    }
+    
     .info-strip {
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
+      padding: 15px 20px;
+    }
+    
+    .info-item {
+      justify-content: center;
+      font-size: 14px;
     }
   }
 
+  /* Specific optimizations for 5-inch screens (480-600px width) */
   @media (max-width: 600px) {
+    body {
+      font-size: 16px; /* Better touch target sizing */
+    }
+    
+    .content {
+      padding: 70px 10px 5px;
+    }
+    
+    .floating-header {
+      padding: 6px 10px;
+    }
+    
+    .badge-text {
+      font-size: 12px;
+    }
+    
+    .version-badge {
+      font-size: 11px;
+      padding: 4px 8px;
+    }
+    
+    .home-btn {
+      font-size: 12px;
+      padding: 6px 12px;
+    }
+    
     .images-container {
-      gap: 10px;
+      gap: 12px;
       padding: 0 5px;
     }
 
     .image-card {
-      width: 160px;
-      height: 150px;
+      height: 180px;
+      border-radius: 15px;
+    }
+    
+    .image-title {
+      font-size: 16px;
     }
 
-    .floating-header {
-      position: relative;
-      top: 10px;
-      left: 10px;
-      right: 10px;
+    .image-desc {
+      font-size: 13px;
     }
 
-    .content {
-      padding: 50px 10px 10px;
+    .stat {
+      font-size: 11px;
+      padding: 3px 8px;
+    }
+    
+    .action-btn {
+      padding: 12px 16px;
+      font-size: 14px;
+      min-height: 44px; /* Touch-friendly size */
+    }
+    
+    .btn-text {
+      font-size: 13px;
     }
   }
 
+  /* Extra small screens optimization */
   @media (max-width: 480px) {
     .content {
-      padding: 60px 15px 15px;
+      padding: 60px 8px 5px;
     }
 
     .image-card {
-      width: 120px;
-      height: 110px;
-    }
-
-    .images-container {
-      gap: 8px;
+      height: 160px;
     }
 
     .floating-orb {
@@ -899,7 +919,7 @@
     }
 
     .image-title {
-      font-size: 14px;
+      font-size: 15px;
     }
 
     .image-desc {
@@ -909,6 +929,14 @@
     .stat {
       font-size: 10px;
       padding: 2px 6px;
+    }
+    
+    .info-strip {
+      padding: 10px 15px;
+    }
+    
+    .info-text {
+      font-size: 11px;
     }
   }
 </style>
@@ -955,13 +983,7 @@
     }
 
     function setupDotsNavigation() {
-      const dots = document.querySelectorAll('.dot');
-      
-      dots.forEach((dot, index) => {
-        dot.addEventListener('click', () => {
-          switchToImage(index);
-        });
-      });
+      // Navigation dots removed for better mobile experience
     }
 
     function handleImageClick(index) {
@@ -1005,10 +1027,6 @@
     function switchToImage(index) {
       currentImageIndex = index;
       
-      // Update dots
-      document.querySelectorAll('.dot').forEach((dot, i) => {
-        dot.classList.toggle('active', i === index);
-      });
       
       // Update image focus
       document.querySelectorAll('.image-card').forEach((card, i) => {

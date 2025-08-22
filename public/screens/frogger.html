@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frogger Game</title>
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/game.css">
+  
+  <style>
+    /* Frogger Game Specific Styles */
+    #screen-frogger {
+      width: 100%;
+      height: 100vh;
+      background: #0b0c10;
+      color: #eef2f7;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    #screen-frogger * {
+      box-sizing: border-box;
+      touch-action: manipulation;
+      user-select: none;
+    }
+    
+    /* Header */
+    .frogger-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      background: #101218;
+      border-bottom: 1px solid #1c2030;
+    }
+    
+    .frogger-title {
+      font-size: 16px;
+      margin: 0;
+      color: #e4e6f1;
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .home-button {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e4e6f1;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    
+    .home-button:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .home-button:active {
+      transform: scale(0.95);
+    }
+    
+    /* Game Container */
+    .game-container {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      background: #0b0c10;
+      gap: 15px;
+    }
+    
+    /* Game Area */
+    .game-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Side Panel */
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      min-width: 120px;
+      max-width: 150px;
+    }
+    
+    /* Game Canvas */
+    .game-canvas {
+      border: 2px solid #22c55e;
+      border-radius: 8px;
+      background: #f8f8f8;
+      box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
+      max-width: 100%;
+      max-height: 80vh;
+    }
+    
+    /* Control Buttons */
+    .control-button {
+      width: 100%;
+      height: 50px;
+      border: 2px solid #22c55e;
+      border-radius: 8px;
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .control-button:hover {
+      background: rgba(34, 197, 94, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .control-button:active {
+      transform: translateY(0);
+    }
+    
+    /* Direction Buttons */
+    .direction-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    
+    .direction-button {
+      width: 100%;
+      height: 45px;
+      border: 2px solid #22c55e;
+      border-radius: 8px;
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .direction-button:hover {
+      background: rgba(34, 197, 94, 0.2);
+      transform: scale(1.05);
+    }
+    
+    .direction-button:active {
+      transform: scale(0.95);
+    }
+    
+    /* Game Info */
+    .game-info {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12px;
+      color: #cfd6e6;
+    }
+    
+    .game-info h4 {
+      color: #22c55e;
+      margin: 0 0 8px 0;
+      font-size: 14px;
+    }
+    
+    .game-info p {
+      margin: 4px 0;
+      font-size: 11px;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .game-container {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .side-panel {
+        flex-direction: row;
+        min-width: auto;
+        max-width: none;
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .game-canvas {
+        max-width: 100%;
+        max-height: 60vh;
+      }
+      
+      .direction-buttons {
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 300px;
+      }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .game-container {
+        padding: 10px;
+      }
+      
+      .game-canvas {
+        max-width: 100%;
+        max-height: 60vh;
+      }
+      
+      .game-info {
+        font-size: 12px;
+      }
+      
+      .game-instructions {
+        padding: 10px;
+      }
+      
+      .game-instructions h3 {
+        font-size: 14px;
+      }
+    }
+    
+    @media (max-height: 600px) {
+      .game-container {
+        padding: 5px;
+      }
+      
+      .game-info {
+        margin-top: 10px;
+      }
+      
+      .game-instructions {
+        margin-top: 10px;
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section id="screen-frogger" class="screen" aria-label="Frogger Game">
+    <header class="frogger-header">
+      <h1 class="frogger-title">Frogger Game</h1>
+      <div class="header-right">
+        <button id="btnHome" class="home-button" aria-label="Home">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </button>
+      </div>
+    </header>
+    
+    <main class="game-container">
+      <div class="game-area">
+        <canvas width="624" height="720" id="game" class="game-canvas"></canvas>
+      </div>
+      
+      <div class="side-panel">
+        <!-- Direction Controls -->
+        <div class="direction-buttons">
+          <button id="btnUp" class="direction-button">↑</button>
+          <button id="btnLeft" class="direction-button">←</button>
+          <button id="btnRight" class="direction-button">→</button>
+          <button id="btnDown" class="direction-button">↓</button>
+        </div>
+        
+        <!-- Game Info -->
+        <div class="game-info">
+          <h4>How to Play</h4>
+          <p><strong>Goal:</strong> Get frog to end bank</p>
+          <p><strong>Avoid:</strong> Red cars on road</p>
+          <p><strong>Use:</strong> Logs & turtles to cross water</p>
+          <p><strong>Controls:</strong> Arrow keys or buttons</p>
+        </div>
+        
+        <!-- Home Button -->
+        <button id="btnHomeSide" class="control-button">
+          🏠 Home
+        </button>
+      </div>
+    </main>
+  </section>
+
+  <script>
+    (function() {
+      'use strict';
+      
+      const root = document.getElementById('screen-frogger');
+      const canvas = document.getElementById('game');
+      const context = canvas.getContext('2d');
+      
+      const grid = 48;
+      const gridGap = 10;
+      
+      // a simple sprite prototype function
+      function Sprite(props) {
+        // shortcut for assigning all object properties to the sprite
+        Object.assign(this, props);
+      }
+      
+      Sprite.prototype.render = function() {
+        context.fillStyle = this.color;
+        
+        // draw a rectangle sprite
+        if (this.shape === 'rect') {
+          // by using a size less than the grid we can ensure there is a visual space
+          // between each row
+          context.fillRect(this.x, this.y + gridGap / 2, this.size, grid - gridGap);
+        }
+        // draw a circle sprite. since size is the diameter we need to divide by 2
+        // to get the radius. also the x/y position needs to be centered instead of
+        // the top-left corner of the sprite
+        else {
+          context.beginPath();
+          context.arc(
+            this.x + this.size / 2, this.y + this.size / 2,
+            this.size / 2 - gridGap / 2, 0, 2 * Math.PI
+          );
+          context.fill();
+        }
+      };
+      
+      const frogger = new Sprite({
+        x: grid * 6,
+        y: grid * 13,
+        color: 'greenyellow',
+        size: grid,
+        shape: 'circle'
+      });
+      
+      const scoredFroggers = [];
+      
+      // a pattern describes each obstacle in the row
+      const patterns = [
+        // end bank is safe
+        null,
+        
+        // log
+        {
+          spacing: [2], // how many grid spaces between each obstacle
+          color: '#c55843', // color of the obstacle
+          size: grid * 4, // width (rect) / diameter (circle) of the obstacle
+          shape: 'rect', // shape of the obstacle (rect or circle)
+          speed: 0.75 // how fast the obstacle moves and which direction
+        },
+        
+        // turtle
+        {
+          spacing: [0,2,0,2,0,2,0,4],
+          color: '#de0004',
+          size: grid,
+          shape: 'circle',
+          speed: -1
+        },
+        
+        // long log
+        {
+          spacing: [2],
+          color: '#c55843',
+          size: grid * 7,
+          shape: 'rect',
+          speed: 1.5
+        },
+        
+        // log
+        {
+          spacing: [3],
+          color: '#c55843',
+          size: grid * 3,
+          shape: 'rect',
+          speed: 0.5
+        },
+        
+        // turtle
+        {
+          spacing: [0,2,0,2,0,2,0,4],
+          color: '#de0004',
+          size: grid,
+          shape: 'circle',
+          speed: -1.25
+        },
+        
+        // car
+        {
+          spacing: [1],
+          color: '#ff0000',
+          size: grid * 2,
+          shape: 'rect',
+          speed: 2
+        },
+        
+        // car
+        {
+          spacing: [1],
+          color: '#ff0000',
+          size: grid * 2,
+          shape: 'rect',
+          speed: -2
+        },
+        
+        // car
+        {
+          spacing: [1],
+          color: '#ff0000',
+          size: grid * 2,
+          shape: 'rect',
+          speed: 1.5
+        },
+        
+        // car
+        {
+          spacing: [1],
+          color: '#ff0000',
+          size: grid * 2,
+          shape: 'rect',
+          speed: -1.5
+        },
+        
+        // car
+        {
+          spacing: [1],
+          color: '#ff0000',
+          size: grid * 2,
+          shape: 'rect',
+          speed: 1
+        },
+        
+        // car
+        {
+          spacing: [1],
+          color: '#ff0000',
+          size: grid * 2,
+          shape: 'rect',
+          speed: -1
+        },
+        
+        // car
+        {
+          spacing: [1],
+          color: '#ff0000',
+          size: grid * 2,
+          shape: 'rect',
+          speed: 0.5
+        }
+      ];
+      
+      // create rows of sprites based on patterns
+      const rows = patterns.map(function(pattern, r) {
+        if (!pattern) return [];
+        
+        const sprites = [];
+        const spacing = pattern.spacing;
+        let index = 0;
+        
+        for (let i = 0; i < 13; i++) {
+          const sprite = new Sprite({
+            x: i * grid,
+            y: r * grid,
+            color: pattern.color,
+            size: pattern.size,
+            shape: pattern.shape,
+            speed: pattern.speed,
+            index: index
+          });
+          
+          sprites.push(sprite);
+          
+          // move to next spacing
+          index = index >= spacing.length - 1 ? 0 : index + 1;
+          i += spacing[index] - 1;
+        }
+        
+        return sprites;
+      });
+      
+      // game loop
+      function loop() {
+        requestAnimationFrame(loop);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // draw background
+        context.fillStyle = '#87CEEB'; // sky blue for water
+        context.fillRect(0, 0, canvas.width, canvas.height / 2);
+        
+        context.fillStyle = '#8FBC8F'; // dark sea green for grass
+        context.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
+        
+        // draw road
+        context.fillStyle = '#696969'; // dim gray for road
+        context.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
+        
+        // draw end bank
+        context.fillStyle = '#228B22'; // forest green for end bank
+        context.fillRect(0, 0, canvas.width, grid);
+        
+        // draw sprites
+        rows.forEach(function(row) {
+          row.forEach(function(sprite) {
+            sprite.render();
+          });
+        });
+        
+        // move sprites
+        rows.forEach(function(row, r) {
+          row.forEach(function(sprite) {
+            sprite.x += sprite.speed;
+            
+            // wrap sprites around screen
+            if (sprite.speed > 0 && sprite.x > canvas.width) {
+              sprite.x = -sprite.size;
+            } else if (sprite.speed < 0 && sprite.x < -sprite.size) {
+              sprite.x = canvas.width;
+            }
+          });
+        });
+        
+        // draw frogger
+        frogger.x += frogger.speed || 0;
+        frogger.render();
+        
+        // draw scored froggers
+        scoredFroggers.forEach(frog => frog.render());
+        
+        // check for collision with all sprites in the same row as frogger
+        const froggerRow = frogger.y / grid - 1 | 0;
+        let collision = false;
+        
+        for (let i = 0; i < rows[froggerRow].length; i++) {
+          let sprite = rows[froggerRow][i];
+          
+          // axis-aligned bounding box (AABB) collision check
+          // treat any circles as rectangles for the purposes of collision
+          if (frogger.x < sprite.x + sprite.size - gridGap &&
+              frogger.x + grid - gridGap > sprite.x &&
+              frogger.y < sprite.y + grid &&
+              frogger.y + grid > sprite.y) {
+            collision = true;
+            
+            // reset frogger if got hit by car
+            if (froggerRow > rows.length / 2) {
+              frogger.x = grid * 6;
+              frogger.y = grid * 13;
+            }
+            // move frogger along with obstacle
+            else {
+              frogger.speed = sprite.speed;
+            }
+          }
+        }
+        
+        if (!collision) {
+          // if frogger isn't colliding reset speed
+          frogger.speed = 0;
+          
+          // frogger got to end bank (goal every 3 cols)
+          const col = (frogger.x + grid / 2) / grid | 0;
+          if (froggerRow === 0 && col % 3 === 0 &&
+              // check to see if there isn't a scored frog already there
+              !scoredFroggers.find(frog => frog.x === col * grid)) {
+            scoredFroggers.push(new Sprite({
+              ...frogger,
+              x: col * grid,
+              y: frogger.y + 5
+            }));
+          }
+          
+          // reset frogger if not on obstacle in river
+          if (froggerRow < rows.length / 2 - 1) {
+            frogger.x = grid * 6;
+            frogger.y = grid * 13;
+          }
+        }
+      }
+      
+      // listen to keyboard events to move frogger
+      document.addEventListener('keydown', function(e) {
+        // left arrow key
+        if (e.which === 37) {
+          frogger.x -= grid;
+        }
+        // right arrow key
+        else if (e.which === 39) {
+          frogger.x += grid;
+        }
+        
+        // up arrow key
+        else if (e.which === 38) {
+          frogger.y -= grid;
+        }
+        // down arrow key
+        else if (e.which === 40) {
+          frogger.y += grid;
+        }
+        
+        // clamp frogger position to stay on screen
+        frogger.x = Math.min( Math.max(0, frogger.x), canvas.width - grid);
+        frogger.y = Math.min( Math.max(grid, frogger.y), canvas.height - grid * 2);
+      });
+      
+      // Touch controls for mobile
+      let touchStartX = 0;
+      let touchStartY = 0;
+      
+      canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+      });
+      
+      canvas.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        const touch = e.changedTouches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+        
+        // Determine swipe direction
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          // Horizontal swipe
+          if (deltaX > 30) {
+            // Right swipe
+            frogger.x += grid;
+          } else if (deltaX < -30) {
+            // Left swipe
+            frogger.x -= grid;
+          }
+        } else {
+          // Vertical swipe
+          if (deltaY > 30) {
+            // Down swipe
+            frogger.y += grid;
+          } else if (deltaY < -30) {
+            // Up swipe
+            frogger.y -= grid;
+          }
+        }
+        
+        // clamp frogger position to stay on screen
+        frogger.x = Math.min( Math.max(0, frogger.x), canvas.width - grid);
+        frogger.y = Math.min( Math.max(grid, frogger.y), canvas.height - grid * 2);
+      });
+      
+             // Direction buttons
+       document.getElementById('btnUp').addEventListener('click', function() {
+         frogger.y -= grid;
+         frogger.y = Math.min( Math.max(grid, frogger.y), canvas.height - grid * 2);
+       });
+       
+       document.getElementById('btnDown').addEventListener('click', function() {
+         frogger.y += grid;
+         frogger.y = Math.min( Math.max(grid, frogger.y), canvas.height - grid * 2);
+       });
+       
+       document.getElementById('btnLeft').addEventListener('click', function() {
+         frogger.x -= grid;
+         frogger.x = Math.min( Math.max(0, frogger.x), canvas.width - grid);
+       });
+       
+       document.getElementById('btnRight').addEventListener('click', function() {
+         frogger.x += grid;
+         frogger.x = Math.min( Math.max(0, frogger.x), canvas.width - grid);
+       });
+       
+       // Home buttons
+       document.getElementById('btnHome').addEventListener('click', function() {
+         window.location.href = '../index.html';
+       });
+       
+       document.getElementById('btnHomeSide').addEventListener('click', function() {
+         window.location.href = '../index.html';
+       });
+      
+      // start the game
+      requestAnimationFrame(loop);
+      
+    })();
+  </script>
+</body>
+</html>

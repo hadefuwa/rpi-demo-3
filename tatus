@@ -1,0 +1,5 @@
+[33m2501bd1[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Remove all camera references from shell scripts and clean up project
+[33m582e3f8[m Improve responsiveness and UI enhancements across multiple screens - Fix electrical machines page for 5-inch screens - Fix filament spacing in 3D printer page - Make lift vs drag graph front and center in wind tunnel - Improve about page home button accessibility - Enhance curriculum page responsiveness
+[33ma52def5[m Fix curriculum.html structure and update sync script - Fixed HTML structure in curriculum.html - Updated sync-and-run.sh directory path - Added new assets and diagnostics
+[33m163cac3[m ..
+[33m122c559[m ..
