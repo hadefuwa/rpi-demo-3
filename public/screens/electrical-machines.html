@@ -267,15 +267,15 @@
   user-select: none; 
 }
 
-/* Header */
+/* Header - Compact for 5-inch screens */
 .em-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: 4px 8px;
   background: #1a1a1a;
-  border-bottom: 2px solid #444;
-  height: 65px;
+  border-bottom: 1px solid #444;
+  height: 40px;
 }
 
 .logo-section {
@@ -284,15 +284,15 @@
 }
 
 .matrix-logo {
-  font-size: 22px;
+  font-size: 16px;
   font-weight: bold;
   color: #fff;
-  letter-spacing: 2px;
-  text-shadow: 0 0 10px rgba(255,255,255,0.5);
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(255,255,255,0.5);
 }
 
 .subtitle {
-  font-size: 11px;
+  font-size: 8px;
   color: #ccc;
   margin-top: 1px;
 }
@@ -305,17 +305,17 @@
 }
 
 .firmware-version {
-  font-size: 11px;
+  font-size: 8px;
   color: #ccc;
 }
 
 .status-indicators {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   background: #333;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 2px 4px;
+  border-radius: 3px;
   position: relative;
 }
 
@@ -332,24 +332,24 @@
 }
 
 .indicator {
-  font-size: 10px;
+  font-size: 8px;
   color: #fff;
-  padding: 2px 4px;
-  border-radius: 3px;
+  padding: 1px 3px;
+  border-radius: 2px;
   background: #000;
 }
 
 .power-readings {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   text-align: left;
   background: rgba(0,0,0,0.3);
-  padding: 8px 10px;
-  border-radius: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
   border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  min-width: 140px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  min-width: 100px;
   position: relative;
   overflow: hidden;
 }
@@ -366,12 +366,12 @@
 }
 
 .reading {
-  font-size: 10px;
+  font-size: 9px;
   color: #ccc;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 2px 0;
+  padding: 1px 0;
   border-bottom: 1px solid rgba(255,255,255,0.05);
   font-weight: 500;
   line-height: 1.1;
@@ -384,16 +384,16 @@
 .reading-label {
   color: #ccc;
   font-weight: 500;
-  font-size: 10px;
+  font-size: 9px;
 }
 
 .reading span:not(.reading-label) {
   color: #4CAF50;
   font-weight: bold;
-  font-size: 11px;
+  font-size: 10px;
   text-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
   background: rgba(76, 175, 80, 0.1);
-  padding: 1px 4px;
+  padding: 1px 3px;
   border-radius: 2px;
   border: 1px solid rgba(76, 175, 80, 0.3);
   transition: all 0.3s ease;
@@ -415,14 +415,14 @@
 .voltage-readings {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   text-align: left;
   background: rgba(0,0,0,0.3);
-  padding: 8px 10px;
-  border-radius: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
   border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  min-width: 140px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  min-width: 100px;
   position: relative;
   overflow: hidden;
 }
@@ -463,29 +463,29 @@
   transform: scale(1.05);
 }
 
-/* Main Layout */
+/* Main Layout - Compact for 5-inch screens */
 .em-main {
   display: grid;
-  grid-template-columns: 400px 1fr;
-  grid-template-rows: 1fr 200px;
-  gap: 20px;
-  padding: 20px;
+  grid-template-columns: 300px 1fr;
+  grid-template-rows: 1fr 150px;
+  gap: 10px;
+  padding: 10px;
   flex: 1;
-  height: calc(100vh - 145px);
+  height: calc(100vh - 90px);
   min-height: 0;
   overflow: hidden;
 }
 
-/* Control Panel */
+/* Control Panel - Compact for 5-inch screens */
 .control-panel {
   background: #333;
-  border-radius: 12px;
-  padding: 15px;
+  border-radius: 8px;
+  padding: 8px;
   display: flex;
-  gap: 15px;
+  gap: 8px;
   align-items: flex-start;
   grid-row: 1 / 3;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   border: 1px solid #444;
   flex-wrap: wrap;
   align-content: flex-start;
@@ -497,52 +497,52 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   flex: 1;
-  padding: 15px 10px;
-  border-radius: 8px;
+  padding: 8px 6px;
+  border-radius: 6px;
   background: rgba(255,255,255,0.02);
   border: 1px solid rgba(255,255,255,0.05);
-  min-height: 300px;
-  min-width: 100px;
-  max-width: 140px;
+  min-height: 200px;
+  min-width: 80px;
+  max-width: 100px;
   overflow: hidden;
 }
 
 .control-label {
-  font-size: 12px;
+  font-size: 10px;
   color: #ccc;
   font-weight: bold;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .control-value {
-  font-size: 11px;
+  font-size: 9px;
   color: #fff;
   background: #222;
-  padding: 4px 6px;
-  border-radius: 6px;
-  min-width: 80px;
+  padding: 3px 4px;
+  border-radius: 4px;
+  min-width: 60px;
   text-align: center;
   font-weight: 500;
   border: 1px solid #444;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .horizontal-slider {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   width: 100%;
-  padding: 2px;
+  padding: 1px;
 }
 
 .slider-track {
   width: 100%;
-  height: 8px;
+  height: 12px;
   background: #222;
-  border-radius: 4px;
+  border-radius: 6px;
   position: relative;
   border: 2px solid #555;
   cursor: pointer;
@@ -572,9 +572,9 @@
 
 .slider-thumb {
   position: absolute;
-  top: -6px;
-  width: 20px;
-  height: 20px;
+  top: -8px;
+  width: 28px;
+  height: 28px;
   background: #fff;
   border-radius: 50%;
   border: 2px solid #4CAF50;
@@ -600,23 +600,23 @@
 .slider-scale {
   display: flex;
   justify-content: space-between;
-  font-size: 9px;
+  font-size: 8px;
   color: #999;
   width: 100%;
   font-weight: 500;
-  padding: 0 2px;
+  padding: 0 1px;
 }
 
 .control-btn {
   background: #555;
   color: #fff;
   border: none;
-  padding: 6px 10px;
+  padding: 8px 12px;
   border-radius: 6px;
   font-size: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 60px;
+  min-width: 70px;
   font-weight: 500;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   border: 1px solid #666;
@@ -639,13 +639,13 @@
   box-shadow: 0 0 8px rgba(33, 150, 243, 0.3);
 }
 
-/* Gauges Section */
+/* Gauges Section - Compact for 5-inch screens */
 .gauges-section {
   background: #333;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 8px;
+  padding: 10px;
   display: flex;
-  gap: 20px;
+  gap: 10px;
   align-items: flex-start;
   grid-column: 2;
   grid-row: 2;
@@ -654,11 +654,11 @@
 .readings-panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-width: 160px;
+  gap: 8px;
+  min-width: 120px;
   flex: 1;
   align-self: stretch;
-  min-height: 300px;
+  min-height: 200px;
   justify-content: center;
   overflow: hidden;
 }
@@ -737,11 +737,11 @@
 
 .gauge-visual {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   background: rgba(0,0,0,0.2);
   border-radius: 50%;
-  padding: 8px;
+  padding: 6px;
   border: 1px solid rgba(255,255,255,0.1);
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
 }
@@ -785,23 +785,23 @@
 
 .gauge-scale {
   position: absolute;
-  bottom: -25px;
+  bottom: -20px;
   left: 0;
   right: 0;
   display: flex;
   justify-content: space-between;
-  font-size: 9px;
+  font-size: 7px;
   color: #ccc;
   font-weight: 500;
-  padding: 0 5px;
+  padding: 0 3px;
 }
 
 .scale-mark {
   background: rgba(0,0,0,0.3);
-  padding: 2px 4px;
-  border-radius: 3px;
+  padding: 1px 2px;
+  border-radius: 2px;
   border: 1px solid rgba(255,255,255,0.1);
-  font-size: 8px;
+  font-size: 6px;
   color: #aaa;
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
@@ -947,14 +947,14 @@
   box-shadow: 0 4px 8px rgba(0,0,0,0.4), 0 0 8px rgba(244, 67, 54, 0.2);
 }
 
-/* Charts Section */
+/* Charts Section - Compact for 5-inch screens */
 .charts-section {
   background: #333;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 8px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
   grid-column: 2;
   grid-row: 1;
   overflow: hidden;
@@ -969,40 +969,40 @@
 }
 
 .chart-title {
-  font-size: 14px;
+  font-size: 12px;
   color: #ccc;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .chart-container {
   flex: 1;
   position: relative;
   background: #222;
-  border-radius: 8px;
-  padding: 10px;
+  border-radius: 6px;
+  padding: 8px;
   width: 100%;
   height: 100%;
 }
 
 .chart-legend {
   position: absolute;
-  right: 15px;
-  top: 15px;
+  right: 10px;
+  top: 10px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   background: rgba(0,0,0,0.7);
-  padding: 8px;
-  border-radius: 4px;
+  padding: 6px;
+  border-radius: 3px;
   border: 1px solid rgba(255,255,255,0.1);
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 10px;
+  gap: 4px;
+  font-size: 8px;
   color: #ccc;
 }
 
@@ -1114,6 +1114,164 @@
     font-size: 10px;
     padding: 6px 10px;
     min-width: 60px;
+  }
+}
+
+/* Specific optimization for 5-inch RPi screens (800x480) */
+@media (max-width: 850px) and (max-height: 500px) {
+  .em-header {
+    height: 30px;
+    padding: 2px 6px;
+  }
+  
+  .matrix-logo {
+    font-size: 14px;
+  }
+  
+  .subtitle {
+    font-size: 7px;
+  }
+  
+  .firmware-version {
+    font-size: 7px;
+  }
+  
+  .status-indicators {
+    gap: 4px;
+    padding: 1px 3px;
+  }
+  
+  .indicator {
+    font-size: 7px;
+    padding: 1px 2px;
+  }
+  
+  .em-main {
+    grid-template-columns: 250px 1fr;
+    grid-template-rows: 1fr 120px;
+    gap: 6px;
+    padding: 6px;
+    height: calc(100vh - 70px);
+  }
+  
+  .control-panel {
+    padding: 6px;
+    gap: 6px;
+  }
+  
+  .control-column {
+    gap: 4px;
+    padding: 6px 4px;
+    min-height: 150px;
+    min-width: 70px;
+    max-width: 80px;
+  }
+  
+  .control-label {
+    font-size: 9px;
+  }
+  
+  .control-value {
+    font-size: 8px;
+    min-width: 50px;
+    padding: 2px 3px;
+  }
+  
+  .slider-track {
+    height: 10px;
+  }
+  
+  .slider-thumb {
+    width: 24px;
+    height: 24px;
+    top: -7px;
+  }
+  
+  .slider-scale {
+    font-size: 7px;
+  }
+  
+  .control-btn {
+    padding: 6px 8px;
+    font-size: 9px;
+    min-width: 60px;
+  }
+  
+  .readings-panel {
+    min-height: 150px;
+    gap: 6px;
+    min-width: 80px;
+  }
+  
+  .power-readings, .voltage-readings {
+    min-width: 80px;
+    padding: 4px 6px;
+  }
+  
+  .reading {
+    font-size: 8px;
+  }
+  
+  .reading-label {
+    font-size: 8px;
+  }
+  
+  .reading span:not(.reading-label) {
+    font-size: 9px;
+    padding: 1px 2px;
+  }
+  
+  .gauges-section {
+    padding: 6px;
+    gap: 6px;
+  }
+  
+  .gauge-visual {
+    width: 60px;
+    height: 60px;
+    padding: 4px;
+  }
+  
+  .gauge-scale {
+    bottom: -15px;
+    font-size: 6px;
+    padding: 0 2px;
+  }
+  
+  .scale-mark {
+    font-size: 5px;
+    padding: 1px 1px;
+  }
+  
+  .charts-section {
+    padding: 6px;
+    gap: 6px;
+  }
+  
+  .chart-title {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  
+  .chart-container {
+    padding: 6px;
+  }
+  
+  .chart-legend {
+    right: 6px;
+    top: 6px;
+    padding: 4px;
+    gap: 2px;
+  }
+  
+  .legend-item {
+    font-size: 7px;
+    gap: 3px;
+  }
+  
+  .home-button {
+    padding: 4px 8px;
+    font-size: 9px;
   }
 }
 

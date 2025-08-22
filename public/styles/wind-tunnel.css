@@ -2,7 +2,7 @@
 
 .wind-tunnel-container {
     display: grid;
-    grid-template-columns: 220px 1fr 320px;
+    grid-template-columns: 200px 1fr 400px;
     gap: var(--spacing-xs);
     height: 100%;
     padding: var(--spacing-xs);
@@ -28,6 +28,14 @@
     text-align: center;
     border-bottom: 2px solid var(--brand);
     padding-bottom: var(--spacing-xs);
+}
+
+/* Special styling for the graphing section title */
+.graphing-section .panel-section h3 {
+    font-size: var(--font-lg);
+    color: var(--accent);
+    text-shadow: 0 0 10px rgba(107, 203, 239, 0.5);
+    margin-bottom: var(--spacing-md);
 }
 
 /* Action Buttons */
@@ -267,19 +275,24 @@
 .graphing-section {
     background: var(--card);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-xs);
+    padding: var(--spacing-sm);
     border: 1px solid rgba(255,255,255,0.1);
     backdrop-filter: blur(10px);
     height: fit-content;
     max-height: calc(100vh - 80px);
     overflow-y: auto;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
 }
 
 .graph-controls {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-sm);
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    background: rgba(255,255,255,0.03);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255,255,255,0.05);
 }
 
 .select-control {
@@ -300,11 +313,13 @@
 .chart-container {
     background: rgba(255,255,255,0.02);
     border-radius: var(--radius-md);
-    padding: var(--spacing-xs);
-    margin-bottom: var(--spacing-xs);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
     border: 1px solid rgba(255,255,255,0.05);
-    height: 280px;
+    height: 350px;
     width: 100%;
+    position: relative;
+    overflow: hidden;
 }
 
 /* Data Log */
@@ -387,12 +402,16 @@
 /* Responsive Design */
 @media (max-width: 1200px) {
     .wind-tunnel-container {
-        grid-template-columns: 200px 1fr 280px;
+        grid-template-columns: 180px 1fr 350px;
         gap: var(--spacing-xs);
     }
     
     .gauge-container {
         gap: var(--spacing-xs);
+    }
+    
+    .chart-container {
+        height: 300px;
     }
 }
 
@@ -471,4 +490,13 @@
 
 .fade-in {
     animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes graphGlow {
+    0%, 100% { box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+    50% { box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 20px rgba(107, 203, 239, 0.3); }
+}
+
+.graphing-section {
+    animation: graphGlow 3s ease-in-out infinite;
 }

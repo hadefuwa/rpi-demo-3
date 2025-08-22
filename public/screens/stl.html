@@ -12,6 +12,28 @@
     // Simple quality mode - just use low quality for RPi compatibility
     window.QUALITY_MODE = 'low';
     console.log('STL Viewer initialized in low quality mode for reliability');
+    
+    // Detect touch device and set cursor visibility
+    function detectTouchDevice() {
+      const isTouchDevice = (
+        ('ontouchstart' in window) ||
+        (navigator.maxTouchPoints > 0) ||
+        (navigator.msMaxTouchPoints > 0) ||
+        (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+      );
+      
+      if (isTouchDevice) {
+        document.body.classList.add('touch-device');
+        console.log('Touch device detected - cursor hidden');
+      } else {
+        document.body.classList.remove('touch-device');
+        console.log('Non-touch device detected - cursor visible');
+      }
+    }
+    
+    // Run detection immediately and on resize
+    detectTouchDevice();
+    window.addEventListener('resize', detectTouchDevice);
   </script>
   
   <style>
@@ -23,14 +45,32 @@
       touch-action: none; /* Prevent default touch behaviors */
     }
     
+    /* Default cursor visibility - show cursor */
+    * {
+      cursor: auto !important;
+    }
+    
+    /* Hide cursor on touch devices */
+    body.touch-device * {
+      cursor: none !important;
+    }
+    
+    /* Ensure interactive elements still show pointer on non-touch */
+    body:not(.touch-device) .chip,
+    body:not(.touch-device) button {
+      cursor: pointer !important;
+    }
+    
     /* Header styling */
     .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 10px 20px;
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
+      background: #f8f9fa;
+      color: #333;
+      border-bottom: 2px solid #e9ecef;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       position: relative;
       z-index: 1000;
     }
@@ -49,18 +89,25 @@
     
     .model-selector .chip {
       padding: 8px 16px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: white;
+      background: #fff;
+      border: 2px solid #dee2e6;
+      color: #495057;
       border-radius: 20px;
       cursor: pointer;
       transition: all 0.3s ease;
+      font-weight: 500;
     }
     
-    .model-selector .chip:hover,
+    .model-selector .chip:hover {
+      background: #e9ecef;
+      border-color: #adb5bd;
+      transform: translateY(-1px);
+    }
+    
     .model-selector .chip.active {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.5);
+      background: #007bff;
+      border-color: #007bff;
+      color: white;
     }
     
     /* Prevent zoom on entire page */
@@ -107,35 +154,46 @@
       transform: translateX(-50%);
       display: flex;
       gap: 10px;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(248, 249, 250, 0.95);
       padding: 10px;
       border-radius: 25px;
+      border: 2px solid #dee2e6;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
       z-index: 10;
     }
     
     .stl-controls .chip {
       padding: 10px 15px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: white;
+      background: #fff;
+      border: 2px solid #dee2e6;
+      color: #495057;
       border-radius: 15px;
       cursor: pointer;
       transition: all 0.3s ease;
-      touch-action: manipulation; /* Prevent zoom on button tap */
+      touch-action: manipulation;
+      font-weight: 500;
     }
     
-    .stl-controls .chip:hover,
+    .stl-controls .chip:hover {
+      background: #e9ecef;
+      border-color: #adb5bd;
+      transform: translateY(-1px);
+    }
+    
     .stl-controls .chip.active {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.5);
+      background: #28a745;
+      border-color: #28a745;
+      color: white;
     }
     
     .note {
       text-align: center;
-      color: rgba(255, 255, 255, 0.7);
+      color: #6c757d;
       font-size: 0.9rem;
       padding: 10px;
-      background: rgba(0, 0, 0, 0.5);
+      background: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+      font-weight: 500;
     }
     
     /* Responsive adjustments */
@@ -157,6 +215,14 @@
       
       #btnHome {
         order: 3;
+        background: #dc3545;
+        border-color: #dc3545;
+        color: white;
+      }
+      
+      #btnHome:hover {
+        background: #c82333;
+        border-color: #bd2130;
       }
       
       .stl-wrap {
@@ -260,7 +326,7 @@
       
       // Camera
       camera = new THREE.PerspectiveCamera(75, canvas.offsetWidth / canvas.offsetHeight, 0.1, 1000);
-      camera.position.set(0, 0, 5);
+      camera.position.set(0, 0, 2.5); // Doubled zoom (halved distance)
       
       // Simple renderer setup
       renderer = new THREE.WebGLRenderer({
@@ -270,23 +336,40 @@
       });
       
       renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
-      renderer.setClearColor(0x000011, 1);
+      renderer.setClearColor(0x87CEEB, 1); // Sky blue background for classroom
       
       // Controls
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.1;
       
-      // Simple lighting
-      const ambientLight = new THREE.AmbientLight(0x404040, 0.8);
+      // Enhanced lighting for better STL visibility
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.2); // Brighter ambient light
       scene.add(ambientLight);
       
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
-      directionalLight.position.set(10, 10, 5);
-      scene.add(directionalLight);
+      // Main directional light (classroom overhead lighting)
+      const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1.5);
+      directionalLight1.position.set(10, 15, 5);
+      directionalLight1.castShadow = false; // Disable shadows for performance
+      scene.add(directionalLight1);
       
-      // Add starfield
-      createStarfield();
+      // Secondary directional light from different angle
+      const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1.0);
+      directionalLight2.position.set(-10, 10, -5);
+      scene.add(directionalLight2);
+      
+      // Front fill light to eliminate dark areas
+      const directionalLight3 = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight3.position.set(0, 5, 10);
+      scene.add(directionalLight3);
+      
+      // Add hemisphere light for natural classroom lighting
+      const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+      hemisphereLight.position.set(0, 20, 0);
+      scene.add(hemisphereLight);
+      
+      // Add classroom environment
+      createClassroomEnvironment();
       
       // Handle resize
       window.addEventListener('resize', onWindowResize, false);
@@ -295,48 +378,93 @@
       animate();
     }
     
-    function createStarfield() {
-      // Create sun first (in the background)
-      const sunGeometry = new THREE.SphereGeometry(200, 32, 32);
-      const sunMaterial = new THREE.MeshBasicMaterial({ 
-        color: 0xffaa00,
+    function createClassroomEnvironment() {
+      // Create classroom floor
+      const floorGeometry = new THREE.PlaneGeometry(50, 50);
+      const floorMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0x8B4513, // Brown wooden floor
         transparent: true,
         opacity: 0.8
       });
-      const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-      sun.position.set(-800, 400, -1000); // Position sun in background
-      scene.add(sun);
+      const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.y = -10;
+      scene.add(floor);
       
-      // Create sun glow effect
-      const glowGeometry = new THREE.SphereGeometry(250, 32, 32);
-      const glowMaterial = new THREE.MeshBasicMaterial({
-        color: 0xffdd44,
+      // Create classroom walls
+      // Back wall
+      const wallGeometry = new THREE.PlaneGeometry(50, 30);
+      const wallMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0xF5F5DC, // Beige wall color
         transparent: true,
-        opacity: 0.3
+        opacity: 0.7
       });
-      const sunGlow = new THREE.Mesh(glowGeometry, glowMaterial);
-      sunGlow.position.copy(sun.position);
-      scene.add(sunGlow);
+      const backWall = new THREE.Mesh(wallGeometry, wallMaterial);
+      backWall.position.set(0, 5, -25);
+      scene.add(backWall);
       
-      // Create starfield
-      const starGeometry = new THREE.BufferGeometry();
-      const starPositions = new Float32Array(500 * 3);
+      // Side walls
+      const leftWall = new THREE.Mesh(wallGeometry, wallMaterial);
+      leftWall.rotation.y = Math.PI / 2;
+      leftWall.position.set(-25, 5, 0);
+      scene.add(leftWall);
       
-      for (let i = 0; i < 500 * 3; i += 3) {
-        starPositions[i] = (Math.random() - 0.5) * 2000;
-        starPositions[i + 1] = (Math.random() - 0.5) * 2000;
-        starPositions[i + 2] = (Math.random() - 0.5) * 2000;
+      const rightWall = new THREE.Mesh(wallGeometry, wallMaterial);
+      rightWall.rotation.y = -Math.PI / 2;
+      rightWall.position.set(25, 5, 0);
+      scene.add(rightWall);
+      
+      // Create whiteboard on back wall
+      const whiteboardGeometry = new THREE.PlaneGeometry(15, 8);
+      const whiteboardMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0xFFFFFF // White
+      });
+      const whiteboard = new THREE.Mesh(whiteboardGeometry, whiteboardMaterial);
+      whiteboard.position.set(0, 8, -24.9);
+      scene.add(whiteboard);
+      
+      // Add whiteboard frame
+      const frameGeometry = new THREE.PlaneGeometry(16, 9);
+      const frameMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0x333333 // Dark frame
+      });
+      const frame = new THREE.Mesh(frameGeometry, frameMaterial);
+      frame.position.set(0, 8, -24.95);
+      scene.add(frame);
+      
+      // Create desks
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 2; j++) {
+          const deskGeometry = new THREE.BoxGeometry(3, 1.5, 2);
+          const deskMaterial = new THREE.MeshLambertMaterial({ 
+            color: 0xDEB887 // Light wood color
+          });
+          const desk = new THREE.Mesh(deskGeometry, deskMaterial);
+          desk.position.set((i - 1) * 8, -8, (j - 0.5) * 6 + 5);
+          scene.add(desk);
+          
+          // Add chairs
+          const chairGeometry = new THREE.BoxGeometry(1.5, 3, 1.5);
+          const chairMaterial = new THREE.MeshLambertMaterial({ 
+            color: 0x4169E1 // Blue chairs
+          });
+          const chair = new THREE.Mesh(chairGeometry, chairMaterial);
+          chair.position.set((i - 1) * 8, -6, (j - 0.5) * 6 + 8);
+          scene.add(chair);
+        }
       }
       
-      starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-      
-      const starMaterial = new THREE.PointsMaterial({
-        color: 0xffffff,
-        size: 1
-      });
-      
-      const starField = new THREE.Points(starGeometry, starMaterial);
-      scene.add(starField);
+      // Add ceiling lights (visual only)
+      for (let i = 0; i < 3; i++) {
+        const lightGeometry = new THREE.BoxGeometry(4, 0.2, 1);
+        const lightMaterial = new THREE.MeshBasicMaterial({ 
+          color: 0xFFFFFF,
+          emissive: 0x404040
+        });
+        const ceilingLight = new THREE.Mesh(lightGeometry, lightMaterial);
+        ceilingLight.position.set((i - 1) * 10, 18, 0);
+        scene.add(ceilingLight);
+      }
     }
     
     function loadModel(filename) {
@@ -425,7 +553,7 @@
     }
     
     function resetView() {
-      camera.position.set(0, 0, 5);
+      camera.position.set(0, 0, 2.5); // Doubled zoom (halved distance)
       controls.reset();
       if (currentModel) {
         currentModel.rotation.set(0, 0, 0);

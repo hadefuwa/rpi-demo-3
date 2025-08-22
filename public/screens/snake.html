@@ -20,11 +20,14 @@
   #screen-snake {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 100vh;
+    min-height: 100vh;
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
     color: white;
     font-family: 'Courier New', monospace;
-    padding: 20px;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
   
   #screen-snake .panel {
@@ -32,22 +35,26 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 10px;
+    min-height: 0;
+    justify-content: space-between;
   }
   
   #screen-snake h2 {
-    font-size: 2.5em;
+    font-size: clamp(1.5em, 4vw, 2.5em);
     margin: 0;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
     text-align: center;
+    flex-shrink: 0;
   }
   
   #screen-snake .game-controls {
     display: flex;
-    gap: 15px;
+    gap: 10px;
     flex-wrap: wrap;
     justify-content: center;
-    margin: 20px 0;
+    margin: 10px 0;
+    flex-shrink: 0;
   }
   
   #screen-snake .chip {
@@ -80,24 +87,29 @@
   
   #screen-snake #snakeCanvas {
     width: 100%;
-    max-width: min(520px, 90vw);
-    height: clamp(300px, 50vh, 520px);
+    max-width: min(90vw, 90vh);
+    height: auto;
+    aspect-ratio: 1;
     background: #111418;
     border-radius: 10px;
     border: 2px solid rgba(255,255,255,0.1);
     box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-    touch-action: none; /* Prevent scrolling on touch */
-    user-select: none; /* Prevent text selection */
+    touch-action: none;
+    user-select: none;
+    flex-shrink: 1;
+    min-height: 250px;
+    max-height: calc(100vh - 200px);
   }
   
   #screen-snake .game-info {
     display: flex;
     justify-content: space-between;
-    margin: 20px 0;
-    font-size: 18px;
+    margin: 10px 0;
+    font-size: clamp(14px, 3vw, 18px);
     font-weight: bold;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 10px;
+    flex-shrink: 0;
   }
   
   #screen-snake .game-info span {
@@ -208,13 +220,20 @@
       // Touch controls for mobile - improved sensitivity
       let touchStartX = 0;
       let touchStartY = 0;
-      let minSwipeDistance = 30; // Minimum distance for a swipe
+      let touchStartTime = 0;
+      let minSwipeDistance = 15; // Reduced minimum distance for better responsiveness
+      let maxTapTime = 200; // Maximum time for a tap vs swipe
       
       canvas.addEventListener('touchstart', function(e) {
         e.preventDefault();
         const touch = e.touches[0];
         touchStartX = touch.clientX;
         touchStartY = touch.clientY;
+        touchStartTime = Date.now();
+      }, { passive: false });
+      
+      canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault(); // Prevent scrolling during swipe
       }, { passive: false });
       
       canvas.addEventListener('touchend', function(e) {
@@ -224,25 +243,54 @@
         const touch = e.changedTouches[0];
         const deltaX = touch.clientX - touchStartX;
         const deltaY = touch.clientY - touchStartY;
+        const touchDuration = Date.now() - touchStartTime;
         
-        // Check if swipe is long enough
+        // Check if this was a quick tap or a swipe
         const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-        if (distance < minSwipeDistance) return;
         
-        // Determine swipe direction
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-          // Horizontal swipe
-          if (deltaX > 0 && direction !== 'left') {
-            direction = 'right';
-          } else if (deltaX < 0 && direction !== 'right') {
+        // For very short touches, treat as directional tap based on canvas quadrant
+        if (touchDuration < maxTapTime && distance < minSwipeDistance) {
+          const rect = canvas.getBoundingClientRect();
+          const relativeX = (touch.clientX - rect.left) / rect.width;
+          const relativeY = (touch.clientY - rect.top) / rect.height;
+          
+          // Determine direction based on which edge is closest
+          const distToLeft = relativeX;
+          const distToRight = 1 - relativeX;
+          const distToTop = relativeY;
+          const distToBottom = 1 - relativeY;
+          
+          const minDist = Math.min(distToLeft, distToRight, distToTop, distToBottom);
+          
+          if (minDist === distToLeft && direction !== 'right') {
             direction = 'left';
-          }
-        } else {
-          // Vertical swipe
-          if (deltaY > 0 && direction !== 'up') {
-            direction = 'down';
-          } else if (deltaY < 0 && direction !== 'down') {
+          } else if (minDist === distToRight && direction !== 'left') {
+            direction = 'right';
+          } else if (minDist === distToTop && direction !== 'down') {
             direction = 'up';
+          } else if (minDist === distToBottom && direction !== 'up') {
+            direction = 'down';
+          }
+          return;
+        }
+        
+        // Handle swipe gestures
+        if (distance >= minSwipeDistance) {
+          // Determine swipe direction
+          if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            // Horizontal swipe
+            if (deltaX > 0 && direction !== 'left') {
+              direction = 'right';
+            } else if (deltaX < 0 && direction !== 'right') {
+              direction = 'left';
+            }
+          } else {
+            // Vertical swipe
+            if (deltaY > 0 && direction !== 'up') {
+              direction = 'down';
+            } else if (deltaY < 0 && direction !== 'down') {
+              direction = 'up';
+            }
           }
         }
       }, { passive: false });

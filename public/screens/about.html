@@ -197,8 +197,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    z-index: 100;
+    z-index: 1000;
     animation: floatIn 1s ease-out;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    padding: 10px 15px;
+    border-radius: 15px;
+    border: 1px solid rgba(0, 255, 255, 0.2);
   }
 
   .logo-badge {
@@ -254,6 +259,8 @@
     letter-spacing: 1px;
     box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
     text-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+    position: relative;
+    z-index: 1001;
   }
 
   .home-btn:hover {
@@ -272,7 +279,7 @@
     justify-content: center;
     align-items: center;
     position: relative;
-    padding: 70px 20px 15px;
+    padding: 100px 20px 15px;
   }
 
   /* Hero Images Section - Main Focus */
@@ -318,7 +325,7 @@
   .image-card:nth-child(2) {
     animation-delay: 0.5s;
     transform: scale(1.1) rotateY(0deg) rotateX(0deg);
-    z-index: 10;
+    z-index: 5;
   }
 
   .image-card:nth-child(3) {
@@ -332,7 +339,7 @@
 
   .image-card:hover {
     transform: scale(1.15) rotateY(0deg) rotateX(0deg) translateZ(50px);
-    z-index: 20;
+    z-index: 15;
   }
 
   .image-wrapper {

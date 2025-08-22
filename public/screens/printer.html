@@ -689,6 +689,7 @@
       flex: 1;
       min-height: 0; /* Prevent overflow */
       overflow: hidden; /* Ensure content fits */
+      width: 100%; /* Ensure full width */
     }
     #screen-printer .slot { 
       background:#0f111a; 
@@ -701,6 +702,9 @@
       align-items:stretch; 
       min-height: 80px;
       transition: all 0.2s ease;
+      flex: 1; /* Make all slots equal width */
+      min-width: 0; /* Allow shrinking */
+      max-width: calc(25% - 6px); /* Ensure equal distribution (25% minus gap) */
     }
     
          #screen-printer .slot:hover {
@@ -798,11 +802,14 @@
       }
       #screen-printer .ams {
         gap: 6px;
+        width: 100%;
       }
       #screen-printer .slot {
         padding: 6px;
         min-height: 70px;
         flex: 1;
+        min-width: 0;
+        max-width: calc(25% - 4.5px); /* Adjust for smaller gap */
       }
       #screen-printer .slot .chip {
         min-height: 50px;
@@ -819,11 +826,14 @@
     @media (min-width: 1200px) {
       #screen-printer .ams {
         gap: 12px;
+        width: 100%;
       }
       #screen-printer .slot {
         padding: 12px;
         min-height: 100px;
         flex: 1;
+        min-width: 0;
+        max-width: calc(25% - 9px); /* Adjust for larger gap */
       }
       #screen-printer .slot .chip {
         min-height: 80px;
