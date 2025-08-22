@@ -4,86 +4,484 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Wind Tunnel GUI</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   :root{
-    --bg:#16181d; --panel:#22262e; --muted:#8ea0b5; --acc:#7c4dff; --good:#37c5ab; --danger:#ff6b6b;
-    --text:#e7eef7;
+    --bg: radial-gradient(ellipse at top, #0f0f23 0%, #161629 50%, #0a0a1a 100%);
+    --panel: rgba(255, 255, 255, 0.08);
+    --panel-hover: rgba(255, 255, 255, 0.12);
+    --panel-dark: rgba(255, 255, 255, 0.05);
+    --muted: #a0a0ab;
+    --acc: #007aff;
+    --acc-hover: #0056cc;
+    --good: #30d158;
+    --warn: #ff9f0a;
+    --danger: #ff453a;
+    --text: #ffffff;
+    --text-muted: #8e8e93;
+    --border: rgba(255, 255, 255, 0.12);
+    --border-muted: rgba(255, 255, 255, 0.06);
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --shadow-hover: 0 16px 64px rgba(0, 0, 0, 0.6);
+    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --border-radius: 16px;
+    --border-radius-lg: 24px;
+    --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    --spring: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --blur: blur(24px);
+    --blur-heavy: blur(40px);
   }
-  *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
-  body{margin:0;background:var(--bg);color:var(--text)}
-  header{padding:12px 16px;border-bottom:1px solid #2c323c;display:flex;align-items:center;gap:12px}
-  header h1{font-size:18px;margin:0;font-weight:600;letter-spacing:.5px}
+  *{
+    box-sizing:border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  body{
+    margin:0;
+    background: var(--bg);
+    color:var(--text);
+    position:relative;
+    min-height:100vh;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+      conic-gradient(from 180deg at 50% 50%, rgba(0, 122, 255, 0.1) 0deg, transparent 60deg, rgba(48, 209, 88, 0.1) 120deg, transparent 180deg, rgba(255, 159, 10, 0.1) 240deg, transparent 300deg, rgba(0, 122, 255, 0.1) 360deg),
+      var(--bg);
+    z-index: -1;
+    animation: rotate 60s linear infinite;
+  }
+  
+  @keyframes rotate {
+    to { transform: rotate(360deg); }
+  }
+  header{
+    padding: 32px 80px;
+    background: var(--panel);
+    backdrop-filter: var(--blur-heavy);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    box-shadow: var(--shadow);
+    position: relative;
+    z-index: 100;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(255, 255, 255, 0.2) 50%, 
+      transparent);
+  }
+  header h1{
+    font-size: 28px;
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #ffffff, #a0a0ab);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
   .grid{
-    display:grid;
-    grid-template-columns: 300px 380px 1fr;
-    gap:12px;
-    padding:12px;
+    display: grid;
+    grid-template-columns: 320px 420px 1fr;
+    gap: 24px;
+    padding: 24px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  @media (max-width:1400px){
+    .grid{grid-template-columns: 300px 380px 1fr; gap: 20px;}
   }
   @media (max-width:1200px){
-    .grid{grid-template-columns: 260px 340px 1fr}
+    .grid{grid-template-columns: 280px 340px 1fr; gap: 16px;}
   }
   @media (max-width:980px){
-    .grid{grid-template-columns: 1fr}
+    .grid{grid-template-columns: 1fr; gap: 20px;}
   }
   .card{
-    background:var(--panel); border:1px solid #2c323c; border-radius:14px; padding:12px;
+    background: var(--panel);
+    backdrop-filter: var(--blur);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius-lg);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
   }
-  .section-title{font-size:13px;color:var(--muted);margin:0 0 8px 0;letter-spacing:.4px;text-transform:uppercase}
-  .controls .row{display:grid;grid-template-columns: 90px 1fr 80px; align-items:center; gap:12px; margin:12px 0; min-height:48px}
-  label{font-size:16px;font-weight:500}
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(255, 255, 255, 0.3) 50%, 
+      transparent);
+    z-index: 1;
+  }
+  .card:hover {
+    background: var(--panel-hover);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-4px);
+    border-color: var(--border);
+  }
+  .section-title{
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 0 24px 0;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .controls .row{
+    display: grid;
+    grid-template-columns: 100px 1fr 90px;
+    align-items: center;
+    gap: 16px;
+    margin: 20px 0;
+    min-height: 56px;
+  }
+  label{
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
   input[type="range"]{
-    width:100%; touch-action:none; height:32px; -webkit-appearance:none; appearance:none;
-    background:#1f232b; border-radius:16px; outline:none;
+    width: 100%;
+    touch-action: none;
+    height: 8px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--panel-dark);
+    border-radius: 4px;
+    outline: none;
+    transition: var(--transition);
+    border: 1px solid var(--border-muted);
+  }
+  input[type="range"]:hover {
+    border-color: var(--border);
   }
   input[type="range"]::-webkit-slider-thumb{
-    -webkit-appearance:none; width:24px; height:24px; border-radius:50%;
-    background:var(--acc); cursor:pointer;
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffffff, #e0e0e0);
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    transition: var(--transition);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+  }
+  input[type="range"]::-webkit-slider-thumb:hover {
+    background: linear-gradient(135deg, #007aff, #0056cc);
+    border-color: #ffffff;
+    box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+    transform: scale(1.1);
   }
   input[type="range"]::-moz-range-thumb{
-    width:24px; height:24px; border-radius:50%; background:var(--acc);
-    border:none; cursor:pointer;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffffff, #e0e0e0);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   }
   .btn{
-    background:#2e3440;border:1px solid #394152;color:#dbe7ff;border-radius:10px;padding:12px 16px;
-    font-size:16px;cursor:pointer;min-height:48px;touch-action:manipulation
+    background: var(--panel);
+    backdrop-filter: var(--blur);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--border-radius);
+    padding: 16px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 52px;
+    touch-action: manipulation;
+    transition: var(--transition);
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
   }
-  .btn:active{transform:scale(.98)}
-  .btn.secondary{background:#252a34;color:#bcd0ea}
-  .btn.warn{background:#3a1f1f;border-color:#5a2b2b;color:#ffdcdc}
-  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(255, 255, 255, 0.3) 50%, 
+      transparent);
+  }
+  .btn:hover {
+    background: var(--panel-hover);
+    border-color: var(--acc);
+    color: var(--acc);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px) scale(1.02);
+  }
+  .btn:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: var(--shadow);
+  }
+  .btn.secondary{
+    background: var(--panel-dark);
+    border-color: var(--border-muted);
+    color: var(--text-muted);
+  }
+  .btn.secondary:hover {
+    background: var(--panel);
+    border-color: var(--border);
+    color: var(--text);
+    box-shadow: var(--shadow-hover);
+  }
+  .btn.warn{
+    background: rgba(255, 69, 58, 0.1);
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+  .btn.warn:hover {
+    background: rgba(255, 69, 58, 0.2);
+    border-color: var(--danger);
+    color: #ff6b5a;
+    box-shadow: 0 16px 64px rgba(255, 69, 58, 0.3);
+  }
+  .toolbar{
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 24px 0;
+  }
   select, input[type="text"]{
-    width:100%;padding:12px 16px;background:#1f232b;border:1px solid #323a46;border-radius:10px;color:#e6eefb;
-    font-size:16px;min-height:48px;touch-action:manipulation
+    width: 100%;
+    padding: 16px 20px;
+    background: var(--panel-dark);
+    backdrop-filter: var(--blur);
+    border: 1px solid var(--border-muted);
+    border-radius: var(--border-radius);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    min-height: 56px;
+    touch-action: manipulation;
+    transition: var(--transition);
+    box-shadow: var(--shadow);
   }
-  /* Gauges */
-  .gauges{display:grid;grid-template-columns: repeat(4,1fr); gap:10px}
-  .gauge{display:flex;flex-direction:column;gap:6px}
-  .gauge .face{
-    position:relative;height:160px;border:1px solid #2f3540;border-radius:10px;background:#1b1f27;padding:6px
+  select:hover, input[type="text"]:hover {
+    background: var(--panel);
+    border-color: var(--border);
+    box-shadow: var(--shadow-hover);
   }
-  .bar{
-    position:absolute;left:6px;right:6px;bottom:6px;height:0;background:linear-gradient(#3f8cff,#7c4dff);
-    border-radius:8px
+  select:focus, input[type="text"]:focus {
+    outline: none;
+    border-color: var(--acc);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+    background: var(--panel);
   }
-  .ticks{position:absolute;inset:6px;display:flex;flex-direction:column;justify-content:space-between;color:#607089;font-size:11px}
-  .g-header{display:flex;justify-content:space-between;align-items:baseline}
-  .g-name{font-size:13px;color:#b6c7db}
-  .g-val{font-size:18px;font-weight:600}
-  .units{font-size:12px;color:#9cb2cb}
-  output{font-size:18px;font-weight:600;min-width:60px;text-align:center}
+  /* Professional Gauges */
+  .gauges{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 20px;
+    height: 420px;
+  }
+  .gauge{
+    background: var(--panel-dark);
+    backdrop-filter: var(--blur);
+    border-radius: var(--border-radius);
+    padding: 28px;
+    transition: var(--transition);
+    border: 1px solid var(--border-muted);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow);
+  }
+  .gauge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(255, 255, 255, 0.2) 50%, 
+      transparent);
+  }
+  .gauge:hover {
+    background: var(--panel);
+    border-color: var(--border);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+  .gauge-chart {
+    width: 100%;
+    height: 120px;
+    margin: 10px 0;
+    flex-shrink: 0;
+  }
+  .g-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+  }
+  .g-name{
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .g-val{
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text);
+    background: linear-gradient(135deg, #ffffff, #a0a0ab);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  }
+  .units{
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 4px;
+  }
+  output{
+    font-size: 20px;
+    font-weight: 700;
+    min-width: 80px;
+    text-align: center;
+    color: var(--text);
+    background: linear-gradient(135deg, #ffffff, #a0a0ab);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
   /* Graph */
-  .graph-wrap{display:flex;flex-direction:column;gap:8px;height:100%}
-  canvas{background:#12151a;border:1px solid #2f3540;border-radius:12px;width:100%;height:420px}
+  .graph-wrap{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+  }
+  #plot{
+    background: var(--panel-dark);
+    backdrop-filter: var(--blur);
+    border: 1px solid var(--border-muted);
+    border-radius: var(--border-radius);
+    width: 100%;
+    height: 440px;
+    transition: var(--transition);
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+  #plot::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(255, 255, 255, 0.2) 50%, 
+      transparent);
+  }
+  #plot:hover {
+    border-color: var(--border);
+    box-shadow: var(--shadow-hover);
+  }
   .log-list{max-height:110px;overflow:auto;background:#11151a;border:1px solid #2c323c;border-radius:10px;padding:6px;font-size:13px}
   .row small{color:#9cb2cb}
   .spacer{height:4px}
+  
+  /* Navigation */
+  .matrix-logo {
+    position: fixed;
+    top: 20px;
+    left: 24px;
+    height: 32px;
+    width: auto;
+    z-index: 1000;
+    opacity: 0.9;
+    filter: brightness(1.2) contrast(1.1);
+  }
+  
+  .home-button {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .home-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  
+  .home-button:active {
+    transform: translateY(0) scale(0.98);
+  }
 </style>
 </head>
 <body>
+  <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo matrix-logo" />
+  <button id="btnHome" class="home-button">HOME</button>
+  
   <header>
     <h1>Matrix Wind Tunnel 125</h1>
     <div style="flex:1"></div>
-    <div style="min-width:280px">
+    <div style="min-width:280px;max-width:350px">
       <select id="experiment">
         <option value="baseline">Select Experiment...</option>
         <option value="lift-curve">Lift Curve vs AoA</option>
@@ -124,52 +522,40 @@
     <section class="card">
       <h3 class="section-title">Measurements</h3>
       <div class="gauges">
-        <div class="gauge" data-key="lift">
+        <div class="gauge">
           <div class="g-header">
             <span class="g-name">Lift</span>
             <span class="g-val" id="liftVal">0.00</span>
           </div>
           <div class="units">mN</div>
-          <div class="face">
-            <div class="ticks"><span>max</span><span>0</span></div>
-            <div class="bar" id="liftBar"></div>
-          </div>
+          <canvas id="liftChart" class="gauge-chart"></canvas>
         </div>
 
-        <div class="gauge" data-key="drag">
+        <div class="gauge">
           <div class="g-header">
             <span class="g-name">Drag</span>
             <span class="g-val" id="dragVal">0.00</span>
           </div>
           <div class="units">mN</div>
-          <div class="face">
-            <div class="ticks"><span>max</span><span>0</span></div>
-            <div class="bar" id="dragBar"></div>
-          </div>
+          <canvas id="dragChart" class="gauge-chart"></canvas>
         </div>
 
-        <div class="gauge" data-key="pressure">
+        <div class="gauge">
           <div class="g-header">
             <span class="g-name">Pressure</span>
             <span class="g-val" id="pressVal">0.0</span>
           </div>
           <div class="units">Pa</div>
-          <div class="face">
-            <div class="ticks"><span>max</span><span>0</span></div>
-            <div class="bar" id="pressBar"></div>
-          </div>
+          <canvas id="pressChart" class="gauge-chart"></canvas>
         </div>
 
-        <div class="gauge" data-key="airspeed">
+        <div class="gauge">
           <div class="g-header">
-            <span class="g-name">Air speed</span>
+            <span class="g-name">Airspeed</span>
             <span class="g-val" id="spdVal">0.0</span>
           </div>
           <div class="units">m/s</div>
-          <div class="face">
-            <div class="ticks"><span>50</span><span>0</span></div>
-            <div class="bar" id="spdBar"></div>
-          </div>
+          <canvas id="speedChart" class="gauge-chart"></canvas>
         </div>
       </div>
     </section>
@@ -179,8 +565,9 @@
       <h3 class="section-title">Log and Graph</h3>
       <div class="graph-wrap">
         <div class="toolbar">
-          <button id="btnLog" class="btn">Log</button>
+          <button id="btnLog" class="btn">Manual Log</button>
           <button id="btnClear" class="btn secondary">Clear Graph</button>
+          <button id="btnToggleLive" class="btn secondary">Live: ON</button>
         </div>
         <canvas id="plot" width="900" height="420" aria-label="Fan speed vs Pressure"></canvas>
         <div class="log-list" id="logList"></div>
@@ -190,15 +577,24 @@
 
 <script>
 (() => {
-  // Constants
-  const rho = 1.2;     // air density kg/m^3
-  const S = 0.01;      // ref area m^2
-  const Cd0 = 0.05;
-  const k = 0.07;
+  // Physical constants and airfoil properties
+  const rho = 1.225;   // air density kg/m^3 at sea level 15°C
+  const S = 0.012;     // reference area m^2 (scaled model wing)
+  const chord = 0.08;  // chord length m
+  const span = 0.15;   // wing span m
+  const AR = span*span/S; // aspect ratio
+  
+  // Airfoil coefficients (NACA 0012-like)
+  const Cd0 = 0.008;   // zero-lift drag coefficient
+  const k = 0.045;     // induced drag factor
+  const Cl_alpha = 5.7; // lift curve slope per radian
+  const alpha_stall = 15 * Math.PI/180; // stall angle
+  const Cl_max = 1.4;  // maximum lift coefficient
 
   // State
   const state = {
     mode: 'manual', // manual, sweep, off
+    experiment: 'baseline', // current experiment type
     angleDeg: 0,
     speedPct: 0,
     offsets: {lift:0, drag:0, pressure:0},
@@ -206,7 +602,10 @@
     pressure: 0,
     lift: 0,
     drag: 0,
-    dataPoints: [] // {x: speedPct, y: pressure}
+    dataPoints: [], // {x: speedPct, y: pressure}
+    liveUpdates: true,
+    autoSweep: false, // for automatic experiment sweeps
+    sweepTarget: 0
   };
 
   // DOM
@@ -220,10 +619,42 @@
   const pressVal = document.getElementById('pressVal');
   const spdVal  = document.getElementById('spdVal');
 
-  const liftBar = document.getElementById('liftBar');
-  const dragBar = document.getElementById('dragBar');
-  const pressBar= document.getElementById('pressBar');
-  const spdBar  = document.getElementById('spdBar');
+  // Chart.js gauge setup
+  let liftChart, dragChart, pressChart, speedChart;
+  
+  function createGaugeChart(ctx, label, color, max) {
+    return new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: [0, 100],
+          backgroundColor: [color, 'rgba(255,255,255,0.1)'],
+          borderWidth: 0,
+          cutout: '75%'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false }
+        },
+        animation: {
+          animateRotate: true,
+          duration: 500
+        }
+      }
+    });
+  }
+  
+  // Initialize charts
+  setTimeout(() => {
+    liftChart = createGaugeChart(document.getElementById('liftChart'), 'Lift', '#007aff', 8000);
+    dragChart = createGaugeChart(document.getElementById('dragChart'), 'Drag', '#30d158', 3000);
+    pressChart = createGaugeChart(document.getElementById('pressChart'), 'Pressure', '#ff9f0a', 2000);
+    speedChart = createGaugeChart(document.getElementById('speedChart'), 'Speed', '#bf5af2', 60);
+  }, 100);
 
   const btnZero = document.getElementById('btnZero');
   const btnSet  = document.getElementById('btnSet');
@@ -231,6 +662,8 @@
   const btnOff  = document.getElementById('btnOff');
   const btnLog  = document.getElementById('btnLog');
   const btnClear= document.getElementById('btnClear');
+  const btnToggleLive = document.getElementById('btnToggleLive');
+  const btnHome = document.getElementById('btnHome');
   const logList = document.getElementById('logList');
   const experimentEl = document.getElementById('experiment');
 
@@ -242,49 +675,108 @@
   function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)) }
   function fmt(n, d=2){ return Number(n).toFixed(d) }
 
-  // Simulation model (visual-only outputs)
+  // Advanced simulation model with realistic aerodynamics
   function simulate() {
-    // Map speed% to airspeed 0..50 m/s using sqrt curve for nicer feel
-    const V = 50 * Math.sqrt(state.speedPct/100);
-    const q = 0.5 * rho * V * V;               // dynamic pressure Pa
+    // Realistic speed mapping: 0-100% -> 0-60 m/s with cubic response
+    const speedFactor = state.speedPct / 100;
+    const V = 60 * speedFactor * speedFactor * speedFactor;
+    const q = 0.5 * rho * V * V; // dynamic pressure Pa
     const alpha = state.angleDeg * Math.PI/180;
-
-    // Simple lift/drag model with proper clamping
-    let Cl = 2*Math.PI*alpha;
-    Cl = clamp(Cl, -1.8, 1.8);
-    const Cd = Cd0 + k*Cl*Cl;
-
-    const L = q * S * Cl; // N
-    const D = q * S * Cd; // N
-
-    // Add small realistic noise (±1% of reading)
-    const noise = () => (Math.random() - 0.5) * 0.02;
+    const Re = rho * V * chord / 1.8e-5; // Reynolds number (air viscosity ~1.8e-5)
     
-    state.airspeed = V * (1 + noise());
-    state.pressure = (q - state.offsets.pressure) * (1 + noise());
-    state.lift = (L - state.offsets.lift) * 1000 * (1 + noise()); // mN
-    state.drag = (D - state.offsets.drag) * 1000 * (1 + noise()); // mN
+    // Advanced lift coefficient with stall behavior
+    let Cl = 0;
+    if (Math.abs(alpha) <= alpha_stall) {
+      // Linear region
+      Cl = Cl_alpha * alpha;
+    } else {
+      // Post-stall region with gradual loss
+      const stall_sign = Math.sign(alpha);
+      const alpha_excess = Math.abs(alpha) - alpha_stall;
+      Cl = stall_sign * (Cl_max - 0.3 * alpha_excess);
+      Cl = clamp(Cl, -0.8, 0.8); // Deep stall limit
+    }
+    
+    // Realistic drag with Reynolds number effects
+    const Cd_friction = Re > 500000 ? 0.004 : 0.008; // turbulent vs laminar
+    const Cd_induced = k * Cl * Cl; // induced drag
+    const Cd_separation = Math.abs(alpha) > alpha_stall ? 0.5 * Math.sin(2*alpha) : 0;
+    const Cd = Cd0 + Cd_friction + Cd_induced + Cd_separation;
+    
+    // Forces in Newtons
+    const L = q * S * Cl;
+    const D = q * S * Cd;
+    
+    // Realistic sensor noise and dynamics
+    const sensor_noise = () => {
+      // Higher frequency, lower amplitude noise for sensors
+      const white = (Math.random() - 0.5) * 0.01;
+      const pink = Math.sin(Date.now() * 0.001) * 0.005; // slow drift
+      return white + pink;
+    };
+    
+    // Temperature and pressure variations
+    const temp_drift = Math.sin(Date.now() * 0.0001) * 0.02; // slow thermal drift
+    
+    state.airspeed = V * (1 + sensor_noise());
+    state.pressure = (q - state.offsets.pressure) * (1 + sensor_noise() + temp_drift);
+    state.lift = (L - state.offsets.lift) * 1000 * (1 + sensor_noise()); // mN
+    state.drag = (D - state.offsets.drag) * 1000 * (1 + sensor_noise()); // mN
+    
+    // Add turbulence effects at high speeds
+    if (V > 30) {
+      const turbulence = (Math.random() - 0.5) * 0.1 * (V/60);
+      state.lift *= (1 + turbulence);
+      state.drag *= (1 + turbulence * 0.5);
+    }
   }
 
   function renderGauges() {
-    liftVal.textContent = fmt(state.lift,2);
-    dragVal.textContent = fmt(state.drag,2);
-    pressVal.textContent= fmt(state.pressure,1);
-    spdVal.textContent  = fmt(state.airspeed,1);
+    // Display values with appropriate precision
+    liftVal.textContent = Math.abs(state.lift) < 10 ? fmt(state.lift,3) : fmt(state.lift,1);
+    dragVal.textContent = Math.abs(state.drag) < 10 ? fmt(state.drag,3) : fmt(state.drag,1);
+    pressVal.textContent = Math.abs(state.pressure) < 10 ? fmt(state.pressure,2) : fmt(state.pressure,1);
+    spdVal.textContent = fmt(state.airspeed,1);
 
-    // Normalise bars to practical scales
-    const liftPct = clamp(Math.abs(state.lift)/4000, 0, 1);
-    const dragPct = clamp(Math.abs(state.drag)/4000, 0, 1);
-    const pressPct= clamp(Math.abs(state.pressure)/1000, 0, 1);
-    const spdPct  = clamp(state.airspeed/50, 0, 1);
+    // Dynamic scaling based on actual ranges
+    const maxLift = 8000;
+    const maxDrag = 3000;
+    const maxPress = 2000;
+    const maxSpeed = 60;
+    
+    const liftPct = clamp(Math.abs(state.lift)/maxLift * 100, 0, 100);
+    const dragPct = clamp(Math.abs(state.drag)/maxDrag * 100, 0, 100);
+    const pressPct = clamp(Math.abs(state.pressure)/maxPress * 100, 0, 100);
+    const spdPct = clamp(state.airspeed/maxSpeed * 100, 0, 100);
 
-    liftBar.style.height = (liftPct*100) + '%';
-    dragBar.style.height = (dragPct*100) + '%';
-    pressBar.style.height= (pressPct*100) + '%';
-    spdBar.style.height  = (spdPct*100) + '%';
+    // Update Chart.js gauges
+    if (liftChart) {
+      const liftColor = state.lift < 0 ? '#ff453a' : '#007aff';
+      liftChart.data.datasets[0].data = [liftPct, 100 - liftPct];
+      liftChart.data.datasets[0].backgroundColor = [liftColor, 'rgba(255,255,255,0.05)'];
+      liftChart.update('none');
+    }
+    
+    if (dragChart) {
+      dragChart.data.datasets[0].data = [dragPct, 100 - dragPct];
+      dragChart.data.datasets[0].backgroundColor = ['#30d158', 'rgba(255,255,255,0.05)'];
+      dragChart.update('none');
+    }
+    
+    if (pressChart) {
+      pressChart.data.datasets[0].data = [pressPct, 100 - pressPct];
+      pressChart.data.datasets[0].backgroundColor = ['#ff9f0a', 'rgba(255,255,255,0.05)'];
+      pressChart.update('none');
+    }
+    
+    if (speedChart) {
+      speedChart.data.datasets[0].data = [spdPct, 100 - spdPct];
+      speedChart.data.datasets[0].backgroundColor = ['#bf5af2', 'rgba(255,255,255,0.05)'];
+      speedChart.update('none');
+    }
   }
 
-  function drawAxes() {
+  function drawAxes(yMax, xMax = 100, xLabel = 'Fan Speed [%]', yLabel = 'Pressure [Pa]') {
     ctx.clearRect(0,0,canvas.width,canvas.height);
     const pad = 48;
     const w = canvas.width - 2*pad;
@@ -300,7 +792,7 @@
       ctx.moveTo(x, pad);
       ctx.lineTo(x, canvas.height - pad);
     }
-    // Horizontal grid lines (every 200 Pa)
+    // Horizontal grid lines
     for(let i = 0; i <= 5; i++) {
       const y = canvas.height - pad - (i/5) * h;
       ctx.moveTo(pad, y);
@@ -321,49 +813,97 @@
     ctx.fillStyle = '#9cb2cb';
     ctx.font = '12px system-ui';
     ctx.textAlign = 'left';
-    ctx.fillText('Pressure [Pa]', 10, 16);
+    ctx.fillText(yLabel, 10, 16);
     ctx.textAlign = 'center';
-    ctx.fillText('Fan Speed [%]', canvas.width/2, canvas.height - 10);
+    ctx.fillText(xLabel, canvas.width/2, canvas.height - 10);
     
-    // Y-axis tick labels
+    // Y-axis tick labels (adaptive to data range)
     ctx.textAlign = 'right';
+    const yStep = yMax / 5;
     for(let i = 0; i <= 5; i++) {
       const y = canvas.height - pad - (i/5) * h;
-      const val = i * 200;
+      const val = Math.round(i * yStep);
       ctx.fillText(val.toString(), pad - 8, y + 4);
     }
     
     // X-axis tick labels
     ctx.textAlign = 'center';
+    const xStep = xMax / 5;
     for(let i = 0; i <= 5; i++) {
       const x = pad + (i/5) * w;
-      const val = i * 20;
+      let val;
+      if(state.experiment === 'lift-curve') {
+        val = Math.round(-20 + i * 8); // -20 to +20 degrees
+      } else {
+        val = Math.round(i * xStep);
+      }
       ctx.fillText(val.toString(), x, canvas.height - pad + 16);
     }
   }
 
-  function drawPoints() {
+  function drawPoints(yMax, xMax = 100) {
     const pad = 48;
     const w = canvas.width - 2*pad;
     const h = canvas.height - 2*pad;
 
-    // Scale
-    const xMax = 100;
-    const yMax = 1000; // plot up to 1000 Pa
-    ctx.fillStyle = '#7c4dff';
+    // Color based on experiment - modern theme
+    const colors = {
+      'lift-curve': '#007aff',
+      'drag-polar': '#30d158', 
+      'pressure-speed': '#ff9f0a',
+      'baseline': '#bf5af2'
+    };
+    ctx.fillStyle = colors[state.experiment] || '#007aff';
 
     for(const p of state.dataPoints){
-      const x = pad + (p.x/xMax)*w;
-      const y = canvas.height - pad - (clamp(p.y,0,yMax)/yMax)*h;
+      let x, y;
+      
+      if(state.experiment === 'lift-curve') {
+        // Map angle -20 to +20 to canvas width
+        x = pad + ((p.x + 20) / 40) * w;
+        y = canvas.height - pad - (clamp(Math.abs(p.y), 0, yMax) / yMax) * h;
+      } else if(state.experiment === 'drag-polar') {
+        x = pad + (clamp(p.x, 0, xMax) / xMax) * w;
+        y = canvas.height - pad - (clamp(p.y, 0, yMax) / yMax) * h;
+      } else {
+        x = pad + (p.x / xMax) * w;
+        y = canvas.height - pad - (clamp(p.y, 0, yMax) / yMax) * h;
+      }
+      
       ctx.beginPath();
-      ctx.arc(x,y,3,0,Math.PI*2);
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
       ctx.fill();
     }
   }
 
   function renderPlot() {
-    drawAxes();
-    drawPoints();
+    if(state.dataPoints.length === 0) {
+      drawAxes(2000);
+      return;
+    }
+    
+    // Dynamic scaling based on experiment type
+    let xMax, yMax, xLabel, yLabel;
+    
+    if(state.experiment === 'lift-curve') {
+      xMax = 40; // -20 to +20 degrees
+      yMax = Math.max(8000, Math.max(...state.dataPoints.map(p => Math.abs(p.y))) * 1.1);
+      xLabel = 'Angle of Attack [°]';
+      yLabel = 'Lift Force [mN]';
+    } else if(state.experiment === 'drag-polar') {
+      xMax = Math.max(4000, Math.max(...state.dataPoints.map(p => p.x)) * 1.1);
+      yMax = Math.max(2000, Math.max(...state.dataPoints.map(p => p.y)) * 1.1);
+      xLabel = 'Lift Force [mN]';
+      yLabel = 'Drag Force [mN]';
+    } else {
+      xMax = 100;
+      yMax = Math.max(2000, Math.max(...state.dataPoints.map(p => p.y)) * 1.1);
+      xLabel = 'Fan Speed [%]';
+      yLabel = 'Pressure [Pa]';
+    }
+    
+    drawAxes(yMax, xMax, xLabel, yLabel);
+    drawPoints(yMax, xMax);
   }
 
   // Event handlers
@@ -414,7 +954,7 @@
   btnLog.addEventListener('click', () => {
     state.dataPoints.push({x: state.speedPct, y: Math.max(0,state.pressure)});
     renderPlot();
-    log(`Logged point: speed ${state.speedPct}%, pressure ${fmt(state.pressure,1)} Pa`);
+    log(`Manually logged point: speed ${state.speedPct}%, pressure ${fmt(state.pressure,1)} Pa`);
   });
 
   btnClear.addEventListener('click', () => {
@@ -423,31 +963,54 @@
     log('Graph cleared');
   });
 
-  // Experiment automation
+  btnToggleLive.addEventListener('click', () => {
+    state.liveUpdates = !state.liveUpdates;
+    btnToggleLive.textContent = `Live: ${state.liveUpdates ? 'ON' : 'OFF'}`;
+    btnToggleLive.className = state.liveUpdates ? 'btn secondary' : 'btn';
+    log(`Live updates ${state.liveUpdates ? 'enabled' : 'disabled'}`);
+  });
+
+  // Enhanced experiment automation
   experimentEl.addEventListener('change', e => {
     const exp = e.target.value;
-    if (exp === 'baseline') return;
+    state.experiment = exp;
+    
+    // Clear previous data
+    state.dataPoints.length = 0;
+    renderPlot();
+    
+    if (exp === 'baseline') {
+      state.autoSweep = false;
+      log('Manual control mode');
+      return;
+    }
     
     log(`Starting experiment: ${exp}`);
     
     if (exp === 'lift-curve') {
-      // Sweep angle from -30 to 30 degrees at 50% speed
+      // Fixed speed, sweep angle for lift analysis
       state.speedPct = 50;
       speedEl.value = 50;
       speedOut.textContent = '50%';
-      log('Set speed to 50% for lift curve analysis');
+      state.autoSweep = true;
+      state.sweepTarget = 'angle';
+      log('Lift curve: Fixed 50% speed, sweeping angle -20° to +20°');
     } else if (exp === 'drag-polar') {
-      // Sweep angle from 0 to 20 degrees at 75% speed
+      // Higher speed, sweep angle for drag analysis  
       state.speedPct = 75;
       speedEl.value = 75;
       speedOut.textContent = '75%';
-      log('Set speed to 75% for drag polar analysis');
+      state.autoSweep = true;
+      state.sweepTarget = 'angle';
+      log('Drag polar: Fixed 75% speed, sweeping angle 0° to +25°');
     } else if (exp === 'pressure-speed') {
-      // Keep angle at 0, will sweep speed automatically
+      // Fixed angle, sweep speed for pressure analysis
       state.angleDeg = 0;
       angleEl.value = 0;
       angleOut.textContent = '0°';
-      log('Set angle to 0° for pressure vs speed analysis');
+      state.autoSweep = true;
+      state.sweepTarget = 'speed';
+      log('Pressure vs Speed: Fixed 0° angle, sweeping speed 0% to 100%');
     }
     simulate(); renderGauges();
   });
@@ -462,9 +1025,14 @@
     }
   }
 
-  // Main loop for optional sweep and steady refresh
+  // Enhanced main loop with experiment-specific sweeps
+  let lastLogTime = 0;
+  let sweepStep = 0;
+  const sweepSpeed = 0.5; // slower for better data collection
+  
   setInterval(() => {
-    if(sweeping){
+    // Manual sweep mode (original)
+    if(sweeping && !state.autoSweep){
       let v = state.speedPct + sweepDir*1.5;
       if(v >= 100){ v = 100; sweepDir = -1; }
       if(v <= 0){ v = 0; sweepDir = 1; }
@@ -472,11 +1040,81 @@
       speedEl.value = Math.round(v);
       speedOut.textContent = `${Math.round(v)}%`;
     }
-    simulate(); renderGauges();
+    
+    // Experiment auto-sweep
+    if(state.autoSweep) {
+      if(state.experiment === 'lift-curve') {
+        // Sweep angle -20 to +20 degrees
+        const angle = -20 + (sweepStep % 200) * 0.2; // 200 steps = 40 degree range
+        state.angleDeg = angle;
+        angleEl.value = Math.round(angle);
+        angleOut.textContent = `${Math.round(angle)}°`;
+        sweepStep += sweepSpeed;
+      } else if(state.experiment === 'drag-polar') {
+        // Sweep angle 0 to +25 degrees
+        const angle = (sweepStep % 125) * 0.2; // 125 steps = 25 degree range
+        state.angleDeg = angle;
+        angleEl.value = Math.round(angle);
+        angleOut.textContent = `${Math.round(angle)}°`;
+        sweepStep += sweepSpeed;
+      } else if(state.experiment === 'pressure-speed') {
+        // Sweep speed 0 to 100%
+        const speed = (sweepStep % 500) * 0.2; // 500 steps = 100% range
+        state.speedPct = speed;
+        speedEl.value = Math.round(speed);
+        speedOut.textContent = `${Math.round(speed)}%`;
+        sweepStep += sweepSpeed;
+      }
+    }
+    
+    simulate(); 
+    renderGauges();
+    
+    // Enhanced auto-logging with experiment-specific data
+    const now = Date.now();
+    if(state.liveUpdates && (now - lastLogTime) >= 300) { // faster logging
+      let dataPoint;
+      
+      if(state.experiment === 'lift-curve') {
+        // Log angle vs lift
+        dataPoint = {x: state.angleDeg, y: state.lift};
+      } else if(state.experiment === 'drag-polar') {
+        // Log lift vs drag (drag polar plot)
+        dataPoint = {x: state.lift, y: state.drag};
+      } else {
+        // Default: speed vs pressure
+        dataPoint = {x: state.speedPct, y: Math.max(0, state.pressure)};
+      }
+      
+      if(state.speedPct > 0 || state.dataPoints.length === 0 || state.autoSweep) {
+        state.dataPoints.push(dataPoint);
+        if(state.dataPoints.length > 150) {
+          state.dataPoints.shift();
+        }
+        renderPlot();
+        lastLogTime = now;
+      }
+    }
   }, 100);
+
+  // Navigation
+  btnHome.addEventListener('click', () => {
+    window.location.href = '../index.html';
+  });
+
+  // Auto-select pressure-speed experiment on load
+  function autoSelectExperiment() {
+    experimentEl.value = 'pressure-speed';
+    state.angleDeg = 0;
+    angleEl.value = 0;
+    angleOut.textContent = '0°';
+    log('Auto-started Pressure vs Speed experiment');
+    simulate(); renderGauges();
+  }
 
   // Init
   simulate(); renderGauges(); renderPlot();
+  setTimeout(autoSelectExperiment, 1000); // Auto-start after 1 second
 })();
 </script>
 </body>

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Graphs - RPI Showcase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #0a0a0a 50%, #1e1e1e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #444;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            background: linear-gradient(45deg, #FFD700, #FFA500, #FF6347);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .graphs-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .graph-card {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .graph-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.6);
+        }
+
+        .graph-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #FFD700;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .graph-description {
+            font-size: 0.9em;
+            color: #ccc;
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        .home-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .home-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #444, #666);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(135deg, #666, #888);
+            transform: translateY(-1px);
+        }
+
+        .control-btn.active {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+        }
+
+        @media (max-width: 768px) {
+            .graphs-container {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .graph-card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="home-button">← Home</a>
+    
+    <div class="header">
+        <h1>Engineering Graphs</h1>
+        <p>Interactive data visualization for electrical and mechanical engineering</p>
+    </div>
+
+    <div class="graphs-container">
+        <!-- Graph 1: Motor Performance Curve -->
+        <div class="graph-card">
+            <h3 class="graph-title">Motor Performance Curve</h3>
+            <p class="graph-description">Shows the relationship between motor speed, torque, and efficiency</p>
+            <div class="chart-container">
+                <canvas id="motorChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn active" onclick="updateMotorData('normal')">Normal Load</button>
+                <button class="control-btn" onclick="updateMotorData('high')">High Load</button>
+                <button class="control-btn" onclick="updateMotorData('low')">Low Load</button>
+            </div>
+        </div>
+
+        <!-- Graph 2: Power Consumption Over Time -->
+        <div class="graph-card">
+            <h3 class="graph-title">Power Consumption Analysis</h3>
+            <p class="graph-description">Real-time power consumption patterns in electrical systems</p>
+            <div class="chart-container">
+                <canvas id="powerChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn active" onclick="updatePowerData('daily')">Daily</button>
+                <button class="control-btn" onclick="updatePowerData('weekly')">Weekly</button>
+                <button class="control-btn" onclick="updatePowerData('monthly')">Monthly</button>
+            </div>
+        </div>
+
+        <!-- Graph 3: Temperature vs Efficiency -->
+        <div class="graph-card">
+            <h3 class="graph-title">Temperature vs Efficiency</h3>
+            <p class="graph-description">Thermal analysis showing how temperature affects system efficiency</p>
+            <div class="chart-container">
+                <canvas id="tempChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn active" onclick="updateTempData('motor')">Motor</button>
+                <button class="control-btn" onclick="updateTempData('transformer')">Transformer</button>
+                <button class="control-btn" onclick="updateTempData('electronics')">Electronics</button>
+            </div>
+        </div>
+
+        <!-- Graph 4: Vibration Analysis -->
+        <div class="graph-card">
+            <h3 class="graph-title">Vibration Analysis</h3>
+            <p class="graph-description">Frequency domain analysis of mechanical vibrations</p>
+            <div class="chart-container">
+                <canvas id="vibrationChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn active" onclick="updateVibrationData('normal')">Normal</button>
+                <button class="control-btn" onclick="updateVibrationData('fault')">Fault Condition</button>
+                <button class="control-btn" onclick="updateVibrationData('maintenance')">Maintenance</button>
+            </div>
+        </div>
+
+        <!-- Graph 5: Voltage and Current Waveforms -->
+        <div class="graph-card">
+            <h3 class="graph-title">AC Waveform Analysis</h3>
+            <p class="graph-description">Voltage and current waveforms in AC electrical systems</p>
+            <div class="chart-container">
+                <canvas id="waveformChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn active" onclick="updateWaveformData('sine')">Sine Wave</button>
+                <button class="control-btn" onclick="updateWaveformData('square')">Square Wave</button>
+                <button class="control-btn" onclick="updateWaveformData('distorted')">Distorted</button>
+            </div>
+        </div>
+
+        <!-- Graph 6: System Reliability -->
+        <div class="graph-card">
+            <h3 class="graph-title">System Reliability</h3>
+            <p class="graph-description">Reliability analysis showing failure rates over time</p>
+            <div class="chart-container">
+                <canvas id="reliabilityChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn active" onclick="updateReliabilityData('new')">New System</button>
+                <button class="control-btn" onclick="updateReliabilityData('aged')">Aged System</button>
+                <button class="control-btn" onclick="updateReliabilityData('maintained')">Maintained</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/chart.js"></script>
+    <script>
+        // Global chart variables
+        let motorChart, powerChart, tempChart, vibrationChart, waveformChart, reliabilityChart;
+
+        // Initialize all charts when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+        });
+
+        function initializeCharts() {
+            // Chart 1: Motor Performance Curve
+            const motorCtx = document.getElementById('motorChart').getContext('2d');
+            motorChart = new Chart(motorCtx, {
+                type: 'line',
+                data: {
+                    labels: ['0', '500', '1000', '1500', '2000', '2500', '3000'],
+                    datasets: [{
+                        label: 'Torque (Nm)',
+                        data: [120, 115, 110, 105, 100, 95, 90],
+                        borderColor: '#FFD700',
+                        backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Efficiency (%)',
+                        data: [0, 60, 85, 92, 88, 82, 75],
+                        borderColor: '#00FF00',
+                        backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Speed (RPM)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Torque (Nm)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Efficiency (%)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Power Consumption
+            const powerCtx = document.getElementById('powerChart').getContext('2d');
+            powerChart = new Chart(powerCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                    datasets: [{
+                        label: 'Power (kW)',
+                        data: [2.1, 1.8, 3.2, 4.5, 4.8, 3.9, 2.3],
+                        borderColor: '#FF6347',
+                        backgroundColor: 'rgba(255, 99, 71, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Power (kW)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    }
+                }
+            });
+
+            // Chart 3: Temperature vs Efficiency
+            const tempCtx = document.getElementById('tempChart').getContext('2d');
+            tempChart = new Chart(tempCtx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Temperature vs Efficiency',
+                        data: [
+                            {x: 20, y: 95}, {x: 30, y: 92}, {x: 40, y: 88},
+                            {x: 50, y: 85}, {x: 60, y: 80}, {x: 70, y: 75},
+                            {x: 80, y: 68}, {x: 90, y: 60}, {x: 100, y: 50}
+                        ],
+                        backgroundColor: '#FFA500',
+                        borderColor: '#FFD700'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Temperature (°C)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Efficiency (%)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    }
+                }
+            });
+
+            // Chart 4: Vibration Analysis
+            const vibrationCtx = document.getElementById('vibrationChart').getContext('2d');
+            vibrationChart = new Chart(vibrationCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['10Hz', '25Hz', '50Hz', '100Hz', '200Hz', '500Hz', '1kHz'],
+                    datasets: [{
+                        label: 'Amplitude (mm/s)',
+                        data: [0.1, 0.3, 0.8, 1.2, 0.6, 0.2, 0.1],
+                        backgroundColor: [
+                            '#00FF00', '#00FF00', '#FFFF00', '#FFA500',
+                            '#FF6347', '#FF0000', '#FF0000'
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Frequency',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Amplitude (mm/s)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    }
+                }
+            });
+
+            // Chart 5: AC Waveform
+            const waveformCtx = document.getElementById('waveformChart').getContext('2d');
+            const timePoints = [];
+            const voltagePoints = [];
+            const currentPoints = [];
+            
+            for (let i = 0; i <= 100; i++) {
+                const t = i * 0.0628; // 2π/100
+                timePoints.push(t.toFixed(2));
+                voltagePoints.push(230 * Math.sin(t));
+                currentPoints.push(10 * Math.sin(t - 0.3)); // Phase shift
+            }
+
+            waveformChart = new Chart(waveformCtx, {
+                type: 'line',
+                data: {
+                    labels: timePoints,
+                    datasets: [{
+                        label: 'Voltage (V)',
+                        data: voltagePoints,
+                        borderColor: '#FFD700',
+                        backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                        tension: 0.1
+                    }, {
+                        label: 'Current (A)',
+                        data: currentPoints,
+                        borderColor: '#00FF00',
+                        backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time (ms)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Amplitude',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    }
+                }
+            });
+
+            // Chart 6: System Reliability
+            const reliabilityCtx = document.getElementById('reliabilityChart').getContext('2d');
+            reliabilityChart = new Chart(reliabilityCtx, {
+                type: 'line',
+                data: {
+                    labels: ['0', '1000', '2000', '3000', '4000', '5000', '6000'],
+                    datasets: [{
+                        label: 'Reliability (%)',
+                        data: [100, 98, 95, 90, 85, 80, 75],
+                        borderColor: '#00FFFF',
+                        backgroundColor: 'rgba(0, 255, 255, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Operating Hours',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Reliability (%)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update functions for interactive controls
+        function updateMotorData(loadType) {
+            updateButtonStates('motor', loadType);
+            
+            let torqueData, efficiencyData;
+            switch(loadType) {
+                case 'high':
+                    torqueData = [140, 135, 130, 125, 120, 115, 110];
+                    efficiencyData = [0, 55, 80, 88, 85, 78, 70];
+                    break;
+                case 'low':
+                    torqueData = [100, 95, 90, 85, 80, 75, 70];
+                    efficiencyData = [0, 65, 90, 95, 92, 88, 82];
+                    break;
+                default: // normal
+                    torqueData = [120, 115, 110, 105, 100, 95, 90];
+                    efficiencyData = [0, 60, 85, 92, 88, 82, 75];
+            }
+            
+            motorChart.data.datasets[0].data = torqueData;
+            motorChart.data.datasets[1].data = efficiencyData;
+            motorChart.update();
+        }
+
+        function updatePowerData(timeframe) {
+            updateButtonStates('power', timeframe);
+            
+            let labels, data;
+            switch(timeframe) {
+                case 'weekly':
+                    labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                    data = [3.2, 3.5, 3.8, 4.1, 4.3, 3.9, 3.0];
+                    break;
+                case 'monthly':
+                    labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+                    data = [3.5, 3.8, 4.2, 3.9];
+                    break;
+                default: // daily
+                    labels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'];
+                    data = [2.1, 1.8, 3.2, 4.5, 4.8, 3.9, 2.3];
+            }
+            
+            powerChart.data.labels = labels;
+            powerChart.data.datasets[0].data = data;
+            powerChart.update();
+        }
+
+        function updateTempData(component) {
+            updateButtonStates('temp', component);
+            
+            let data;
+            switch(component) {
+                case 'transformer':
+                    data = [
+                        {x: 25, y: 98}, {x: 35, y: 96}, {x: 45, y: 94},
+                        {x: 55, y: 91}, {x: 65, y: 88}, {x: 75, y: 84},
+                        {x: 85, y: 78}, {x: 95, y: 70}, {x: 105, y: 60}
+                    ];
+                    break;
+                case 'electronics':
+                    data = [
+                        {x: 30, y: 90}, {x: 40, y: 85}, {x: 50, y: 80},
+                        {x: 60, y: 75}, {x: 70, y: 68}, {x: 80, y: 60},
+                        {x: 90, y: 50}, {x: 100, y: 40}, {x: 110, y: 30}
+                    ];
+                    break;
+                default: // motor
+                    data = [
+                        {x: 20, y: 95}, {x: 30, y: 92}, {x: 40, y: 88},
+                        {x: 50, y: 85}, {x: 60, y: 80}, {x: 70, y: 75},
+                        {x: 80, y: 68}, {x: 90, y: 60}, {x: 100, y: 50}
+                    ];
+            }
+            
+            tempChart.data.datasets[0].data = data;
+            tempChart.update();
+        }
+
+        function updateVibrationData(condition) {
+            updateButtonStates('vibration', condition);
+            
+            let data, colors;
+            switch(condition) {
+                case 'fault':
+                    data = [0.2, 0.5, 1.5, 2.8, 1.8, 0.8, 0.3];
+                    colors = ['#00FF00', '#FFFF00', '#FFA500', '#FF0000', '#FF0000', '#FF6347', '#FFA500'];
+                    break;
+                case 'maintenance':
+                    data = [0.05, 0.1, 0.3, 0.5, 0.2, 0.1, 0.05];
+                    colors = ['#00FF00', '#00FF00', '#00FF00', '#FFFF00', '#00FF00', '#00FF00', '#00FF00'];
+                    break;
+                default: // normal
+                    data = [0.1, 0.3, 0.8, 1.2, 0.6, 0.2, 0.1];
+                    colors = ['#00FF00', '#00FF00', '#FFFF00', '#FFA500', '#FF6347', '#FF0000', '#FF0000'];
+            }
+            
+            vibrationChart.data.datasets[0].data = data;
+            vibrationChart.data.datasets[0].backgroundColor = colors;
+            vibrationChart.update();
+        }
+
+        function updateWaveformData(waveType) {
+            updateButtonStates('waveform', waveType);
+            
+            const timePoints = [];
+            const voltagePoints = [];
+            const currentPoints = [];
+            
+            for (let i = 0; i <= 100; i++) {
+                const t = i * 0.0628;
+                timePoints.push(t.toFixed(2));
+                
+                let voltage, current;
+                switch(waveType) {
+                    case 'square':
+                        voltage = 230 * Math.sign(Math.sin(t));
+                        current = 10 * Math.sign(Math.sin(t - 0.3));
+                        break;
+                    case 'distorted':
+                        voltage = 230 * Math.sin(t) + 50 * Math.sin(3*t);
+                        current = 10 * Math.sin(t - 0.3) + 2 * Math.sin(3*t - 0.3);
+                        break;
+                    default: // sine
+                        voltage = 230 * Math.sin(t);
+                        current = 10 * Math.sin(t - 0.3);
+                }
+                
+                voltagePoints.push(voltage);
+                currentPoints.push(current);
+            }
+            
+            waveformChart.data.labels = timePoints;
+            waveformChart.data.datasets[0].data = voltagePoints;
+            waveformChart.data.datasets[1].data = currentPoints;
+            waveformChart.update();
+        }
+
+        function updateReliabilityData(systemType) {
+            updateButtonStates('reliability', systemType);
+            
+            let data;
+            switch(systemType) {
+                case 'aged':
+                    data = [100, 95, 88, 78, 65, 50, 35];
+                    break;
+                case 'maintained':
+                    data = [100, 99, 97, 94, 90, 85, 80];
+                    break;
+                default: // new
+                    data = [100, 98, 95, 90, 85, 80, 75];
+            }
+            
+            reliabilityChart.data.datasets[0].data = data;
+            reliabilityChart.update();
+        }
+
+        function updateButtonStates(chartType, activeValue) {
+            // Remove active class from all buttons in the specific chart
+            const chartCard = event.target.closest('.graph-card');
+            const buttons = chartCard.querySelectorAll('.control-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

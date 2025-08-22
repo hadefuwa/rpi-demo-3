@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - RPI Showcase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #0a0a0a 50%, #1e1e1e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #444;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            background: linear-gradient(45deg, #00FF00, #32CD32, #228B22);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #ccc;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .progress-section {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #00FF00;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #333;
+            border: 2px solid #555;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00FF00, #32CD32, #228B22);
+            border-radius: 13px;
+            transition: width 1s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #00FF00;
+            margin: 10px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #333 0%, #222 100%);
+            border: 1px solid #555;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00FF00;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #ccc;
+            margin-top: 5px;
+        }
+
+        .achievement-section {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            grid-column: 1 / -1;
+        }
+
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .achievement-card {
+            background: linear-gradient(135deg, #333 0%, #222 100%);
+            border: 2px solid #555;
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+        }
+
+        .achievement-card.completed {
+            border-color: #00FF00;
+            background: linear-gradient(135deg, #1a3a1a 0%, #0a2a0a 100%);
+        }
+
+        .achievement-card.completed::before {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #00FF00;
+            color: #000;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .achievement-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .achievement-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .achievement-desc {
+            font-size: 0.9em;
+            color: #ccc;
+            line-height: 1.4;
+        }
+
+        .curriculum-section {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+        }
+
+        .module-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .module-item {
+            background: linear-gradient(135deg, #333 0%, #222 100%);
+            border: 1px solid #555;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .module-item:hover {
+            border-color: #00FF00;
+            box-shadow: 0 4px 8px rgba(0,255,0,0.2);
+        }
+
+        .module-item.completed {
+            border-color: #00FF00;
+            background: linear-gradient(135deg, #1a3a1a 0%, #0a2a0a 100%);
+        }
+
+        .module-info {
+            flex: 1;
+        }
+
+        .module-title {
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .module-desc {
+            font-size: 0.9em;
+            color: #ccc;
+        }
+
+        .module-status {
+            font-size: 0.9em;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .status-completed {
+            background: #00FF00;
+            color: #000;
+        }
+
+        .status-in-progress {
+            background: #FFA500;
+            color: #000;
+        }
+
+        .status-not-started {
+            background: #666;
+            color: #fff;
+        }
+
+        .home-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #00FF00, #32CD32);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .home-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .on-track-status {
+            background: linear-gradient(135deg, #1a3a1a 0%, #0a2a0a 100%);
+            border: 2px solid #00FF00;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,255,0,0.2);
+        }
+
+        .on-track-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #00FF00;
+            margin-bottom: 10px;
+        }
+
+        .on-track-desc {
+            color: #ccc;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .achievement-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="home-button">← Home</a>
+    
+    <div class="header">
+        <h1>Student Dashboard</h1>
+        <p>Track your progress through the engineering curriculum</p>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Progress Overview Section -->
+        <div class="progress-section">
+            <h2 class="section-title">Overall Progress</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="overallProgress" style="width: 0%"></div>
+            </div>
+            <div class="progress-text" id="progressText">0% Complete</div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="worksheetsCompleted">0</div>
+                    <div class="stat-label">Worksheets Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalWorksheets">12</div>
+                    <div class="stat-label">Total Worksheets</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="modulesCompleted">0</div>
+                    <div class="stat-label">Modules Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="currentGrade">A</div>
+                    <div class="stat-label">Current Grade</div>
+                </div>
+            </div>
+
+            <div class="on-track-status">
+                <div class="on-track-title" id="trackStatus">On Track to Achieve: Distinction</div>
+                <div class="on-track-desc" id="trackDescription">
+                    Excellent progress! You're maintaining high standards and completing work ahead of schedule. 
+                    Keep up the great work to achieve distinction level.
+                </div>
+            </div>
+        </div>
+
+        <!-- Curriculum Section -->
+        <div class="curriculum-section">
+            <h2 class="section-title">Curriculum Modules</h2>
+            <ul class="module-list" id="moduleList">
+                <!-- Modules will be populated by JavaScript -->
+            </ul>
+        </div>
+
+        <!-- Achievements Section -->
+        <div class="achievement-section">
+            <h2 class="section-title">Achievements & Badges</h2>
+            <div class="achievement-grid" id="achievementGrid">
+                <!-- Achievements will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample student data - in a real app, this would come from a database
+        const studentData = {
+            name: "Alex Johnson",
+            overallProgress: 78,
+            worksheetsCompleted: 9,
+            totalWorksheets: 12,
+            modulesCompleted: 3,
+            currentGrade: "A",
+            trackStatus: "On Track to Achieve: Distinction",
+            trackDescription: "Excellent progress! You're maintaining high standards and completing work ahead of schedule. Keep up the great work to achieve distinction level.",
+            
+            modules: [
+                {
+                    id: 1,
+                    title: "Electrical Fundamentals",
+                    description: "Basic electrical concepts and circuit analysis",
+                    status: "completed",
+                    progress: 100
+                },
+                {
+                    id: 2,
+                    title: "Mechanical Systems",
+                    description: "Understanding mechanical principles and systems",
+                    status: "completed",
+                    progress: 100
+                },
+                {
+                    id: 3,
+                    title: "Control Systems",
+                    description: "Introduction to control theory and automation",
+                    status: "completed",
+                    progress: 100
+                },
+                {
+                    id: 4,
+                    title: "Digital Electronics",
+                    description: "Logic gates, circuits, and digital systems",
+                    status: "in-progress",
+                    progress: 75
+                },
+                {
+                    id: 5,
+                    title: "Power Systems",
+                    description: "Electrical power generation and distribution",
+                    status: "in-progress",
+                    progress: 45
+                },
+                {
+                    id: 6,
+                    title: "Robotics & Automation",
+                    description: "Advanced robotics and industrial automation",
+                    status: "not-started",
+                    progress: 0
+                }
+            ],
+            
+            achievements: [
+                {
+                    id: 1,
+                    title: "First Steps",
+                    description: "Complete your first worksheet",
+                    icon: "🎯",
+                    completed: true
+                },
+                {
+                    id: 2,
+                    title: "Quick Learner",
+                    description: "Complete 3 worksheets in one week",
+                    icon: "⚡",
+                    completed: true
+                },
+                {
+                    id: 3,
+                    title: "Module Master",
+                    description: "Complete your first full module",
+                    icon: "🏆",
+                    completed: true
+                },
+                {
+                    id: 4,
+                    title: "Consistent Performer",
+                    description: "Maintain A grade for 5 consecutive worksheets",
+                    icon: "📈",
+                    completed: true
+                },
+                {
+                    id: 5,
+                    title: "Halfway There",
+                    description: "Complete 50% of the curriculum",
+                    icon: "🎉",
+                    completed: true
+                },
+                {
+                    id: 6,
+                    title: "Perfect Score",
+                    description: "Achieve 100% on any module",
+                    icon: "💎",
+                    completed: false
+                },
+                {
+                    id: 7,
+                    title: "Speed Demon",
+                    description: "Complete a module in under 2 weeks",
+                    icon: "🚀",
+                    completed: false
+                },
+                {
+                    id: 8,
+                    title: "Curriculum Champion",
+                    description: "Complete the entire curriculum",
+                    icon: "👑",
+                    completed: false
+                }
+            ]
+        };
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+        });
+
+        function initializeDashboard() {
+            // Update progress bar with animation
+            const progressBar = document.getElementById('overallProgress');
+            const progressText = document.getElementById('progressText');
+            
+            setTimeout(() => {
+                progressBar.style.width = studentData.overallProgress + '%';
+                progressText.textContent = studentData.overallProgress + '% Complete';
+            }, 500);
+
+            // Update statistics
+            document.getElementById('worksheetsCompleted').textContent = studentData.worksheetsCompleted;
+            document.getElementById('totalWorksheets').textContent = studentData.totalWorksheets;
+            document.getElementById('modulesCompleted').textContent = studentData.modulesCompleted;
+            document.getElementById('currentGrade').textContent = studentData.currentGrade;
+
+            // Update track status
+            document.getElementById('trackStatus').textContent = studentData.trackStatus;
+            document.getElementById('trackDescription').textContent = studentData.trackDescription;
+
+            // Populate modules
+            populateModules();
+
+            // Populate achievements
+            populateAchievements();
+        }
+
+        function populateModules() {
+            const moduleList = document.getElementById('moduleList');
+            moduleList.innerHTML = '';
+
+            studentData.modules.forEach(module => {
+                const moduleItem = document.createElement('li');
+                moduleItem.className = `module-item ${module.status}`;
+                
+                const statusClass = module.status === 'completed' ? 'status-completed' : 
+                                  module.status === 'in-progress' ? 'status-in-progress' : 'status-not-started';
+                
+                const statusText = module.status === 'completed' ? 'Completed' : 
+                                 module.status === 'in-progress' ? 'In Progress' : 'Not Started';
+
+                moduleItem.innerHTML = `
+                    <div class="module-info">
+                        <div class="module-title">${module.title}</div>
+                        <div class="module-desc">${module.description}</div>
+                    </div>
+                    <div class="module-status ${statusClass}">${statusText}</div>
+                `;
+
+                moduleList.appendChild(moduleItem);
+            });
+        }
+
+        function populateAchievements() {
+            const achievementGrid = document.getElementById('achievementGrid');
+            achievementGrid.innerHTML = '';
+
+            studentData.achievements.forEach(achievement => {
+                const achievementCard = document.createElement('div');
+                achievementCard.className = `achievement-card ${achievement.completed ? 'completed' : ''}`;
+                
+                achievementCard.innerHTML = `
+                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-title">${achievement.title}</div>
+                    <div class="achievement-desc">${achievement.description}</div>
+                `;
+
+                achievementGrid.appendChild(achievementCard);
+            });
+        }
+
+        // Simulate real-time updates (for demo purposes)
+        function simulateProgress() {
+            // This function could be called periodically to update progress
+            // In a real application, this would fetch data from a server
+            console.log('Progress updated');
+        }
+
+        // Update progress every 30 seconds (demo only)
+        setInterval(simulateProgress, 30000);
+    </script>
+</body>
+</html>

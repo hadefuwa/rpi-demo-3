@@ -8,6 +8,11 @@ git pull
 git add .
 git commit -m ".."
 git push origin main
+
+git pull origin main
+git add .
+git commit -m "Updated GLB viewer and other changes"
+git push origin main
 ```
 ## sudo systemctl start rpidemo.service
 

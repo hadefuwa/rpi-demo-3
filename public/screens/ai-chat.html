@@ -254,13 +254,14 @@
 
   /* Chat Container */
   #screen-ai-chat .chat-container {
-    flex: 1;
+    height: 300px; /* Fixed height instead of flex: 1 */
     background: rgba(255,255,255,0.05);
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.1);
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    margin-bottom: 8px; /* Add some space below */
   }
 
   #screen-ai-chat .messages {
@@ -270,6 +271,27 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    /* Ensure scrollbar is always visible */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.3) transparent;
+  }
+
+  /* Custom scrollbar for webkit browsers */
+  #screen-ai-chat .messages::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  #screen-ai-chat .messages::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  #screen-ai-chat .messages::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+  }
+
+  #screen-ai-chat .messages::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.5);
   }
 
   #screen-ai-chat .message {
@@ -454,6 +476,10 @@
 
   /* Responsive adjustments */
   @media (max-width: 480px) {
+    #screen-ai-chat .chat-container {
+      height: 250px; /* Smaller height on mobile */
+    }
+    
     #screen-ai-chat .key {
       min-width: 32px;
       height: 50px;
@@ -467,6 +493,13 @@
     
     #screen-ai-chat h2 {
       font-size: 20px;
+    }
+  }
+
+  /* For very small screens */
+  @media (max-height: 600px) {
+    #screen-ai-chat .chat-container {
+      height: 200px; /* Even smaller height for very small screens */
     }
   }
 
@@ -509,6 +542,11 @@
       setupNoZoom();
       checkConnection();
       loadChatHistory();
+      
+      // Scroll to bottom after everything is loaded
+      setTimeout(() => {
+        messages.scrollTop = messages.scrollHeight;
+      }, 200);
     }
     
     function setupDOM() {
@@ -548,6 +586,10 @@
       // Input focus to show keyboard
       messageInput.addEventListener('focus', () => {
         keyboardContainer.style.display = 'block';
+        // Scroll to bottom when keyboard appears
+        setTimeout(() => {
+          messages.scrollTop = messages.scrollHeight;
+        }, 100);
       });
       
       // Prevent default input behavior
