@@ -569,6 +569,9 @@
            // Center the model
            currentModel.position.sub(center);
            
+           // Move the model up slightly to ensure it's fully visible
+           currentModel.position.y += 0.5;
+           
            // Scale the model to fit in view
            const maxDim = Math.max(size.x, size.y, size.z);
            const scale = 2 / maxDim;
