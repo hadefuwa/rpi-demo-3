@@ -46,8 +46,8 @@
         // Camera position - start away from the table so we can see it
         camera.position.set(0, 1.6, 3); // Standing height, moved back to see table
 
-        // Create a simple room (20x20 units - doubled in size)
-        const roomSize = 20;
+        // Create a simple room (10x10 units)
+        const roomSize = 10;
         const wallHeight = 4;
         
         // Floor
@@ -89,87 +89,35 @@
         // Add a simple table - make it bright red and bigger so we can see it
         const tableMaterial = new THREE.MeshBasicMaterial({ color: 0xFF0000 }); // Bright red
 
-        // Table top - make it much bigger, moved back against the wall
+        // Table top - make it much bigger
         const tableTopGeometry = new THREE.BoxGeometry(3, 0.2, 2);
         const tableTop = new THREE.Mesh(tableTopGeometry, tableMaterial);
-        tableTop.position.set(0, 1, -8); // Moved back against the north wall
+        tableTop.position.set(0, 1, 0); // Center of room, table height
         scene.add(tableTop);
         console.log('Table added at position:', tableTop.position);
 
-        // Table legs - make them thicker, adjusted for new position
+        // Table legs - make them thicker
         const legGeometry = new THREE.BoxGeometry(0.2, 1, 0.2);
         
         // Front left leg
         const leg1 = new THREE.Mesh(legGeometry, tableMaterial);
-        leg1.position.set(-1.4, 0.5, -8.9);
+        leg1.position.set(-1.4, 0.5, -0.9);
         scene.add(leg1);
 
         // Front right leg
         const leg2 = new THREE.Mesh(legGeometry, tableMaterial);
-        leg2.position.set(1.4, 0.5, -8.9);
+        leg2.position.set(1.4, 0.5, -0.9);
         scene.add(leg2);
 
         // Back left leg
         const leg3 = new THREE.Mesh(legGeometry, tableMaterial);
-        leg3.position.set(-1.4, 0.5, -7.1);
+        leg3.position.set(-1.4, 0.5, 0.9);
         scene.add(leg3);
 
         // Back right leg
         const leg4 = new THREE.Mesh(legGeometry, tableMaterial);
-        leg4.position.set(1.4, 0.5, -7.1);
+        leg4.position.set(1.4, 0.5, 0.9);
         scene.add(leg4);
-
-        // Left table (blue) - rotated 90 degrees, moved further left
-        const leftTableMaterial = new THREE.MeshBasicMaterial({ color: 0x0000FF }); // Blue
-        
-        // Left table top - rotated 90 degrees
-        const leftTableTop = new THREE.Mesh(tableTopGeometry, leftTableMaterial);
-        leftTableTop.position.set(-6, 1, 0); // Moved further left
-        leftTableTop.rotation.y = Math.PI / 2; // 90 degree rotation
-        scene.add(leftTableTop);
-        
-        // Left table legs - positions adjusted for rotation and new position
-        const leftLeg1 = new THREE.Mesh(legGeometry, leftTableMaterial);
-        leftLeg1.position.set(-6.9, 0.5, -1.4);
-        scene.add(leftLeg1);
-        
-        const leftLeg2 = new THREE.Mesh(legGeometry, leftTableMaterial);
-        leftLeg2.position.set(-6.9, 0.5, 1.4);
-        scene.add(leftLeg2);
-        
-        const leftLeg3 = new THREE.Mesh(legGeometry, leftTableMaterial);
-        leftLeg3.position.set(-5.1, 0.5, -1.4);
-        scene.add(leftLeg3);
-        
-        const leftLeg4 = new THREE.Mesh(legGeometry, leftTableMaterial);
-        leftLeg4.position.set(-5.1, 0.5, 1.4);
-        scene.add(leftLeg4);
-
-        // Right table (green) - rotated 90 degrees, moved further right
-        const rightTableMaterial = new THREE.MeshBasicMaterial({ color: 0x00FF00 }); // Green
-        
-        // Right table top - rotated 90 degrees
-        const rightTableTop = new THREE.Mesh(tableTopGeometry, rightTableMaterial);
-        rightTableTop.position.set(6, 1, 0); // Moved further right
-        rightTableTop.rotation.y = Math.PI / 2; // 90 degree rotation
-        scene.add(rightTableTop);
-        
-        // Right table legs - positions adjusted for rotation and new position
-        const rightLeg1 = new THREE.Mesh(legGeometry, rightTableMaterial);
-        rightLeg1.position.set(5.1, 0.5, -1.4);
-        scene.add(rightLeg1);
-        
-        const rightLeg2 = new THREE.Mesh(legGeometry, rightTableMaterial);
-        rightLeg2.position.set(5.1, 0.5, 1.4);
-        scene.add(rightLeg2);
-        
-        const rightLeg3 = new THREE.Mesh(legGeometry, rightTableMaterial);
-        rightLeg3.position.set(6.9, 0.5, -1.4);
-        scene.add(rightLeg3);
-        
-        const rightLeg4 = new THREE.Mesh(legGeometry, rightTableMaterial);
-        rightLeg4.position.set(6.9, 0.5, 1.4);
-        scene.add(rightLeg4);
 
         // Simple controls
         const keys = {};

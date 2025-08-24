@@ -4,9 +4,9 @@
 ```bash
 
 cd ~/rpi-demo-3
-git pull
 git add .
-git commit -m ".."
+git commit -m "fdgfdg"
+git commit -a "fdgfdg"
 git push origin main
 
 git pull origin main
@@ -26,6 +26,9 @@ npm install
 chmod +x scripts/*.sh
 npm run kiosk
 ```
+
+cd ~/rpi-demo-3
+git pull
 
 ## Troubleshooting Kiosk Mode
 If you get "localhost:3000 can't be found" error:

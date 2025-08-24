@@ -952,6 +952,36 @@
     #screen-info .real-time-grid { grid-template-columns: 1fr; }
     #screen-info .trend-stats { grid-template-columns: 1fr; }
   }
+
+  /* Hide mouse cursor on small touchscreen devices (5-inch screens) */
+  @media (max-width: 800px) and (max-height: 600px) {
+    #screen-info {
+      cursor: none;
+    }
+    #screen-info * {
+      cursor: none !important;
+    }
+  }
+
+  /* Hide cursor on touch-only devices */
+  @media (hover: none) and (pointer: coarse) {
+    #screen-info {
+      cursor: none;
+    }
+    #screen-info * {
+      cursor: none !important;
+    }
+  }
+
+  /* Keep cursor visible on desktop devices */
+  @media (hover: hover) and (pointer: fine) and (min-width: 1200px) {
+    #screen-info {
+      cursor: auto;
+    }
+    #screen-info * {
+      cursor: auto !important;
+    }
+  }
 </style>
 
 <script>

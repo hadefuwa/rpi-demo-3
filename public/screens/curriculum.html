@@ -49,12 +49,27 @@
 </section>
 
 <style>
+  /* CSS Reset to remove any browser default margins/padding/borders */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    overflow: hidden;
+  }
+
   /* Curriculum Quiz Styles - All scoped to #screen-curriculum */
   #screen-curriculum {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    width: 100%;
+    height: 100vh;
+    width: 100vw;
     max-height: 100vh;
     max-width: 100vw;
     overflow: hidden;
@@ -64,8 +79,19 @@
     color: #ecf0f1;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     padding: 0;
+    margin: 0;
     position: relative;
     box-sizing: border-box;
+    border: none;
+    outline: none;
+  }
+
+  /* Ensure no white borders from parent elements */
+  #screen-curriculum.screen {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    outline: none !important;
   }
   
   /* Hide cursor on touch devices and small screens (5-inch displays) */
@@ -74,6 +100,18 @@
     #screen-curriculum * {
       cursor: none !important;
     }
+  }
+
+  /* Remove any potential white borders from all elements */
+  #screen-curriculum * {
+    border: none;
+    outline: none;
+  }
+
+  /* Ensure header has no borders */
+  #screen-curriculum .header {
+    border: none;
+    outline: none;
   }
   
   /* Hide cursor on very small screens (likely 5-inch displays) */

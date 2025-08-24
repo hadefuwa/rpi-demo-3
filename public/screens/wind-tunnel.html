@@ -302,6 +302,37 @@
     box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
     background: var(--panel);
   }
+  
+  /* Fix dropdown text visibility */
+  select option {
+    background: #1a1a1a;
+    color: #ffffff;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  select option:hover {
+    background: #2a2a2a;
+    color: #ffffff;
+  }
+  
+  select option:checked {
+    background: #007aff;
+    color: #ffffff;
+  }
+  
+  /* Ensure dropdown is visible on all browsers */
+  select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 16px;
+    padding-right: 48px;
+  }
   /* Professional Gauges */
   .gauges{
     display: grid;
@@ -471,6 +502,36 @@
   
   .home-button:active {
     transform: translateY(0) scale(0.98);
+  }
+
+  /* Hide mouse cursor on small touchscreen devices (5-inch screens) */
+  @media (max-width: 800px) and (max-height: 600px) {
+    body {
+      cursor: none;
+    }
+    body * {
+      cursor: none !important;
+    }
+  }
+
+  /* Hide cursor on touch-only devices */
+  @media (hover: none) and (pointer: coarse) {
+    body {
+      cursor: none;
+    }
+    body * {
+      cursor: none !important;
+    }
+  }
+
+  /* Keep cursor visible on desktop devices */
+  @media (hover: hover) and (pointer: fine) and (min-width: 1200px) {
+    body {
+      cursor: auto;
+    }
+    body * {
+      cursor: auto !important;
+    }
   }
 </style>
 </head>

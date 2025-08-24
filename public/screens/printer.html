@@ -886,6 +886,49 @@
         min-height: 150px;
       }
     }
+
+    /* Hide mouse cursor on small touchscreen devices (5-inch screens) */
+    @media (max-width: 800px) and (max-height: 600px) {
+      #screen-printer * {
+        cursor: none !important;
+      }
+      
+      /* Keep cursor visible for interactive elements on larger displays */
+      @media (min-width: 1200px) {
+        #screen-printer * {
+          cursor: auto !important;
+        }
+        #screen-printer .btn,
+        #screen-printer .home-button,
+        #screen-printer .speed-knob,
+        #screen-printer input[type="range"] {
+          cursor: pointer !important;
+        }
+        #screen-printer .speed-knob:active {
+          cursor: grabbing !important;
+        }
+      }
+    }
+
+    /* Alternative approach: Hide cursor specifically on touch devices */
+    @media (hover: none) and (pointer: coarse) {
+      #screen-printer * {
+        cursor: none !important;
+      }
+    }
+
+    /* Ensure cursor is visible on desktop/large displays */
+    @media (hover: hover) and (pointer: fine) {
+      #screen-printer .btn,
+      #screen-printer .home-button,
+      #screen-printer .speed-knob,
+      #screen-printer input[type="range"] {
+        cursor: pointer !important;
+      }
+      #screen-printer .speed-knob:active {
+        cursor: grabbing !important;
+      }
+    }
   </style>
   
   <script>

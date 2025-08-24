@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard - RPI Showcase</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -30,11 +31,40 @@
         .header h1 {
             font-size: 2.5em;
             font-weight: bold;
+            font-family: 'Orbitron', 'Arial', sans-serif;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
             background: linear-gradient(45deg, #00FF00, #32CD32, #228B22);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            position: relative;
+            overflow: hidden;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        .header h1::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,255,0,0.3), transparent);
+            animation: titleShimmer 4s infinite;
+        }
+
+        @keyframes titleGlow {
+            0% {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 20px rgba(0,255,0,0.5);
+            }
+            100% {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 30px rgba(0,255,0,0.8), 0 0 40px rgba(0,255,0,0.6);
+            }
+        }
+
+        @keyframes titleShimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
 
         .header p {
@@ -349,6 +379,36 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Hide mouse cursor on small touchscreen devices (5-inch screens) */
+        @media (max-width: 800px) and (max-height: 600px) {
+            body {
+                cursor: none;
+            }
+            body * {
+                cursor: none !important;
+            }
+        }
+
+        /* Hide cursor on touch-only devices */
+        @media (hover: none) and (pointer: coarse) {
+            body {
+                cursor: none;
+            }
+            body * {
+                cursor: none !important;
+            }
+        }
+
+        /* Keep cursor visible on desktop devices */
+        @media (hover: hover) and (pointer: fine) and (min-width: 1200px) {
+            body {
+                cursor: auto;
+            }
+            body * {
+                cursor: auto !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -533,6 +593,7 @@
         // Initialize dashboard when page loads
         document.addEventListener('DOMContentLoaded', function() {
             initializeDashboard();
+            initializeTitleAnimation();
         });
 
         function initializeDashboard() {
@@ -615,6 +676,58 @@
 
         // Update progress every 30 seconds (demo only)
         setInterval(simulateProgress, 30000);
+
+        // Title animation functions
+        function initializeTitleAnimation() {
+            const title = document.querySelector('.header h1');
+            const titleText = title.textContent;
+            
+            // Clear the title
+            title.textContent = '';
+            
+            // Create animated text effect
+            titleText.split('').forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char === ' ' ? '\u00A0' : char; // Preserve spaces
+                span.style.opacity = '0';
+                span.style.animation = `fadeInChar 0.1s ease-in-out ${index * 0.1}s forwards`;
+                title.appendChild(span);
+            });
+
+            // Add hover effect
+            title.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.05)';
+                this.style.transition = 'transform 0.3s ease';
+            });
+
+            title.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+
+            // Add click effect
+            title.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        }
+
+        // Add CSS animation for character fade-in
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInChar {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px) rotateX(90deg);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) rotateX(0deg);
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

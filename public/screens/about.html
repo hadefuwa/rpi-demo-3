@@ -798,16 +798,21 @@
       gap: 10px;
     }
     
+    /* Keep images horizontal on 5-inch screens but adjust sizing */
     .images-container {
-      flex-direction: column;
-      gap: 15px;
-      padding: 0 10px;
+      flex-direction: row;
+      gap: 10px;
+      padding: 0 5px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      justify-content: center;
     }
     
     .image-card {
-      width: 100%;
-      max-width: 300px;
-      height: 200px;
+      width: 180px;
+      min-width: 180px;
+      height: 160px;
+      flex-shrink: 0;
     }
     
     .image-card:nth-child(1),
@@ -871,12 +876,14 @@
     }
     
     .images-container {
-      gap: 12px;
-      padding: 0 5px;
+      gap: 8px;
+      padding: 0 3px;
     }
 
     .image-card {
-      height: 180px;
+      width: 160px;
+      min-width: 160px;
+      height: 140px;
       border-radius: 15px;
     }
     
@@ -910,8 +917,15 @@
       padding: 60px 8px 5px;
     }
 
+    .images-container {
+      gap: 6px;
+      padding: 0 2px;
+    }
+
     .image-card {
-      height: 160px;
+      width: 140px;
+      min-width: 140px;
+      height: 120px;
     }
 
     .floating-orb {

@@ -1719,5 +1719,375 @@
             }
         });
     </script>
+
+    <!-- React Charts Section -->
+    <div class="graphs-container">
+        <!-- React-like Chart Component -->
+        <div class="graph-card">
+            <div class="tech-badge">React</div>
+            <h3 class="graph-title">React-like Chart Component</h3>
+            <p class="graph-description">A React-inspired chart component with state management, hooks-like functionality, and modern ES6+ features</p>
+            <div class="chart-container">
+                <canvas id="reactChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn active" onclick="updateChartType('line')">Line Chart</button>
+                <button class="control-btn" onclick="updateChartType('bar')">Bar Chart</button>
+                <button class="control-btn" onclick="updateChartType('scatter')">Scatter Plot</button>
+                <button class="control-btn" onclick="updateChartType('bubble')">Bubble Chart</button>
+            </div>
+        </div>
+
+        <!-- State Management Demo -->
+        <div class="graph-card">
+            <div class="tech-badge">State</div>
+            <h3 class="graph-title">State Management & Hooks</h3>
+            <p class="graph-description">Demonstrating React-like state management with custom hooks and component lifecycle</p>
+            <div class="chart-container">
+                <canvas id="stateChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn" onclick="addDataPoint()">Add Data</button>
+                <button class="control-btn" onclick="removeDataPoint()">Remove Data</button>
+                <button class="control-btn" onclick="resetData()">Reset</button>
+                <button class="control-btn" onclick="toggleAnimation()">Toggle Animation</button>
+            </div>
+        </div>
+
+        <!-- Component Composition -->
+        <div class="graph-card">
+            <div class="tech-badge">Compose</div>
+            <h3 class="graph-title">Component Composition</h3>
+            <p class="graph-description">Multiple chart components working together with shared state and event handling</p>
+            <div class="chart-container">
+                <canvas id="compositeChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn" onclick="updateTheme('dark')">Dark Theme</button>
+                <button class="control-btn" onclick="updateTheme('light')">Light Theme</button>
+                <button class="control-btn" onclick="updateTheme('colorful')">Colorful Theme</button>
+                <button class="control-btn" onclick="exportData()">Export Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // React-like Component System
+        class ChartComponent {
+            constructor(canvasId, options = {}) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.state = {
+                    data: options.data || [],
+                    type: options.type || 'line',
+                    theme: options.theme || 'dark',
+                    animation: options.animation || true
+                };
+                this.chart = null;
+                this.listeners = new Map();
+                this.init();
+            }
+
+            // State management
+            setState(newState) {
+                this.state = { ...this.state, ...newState };
+                this.update();
+                this.notifyListeners('stateChange', this.state);
+            }
+
+            getState() {
+                return { ...this.state };
+            }
+
+            // Event system
+            on(event, callback) {
+                if (!this.listeners.has(event)) {
+                    this.listeners.set(event, []);
+                }
+                this.listeners.get(event).push(callback);
+            }
+
+            notifyListeners(event, data) {
+                if (this.listeners.has(event)) {
+                    this.listeners.get(event).forEach(callback => callback(data));
+                }
+            }
+
+            // Chart initialization
+            init() {
+                this.createChart();
+                this.setupEventListeners();
+            }
+
+            createChart() {
+                const config = this.getChartConfig();
+                this.chart = new Chart(this.ctx, config);
+            }
+
+            getChartConfig() {
+                const baseConfig = {
+                    type: this.state.type,
+                    data: this.state.data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: this.state.animation ? 1000 : 0,
+                            easing: 'easeInOutQuart'
+                        },
+                        plugins: {
+                            legend: { labels: { color: this.getThemeColor() } }
+                        },
+                        scales: this.getScales()
+                    }
+                };
+
+                return baseConfig;
+            }
+
+            getThemeColor() {
+                const themes = {
+                    dark: '#fff',
+                    light: '#000',
+                    colorful: '#FFD700'
+                };
+                return themes[this.state.theme] || '#fff';
+            }
+
+            getScales() {
+                if (this.state.type === 'scatter' || this.state.type === 'bubble') {
+                    return {
+                        x: { ticks: { color: this.getThemeColor() } },
+                        y: { ticks: { color: this.getThemeColor() } }
+                    };
+                }
+                return {
+                    x: { ticks: { color: this.getThemeColor() } },
+                    y: { ticks: { color: this.getThemeColor() } }
+                };
+            }
+
+            setupEventListeners() {
+                // Simulate React-like event handling
+                this.canvas.addEventListener('click', (e) => {
+                    this.notifyListeners('chartClick', { event: e, chart: this });
+                });
+            }
+
+            update() {
+                if (this.chart) {
+                    this.chart.destroy();
+                }
+                this.createChart();
+            }
+
+            destroy() {
+                if (this.chart) {
+                    this.chart.destroy();
+                }
+            }
+        }
+
+        // Custom Hooks (React-like)
+        const useChartState = (initialState) => {
+            let state = { ...initialState };
+            const listeners = [];
+
+            const setState = (newState) => {
+                state = { ...state, ...newState };
+                listeners.forEach(listener => listener(state));
+            };
+
+            const getState = () => ({ ...state });
+
+            const subscribe = (listener) => {
+                listeners.push(listener);
+                return () => {
+                    const index = listeners.indexOf(listener);
+                    if (index > -1) {
+                        listeners.splice(index, 1);
+                    }
+                };
+            };
+
+            return { getState, setState, subscribe };
+        };
+
+        // Global chart instances
+        let reactChart, stateChart, compositeChart;
+        let globalState = useChartState({
+            dataPoints: 10,
+            animationEnabled: true,
+            currentTheme: 'dark'
+        });
+
+        // Initialize React charts when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeReactCharts();
+            setupGlobalState();
+        });
+
+        function initializeReactCharts() {
+            // Main React-like chart
+            reactChart = new ChartComponent('reactChart', {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'React Performance',
+                        data: [65, 59, 80, 81, 56, 55],
+                        borderColor: '#61DAFB',
+                        backgroundColor: 'rgba(97, 218, 251, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                }
+            });
+
+            // State management chart
+            stateChart = new ChartComponent('stateChart', {
+                type: 'bar',
+                data: {
+                    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                    datasets: [{
+                        label: 'Quarterly Data',
+                        data: [12, 19, 3, 5],
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+                    }]
+                }
+            });
+
+            // Composite chart
+            compositeChart = new ChartComponent('compositeChart', {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                    datasets: [{
+                        label: 'Component A',
+                        data: [10, 15, 12, 18, 20],
+                        borderColor: '#61DAFB',
+                        backgroundColor: 'rgba(97, 218, 251, 0.1)'
+                    }, {
+                        label: 'Component B',
+                        data: [8, 12, 10, 15, 18],
+                        borderColor: '#4ECDC4',
+                        backgroundColor: 'rgba(78, 205, 196, 0.1)'
+                    }]
+                }
+            });
+        }
+
+        function setupGlobalState() {
+            globalState.subscribe((newState) => {
+                // Update all charts when global state changes
+                if (reactChart) reactChart.setState({ theme: newState.currentTheme });
+                if (stateChart) reactChart.setState({ theme: newState.currentTheme });
+                if (compositeChart) reactChart.setState({ theme: newState.currentTheme });
+            });
+        }
+
+        // Chart type update function
+        function updateChartType(type) {
+            if (reactChart) {
+                reactChart.setState({ type });
+            }
+        }
+
+        // State management functions
+        function addDataPoint() {
+            if (stateChart) {
+                const currentData = stateChart.getState().data;
+                const newLabels = [...currentData.labels, `Q${currentData.labels.length + 1}`];
+                const newData = [...currentData.datasets[0].data, Math.floor(Math.random() * 20) + 1];
+                
+                stateChart.setState({
+                    data: {
+                        labels: newLabels,
+                        datasets: [{
+                            ...currentData.datasets[0],
+                            data: newData
+                        }]
+                    }
+                });
+            }
+        }
+
+        function removeDataPoint() {
+            if (stateChart) {
+                const currentData = stateChart.getState().data;
+                if (currentData.labels.length > 1) {
+                    const newLabels = currentData.labels.slice(0, -1);
+                    const newData = currentData.datasets[0].data.slice(0, -1);
+                    
+                    stateChart.setState({
+                        data: {
+                            labels: newLabels,
+                            datasets: [{
+                                ...currentData.datasets[0],
+                                data: newData
+                            }]
+                        }
+                    });
+                }
+            }
+        }
+
+        function resetData() {
+            if (stateChart) {
+                stateChart.setState({
+                    data: {
+                        labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                        datasets: [{
+                            label: 'Quarterly Data',
+                            data: [12, 19, 3, 5],
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+                        }]
+                    }
+                });
+            }
+        }
+
+        function toggleAnimation() {
+            const currentState = globalState.getState();
+            globalState.setState({ animationEnabled: !currentState.animationEnabled });
+            
+            if (reactChart) reactChart.setState({ animation: !currentState.animationEnabled });
+            if (stateChart) stateChart.setState({ animation: !currentState.animationEnabled });
+            if (compositeChart) reactChart.setState({ animation: !currentState.animationEnabled });
+        }
+
+        // Theme update function
+        function updateTheme(theme) {
+            globalState.setState({ currentTheme: theme });
+        }
+
+        // Export function
+        function exportData() {
+            const data = {
+                reactChart: reactChart ? reactChart.getState() : null,
+                stateChart: stateChart ? stateChart.getState() : null,
+                compositeChart: compositeChart ? compositeChart.getState() : null,
+                globalState: globalState.getState()
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'react-chart-data.json';
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // Window resize handler for React charts
+        window.addEventListener('resize', function() {
+            if (reactChart) reactChart.update();
+            if (stateChart) stateChart.update();
+            if (compositeChart) reactChart.update();
+        });
+    </script>
 </body>
 </html>
