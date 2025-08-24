@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Charts Demo - RPI Showcase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #444;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            background: linear-gradient(45deg, #FFD700, #FFA500, #FF6347);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .react-card {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 2px solid #444;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            transition: all 0.3s ease;
+        }
+
+        .react-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+            border-color: #61DAFB;
+        }
+
+        .card-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #61DAFB;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .card-description {
+            font-size: 1em;
+            color: #ccc;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #444, #666);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(135deg, #666, #888);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .control-btn.active {
+            background: linear-gradient(135deg, #61DAFB, #4ECDC4);
+            color: #000;
+        }
+
+        .home-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .home-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .react-logo {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            animation: spin 10s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .react-logo svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .demo-container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .react-card {
+                padding: 20px;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="home-button">← Home</a>
+    
+    <div class="header">
+        <h1>React Charts Demo</h1>
+        <p>Modern React-like Chart Components for Raspberry Pi</p>
+    </div>
+
+    <div class="demo-container">
+        <!-- React-like Chart Component -->
+        <div class="react-card">
+            <div class="react-logo">
+                <svg viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#61DAFB" stroke-width="2"/>
+                    <circle cx="50" cy="50" r="15" fill="#61DAFB"/>
+                    <ellipse cx="50" cy="50" rx="35" ry="15" fill="none" stroke="#61DAFB" stroke-width="2" transform="rotate(0)"/>
+                    <ellipse cx="50" cy="50" rx="35" ry="15" fill="none" stroke="#61DAFB" stroke-width="2" transform="rotate(60)"/>
+                    <ellipse cx="50" cy="50" rx="35" ry="15" fill="none" stroke="#61DAFB" stroke-width="2" transform="rotate(120)"/>
+                </svg>
+            </div>
+            <h3 class="card-title">React-like Chart Component</h3>
+            <p class="card-description">A React-inspired chart component with state management, hooks-like functionality, and modern ES6+ features</p>
+            <div class="chart-container">
+                <canvas id="reactChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn active" onclick="updateChartType('line')">Line Chart</button>
+                <button class="control-btn" onclick="updateChartType('bar')">Bar Chart</button>
+                <button class="control-btn" onclick="updateChartType('scatter')">Scatter Plot</button>
+                <button class="control-btn" onclick="updateChartType('bubble')">Bubble Chart</button>
+            </div>
+        </div>
+
+        <!-- State Management Demo -->
+        <div class="react-card">
+            <h3 class="card-title">State Management & Hooks</h3>
+            <p class="card-description">Demonstrating React-like state management with custom hooks and component lifecycle</p>
+            <div class="chart-container">
+                <canvas id="stateChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn" onclick="addDataPoint()">Add Data</button>
+                <button class="control-btn" onclick="removeDataPoint()">Remove Data</button>
+                <button class="control-btn" onclick="resetData()">Reset</button>
+                <button class="control-btn" onclick="toggleAnimation()">Toggle Animation</button>
+            </div>
+        </div>
+
+        <!-- Component Composition -->
+        <div class="react-card">
+            <h3 class="card-title">Component Composition</h3>
+            <p class="card-description">Multiple chart components working together with shared state and event handling</p>
+            <div class="chart-container">
+                <canvas id="compositeChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn" onclick="updateTheme('dark')">Dark Theme</button>
+                <button class="control-btn" onclick="updateTheme('light')">Light Theme</button>
+                <button class="control-btn" onclick="updateTheme('colorful')">Colorful Theme</button>
+                <button class="control-btn" onclick="exportData()">Export Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // React-like Component System
+        class ChartComponent {
+            constructor(canvasId, options = {}) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.state = {
+                    data: options.data || [],
+                    type: options.type || 'line',
+                    theme: options.theme || 'dark',
+                    animation: options.animation || true
+                };
+                this.chart = null;
+                this.listeners = new Map();
+                this.init();
+            }
+
+            // State management
+            setState(newState) {
+                this.state = { ...this.state, ...newState };
+                this.update();
+                this.notifyListeners('stateChange', this.state);
+            }
+
+            getState() {
+                return { ...this.state };
+            }
+
+            // Event system
+            on(event, callback) {
+                if (!this.listeners.has(event)) {
+                    this.listeners.set(event, []);
+                }
+                this.listeners.get(event).push(callback);
+            }
+
+            notifyListeners(event, data) {
+                if (this.listeners.has(event)) {
+                    this.listeners.get(event).forEach(callback => callback(data));
+                }
+            }
+
+            // Chart initialization
+            init() {
+                this.createChart();
+                this.setupEventListeners();
+            }
+
+            createChart() {
+                const config = this.getChartConfig();
+                this.chart = new Chart(this.ctx, config);
+            }
+
+            getChartConfig() {
+                const baseConfig = {
+                    type: this.state.type,
+                    data: this.state.data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: this.state.animation ? 1000 : 0,
+                            easing: 'easeInOutQuart'
+                        },
+                        plugins: {
+                            legend: { labels: { color: this.getThemeColor() } }
+                        },
+                        scales: this.getScales()
+                    }
+                };
+
+                return baseConfig;
+            }
+
+            getThemeColor() {
+                const themes = {
+                    dark: '#fff',
+                    light: '#000',
+                    colorful: '#FFD700'
+                };
+                return themes[this.state.theme] || '#fff';
+            }
+
+            getScales() {
+                if (this.state.type === 'scatter' || this.state.type === 'bubble') {
+                    return {
+                        x: { ticks: { color: this.getThemeColor() } },
+                        y: { ticks: { color: this.getThemeColor() } }
+                    };
+                }
+                return {
+                    x: { ticks: { color: this.getThemeColor() } },
+                    y: { ticks: { color: this.getThemeColor() } }
+                };
+            }
+
+            setupEventListeners() {
+                // Simulate React-like event handling
+                this.canvas.addEventListener('click', (e) => {
+                    this.notifyListeners('chartClick', { event: e, chart: this });
+                });
+            }
+
+            update() {
+                if (this.chart) {
+                    this.chart.destroy();
+                }
+                this.createChart();
+            }
+
+            destroy() {
+                if (this.chart) {
+                    this.chart.destroy();
+                }
+            }
+        }
+
+        // Custom Hooks (React-like)
+        const useChartState = (initialState) => {
+            let state = { ...initialState };
+            const listeners = [];
+
+            const setState = (newState) => {
+                state = { ...state, ...newState };
+                listeners.forEach(listener => listener(state));
+            };
+
+            const getState = () => ({ ...state });
+
+            const subscribe = (listener) => {
+                listeners.push(listener);
+                return () => {
+                    const index = listeners.indexOf(listener);
+                    if (index > -1) {
+                        listeners.splice(index, 1);
+                    }
+                };
+            };
+
+            return { getState, setState, subscribe };
+        };
+
+        // Global chart instances
+        let reactChart, stateChart, compositeChart;
+        let globalState = useChartState({
+            dataPoints: 10,
+            animationEnabled: true,
+            currentTheme: 'dark'
+        });
+
+        // Initialize charts when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            setupGlobalState();
+        });
+
+        function initializeCharts() {
+            // Main React-like chart
+            reactChart = new ChartComponent('reactChart', {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'React Performance',
+                        data: [65, 59, 80, 81, 56, 55],
+                        borderColor: '#61DAFB',
+                        backgroundColor: 'rgba(97, 218, 251, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                }
+            });
+
+            // State management chart
+            stateChart = new ChartComponent('stateChart', {
+                type: 'bar',
+                data: {
+                    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                    datasets: [{
+                        label: 'Quarterly Data',
+                        data: [12, 19, 3, 5],
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+                    }]
+                }
+            });
+
+            // Composite chart
+            compositeChart = new ChartComponent('compositeChart', {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                    datasets: [{
+                        label: 'Component A',
+                        data: [10, 15, 12, 18, 20],
+                        borderColor: '#61DAFB',
+                        backgroundColor: 'rgba(97, 218, 251, 0.1)'
+                    }, {
+                        label: 'Component B',
+                        data: [8, 12, 10, 15, 18],
+                        borderColor: '#4ECDC4',
+                        backgroundColor: 'rgba(78, 205, 196, 0.1)'
+                    }]
+                }
+            });
+        }
+
+        function setupGlobalState() {
+            globalState.subscribe((newState) => {
+                // Update all charts when global state changes
+                if (reactChart) reactChart.setState({ theme: newState.currentTheme });
+                if (stateChart) stateChart.setState({ theme: newState.currentTheme });
+                if (compositeChart) compositeChart.setState({ theme: newState.currentTheme });
+            });
+        }
+
+        // Chart type update function
+        function updateChartType(type) {
+            if (reactChart) {
+                reactChart.setState({ type });
+            }
+        }
+
+        // State management functions
+        function addDataPoint() {
+            if (stateChart) {
+                const currentData = stateChart.getState().data;
+                const newLabels = [...currentData.labels, `Q${currentData.labels.length + 1}`];
+                const newData = [...currentData.datasets[0].data, Math.floor(Math.random() * 20) + 1];
+                
+                stateChart.setState({
+                    data: {
+                        labels: newLabels,
+                        datasets: [{
+                            ...currentData.datasets[0],
+                            data: newData
+                        }]
+                    }
+                });
+            }
+        }
+
+        function removeDataPoint() {
+            if (stateChart) {
+                const currentData = stateChart.getState().data;
+                if (currentData.labels.length > 1) {
+                    const newLabels = currentData.labels.slice(0, -1);
+                    const newData = currentData.datasets[0].data.slice(0, -1);
+                    
+                    stateChart.setState({
+                        data: {
+                            labels: newLabels,
+                            datasets: [{
+                                ...currentData.datasets[0],
+                                data: newData
+                            }]
+                        }
+                    });
+                }
+            }
+        }
+
+        function resetData() {
+            if (stateChart) {
+                stateChart.setState({
+                    data: {
+                        labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                        datasets: [{
+                            label: 'Quarterly Data',
+                            data: [12, 19, 3, 5],
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+                        }]
+                    }
+                });
+            }
+        }
+
+        function toggleAnimation() {
+            const currentState = globalState.getState();
+            globalState.setState({ animationEnabled: !currentState.animationEnabled });
+            
+            if (reactChart) reactChart.setState({ animation: !currentState.animationEnabled });
+            if (stateChart) stateChart.setState({ animation: !currentState.animationEnabled });
+            if (compositeChart) compositeChart.setState({ animation: !currentState.animationEnabled });
+        }
+
+        // Theme update function
+        function updateTheme(theme) {
+            globalState.setState({ currentTheme: theme });
+        }
+
+        // Export function
+        function exportData() {
+            const data = {
+                reactChart: reactChart ? reactChart.getState() : null,
+                stateChart: stateChart ? stateChart.getState() : null,
+                compositeChart: compositeChart ? compositeChart.getState() : null,
+                globalState: globalState.getState()
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'react-chart-data.json';
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // Window resize handler
+        window.addEventListener('resize', function() {
+            if (reactChart) reactChart.update();
+            if (stateChart) stateChart.update();
+            if (compositeChart) compositeChart.update();
+        });
+    </script>
+</body>
+</html>

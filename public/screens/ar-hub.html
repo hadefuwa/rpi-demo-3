@@ -1,0 +1,466 @@
+<section id="screen-ar-hub" class="screen">
+  <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo matrix-logo" />
+  <button id="btnHome" class="home-button">🏠</button>
+  <div class="panel">
+    <h2>AR Hub</h2>
+    <div class="ar-grid">
+      <a href="ar2.html" class="ar-card theme-blue">
+        <span class="ar-icon">🎥</span>
+        <span class="ar-title">AR2 - Video Overlay</span>
+        <span class="ar-desc">3D models over video background</span>
+      </a>
+      
+      <a href="ar3.html" class="ar-card theme-green">
+        <span class="ar-icon">🏗️</span>
+        <span class="ar-title">AR3 - Fixed Anchors</span>
+        <span class="ar-desc">3D models with fixed positions</span>
+      </a>
+      
+      <a href="ar4.html" class="ar-card theme-orange">
+        <span class="ar-icon">🎓</span>
+        <span class="ar-title">AR4 - 3D Classroom</span>
+        <span class="ar-desc">Complete classroom environment</span>
+      </a>
+      
+      <a href="ar5.html" class="ar-card theme-violet">
+        <span class="ar-icon">🔧</span>
+        <span class="ar-title">AR5 - Modular Builder</span>
+        <span class="ar-desc">Interactive classroom builder</span>
+      </a>
+    </div>
+    <div class="note">Tap any AR experience to explore!</div>
+  </div>
+</section>
+
+<style>
+  /* Reset and prevent white borders */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* AR Hub Specific Styles - All scoped to #screen-ar-hub */
+  #screen-ar-hub {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-family: 'Arial', sans-serif;
+    padding: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    margin: 0;
+    border: none;
+    outline: none;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  
+  /* Home button styles */
+  #screen-ar-hub .home-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 10px 15px;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 100;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #screen-ar-hub .home-button:hover {
+    background: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.5);
+    transform: scale(1.1);
+  }
+
+  /* Logo styles */
+  #screen-ar-hub .matrix-logo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    height: 60px;
+    width: auto;
+    z-index: 100;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+
+  /* Panel styles */
+  #screen-ar-hub .panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+    z-index: 10;
+  }
+
+  #screen-ar-hub h2 {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    font-weight: bold;
+    letter-spacing: 2px;
+  }
+
+  /* AR Grid styles */
+  #screen-ar-hub .ar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+
+  /* AR Card styles */
+  #screen-ar-hub .ar-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    text-decoration: none;
+    color: white;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  #screen-ar-hub .ar-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+  }
+
+  #screen-ar-hub .ar-card:hover::before {
+    left: 100%;
+  }
+
+  #screen-ar-hub .ar-card:hover {
+    transform: translateY(-10px) scale(1.05);
+    border-color: rgba(255,255,255,0.5);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+
+  /* AR Icon styles */
+  #screen-ar-hub .ar-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+
+  /* AR Title styles */
+  #screen-ar-hub .ar-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  /* AR Description styles */
+  #screen-ar-hub .ar-desc {
+    font-size: 1rem;
+    text-align: center;
+    opacity: 0.9;
+    line-height: 1.4;
+  }
+
+  /* Note styles */
+  #screen-ar-hub .note {
+    font-size: 1.2rem;
+    opacity: 0.8;
+    text-align: center;
+    font-style: italic;
+    margin-top: 1rem;
+  }
+
+  /* Theme-specific styles for AR cards */
+  #screen-ar-hub .theme-blue {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.1));
+  }
+
+  #screen-ar-hub .theme-blue:hover {
+    border-color: #60a5fa;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.2));
+  }
+
+  #screen-ar-hub .theme-green {
+    border-color: #10b981;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1));
+  }
+
+  #screen-ar-hub .theme-green:hover {
+    border-color: #34d399;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.2));
+  }
+
+  #screen-ar-hub .theme-orange {
+    border-color: #f59e0b;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.1));
+  }
+
+  #screen-ar-hub .theme-orange:hover {
+    border-color: #fbbf24;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.2));
+  }
+
+  #screen-ar-hub .theme-violet {
+    border-color: #8b5cf6;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(124, 58, 237, 0.1));
+  }
+
+  #screen-ar-hub .theme-violet:hover {
+    border-color: #a78bfa;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(124, 58, 237, 0.2));
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    #screen-ar-hub h2 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    #screen-ar-hub .ar-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      padding: 0 1rem;
+    }
+
+    #screen-ar-hub .ar-card {
+      padding: 1.5rem;
+    }
+
+    #screen-ar-hub .ar-icon {
+      font-size: 3rem;
+    }
+
+    #screen-ar-hub .ar-title {
+      font-size: 1.3rem;
+    }
+
+    #screen-ar-hub .ar-desc {
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    #screen-ar-hub .matrix-logo {
+      height: 40px;
+      top: 15px;
+      left: 15px;
+    }
+
+    #screen-ar-hub .home-button {
+      top: 10px;
+      right: 10px;
+      width: 35px;
+      height: 35px;
+      font-size: 16px;
+    }
+
+    #screen-ar-hub h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    #screen-ar-hub .panel {
+      padding: 15px;
+    }
+  }
+
+  /* Animation for cards on load */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  #screen-ar-hub .ar-card {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  #screen-ar-hub .ar-card:nth-child(1) { animation-delay: 0.1s; }
+  #screen-ar-hub .ar-card:nth-child(2) { animation-delay: 0.2s; }
+  #screen-ar-hub .ar-card:nth-child(3) { animation-delay: 0.3s; }
+  #screen-ar-hub .ar-card:nth-child(4) { animation-delay: 0.4s; }
+
+  /* Hover effects for interactive elements */
+  #screen-ar-hub .ar-card:active {
+    transform: translateY(-5px) scale(1.02);
+    transition: transform 0.1s ease;
+  }
+
+  /* Focus styles for accessibility */
+  #screen-ar-hub .ar-card:focus {
+    outline: 3px solid rgba(255,255,255,0.5);
+    outline-offset: 2px;
+  }
+
+  /* Loading state */
+  #screen-ar-hub .ar-card.loading {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  #screen-ar-hub .ar-card.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+
+<script>
+  // AR Hub functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('AR Hub initialized');
+    
+    // Home button functionality
+    const homeButton = document.getElementById('btnHome');
+    if (homeButton) {
+      homeButton.addEventListener('click', function() {
+        window.location.href = '../index.html';
+      });
+    }
+
+    // AR card click handling with loading state
+    const arCards = document.querySelectorAll('.ar-card');
+    arCards.forEach(card => {
+      card.addEventListener('click', function(e) {
+        // Add loading state
+        this.classList.add('loading');
+        
+        // Small delay to show loading state
+        setTimeout(() => {
+          // Navigate to the AR page
+          window.location.href = this.getAttribute('href');
+        }, 300);
+      });
+    });
+
+    // Add hover sound effect (optional)
+    arCards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        // You can add hover sound effects here
+        this.style.transform = 'translateY(-10px) scale(1.05)';
+      });
+      
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+      });
+    });
+
+    // Keyboard navigation support
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        window.location.href = '../index.html';
+      }
+    });
+
+    // Touch gesture support for mobile
+    let touchStartY = 0;
+    let touchEndY = 0;
+
+    document.addEventListener('touchstart', function(e) {
+      touchStartY = e.changedTouches[0].screenY;
+    });
+
+    document.addEventListener('touchend', function(e) {
+      touchEndY = e.changedTouches[0].screenY;
+      handleSwipe();
+    });
+
+    function handleSwipe() {
+      const swipeThreshold = 50;
+      const diff = touchStartY - touchEndY;
+      
+      if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0) {
+          // Swipe up - could be used for additional navigation
+          console.log('Swipe up detected');
+        } else {
+          // Swipe down - could be used for additional navigation
+          console.log('Swipe down detected');
+        }
+      }
+    }
+
+    // Performance optimization - reduce animations on low-end devices
+    if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) {
+      document.body.style.setProperty('--animation-duration', '0.3s');
+      arCards.forEach(card => {
+        card.style.animationDuration = '0.3s';
+      });
+    }
+
+    console.log('AR Hub activated');
+  });
+
+  // Cleanup when leaving the page
+  window.addEventListener('beforeunload', function() {
+    console.log('AR Hub deactivated');
+  });
+
+  // Handle page visibility changes
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      console.log('AR Hub hidden');
+    } else {
+      console.log('AR Hub visible');
+    }
+  });
+</script>

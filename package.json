@@ -45,6 +45,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/hadefuwa/rpi-5inch-showcase.git"
+  },
+  "dependencies": {
+    "rpi-5inch-showcase": "file:",
+    "three": "^0.179.1"
   }
 }
-

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Video AR Overlay – 3 Buttons, Fixed Video</title>
+  <style>
+    :root { --ui-bg:#0f1115; --ui-fg:#e6e6e6; --ui-muted:#8b8d93; --ui-accent:#6aa0ff; }
+    html, body { height: 100%; margin: 0; }
+    body { background:#000; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, sans-serif; }
+    .app { position: fixed; inset: 0; overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
+
+    .toolbar { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; padding:.6rem .8rem; background:rgba(15,17,21,.9); color:var(--ui-fg); backdrop-filter: blur(8px); border-bottom:1px solid rgba(255,255,255,.06); }
+    .toolbar .group { display:flex; gap:.5rem; align-items:center; }
+    .toolbar label { font-size:.9rem; color:var(--ui-muted); }
+    .toolbar button { appearance:none; border:none; cursor:pointer; padding:.5rem .7rem; border-radius:10px; font-weight:600; background:#1a1e27; color:var(--ui-fg); box-shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 6px 18px rgba(0,0,0,.45); }
+    .toolbar button:hover { background:#232938; }
+    .toolbar button.primary { background: linear-gradient(180deg, #2c73ff, #2454ff); }
+    .toolbar button.primary:hover { filter:brightness(1.08); }
+
+    .stage { position:relative; height:100%; width:100%; overflow:hidden; background:#000; }
+    #bgVideo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(1.05) contrast(1.02); background:#000; }
+    #three { position:absolute; inset:0; display:block; pointer-events:none; }
+    #overlay { position:absolute; inset:0; cursor:crosshair; touch-action:none; }
+
+    .hint { position:absolute; left:12px; bottom:12px; color:#d7d7d7; font-size:.9rem; padding:.5rem .6rem; background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.06); border-radius:8px; backdrop-filter: blur(6px); }
+    .chip { display:inline-flex; gap:.35rem; align-items:center; padding:.2rem .5rem; border-radius:999px; background:#19202c; color:#cfe0ff; font-size:.78rem; margin-right:.35rem; }
+
+    .models { display:flex; gap:.4rem; }
+    .timeline { display:flex; align-items:center; gap:.6rem; }
+    .timeline input[type="range"] { width: 220px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="toolbar">
+      <div class="group models">
+        <label>Models</label>
+        <button id="btnM1" class="primary">Model 1</button>
+        <button id="btnM2">Model 2</button>
+        <button id="btnM3">Model 3</button>
+      </div>
+      <div class="group timeline">
+        <button id="playPause">Pause</button>
+        <button id="muteBtn">Mute: On</button>
+        <button id="fitBtn">Fit: Cover</button>
+        <input id="seek" type="range" min="0" max="1000" value="0" step="1" />
+        <span id="timeLabel" style="font-variant-numeric: tabular-nums; color:var(--ui-muted)">00:00 / 00:00</span>
+      </div>
+      <div class="group" style="margin-left:auto">
+        <button id="parallax">Parallax: Off</button>
+      </div>
+    </div>
+
+    <div class="stage">
+      <video id="bgVideo" playsinline muted loop></video>
+      <canvas id="three"></canvas>
+      <div id="overlay" aria-label="Interaction layer"></div>
+      <div class="hint">
+        <span class="chip">Click/tap to place • drag to move</span>
+        <span class="chip">Wheel = scale • Shift+Wheel = zoom camera</span>
+        <span class="chip">R = rotate • Pause video to position</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/three/three.standalone.js"></script>
+  <script src="../js/three/GLTFLoader.js"></script>
+  <script>
+
+    // === Config: set your fixed assets here ===
+    // Using existing video file from assets
+    const VIDEO_SRC = '/assets/video.mp4';
+    // Your three GLBs served from /public
+    const PRESETS = ['/assets/model1.glb','/assets/model2.glb','/assets/model3.glb'];
+
+    // DOM
+    const videoEl = document.getElementById('bgVideo');
+    const playPauseBtn = document.getElementById('playPause');
+    const muteBtn = document.getElementById('muteBtn');
+    const fitBtn = document.getElementById('fitBtn');
+    const seek = document.getElementById('seek');
+    const timeLabel = document.getElementById('timeLabel');
+    const overlay = document.getElementById('overlay');
+    const parallaxBtn = document.getElementById('parallax');
+
+    const btnM1 = document.getElementById('btnM1');
+    const btnM2 = document.getElementById('btnM2');
+    const btnM3 = document.getElementById('btnM3');
+
+    // Init fixed video
+    videoEl.src = VIDEO_SRC;
+    videoEl.muted = true; // autoplay policy
+    videoEl.loop = true;
+    videoEl.play().catch(()=>{});
+
+    // Update timeline UI
+    function fmt(t){ t=Math.max(0,t|0); const m=(t/60)|0, s=(t%60)|0; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
+    function updateTime(){
+      const cur = videoEl.currentTime|0;
+      const dur = (videoEl.duration||0)|0;
+      timeLabel.textContent = `${fmt(cur)} / ${fmt(dur)}`;
+      if (videoEl.duration) seek.value = Math.round((videoEl.currentTime / videoEl.duration) * 1000);
+    }
+    videoEl.addEventListener('timeupdate', updateTime);
+    videoEl.addEventListener('loadedmetadata', updateTime);
+    seek.addEventListener('input', () => {
+      if (!videoEl.duration) return;
+      videoEl.currentTime = (seek.value/1000) * videoEl.duration;
+    });
+
+    playPauseBtn.onclick = async () => {
+      if (videoEl.paused) { await videoEl.play().catch(()=>{}); playPauseBtn.textContent = 'Pause'; }
+      else { videoEl.pause(); playPauseBtn.textContent = 'Play'; }
+    };
+    muteBtn.onclick = () => { videoEl.muted = !videoEl.muted; muteBtn.textContent = `Mute: ${videoEl.muted ? 'On' : 'Off'}`; };
+    fitBtn.onclick = () => {
+      const next = videoEl.style.objectFit === 'contain' ? 'cover' : 'contain';
+      videoEl.style.objectFit = next; fitBtn.textContent = `Fit: ${next[0].toUpperCase()+next.slice(1)}`;
+    };
+
+    // THREE setup
+    const canvas = document.getElementById('three');
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.shadowMap.enabled = true;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, 1, 0.01, 100);
+    camera.position.set(0, 1.2, 3.4);
+
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x334466, 1.0));
+    const dir = new THREE.DirectionalLight(0xffffff, 0.9); dir.position.set(2.5, 4.0, 3.0); dir.castShadow = true; scene.add(dir);
+
+    const shadowPlane = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.ShadowMaterial({ opacity: 0.28 }));
+    shadowPlane.rotation.x = -Math.PI / 2; shadowPlane.receiveShadow = true; scene.add(shadowPlane);
+
+    // Raycast plane (y=0 ground)
+    const placePlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const raycaster = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
+    function screenToWorldOnPlane(clientX, clientY, plane, outVec3) {
+      const rect = overlay.getBoundingClientRect();
+      ndc.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      ndc.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(ndc, camera);
+      return raycaster.ray.intersectPlane(plane, outVec3);
+    }
+
+    const loader = new GLTFLoader();
+    let active = null; // currently selected model (only one kept in scene)
+
+    async function loadExclusiveModel(url) {
+      // Remove previous
+      if (active) { scene.remove(active); active = null; }
+      const gltf = await loader.loadAsync(url);
+      const root = gltf.scene || gltf.scenes?.[0];
+      root.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
+      // Normalise size
+      const box = new THREE.Box3().setFromObject(root);
+      const size = box.getSize(new THREE.Vector3()).length() || 1;
+      const scale = 0.8 / size;
+      root.scale.setScalar(scale);
+      // Rest on ground at origin
+      box.setFromObject(root);
+      root.position.set(0, -box.min.y * scale, 0);
+      scene.add(root);
+      active = root;
+    }
+
+    // 3 buttons -> swap model
+    btnM1.onclick = () => { markActive(btnM1); loadExclusiveModel(PRESETS[0]); };
+    btnM2.onclick = () => { markActive(btnM2); loadExclusiveModel(PRESETS[1]); };
+    btnM3.onclick = () => { markActive(btnM3); loadExclusiveModel(PRESETS[2]); };
+
+    function markActive(btn){
+      for (const b of [btnM1, btnM2, btnM3]) b.classList.toggle('primary', b===btn);
+    }
+
+    // Interactions: place/drag/scale model, camera zoom with Shift+Wheel
+    const activePointers = new Map();
+    let startPinchDist = 0; let startScale = 1; let dragging = false; let grabOffset = new THREE.Vector3();
+
+    overlay.addEventListener('pointerdown', (e) => {
+      overlay.setPointerCapture(e.pointerId);
+      activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (!active) return; // need a model loaded first
+
+      if (activePointers.size === 2) {
+        const pts = [...activePointers.values()];
+        startPinchDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+        startScale = active.scale.x;
+      }
+
+      const hit = new THREE.Vector3();
+      if (screenToWorldOnPlane(e.clientX, e.clientY, placePlane, hit)) {
+        grabOffset.copy(active.position).sub(hit);
+        active.position.copy(hit.add(grabOffset));
+        dragging = true;
+      }
+    });
+
+    overlay.addEventListener('pointermove', (e) => {
+      if (activePointers.has(e.pointerId)) activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (!active) return;
+
+      if (activePointers.size === 2) {
+        const pts = [...activePointers.values()];
+        const d = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+        if (startPinchDist > 0) {
+          const s = THREE.MathUtils.clamp((d / startPinchDist) * startScale, 0.1, 8.0);
+          active.scale.setScalar(s);
+        }
+        return;
+      }
+
+      if (!dragging) return;
+      const hit = new THREE.Vector3();
+      if (screenToWorldOnPlane(e.clientX, e.clientY, placePlane, hit)) {
+        active.position.copy(hit.add(grabOffset));
+      }
+    });
+
+    overlay.addEventListener('pointerup', (e) => {
+      try { overlay.releasePointerCapture(e.pointerId); } catch {}
+      activePointers.delete(e.pointerId);
+      dragging = false; startPinchDist = 0;
+    });
+
+    overlay.addEventListener('wheel', (e) => {
+      if (e.shiftKey) {
+        // Camera dolly (zoom) with Shift+Wheel
+        const dz = Math.sign(e.deltaY) * 0.25;
+        camera.position.z = THREE.MathUtils.clamp(camera.position.z + dz, 1.2, 12);
+        return;
+      }
+      if (!active) return;
+      const delta = Math.sign(e.deltaY) * -0.08;
+      const s = THREE.MathUtils.clamp(active.scale.x + delta, 0.1, 8.0);
+      active.scale.setScalar(s);
+    }, { passive: true });
+
+    // Rotate and delete
+    window.addEventListener('keydown', (e) => {
+      if (!active) return;
+      if (e.key.toLowerCase() === 'r') active.rotation.y += Math.PI/12;
+      if (e.key === 'Delete' || e.key === 'Backspace') { scene.remove(active); active = null; }
+    });
+
+    // Optional parallax
+    let parallaxOn = false, mouseX = 0, mouseY = 0, tiltX = 0, tiltY = 0;
+    function setParallax(on) { parallaxOn = on; parallaxBtn.textContent = `Parallax: ${on ? 'On' : 'Off'}`; }
+    parallaxBtn.onclick = () => setParallax(!parallaxOn);
+    overlay.addEventListener('mousemove', (e) => {
+      const r = overlay.getBoundingClientRect();
+      mouseX = ((e.clientX - r.left) / r.width) * 2 - 1;
+      mouseY = -(((e.clientY - r.top) / r.height) * 2 - 1);
+    });
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientation', (ev) => {
+        tiltX = (ev.gamma || 0) / 90; tiltY = (ev.beta || 0) / 180;
+      });
+    }
+
+    // Resize & render
+    function fit() {
+      const stage = document.querySelector('.stage');
+      const w = stage.clientWidth, h = stage.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w/h; camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', fit); fit();
+
+    function tick() {
+      if (parallaxOn) {
+        const px = tiltX || mouseX; const py = tiltY || mouseY;
+        const target = new THREE.Vector3(0, 0.7, 0);
+        camera.position.x = THREE.MathUtils.lerp(camera.position.x, px * 0.9, 0.06);
+        camera.position.y = THREE.MathUtils.lerp(camera.position.y, 1.2 + py * 0.6, 0.06);
+        camera.lookAt(target);
+      }
+      renderer.render(scene, camera);
+      requestAnimationFrame(tick);
+    }
+    tick();
+  </script>
+</body>
+</html>

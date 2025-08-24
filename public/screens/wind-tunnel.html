@@ -477,9 +477,13 @@
 <body>
   <img src="../assets/Matrix.png" alt="Matrix TSL" class="logo matrix-logo" />
   <button id="btnHome" class="home-button">HOME</button>
-  
+
   <header>
-    <h1>Matrix Wind Tunnel 125</h1>
+    <!-- Navigation only -->
+  </header>
+
+  <div style="padding: 32px 80px 0 80px; background: var(--panel); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 24px;">
+    <h1 style="font-size: 28px; margin: 0; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(135deg, #ffffff, #a0a0ab); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Matrix Wind Tunnel 125</h1>
     <div style="flex:1"></div>
     <div style="min-width:280px;max-width:350px">
       <select id="experiment">
@@ -489,7 +493,7 @@
         <option value="pressure-speed">Pressure vs Speed</option>
       </select>
     </div>
-  </header>
+  </div>
 
   <main class="grid">
     <!-- Controls -->

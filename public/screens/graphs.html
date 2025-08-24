@@ -85,6 +85,49 @@
             padding: 10px;
         }
 
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Ensure Chart.js wrapper div fills the container */
+        .chart-container > div {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Force Chart.js to use full container dimensions */
+        .chart-container > div > canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .live-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #00FF00;
+            z-index: 10;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #00FF00;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
         .home-button {
             position: fixed;
             top: 20px;
@@ -136,6 +179,29 @@
             color: #000;
         }
 
+        .live-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .live-toggle {
+            background: linear-gradient(135deg, #00FF00, #00CC00);
+            color: #000;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .live-toggle.paused {
+            background: linear-gradient(135deg, #FF6347, #CC0000);
+        }
+
         @media (max-width: 768px) {
             .graphs-container {
                 grid-template-columns: 1fr;
@@ -157,15 +223,19 @@
     
     <div class="header">
         <h1>Engineering Graphs</h1>
-        <p>Interactive data visualization for electrical and mechanical engineering</p>
+        <p>Live Interactive Data Visualization for Electrical and Mechanical Engineering</p>
     </div>
 
     <div class="graphs-container">
         <!-- Graph 1: Motor Performance Curve -->
         <div class="graph-card">
             <h3 class="graph-title">Motor Performance Curve</h3>
-            <p class="graph-description">Shows the relationship between motor speed, torque, and efficiency</p>
+            <p class="graph-description">Live motor performance showing real-time torque, speed, and efficiency data</p>
             <div class="chart-container">
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>LIVE</span>
+                </div>
                 <canvas id="motorChart"></canvas>
             </div>
             <div class="controls">
@@ -173,13 +243,20 @@
                 <button class="control-btn" onclick="updateMotorData('high')">High Load</button>
                 <button class="control-btn" onclick="updateMotorData('low')">Low Load</button>
             </div>
+            <div class="live-controls">
+                <button class="live-toggle active" onclick="toggleLiveData('motor')">PAUSE</button>
+            </div>
         </div>
 
         <!-- Graph 2: Power Consumption Over Time -->
         <div class="graph-card">
             <h3 class="graph-title">Power Consumption Analysis</h3>
-            <p class="graph-description">Real-time power consumption patterns in electrical systems</p>
+            <p class="graph-description">Real-time power consumption patterns with live data streaming</p>
             <div class="chart-container">
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>LIVE</span>
+                </div>
                 <canvas id="powerChart"></canvas>
             </div>
             <div class="controls">
@@ -187,13 +264,20 @@
                 <button class="control-btn" onclick="updatePowerData('weekly')">Weekly</button>
                 <button class="control-btn" onclick="updatePowerData('monthly')">Monthly</button>
             </div>
+            <div class="live-controls">
+                <button class="live-toggle active" onclick="toggleLiveData('power')">PAUSE</button>
+            </div>
         </div>
 
         <!-- Graph 3: Temperature vs Efficiency -->
         <div class="graph-card">
             <h3 class="graph-title">Temperature vs Efficiency</h3>
-            <p class="graph-description">Thermal analysis showing how temperature affects system efficiency</p>
+            <p class="graph-description">Live thermal analysis with real-time temperature and efficiency monitoring</p>
             <div class="chart-container">
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>LIVE</span>
+                </div>
                 <canvas id="tempChart"></canvas>
             </div>
             <div class="controls">
@@ -201,13 +285,20 @@
                 <button class="control-btn" onclick="updateTempData('transformer')">Transformer</button>
                 <button class="control-btn" onclick="updateTempData('electronics')">Electronics</button>
             </div>
+            <div class="live-controls">
+                <button class="live-toggle active" onclick="toggleLiveData('temp')">PAUSE</button>
+            </div>
         </div>
 
         <!-- Graph 4: Vibration Analysis -->
         <div class="graph-card">
             <h3 class="graph-title">Vibration Analysis</h3>
-            <p class="graph-description">Frequency domain analysis of mechanical vibrations</p>
+            <p class="graph-description">Live frequency domain analysis with real-time vibration monitoring</p>
             <div class="chart-container">
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>LIVE</span>
+                </div>
                 <canvas id="vibrationChart"></canvas>
             </div>
             <div class="controls">
@@ -215,13 +306,20 @@
                 <button class="control-btn" onclick="updateVibrationData('fault')">Fault Condition</button>
                 <button class="control-btn" onclick="updateVibrationData('maintenance')">Maintenance</button>
             </div>
+            <div class="live-controls">
+                <button class="live-toggle active" onclick="toggleLiveData('vibration')">PAUSE</button>
+            </div>
         </div>
 
         <!-- Graph 5: Voltage and Current Waveforms -->
         <div class="graph-card">
             <h3 class="graph-title">AC Waveform Analysis</h3>
-            <p class="graph-description">Voltage and current waveforms in AC electrical systems</p>
+            <p class="graph-description">Live voltage and current waveforms with real-time AC system monitoring</p>
             <div class="chart-container">
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>LIVE</span>
+                </div>
                 <canvas id="waveformChart"></canvas>
             </div>
             <div class="controls">
@@ -229,19 +327,29 @@
                 <button class="control-btn" onclick="updateWaveformData('square')">Square Wave</button>
                 <button class="control-btn" onclick="updateWaveformData('distorted')">Distorted</button>
             </div>
+            <div class="live-controls">
+                <button class="live-toggle active" onclick="toggleLiveData('waveform')">PAUSE</button>
+            </div>
         </div>
 
         <!-- Graph 6: System Reliability -->
         <div class="graph-card">
             <h3 class="graph-title">System Reliability</h3>
-            <p class="graph-description">Reliability analysis showing failure rates over time</p>
+            <p class="graph-description">Live reliability tracking with real-time failure rate monitoring</p>
             <div class="chart-container">
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>LIVE</span>
+                </div>
                 <canvas id="reliabilityChart"></canvas>
             </div>
             <div class="controls">
                 <button class="control-btn active" onclick="updateReliabilityData('new')">New System</button>
                 <button class="control-btn" onclick="updateReliabilityData('aged')">Aged System</button>
                 <button class="control-btn" onclick="updateReliabilityData('maintained')">Maintained</button>
+            </div>
+            <div class="live-controls">
+                <button class="live-toggle active" onclick="toggleLiveData('reliability')">PAUSE</button>
             </div>
         </div>
     </div>
@@ -250,10 +358,32 @@
     <script>
         // Global chart variables
         let motorChart, powerChart, tempChart, vibrationChart, waveformChart, reliabilityChart;
+        
+        // Live data control variables
+        let liveDataIntervals = {};
+        let isLiveDataActive = {
+            motor: true,
+            power: true,
+            temp: true,
+            vibration: true,
+            waveform: true,
+            reliability: true
+        };
 
         // Initialize all charts when page loads
         document.addEventListener('DOMContentLoaded', function() {
             initializeCharts();
+            startLiveDataUpdates();
+            
+            // Force charts to update and fill containers properly
+            setTimeout(() => {
+                if (motorChart) motorChart.update('none');
+                if (powerChart) powerChart.update('none');
+                if (tempChart) tempChart.update('none');
+                if (vibrationChart) vibrationChart.update('none');
+                if (waveformChart) waveformChart.update('none');
+                if (reliabilityChart) reliabilityChart.update('none');
+            }, 100);
         });
 
         function initializeCharts() {
@@ -281,6 +411,18 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 10,
+                            right: 10,
+                            bottom: 10,
+                            left: 10
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    },
                     scales: {
                         x: {
                             title: {
@@ -337,6 +479,18 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 10,
+                            right: 10,
+                            bottom: 10,
+                            left: 10
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    },
                     scales: {
                         x: {
                             title: {
@@ -382,6 +536,18 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 10,
+                            right: 10,
+                            bottom: 10,
+                            left: 10
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    },
                     scales: {
                         x: {
                             title: {
@@ -428,6 +594,18 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 10,
+                            right: 10,
+                            bottom: 10,
+                            left: 10
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    },
                     scales: {
                         x: {
                             title: {
@@ -488,6 +666,18 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 10,
+                            right: 10,
+                            bottom: 10,
+                            left: 10
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    },
                     scales: {
                         x: {
                             title: {
@@ -496,7 +686,7 @@
                                 color: '#fff'
                             },
                             ticks: { color: '#fff' }
-                        },
+                            },
                         y: {
                             title: {
                                 display: true,
@@ -532,6 +722,18 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 10,
+                            right: 10,
+                            bottom: 10,
+                            left: 10
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    },
                     scales: {
                         x: {
                             title: {
@@ -557,6 +759,157 @@
                     }
                 }
             });
+        }
+
+        // Live data update functions
+        function startLiveDataUpdates() {
+            // Motor performance live updates
+            liveDataIntervals.motor = setInterval(() => {
+                if (isLiveDataActive.motor) {
+                    updateMotorLiveData();
+                }
+            }, 2000);
+
+            // Power consumption live updates
+            liveDataIntervals.power = setInterval(() => {
+                if (isLiveDataActive.power) {
+                    updatePowerLiveData();
+                }
+            }, 1500);
+
+            // Temperature live updates
+            liveDataIntervals.temp = setInterval(() => {
+                if (isLiveDataActive.temp) {
+                    updateTempLiveData();
+                }
+            }, 3000);
+
+            // Vibration live updates
+            liveDataIntervals.vibration = setInterval(() => {
+                if (isLiveDataActive.vibration) {
+                    updateVibrationLiveData();
+                }
+            }, 1000);
+
+            // Waveform live updates
+            liveDataIntervals.waveform = setInterval(() => {
+                if (isLiveDataActive.waveform) {
+                    updateWaveformLiveData();
+                }
+            }, 100);
+
+            // Reliability live updates
+            liveDataIntervals.reliability = setInterval(() => {
+                if (isLiveDataActive.reliability) {
+                    updateReliabilityLiveData();
+                }
+            }, 5000);
+        }
+
+        function updateMotorLiveData() {
+            // Simulate real-time motor data with noise and variations
+            const baseTorque = [120, 115, 110, 105, 100, 95, 90];
+            const baseEfficiency = [0, 60, 85, 92, 88, 82, 75];
+            
+            const newTorque = baseTorque.map(value => 
+                value + (Math.random() - 0.5) * 10
+            );
+            const newEfficiency = baseEfficiency.map(value => 
+                Math.max(0, Math.min(100, value + (Math.random() - 0.5) * 5))
+            );
+            
+            motorChart.data.datasets[0].data = newTorque;
+            motorChart.data.datasets[1].data = newEfficiency;
+            motorChart.update('none');
+        }
+
+        function updatePowerLiveData() {
+            // Simulate real-time power consumption with realistic variations
+            const basePower = [2.1, 1.8, 3.2, 4.5, 4.8, 3.9, 2.3];
+            const newPower = basePower.map(value => 
+                Math.max(0, value + (Math.random() - 0.5) * 0.8)
+            );
+            
+            powerChart.data.datasets[0].data = newPower;
+            powerChart.update('none');
+        }
+
+        function updateTempLiveData() {
+            // Simulate real-time temperature variations
+            const baseData = [
+                {x: 20, y: 95}, {x: 30, y: 92}, {x: 40, y: 88},
+                {x: 50, y: 85}, {x: 60, y: 80}, {x: 70, y: 75},
+                {x: 80, y: 68}, {x: 90, y: 60}, {x: 100, y: 50}
+            ];
+            
+            const newData = baseData.map(point => ({
+                x: point.x + (Math.random() - 0.5) * 4,
+                y: Math.max(0, Math.min(100, point.y + (Math.random() - 0.5) * 6))
+            }));
+            
+            tempChart.data.datasets[0].data = newData;
+            tempChart.update('none');
+        }
+
+        function updateVibrationLiveData() {
+            // Simulate real-time vibration data with dynamic changes
+            const baseAmplitude = [0.1, 0.3, 0.8, 1.2, 0.6, 0.2, 0.1];
+            const newAmplitude = baseAmplitude.map(value => 
+                Math.max(0, value + (Math.random() - 0.5) * 0.3)
+            );
+            
+            vibrationChart.data.datasets[0].data = newAmplitude;
+            vibrationChart.update('none');
+        }
+
+        function updateWaveformLiveData() {
+            // Simulate real-time AC waveform with phase variations
+            const timePoints = [];
+            const voltagePoints = [];
+            const currentPoints = [];
+            
+            const phaseShift = Date.now() * 0.001; // Dynamic phase shift
+            
+            for (let i = 0; i <= 100; i++) {
+                const t = i * 0.0628 + phaseShift;
+                timePoints.push(t.toFixed(2));
+                voltagePoints.push(230 * Math.sin(t) + (Math.random() - 0.5) * 10);
+                currentPoints.push(10 * Math.sin(t - 0.3) + (Math.random() - 0.5) * 1);
+            }
+            
+            waveformChart.data.labels = timePoints;
+            waveformChart.data.datasets[0].data = voltagePoints;
+            waveformChart.data.datasets[1].data = currentPoints;
+            waveformChart.update('none');
+        }
+
+        function updateReliabilityLiveData() {
+            // Simulate real-time reliability degradation
+            const baseReliability = [100, 98, 95, 90, 85, 80, 75];
+            const timeFactor = Date.now() * 0.000001; // Gradual degradation over time
+            
+            const newReliability = baseReliability.map((value, index) => 
+                Math.max(0, value - timeFactor * (index + 1) + (Math.random() - 0.5) * 2)
+            );
+            
+            reliabilityChart.data.datasets[0].data = newReliability;
+            reliabilityChart.update('none');
+        }
+
+        // Toggle live data updates
+        function toggleLiveData(chartType) {
+            const button = event.target;
+            isLiveDataActive[chartType] = !isLiveDataActive[chartType];
+            
+            if (isLiveDataActive[chartType]) {
+                button.textContent = 'PAUSE';
+                button.classList.remove('paused');
+                button.classList.add('active');
+            } else {
+                button.textContent = 'RESUME';
+                button.classList.add('paused');
+                button.classList.remove('active');
+            }
         }
 
         // Update functions for interactive controls
@@ -724,6 +1077,25 @@
             // Add active class to clicked button
             event.target.classList.add('active');
         }
+
+        // Handle window resize to ensure charts fill containers properly
+        window.addEventListener('resize', function() {
+            setTimeout(() => {
+                if (motorChart) motorChart.update('none');
+                if (powerChart) powerChart.update('none');
+                if (tempChart) tempChart.update('none');
+                if (vibrationChart) vibrationChart.update('none');
+                if (waveformChart) waveformChart.update('none');
+                if (reliabilityChart) reliabilityChart.update('none');
+            }, 100);
+        });
+
+        // Cleanup intervals when page is unloaded
+        window.addEventListener('beforeunload', function() {
+            Object.values(liveDataIntervals).forEach(interval => {
+                if (interval) clearInterval(interval);
+            });
+        });
     </script>
 </body>
 </html>

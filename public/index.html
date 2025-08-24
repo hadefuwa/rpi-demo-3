@@ -461,6 +461,13 @@
                <div class="icon"></div>
                <span class="label">Games Hub</span>
              </a>
+             
+             <a href="./screens/ar-hub.html" class="card fancy theme-violet">
+               <div class="border-animation"></div>
+               <div class="card-particles"></div>
+               <div class="icon"></div>
+               <span class="label">AR Hub</span>
+             </a>
                            <a href="./screens/scroll.html" class="card fancy theme-grey">
                 <div class="border-animation"></div>
                 <div class="card-particles"></div>
@@ -497,12 +504,25 @@
                <div class="icon"></div>
                <span class="label">Visuals</span>
              </a>
-             <a href="./screens/graphs.html" class="card fancy theme-orange">
+
+             <a href="./screens/graphs-showcase.html" class="card fancy theme-purple">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
                <div class="icon"></div>
-               <span class="label">Graphs</span>
+               <span class="label">Charts Showcase</span>
              </a>
+                           <a href="./screens/react-chart-demo.html" class="card fancy theme-cyan">
+                <div class="border-animation"></div>
+                <div class="card-particles"></div>
+                <div class="icon"></div>
+                <span class="label">React Charts</span>
+              </a>
+              <a href="./screens/buttons.html" class="card fancy theme-pink">
+                <div class="border-animation"></div>
+                <div class="card-particles"></div>
+                <div class="icon"></div>
+                <span class="label">Buttons</span>
+              </a>
              <a href="./screens/student-dashboard.html" class="card fancy theme-green">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
@@ -1326,22 +1346,39 @@
          font-family: Arial, sans-serif;
        }
        
-       /* Wind Tunnel Card - 17th position */
-       #screen-home .card:nth-child(17) .icon::before {
-         content: "🌪️";
-       }
-       #screen-home .card:nth-child(17) .icon::after {
-         content: "WIND";
-         position: absolute;
-         top: 50%;
-         left: 50%;
-         transform: translate(-50%, -50%);
-         font-size: 7px;
-         font-weight: bold;
-         color: rgba(255,255,255,0.8);
-         display: none;
-         font-family: Arial, sans-serif;
-       }
+               /* Wind Tunnel Card - 17th position */
+        #screen-home .card:nth-child(17) .icon::before {
+          content: "🌪️";
+        }
+        #screen-home .card:nth-child(17) .icon::after {
+          content: "WIND";
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 7px;
+          font-weight: bold;
+          color: rgba(255,255,255,0.8);
+          display: none;
+          font-family: Arial, sans-serif;
+        }
+        
+        /* Buttons Card - 18th position */
+        #screen-home .card:nth-child(18) .icon::before {
+          content: "🔘";
+        }
+        #screen-home .card:nth-child(18) .icon::after {
+          content: "BTN";
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 7px;
+          font-weight: bold;
+          color: rgba(255,255,255,0.8);
+          display: none;
+          font-family: Arial, sans-serif;
+        }
       
       /* Touch Demo Card - Glow Effect */
       #screen-home .card:nth-child(1) {
@@ -1632,6 +1669,12 @@
          border-color: #009688; 
          background: linear-gradient(135deg, #4db6ac, #009688, #00695c);
          box-shadow: 0 5px 15px rgba(0, 150, 136, 0.6);
+       }
+       
+       .theme-violet { 
+         border-color: #8b5cf6; 
+         background: linear-gradient(135deg, #a78bfa, #8b5cf6, #7c3aed);
+         box-shadow: 0 5px 15px rgba(139, 92, 246, 0.6);
        }
       
       /* Quality-based optimizations */
@@ -2514,6 +2557,7 @@
              .theme-green .card-particle { background: rgba(129, 199, 132, 0.8); }
        .theme-pink .card-particle { background: rgba(244, 143, 177, 0.8); }
        .theme-teal .card-particle { background: rgba(0, 150, 136, 0.8); }
+       .theme-violet .card-particle { background: rgba(139, 92, 246, 0.8); }
       
       /* Particle animations */
       @keyframes float-up {
