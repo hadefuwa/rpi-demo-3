@@ -1,6 +1,0 @@
-/* Snake canvas and controls */
-#snakeCanvas { width: 100%; max-width: min(520px, 90vw); height: clamp(200px, 40vh, 400px); background: #111418; border-radius: var(--radius-md); border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 8px 24px var(--shadow); }
-.game-controls { display: flex; gap: var(--spacing-md); margin: var(--spacing-lg) 0; justify-content: center; flex-wrap: wrap; }
-.game-info { display: flex; justify-content: space-between; margin: var(--spacing-md) 0; font-size: var(--font-base); flex-wrap: wrap; gap: var(--spacing-sm); }
-
-

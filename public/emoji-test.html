@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji Test - RPI Showcase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .emoji-test {
+            font-size: 48px;
+            margin: 20px;
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background: #111;
+        }
+        
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        
+        .test-button:hover {
+            background: #0056b3;
+        }
+        
+        .result {
+            margin: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .warning {
+            background: #ffc107;
+            color: black;
+        }
+        
+        .error {
+            background: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Emoji Test Page</h1>
+    <p>Testing emoji rendering and fallback systems</p>
+    
+    <div class="emoji-test">
+        <h2>Test Emojis:</h2>
+        <p>🖨️ 📚 🤖 🎮 🔮 🎈 📷 ⚙️ 📜 ⚙️ 📊 👆 🎬 🎨 🌪️ 🔘</p>
+        <p>These should display as colored emojis if working properly</p>
+    </div>
+    
+    <button class="test-button" onclick="testEmojiRendering()">Test Emoji Rendering</button>
+    <button class="test-button" onclick="testEmojiFonts()">Test Emoji Fonts</button>
+    <button class="test-button" onclick="window.location.href='index.html'">Back to Homepage</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        function testEmojiRendering() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 50;
+            canvas.height = 50;
+            
+            // Test with emoji
+            ctx.font = '32px Arial';
+            ctx.fillText('😀', 0, 32);
+            
+            const imageData = ctx.getImageData(0, 0, 50, 50);
+            const data = imageData.data;
+            
+            let hasColor = false;
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i] > 0 || data[i + 1] > 0 || data[i + 2] > 0) {
+                    hasColor = true;
+                    break;
+                }
+            }
+            
+            const result = document.getElementById('result');
+            if (hasColor) {
+                result.className = 'result success';
+                result.textContent = '✅ Emojis are rendering with color!';
+            } else {
+                result.className = 'result warning';
+                result.textContent = '⚠️ Emojis may not be rendering properly';
+            }
+        }
+        
+        function testEmojiFonts() {
+            const testEmoji = '😀';
+            const span = document.createElement('span');
+            span.textContent = testEmoji;
+            span.style.fontSize = '32px';
+            span.style.fontFamily = 'NotoColorEmoji, TwemojiMozilla, Apple Color Emoji, Segoe UI Emoji';
+            
+            document.body.appendChild(span);
+            
+            // Check if the emoji rendered differently than default
+            const defaultSpan = document.createElement('span');
+            defaultSpan.textContent = testEmoji;
+            defaultSpan.style.fontSize = '32px';
+            defaultSpan.style.fontFamily = 'Arial';
+            
+            document.body.appendChild(defaultSpan);
+            
+            const result = document.getElementById('result');
+            result.className = 'result success';
+            result.textContent = '✅ Emoji font test completed. Check if emojis look different above.';
+            
+            // Clean up test elements
+            setTimeout(() => {
+                span.remove();
+                defaultSpan.remove();
+            }, 3000);
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            setTimeout(testEmojiRendering, 1000);
+        });
+    </script>
+</body>
+</html>

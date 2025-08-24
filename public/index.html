@@ -190,20 +190,28 @@
       })();
     </script>
     
-    <!-- Emoji Font Support for Raspberry Pi -->
+    <!-- Enhanced Emoji Font Support for Raspberry Pi -->
     <style>
+      /* Multiple emoji font sources for better compatibility */
       @font-face {
-        font-family: 'EmojiFont';
-        src: url('data:font/woff2;base64,') format('woff2'),
-             url('https://fonts.gstatic.com/s/notocoloremoji/v25/Yq6P-KqIXTD0t4D9z1ESnKM3-HpFabsE4tq3luCC7p-aXxcn.woff2') format('woff2');
+        font-family: 'NotoColorEmoji';
+        src: url('https://fonts.gstatic.com/s/notocoloremoji/v25/Yq6P-KqIXTD0t4D9z1ESnKM3-HpFabsE4tq3luCC7p-aXxcn.woff2') format('woff2');
         font-display: swap;
       }
       
-      /* Fallback emoji font stack for Raspberry Pi */
+      @font-face {
+        font-family: 'TwemojiMozilla';
+        src: url('https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/fonts/TwemojiMozilla.ttf') format('truetype');
+        font-display: swap;
+      }
+      
+      /* Comprehensive emoji font stack for Raspberry Pi */
       .emoji-text {
-        font-family: 'EmojiFont', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', 'EmojiOne Mozilla', 'Twemoji Mozilla', 'Segoe UI Symbol', sans-serif;
+        font-family: 'NotoColorEmoji', 'TwemojiMozilla', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', 'EmojiOne Mozilla', 'Segoe UI Symbol', sans-serif;
         font-variant-emoji: emoji;
         text-rendering: optimizeSpeed;
+        -webkit-font-feature-settings: "liga" 1, "dlig" 1;
+        font-feature-settings: "liga" 1, "dlig" 1;
       }
       
       /* Quality mode CSS variables */
@@ -258,6 +266,10 @@
     <meta name="apple-mobile-web-app-title" content="RPI Showcase" />
     <meta name="msapplication-TileColor" content="#000000" />
     <meta name="msapplication-config" content="none" />
+    
+    <!-- Preload emoji fonts for better performance -->
+    <link rel="preload" href="https://fonts.gstatic.com/s/notocoloremoji/v25/Yq6P-KqIXTD0t4D9z1ESnKM3-HpFabsE4tq3luCC7p-aXxcn.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/fonts/TwemojiMozilla.ttf" as="font" type="font/ttf" crossorigin>
     
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="./assets/Matrix.png" />
@@ -421,119 +433,126 @@
              <a href="./screens/glb.html" class="card fancy theme-purple">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
-               <div class="icon"></div>
+               <div class="icon" data-text-fallback="3D"></div>
                <span class="label">3D Models</span>
              </a>
              <a href="./screens/printer.html" class="card fancy theme-red">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
-               <div class="icon"></div>
+               <div class="icon" data-text-fallback="PRINT"></div>
                <span class="label">3D Printer Demo</span>
              </a>
              <a href="./screens/about.html" class="card fancy theme-silver">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
-               <div class="icon"></div>
+               <div class="icon" data-text-fallback="INFO"></div>
                <span class="label">About</span>
              </a>
                                         <a href="./screens/ai-chat.html" class="card fancy theme-green">
                 <div class="border-animation"></div>
                 <div class="card-particles"></div>
-                <div class="icon"></div>
+                <div class="icon" data-text-fallback="AI"></div>
                 <span class="label">AI Chat</span>
               </a>
               <a href="./screens/curriculum.html" class="card fancy theme-teal">
                 <div class="border-animation"></div>
                 <div class="card-particles"></div>
-                <div class="icon"></div>
+                <div class="icon" data-text-fallback="CURR"></div>
                 <span class="label">Curriculum</span>
               </a>
 
                <a href="./screens/electrical-machines.html" class="card fancy theme-blue">
                  <div class="border-animation"></div>
                  <div class="card-particles"></div>
-                 <div class="icon"></div>
+                 <div class="icon" data-text-fallback="MACH"></div>
                  <span class="label">Electrical Machines</span>
                </a>
              <a href="./screens/games.html" class="card fancy theme-gold">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
-               <div class="icon"></div>
+               <div class="icon" data-text-fallback="GAME"></div>
                <span class="label">Games Hub</span>
              </a>
              
              <a href="./screens/ar-hub.html" class="card fancy theme-violet">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
-               <div class="icon"></div>
+               <div class="icon" data-text-fallback="AR"></div>
                <span class="label">AR Hub</span>
              </a>
                            <a href="./screens/scroll.html" class="card fancy theme-grey">
                 <div class="border-animation"></div>
                 <div class="card-particles"></div>
-                <div class="icon"></div>
+                <div class="icon" data-text-fallback="SCROLL"></div>
                 <span class="label">Scroll Test</span>
               </a>
              <a href="./screens/settings.html" class="card fancy theme-blue">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
-               <div class="icon"></div>
+               <div class="icon" data-text-fallback="SET"></div>
                <span class="label">Settings</span>
              </a>
              <a href="./screens/info.html" class="card fancy theme-purple">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
-               <div class="icon"></div>
+               <div class="icon" data-text-fallback="INFO"></div>
                <span class="label">System Info</span>
              </a>
              <a href="./screens/touch.html" class="card fancy theme-cyan">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
-               <div class="icon"></div>
+               <div class="icon" data-text-fallback="TOUCH"></div>
                <span class="label">Touch Demo</span>
              </a>
              <a href="./screens/video.html" class="card fancy theme-indigo">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
-               <div class="icon"></div>
+               <div class="icon" data-text-fallback="VIDEO"></div>
                <span class="label">Video Player</span>
              </a>
              <a href="./screens/visuals.html" class="card fancy theme-lime">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
-               <div class="icon"></div>
+               <div class="icon" data-text-fallback="ART"></div>
                <span class="label">Visuals</span>
              </a>
 
-             <a href="./screens/graphs-showcase.html" class="card fancy theme-purple">
+             <a href="./screens/graphs-combined.html" class="card fancy theme-purple">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
-               <div class="icon"></div>
-               <span class="label">Charts Showcase</span>
+               <div class="icon" data-text-fallback="CHART"></div>
+               <span class="label">Advanced Charts</span>
              </a>
                            <a href="./screens/react-chart-demo.html" class="card fancy theme-cyan">
                 <div class="border-animation"></div>
                 <div class="card-particles"></div>
-                <div class="icon"></div>
+                <div class="icon" data-text-fallback="REACT"></div>
                 <span class="label">React Charts</span>
               </a>
               <a href="./screens/buttons.html" class="card fancy theme-pink">
                 <div class="border-animation"></div>
                 <div class="card-particles"></div>
-                <div class="icon"></div>
+                <div class="icon" data-text-fallback="BTN"></div>
                 <span class="label">Buttons</span>
               </a>
              <a href="./screens/student-dashboard.html" class="card fancy theme-green">
                <div class="border-animation"></div>
                <div class="card-particles"></div>
-               <div class="icon"></div>
+               <div class="icon" data-text-fallback="DASH"></div>
                <span class="label">Student Dashboard</span>
              </a>
                            <a href="./screens/wind-tunnel.html" class="card fancy theme-cyan">
                 <div class="border-animation"></div>
                 <div class="card-particles"></div>
-                <div class="icon"></div>
+                <div class="icon" data-text-fallback="WIND"></div>
                 <span class="label">Wind Tunnel</span>
+              </a>
+              
+              <a href="./emoji-test.html" class="card fancy theme-orange">
+                <div class="border-animation"></div>
+                <div class="card-particles"></div>
+                <div class="icon" data-text-fallback="TEST"></div>
+                <span class="label">Emoji Test</span>
               </a>
            </div>
         </section>
@@ -971,9 +990,11 @@
       
       /* Enhanced emoji support for all card icons */
       #screen-home .card .icon::before {
-        font-family: 'EmojiFont', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', 'EmojiOne Mozilla', 'Twemoji Mozilla', 'Segoe UI Symbol', sans-serif;
+        font-family: 'NotoColorEmoji', 'TwemojiMozilla', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', 'EmojiOne Mozilla', 'Segoe UI Symbol', sans-serif;
         font-variant-emoji: emoji;
         text-rendering: optimizeSpeed;
+        -webkit-font-feature-settings: "liga" 1, "dlig" 1;
+        font-feature-settings: "liga" 1, "dlig" 1;
         font-size: 24px;
         line-height: 1;
         display: inline-block;
@@ -1007,6 +1028,7 @@
              #screen-home .card:nth-child(13) .icon { animation: wobble 2.5s ease-in-out infinite; }
        #screen-home .card:nth-child(14) .icon { animation: flash 2s infinite; }
        #screen-home .card:nth-child(15) .icon { animation: bounce 2.2s infinite; }
+       #screen-home .card:nth-child(19) .icon { animation: spin 4.5s linear infinite; }
        
        /* Different animations for each card's label */
        #screen-home .card:nth-child(1) .label { animation: glow 2.5s infinite; }
@@ -1024,6 +1046,7 @@
        #screen-home .card:nth-child(13) .label { animation: glow 3.4s infinite 1.3s; }
        #screen-home .card:nth-child(14) .label { animation: flash 2.5s infinite 1.4s; }
        #screen-home .card:nth-child(15) .label { animation: glow 2.8s infinite 1.5s; }
+       #screen-home .card:nth-child(19) .label { animation: pulse 3.0s infinite 1.6s; }
       
       @keyframes bounce {
         0%, 100% { transform: translateY(0); }
@@ -1091,13 +1114,65 @@
         font-family: Arial, sans-serif;
       }
       
-      /* Show text fallback if emoji doesn't render */
+      /* Enhanced emoji fallback system */
       @supports not (font-variant-emoji: emoji) {
         #screen-home .card .icon::before {
           display: none;
         }
         #screen-home .card .icon::after {
           display: block !important;
+        }
+      }
+      
+      /* Show text fallbacks by default, hide when emojis load */
+      #screen-home .card .icon::after {
+        display: block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 8px;
+        font-weight: bold;
+        color: rgba(255,255,255,0.8);
+        font-family: Arial, sans-serif;
+        z-index: 2;
+        opacity: 0.7;
+      }
+      
+      /* Hide text fallbacks when emojis are working */
+      .emojis-working #screen-home .card .icon::after {
+        display: none;
+      }
+      
+      /* Force emoji rendering on supported systems */
+      @supports (font-variant-emoji: emoji) {
+        #screen-home .card .icon::before {
+          font-variant-emoji: emoji;
+          -webkit-font-variant-emoji: emoji;
+        }
+      }
+      
+      /* Additional emoji optimization */
+      #screen-home .card .icon::before {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        font-size: 24px !important;
+        line-height: 1 !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+      }
+      
+      /* Ensure emojis are properly sized on different devices */
+      @media (max-width: 768px) {
+        #screen-home .card .icon::before {
+          font-size: 20px !important;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        #screen-home .card .icon::before {
+          font-size: 18px !important;
         }
       }
       
@@ -1379,6 +1454,23 @@
         }
         #screen-home .card:nth-child(18) .icon::after {
           content: "BTN";
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 7px;
+          font-weight: bold;
+          color: rgba(255,255,255,0.8);
+          display: none;
+          font-family: Arial, sans-serif;
+        }
+        
+        /* Emoji Test Card - 19th position */
+        #screen-home .card:nth-child(19) .icon::before {
+          content: "🧪";
+        }
+        #screen-home .card:nth-child(19) .icon::after {
+          content: "TEST";
           position: absolute;
           top: 50%;
           left: 50%;
@@ -2603,6 +2695,102 @@
         100% { transform: rotate(360deg) translateX(10px) rotate(-360deg); }
       }
     </style>
+    
+    <!-- Emoji Detection and Fallback System -->
+    <script>
+      // Emoji detection and fallback system
+      (function() {
+        'use strict';
+        
+        // Test if emojis are supported and rendering properly
+        function testEmojiSupport() {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = 20;
+          canvas.height = 20;
+          
+          // Test with a simple emoji
+          ctx.font = '16px Arial';
+          ctx.fillText('😀', 0, 16);
+          
+          const imageData = ctx.getImageData(0, 0, 20, 20);
+          const data = imageData.data;
+          
+          // Check if the emoji actually rendered (not just a placeholder)
+          let hasColor = false;
+          for (let i = 0; i < data.length; i += 4) {
+            if (data[i] > 0 || data[i + 1] > 0 || data[i + 2] > 0) {
+              hasColor = true;
+              break;
+            }
+          }
+          
+          return hasColor;
+        }
+        
+        // Fallback to text labels if emojis don't work
+        function enableEmojiFallbacks() {
+          const cards = document.querySelectorAll('#screen-home .card');
+          cards.forEach(card => {
+            const icon = card.querySelector('.icon');
+            if (icon) {
+              const textFallback = icon.getAttribute('data-text-fallback');
+              if (textFallback) {
+                icon.style.setProperty('--fallback-text', `"${textFallback}"`);
+              }
+            }
+          });
+          
+          // Add CSS to show fallback text
+          const style = document.createElement('style');
+          style.textContent = `
+            #screen-home .card .icon::before {
+              content: var(--fallback-text, attr(data-text-fallback)) !important;
+              font-family: Arial, sans-serif !important;
+              font-size: 12px !important;
+              font-weight: bold !important;
+              color: #fff !important;
+            }
+          `;
+          document.head.appendChild(style);
+        }
+        
+        // Initialize emoji system when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initEmojiSystem);
+        } else {
+          initEmojiSystem();
+        }
+        
+        function initEmojiSystem() {
+          // Wait a bit for fonts to load
+          setTimeout(() => {
+            if (!testEmojiSupport()) {
+              console.log('⚠️ Emoji support not detected, enabling fallbacks');
+              enableEmojiFallbacks();
+            } else {
+              console.log('✅ Emoji support detected and working');
+              // Add class to body to hide text fallbacks
+              document.body.classList.add('emojis-working');
+            }
+          }, 1000);
+          
+          // Add manual emoji test function to window for debugging
+          window.testEmojis = function() {
+            const result = testEmojiSupport();
+            console.log('Manual emoji test result:', result);
+            if (result) {
+              document.body.classList.add('emojis-working');
+              alert('✅ Emojis are working! Text fallbacks hidden.');
+            } else {
+              document.body.classList.remove('emojis-working');
+              alert('⚠️ Emojis not working. Text fallbacks enabled.');
+            }
+            return result;
+          };
+        }
+      })();
+    </script>
     
     <!-- Service Worker Registration -->
     <script>

@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Engineering Graphs - RPI Showcase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #444;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            background: linear-gradient(45deg, #FFD700, #FFA500, #FF6347);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .graphs-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            padding: 30px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .graph-card {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 2px solid #444;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .graph-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .graph-card:hover::before {
+            left: 100%;
+        }
+
+        .graph-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+            border-color: #FFD700;
+        }
+
+        .tech-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(45deg, #00FF00, #00CC00);
+            color: #000;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .graph-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #FFD700;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .graph-description {
+            font-size: 1em;
+            color: #ccc;
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .live-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #00FF00;
+            z-index: 10;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #00FF00;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .home-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .home-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #444, #666);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(135deg, #666, #888);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .control-btn.active {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+        }
+
+        .live-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .live-toggle {
+            background: linear-gradient(135deg, #00FF00, #00CC00);
+            color: #000;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .live-toggle.paused {
+            background: linear-gradient(135deg, #FF6347, #CC0000);
+        }
+
+        /* CSS-only animated chart */
+        .css-chart {
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: end;
+            justify-content: space-around;
+            padding: 20px 0;
+        }
+
+        .css-bar {
+            width: 40px;
+            background: linear-gradient(to top, #FFD700, #FFA500);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            animation: growBar 2s ease-out forwards;
+        }
+
+        .css-bar:nth-child(1) { animation-delay: 0s; }
+        .css-bar:nth-child(2) { animation-delay: 0.2s; }
+        .css-bar:nth-child(3) { animation-delay: 0.4s; }
+        .css-bar:nth-child(4) { animation-delay: 0.6s; }
+        .css-bar:nth-child(5) { animation-delay: 0.8s; }
+
+        @keyframes growBar {
+            from { height: 0; }
+            to { height: var(--height); }
+        }
+
+        /* 3D Chart Container */
+        .three-d-container {
+            perspective: 1000px;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .three-d-chart {
+            transform-style: preserve-3d;
+            height: 100%;
+            width: 100%;
+            position: relative;
+        }
+
+        .three-d-chart canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+
+        /* Particle System */
+        .particle-container {
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: float 3s infinite ease-in-out;
+            transition: all 0.3s ease;
+        }
+
+        .particle.vibration {
+            background: #FFD700;
+            box-shadow: 0 0 8px #FFD700;
+        }
+
+        .particle.power {
+            background: #00FFFF;
+            box-shadow: 0 0 8px #00FFFF;
+        }
+
+        .particle.heat {
+            background: #FF6347;
+            box-shadow: 0 0 8px #FF6347;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.7; }
+        }
+
+        @keyframes powerFlow {
+            0% { transform: translateX(-100px) translateY(0px); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100px) translateY(0px); opacity: 0; }
+        }
+
+        @keyframes heatRise {
+            0% { transform: translateY(100px) scale(0.5); opacity: 0; }
+            50% { opacity: 1; transform: translateY(0px) scale(1); }
+            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+        }
+
+        @keyframes vibration {
+            0%, 100% { transform: translateX(0px) translateY(0px) scale(1); }
+            25% { transform: translateX(5px) translateY(-3px) scale(1.2); }
+            50% { transform: translateX(0px) translateY(-5px) scale(0.8); }
+            75% { transform: translateX(-5px) translateY(-3px) scale(1.1); }
+        }
+
+        .particle-legend {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            display: flex;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #fff;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .graphs-container {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .graph-card {
+                padding: 20px;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .graphs-container {
+                padding: 10px;
+                gap: 20px;
+            }
+            
+            .graph-card {
+                padding: 15px;
+            }
+            
+            .chart-container {
+                height: 200px;
+                padding: 10px;
+            }
+            
+            .graph-title {
+                font-size: 1.4em;
+                margin-bottom: 10px;
+            }
+            
+            .graph-description {
+                font-size: 0.9em;
+                margin-bottom: 15px;
+            }
+            
+            .control-btn {
+                padding: 8px 16px;
+                font-size: 13px;
+                min-width: 100px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="home-button">← Home</a>
+    
+    <div class="header">
+        <h1>Advanced Engineering Graphs</h1>
+        <p>Live Interactive Data Visualization & Advanced Chart Technologies</p>
+    </div>
+
+    <div class="graphs-container">
+        <!-- Graph 1: Motor Performance Curve -->
+        <div class="graph-card">
+            <div class="tech-badge">Chart.js</div>
+            <h3 class="graph-title">Motor Performance Curve</h3>
+            <p class="graph-description">Live motor performance showing real-time torque, speed, and efficiency data</p>
+            <div class="chart-container">
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>LIVE</span>
+                </div>
+                <canvas id="motorChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn active" onclick="updateMotorData('normal')">Normal Load</button>
+                <button class="control-btn" onclick="updateMotorData('high')">High Load</button>
+                <button class="control-btn" onclick="updateMotorData('low')">Low Load</button>
+            </div>
+            <div class="live-controls">
+                <button class="live-toggle active" onclick="toggleLiveData('motor')">PAUSE</button>
+            </div>
+        </div>
+
+        <!-- Graph 2: Power Consumption Over Time -->
+        <div class="graph-card">
+            <div class="tech-badge">Chart.js</div>
+            <h3 class="graph-title">Power Consumption Analysis</h3>
+            <p class="graph-description">Real-time power consumption patterns with live data streaming</p>
+            <div class="chart-container">
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>LIVE</span>
+                </div>
+                <canvas id="powerChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn active" onclick="updatePowerData('daily')">Daily</button>
+                <button class="control-btn" onclick="updatePowerData('weekly')">Weekly</button>
+                <button class="control-btn" onclick="updatePowerData('monthly')">Monthly</button>
+            </div>
+            <div class="live-controls">
+                <button class="live-toggle active" onclick="toggleLiveData('power')">PAUSE</button>
+            </div>
+        </div>
+
+        <!-- Graph 3: Advanced Chart.js Visualizations -->
+        <div class="graph-card">
+            <div class="tech-badge">Chart.js</div>
+            <h3 class="graph-title">Advanced Chart.js Visualizations</h3>
+            <p class="graph-description">Complex multi-axis charts with real-time animations and interactions</p>
+            <div class="chart-container">
+                <canvas id="advancedChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn active" onclick="updateAdvancedChart('line')">Line Chart</button>
+                <button class="control-btn" onclick="updateAdvancedChart('radar')">Radar Chart</button>
+                <button class="control-btn" onclick="updateAdvancedChart('polar')">Polar Area</button>
+                <button class="control-btn" onclick="updateAdvancedChart('doughnut')">Doughnut</button>
+            </div>
+        </div>
+
+        <!-- Graph 4: CSS-only Animated Chart -->
+        <div class="graph-card">
+            <div class="tech-badge">Pure CSS</div>
+            <h3 class="graph-title">CSS-Only Animated Chart</h3>
+            <p class="graph-description">Pure CSS animations with no JavaScript - lightweight and performant</p>
+            <div class="chart-container">
+                <div class="css-chart">
+                    <div class="css-bar" style="--height: 60%"></div>
+                    <div class="css-bar" style="--height: 80%"></div>
+                    <div class="css-bar" style="--height: 45%"></div>
+                    <div class="css-bar" style="--height: 95%"></div>
+                    <div class="css-bar" style="--height: 70%"></div>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="control-btn" onclick="resetCSSChart()">Reset Animation</button>
+                <button class="control-btn" onclick="addCSSBar()">Add Bar</button>
+            </div>
+        </div>
+
+        <!-- Graph 5: 3D Interactive Chart -->
+        <div class="graph-card">
+            <div class="tech-badge">Three.js 3D</div>
+            <h3 class="graph-title">3D Interactive Chart</h3>
+            <p class="graph-description">Interactive 3D bar chart showing motor efficiency, power output, temperature, and vibration data with real-time color coding</p>
+            <div class="chart-container">
+                <div class="three-d-container">
+                    <div class="three-d-chart" id="threeDChart">
+                        <!-- 3D chart will be rendered here -->
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="control-btn" onclick="toggle3DRotation()">Reset View</button>
+                <button class="control-btn" onclick="change3DView()">Change View</button>
+                <button class="control-btn" onclick="change3DDataType()">Change Data</button>
+            </div>
+            <div class="live-controls">
+                <button class="live-toggle active" onclick="toggle3DLiveData()">PAUSE</button>
+            </div>
+        </div>
+
+        <!-- Graph 6: Temperature vs Efficiency -->
+        <div class="graph-card">
+            <div class="tech-badge">Chart.js</div>
+            <h3 class="graph-title">Temperature vs Efficiency</h3>
+            <p class="graph-description">Live thermal analysis with real-time temperature and efficiency monitoring</p>
+            <div class="chart-container">
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>LIVE</span>
+                </div>
+                <canvas id="tempChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn active" onclick="updateTempData('motor')">Motor</button>
+                <button class="control-btn" onclick="updateTempData('transformer')">Transformer</button>
+                <button class="control-btn" onclick="updateTempData('electronics')">Electronics</button>
+            </div>
+            <div class="live-controls">
+                <button class="live-toggle active" onclick="toggleLiveData('temp')">PAUSE</button>
+            </div>
+        </div>
+
+        <!-- Graph 7: Particle System Visualization -->
+        <div class="graph-card">
+            <div class="tech-badge">Particles</div>
+            <h3 class="graph-title">Particle System Visualization</h3>
+            <p class="graph-description">Dynamic particle-based data representation showing motor vibration patterns, power flow, and thermal distribution</p>
+            <div class="chart-container">
+                <div class="particle-container" id="particleContainer">
+                    <!-- Particles will be generated here -->
+                </div>
+                <div class="particle-legend">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #FFD700;"></span>
+                        <span>Vibration</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #00FFFF;"></span>
+                        <span>Power Flow</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #FF6347;"></span>
+                        <span>Heat</span>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="control-btn" onclick="toggleParticles()">Toggle Particles</button>
+                <button class="control-btn" onclick="changeParticleSpeed()">Change Speed</button>
+                <button class="control-btn" onclick="changeParticleMode()">Change Mode</button>
+            </div>
+            <div class="live-controls">
+                <button class="live-toggle active" onclick="toggleParticleLiveData()">PAUSE</button>
+            </div>
+        </div>
+
+        <!-- Graph 8: Vibration Analysis -->
+        <div class="graph-card">
+            <div class="tech-badge">Chart.js</div>
+            <h3 class="graph-title">Vibration Analysis</h3>
+            <p class="graph-description">Live frequency domain analysis with real-time vibration monitoring</p>
+            <div class="chart-container">
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>LIVE</span>
+                </div>
+                <canvas id="vibrationChart"></canvas>
+            </div>
+            <div class="controls">
+                <button class="control-btn active" onclick="updateVibrationData('normal')">Normal</button>
+                <button class="control-btn" onclick="updateVibrationData('fault')">Fault Condition</button>
+                <button class="control-btn" onclick="updateVibrationData('maintenance')">Maintenance</button>
+            </div>
+            <div class="live-controls">
+                <button class="live-toggle active" onclick="toggleLiveData('vibration')">PAUSE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // Global chart variables
+        let motorChart, powerChart, tempChart, vibrationChart, advancedChart;
+        
+        // Live data control variables
+        let liveDataIntervals = {};
+        let isLiveDataActive = {
+            motor: true,
+            power: true,
+            temp: true,
+            vibration: true,
+            threeD: true,
+            particles: true
+        };
+
+        // Initialize all charts when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            startLiveDataUpdates();
+            initializeAdvancedChart();
+            initializeParticles();
+            initialize3DChart();
+            
+            // Force charts to update and fill containers properly
+            setTimeout(() => {
+                if (motorChart) motorChart.update('none');
+                if (powerChart) powerChart.update('none');
+                if (tempChart) tempChart.update('none');
+                if (vibrationChart) vibrationChart.update('none');
+                if (advancedChart) advancedChart.update('none');
+            }, 100);
+        });
+
+        function initializeCharts() {
+            // Chart 1: Motor Performance Curve
+            const motorCtx = document.getElementById('motorChart').getContext('2d');
+            motorChart = new Chart(motorCtx, {
+                type: 'line',
+                data: {
+                    labels: ['0', '500', '1000', '1500', '2000', '2500', '3000'],
+                    datasets: [{
+                        label: 'Torque (Nm)',
+                        data: [120, 115, 110, 105, 100, 95, 90],
+                        borderColor: '#FFD700',
+                        backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Efficiency (%)',
+                        data: [85, 87, 89, 91, 93, 95, 97],
+                        borderColor: '#00FF00',
+                        backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Speed (RPM)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Torque (Nm)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Efficiency (%)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Power Consumption
+            const powerCtx = document.getElementById('powerChart').getContext('2d');
+            powerChart = new Chart(powerCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                    datasets: [{
+                        label: 'Power (kW)',
+                        data: [45, 42, 78, 95, 88, 65, 48],
+                        borderColor: '#FF6347',
+                        backgroundColor: 'rgba(255, 99, 71, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time (24h)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Power (kW)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    }
+                }
+            });
+
+            // Chart 3: Temperature vs Efficiency
+            const tempCtx = document.getElementById('tempChart').getContext('2d');
+            tempChart = new Chart(tempCtx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Motor',
+                        data: [
+                            {x: 25, y: 95}, {x: 30, y: 93}, {x: 35, y: 90},
+                            {x: 40, y: 87}, {x: 45, y: 84}, {x: 50, y: 80}
+                        ],
+                        backgroundColor: '#FFD700'
+                    }, {
+                        label: 'Transformer',
+                        data: [
+                            {x: 30, y: 92}, {x: 35, y: 89}, {x: 40, y: 86},
+                            {x: 45, y: 83}, {x: 50, y: 79}, {x: 55, y: 75}
+                        ],
+                        backgroundColor: '#00FF00'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Temperature (°C)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Efficiency (%)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    }
+                }
+            });
+
+            // Chart 4: Vibration Analysis
+            const vibrationCtx = document.getElementById('vibrationChart').getContext('2d');
+            vibrationChart = new Chart(vibrationCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['10Hz', '20Hz', '30Hz', '40Hz', '50Hz', '60Hz'],
+                    datasets: [{
+                        label: 'Amplitude (mm/s)',
+                        data: [0.5, 1.2, 2.1, 1.8, 0.9, 0.3],
+                        backgroundColor: [
+                            'rgba(255, 215, 0, 0.8)',
+                            'rgba(255, 165, 0, 0.8)',
+                            'rgba(255, 99, 71, 0.8)',
+                            'rgba(255, 165, 0, 0.8)',
+                            'rgba(255, 215, 0, 0.8)',
+                            'rgba(0, 255, 0, 0.8)'
+                        ],
+                        borderColor: '#FFD700',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Frequency (Hz)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Amplitude (mm/s)',
+                                color: '#fff'
+                            },
+                            ticks: { color: '#fff' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Advanced Chart.js Chart
+        function initializeAdvancedChart() {
+            const ctx = document.getElementById('advancedChart').getContext('2d');
+            advancedChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: [65, 59, 80, 81, 56, 55],
+                        borderColor: '#FFD700',
+                        backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Profit',
+                        data: [28, 48, 40, 19, 86, 27],
+                        borderColor: '#00FF00',
+                        backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInOutQuart'
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#fff' } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#fff' } },
+                        y: { ticks: { color: '#fff' } }
+                    }
+                }
+            });
+        }
+
+        function updateAdvancedChart(type) {
+            const data = {
+                line: {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Revenue',
+                            data: [65, 59, 80, 81, 56, 55],
+                            borderColor: '#FFD700',
+                            backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    }
+                },
+                radar: {
+                    type: 'radar',
+                    data: {
+                        labels: ['Speed', 'Reliability', 'Comfort', 'Safety', 'Efficiency', 'Durability'],
+                        datasets: [{
+                            label: 'Performance',
+                            data: [85, 90, 75, 95, 80, 88],
+                            borderColor: '#FFD700',
+                            backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                            fill: true
+                        }]
+                    }
+                },
+                polar: {
+                    type: 'polarArea',
+                    data: {
+                        labels: ['Red', 'Green', 'Yellow', 'Grey', 'Blue'],
+                        datasets: [{
+                            label: 'Dataset 1',
+                            data: [11, 16, 7, 3, 14],
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+                        }]
+                    }
+                },
+                doughnut: {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Red', 'Green', 'Yellow', 'Grey', 'Blue'],
+                        datasets: [{
+                            label: 'Dataset 1',
+                            data: [12, 19, 3, 5, 2],
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+                        }]
+                    }
+                }
+            };
+
+            advancedChart.destroy();
+            const ctx = document.getElementById('advancedChart').getContext('2d');
+            advancedChart = new Chart(ctx, {
+                ...data[type],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 2000, easing: 'easeInOutQuart' },
+                    plugins: { legend: { labels: { color: '#fff' } } },
+                    scales: type === 'line' ? {
+                        x: { ticks: { color: '#fff' } },
+                        y: { ticks: { color: '#fff' } }
+                    } : {}
+                }
+            });
+        }
+
+        // CSS Chart Functions
+        function resetCSSChart() {
+            const bars = document.querySelectorAll('.css-bar');
+            bars.forEach(bar => {
+                bar.style.animation = 'none';
+                bar.offsetHeight; // Trigger reflow
+                bar.style.animation = null;
+            });
+        }
+
+        function addCSSBar() {
+            const chart = document.querySelector('.css-chart');
+            const newBar = document.createElement('div');
+            newBar.className = 'css-bar';
+            newBar.style.setProperty('--height', Math.random() * 80 + 20 + '%');
+            newBar.style.animationDelay = (chart.children.length * 0.2) + 's';
+            chart.appendChild(newBar);
+        }
+
+        // 3D Chart with Three.js and real data
+        let threeDScene, threeDCamera, threeDRenderer, threeDChartGroup;
+        let threeDData = {
+            motorEfficiency: [85, 88, 92, 89, 87, 91, 94, 88, 90, 93, 86, 95],
+            powerOutput: [120, 135, 150, 140, 130, 145, 160, 138, 142, 155, 125, 158],
+            temperature: [45, 52, 48, 55, 50, 47, 53, 49, 51, 46, 54, 43],
+            vibration: [2.1, 1.8, 2.3, 1.9, 2.0, 1.7, 2.2, 1.6, 2.1, 1.9, 2.4, 1.5]
+        };
+        let current3DDataType = 'motorEfficiency';
+
+        function initialize3DChart() {
+            const container = document.getElementById('threeDChart');
+            
+            // Clear container
+            container.innerHTML = '';
+            
+            // Initialize Three.js scene
+            threeDScene = new THREE.Scene();
+            threeDScene.background = new THREE.Color(0x1a1a1a);
+            
+            // Camera setup
+            threeDCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            threeDCamera.position.set(0, 5, 10);
+            
+            // Renderer setup
+            threeDRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            threeDRenderer.setSize(container.clientWidth, container.clientHeight);
+            threeDRenderer.setClearColor(0x1a1a1a, 0.8);
+            container.appendChild(threeDRenderer.domElement);
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+            threeDScene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 10, 5);
+            threeDScene.add(directionalLight);
+            
+            // Create chart group
+            threeDChartGroup = new THREE.Group();
+            threeDScene.add(threeDChartGroup);
+            
+            // Create 3D data visualization
+            create3DDataVisualization();
+            
+            // Add controls
+            add3DControls();
+            
+            // Start animation loop
+            animate3DChart();
+            
+            // Handle window resize
+            window.addEventListener('resize', on3DWindowResize);
+        }
+
+        function create3DDataVisualization() {
+            // Clear existing chart
+            threeDChartGroup.clear();
+            
+            const data = threeDData[current3DDataType];
+            const spacing = 1.5;
+            const barHeight = 0.5;
+            
+            // Get data type info for scaling and labeling
+            const dataInfo = get3DDataTypeInfo(current3DDataType);
+            
+            // Create 3D bar chart
+            data.forEach((value, index) => {
+                const height = (value / dataInfo.maxValue) * 5; // Scale height
+                const barGeometry = new THREE.BoxGeometry(barHeight, height, barHeight);
+                
+                // Color based on value and data type
+                let color = get3DDataColor(value, current3DDataType);
+                
+                const barMaterial = new THREE.MeshPhongMaterial({ 
+                    color: color,
+                    transparent: true,
+                    opacity: 0.8,
+                    emissive: new THREE.Color(0x000000),
+                    emissiveIntensity: 0.0
+                });
+                
+                const bar = new THREE.Mesh(barGeometry, barMaterial);
+                bar.position.set(
+                    (index - data.length / 2) * spacing,
+                    height / 2,
+                    0
+                );
+                
+                // Add value label
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = 64;
+                canvas.height = 32;
+                context.fillStyle = '#ffffff';
+                context.font = '16px Arial';
+                context.textAlign = 'center';
+                context.fillText(value + dataInfo.unit, 32, 20);
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                const labelMaterial = new THREE.SpriteMaterial({ map: texture });
+                const label = new THREE.Sprite(labelMaterial);
+                label.position.set(bar.position.x, height + 0.5, 0);
+                label.scale.set(2, 1, 1);
+                
+                threeDChartGroup.add(bar);
+                threeDChartGroup.add(label);
+            });
+            
+            // Add grid lines
+            const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+            gridHelper.position.y = -0.1;
+            threeDChartGroup.add(gridHelper);
+            
+            // Add axis labels
+            addAxisLabels();
+        }
+
+        function get3DDataTypeInfo(dataType) {
+            const info = {
+                motorEfficiency: { maxValue: 100, unit: '%', title: 'Motor Efficiency', yLabel: 'Efficiency (%)' },
+                powerOutput: { maxValue: 160, unit: ' kW', title: 'Power Output', yLabel: 'Power (kW)' },
+                temperature: { maxValue: 60, unit: '°C', title: 'Temperature', yLabel: 'Temperature (°C)' },
+                vibration: { maxValue: 3, unit: ' mm/s', title: 'Vibration', yLabel: 'Vibration (mm/s)' }
+            };
+            return info[dataType] || info.motorEfficiency;
+        }
+
+        function get3DDataColor(value, dataType) {
+            switch(dataType) {
+                case 'motorEfficiency':
+                    if (value >= 90) return 0x00ff00; // Green for high efficiency
+                    else if (value >= 80) return 0xffff00; // Yellow for medium
+                    else return 0xff0000; // Red for low efficiency
+                case 'powerOutput':
+                    if (value >= 150) return 0x00ffff; // Cyan for high power
+                    else if (value >= 130) return 0x0080ff; // Blue for medium
+                    else return 0x0000ff; // Dark blue for low power
+                case 'temperature':
+                    if (value >= 55) return 0xff0000; // Red for high temperature
+                    else if (value >= 50) return 0xff8000; // Orange for medium
+                    else return 0x00ff00; // Green for low temperature
+                case 'vibration':
+                    if (value >= 2.5) return 0xff0000; // Red for high vibration
+                    else if (value >= 2.0) return 0xffff00; // Yellow for medium
+                    else return 0x00ff00; // Green for low vibration
+                default:
+                    return 0x888888; // Gray for unknown
+            }
+        }
+
+        function addAxisLabels() {
+            const dataInfo = get3DDataTypeInfo(current3DDataType);
+            
+            // X-axis label
+            const xLabelCanvas = document.createElement('canvas');
+            const xContext = xLabelCanvas.getContext('2d');
+            xLabelCanvas.width = 128;
+            xLabelCanvas.height = 32;
+            xContext.fillStyle = '#FFD700';
+            xContext.font = '14px Arial';
+            xContext.textAlign = 'center';
+            xContext.fillText(dataInfo.title, 64, 20);
+            
+            const xTexture = new THREE.CanvasTexture(xLabelCanvas);
+            const xLabelMaterial = new THREE.SpriteMaterial({ map: xTexture });
+            const xLabel = new THREE.Sprite(xLabelMaterial);
+            xLabel.position.set(0, 0, -8);
+            xLabel.scale.set(3, 1, 1);
+            threeDChartGroup.add(xLabel);
+            
+            // Y-axis label
+            const yLabelCanvas = document.createElement('canvas');
+            const yContext = yLabelCanvas.getContext('2d');
+            yLabelCanvas.width = 128;
+            yLabelCanvas.height = 32;
+            yContext.fillStyle = '#FFD700';
+            yContext.font = '14px Arial';
+            yContext.textAlign = 'center';
+            yContext.fillText(dataInfo.yLabel, 64, 20);
+            
+            const yTexture = new THREE.CanvasTexture(yLabelCanvas);
+            const yLabelMaterial = new THREE.SpriteMaterial({ map: yTexture });
+            const yLabel = new THREE.Sprite(yLabelMaterial);
+            yLabel.position.set(-8, 2.5, 0);
+            yLabel.scale.set(3, 1, 1);
+            yLabel.rotation.y = Math.PI / 2;
+            threeDChartGroup.add(yLabel);
+        }
+
+        function add3DControls() {
+            // Add rotation controls
+            let isRotating = true;
+            let rotationSpeed = 0.01;
+            
+            // Mouse controls for rotation
+            let mouseX = 0;
+            let mouseY = 0;
+            let isMouseDown = false;
+            
+            const container = threeDRenderer.domElement;
+            
+            container.addEventListener('mousedown', (event) => {
+                isMouseDown = true;
+                mouseX = event.clientX;
+                mouseY = event.clientY;
+            });
+            
+            container.addEventListener('mousemove', (event) => {
+                if (isMouseDown) {
+                    const deltaX = event.clientX - mouseX;
+                    const deltaY = event.clientY - mouseY;
+                    
+                    threeDChartGroup.rotation.y += deltaX * 0.01;
+                    threeDChartGroup.rotation.x += deltaY * 0.01;
+                    
+                    mouseX = event.clientX;
+                    mouseY = event.clientY;
+                } else {
+                    // Raycasting for hover effects
+                    const mouse = new THREE.Vector2();
+                    mouse.x = (event.clientX / container.clientWidth) * 2 - 1;
+                    mouse.y = -(event.clientY / container.clientHeight) * 2 + 1;
+                    
+                    const raycaster = new THREE.Raycaster();
+                    raycaster.setFromCamera(mouse, threeDCamera);
+                    
+                    const intersects = raycaster.intersectObjects(threeDChartGroup.children);
+                    
+                    // Reset all bar materials
+                    threeDChartGroup.children.forEach(child => {
+                        if (child.material && child.material.emissive) {
+                            child.material.emissive.setHex(0x000000);
+                        }
+                    });
+                    
+                    // Highlight hovered bar
+                    if (intersects.length > 0) {
+                        const hoveredObject = intersects[0].object;
+                        if (hoveredObject.material && hoveredObject.material.emissive) {
+                            hoveredObject.material.emissive.setHex(0x333333);
+                        }
+                    }
+                }
+            });
+            
+            container.addEventListener('mouseup', () => {
+                isMouseDown = false;
+            });
+            
+            // Touch controls for mobile
+            container.addEventListener('touchstart', (event) => {
+                if (event.touches.length === 1) {
+                    isMouseDown = true;
+                    mouseX = event.touches[0].clientX;
+                    mouseY = event.touches[0].clientY;
+                }
+            });
+            
+            container.addEventListener('touchmove', (event) => {
+                if (isMouseDown && event.touches.length === 1) {
+                    const deltaX = event.touches[0].clientX - mouseX;
+                    const deltaY = event.touches[0].clientY - mouseY;
+                    
+                    threeDChartGroup.rotation.y += deltaX * 0.01;
+                    threeDChartGroup.rotation.x += deltaY * 0.01;
+                    
+                    mouseX = event.touches[0].clientX;
+                    mouseY = event.touches[0].clientY;
+                }
+            });
+            
+            container.addEventListener('touchend', () => {
+                isMouseDown = false;
+            });
+        }
+
+        function animate3DChart() {
+            requestAnimationFrame(animate3DChart);
+            
+            if (threeDRenderer && threeDScene && threeDCamera) {
+                // Auto-rotation when not manually controlled
+                if (!isMouseDown) {
+                    threeDChartGroup.rotation.y += 0.005;
+                }
+                
+                threeDRenderer.render(threeDScene, threeDCamera);
+            }
+        }
+
+        function on3DWindowResize() {
+            if (threeDCamera && threeDRenderer) {
+                const container = document.getElementById('threeDChart');
+                threeDCamera.aspect = container.clientWidth / container.clientHeight;
+                threeDCamera.updateProjectionMatrix();
+                threeDRenderer.setSize(container.clientWidth, container.clientHeight);
+            }
+        }
+
+        function toggle3DRotation() {
+            if (threeDChartGroup) {
+                threeDChartGroup.rotation.y = 0;
+                threeDChartGroup.rotation.x = 0;
+            }
+        }
+
+        function change3DView() {
+            if (threeDCamera) {
+                // Cycle through different camera positions
+                const positions = [
+                    { pos: [0, 5, 10], lookAt: [0, 0, 0] },
+                    { pos: [10, 5, 0], lookAt: [0, 0, 0] },
+                    { pos: [0, 10, 5], lookAt: [0, 0, 0] },
+                    { pos: [-5, 3, 8], lookAt: [0, 0, 0] }
+                ];
+                
+                const currentIndex = Math.floor(Math.random() * positions.length);
+                const newPos = positions[currentIndex];
+                
+                threeDCamera.position.set(...newPos.pos);
+                threeDCamera.lookAt(...newPos.lookAt);
+            }
+        }
+
+        function change3DDataType() {
+            const dataTypes = ['motorEfficiency', 'powerOutput', 'temperature', 'vibration'];
+            const currentIndex = dataTypes.indexOf(current3DDataType);
+            const nextIndex = (currentIndex + 1) % dataTypes.length;
+            current3DDataType = dataTypes[nextIndex];
+            
+            create3DDataVisualization();
+            
+            // Update the chart title to show current data type
+            const chartTitle = document.querySelector('.graph-card:nth-child(5) .graph-title');
+            if (chartTitle) {
+                const dataInfo = get3DDataTypeInfo(current3DDataType);
+                chartTitle.textContent = `3D ${dataInfo.title} Chart`;
+            }
+        }
+
+        function update3DLiveData() {
+            // Simulate live data updates for the 3D chart with realistic patterns
+            if (current3DDataType === 'motorEfficiency') {
+                threeDData.motorEfficiency = threeDData.motorEfficiency.map(value => {
+                    // Motor efficiency tends to fluctuate around a baseline with gradual trends
+                    const trend = Math.sin(Date.now() * 0.001 + Math.random()) * 0.5;
+                    const noise = (Math.random() - 0.5) * 2;
+                    return Math.max(70, Math.min(100, value + trend + noise));
+                });
+            } else if (current3DDataType === 'powerOutput') {
+                threeDData.powerOutput = threeDData.powerOutput.map(value => {
+                    // Power output shows load variations with some randomness
+                    const loadVariation = Math.sin(Date.now() * 0.002 + Math.random()) * 8;
+                    const noise = (Math.random() - 0.5) * 12;
+                    return Math.max(100, Math.min(180, value + loadVariation + noise));
+                });
+            } else if (current3DDataType === 'temperature') {
+                threeDData.temperature = threeDData.temperature.map(value => {
+                    // Temperature shows thermal cycling with gradual changes
+                    const thermalCycle = Math.sin(Date.now() * 0.0015 + Math.random()) * 1.5;
+                    const noise = (Math.random() - 0.5) * 1.5;
+                    return Math.max(40, Math.min(60, value + thermalCycle + noise));
+                });
+            } else if (current3DDataType === 'vibration') {
+                threeDData.vibration = threeDData.vibration.map(value => {
+                    // Vibration shows operational patterns with some instability
+                    const operationalPattern = Math.sin(Date.now() * 0.003 + Math.random()) * 0.3;
+                    const noise = (Math.random() - 0.5) * 0.2;
+                    return Math.max(1.5, Math.min(3.0, value + operationalPattern + noise));
+                });
+            }
+            
+            create3DDataVisualization();
+        }
+
+        // Particle System with Engineering Data
+        let particleMode = 'vibration';
+        let particleData = {
+            vibration: {
+                frequency: 60, // Hz
+                amplitude: 2.5, // mm/s
+                phase: 0
+            },
+            power: {
+                current: 150, // A
+                voltage: 480, // V
+                powerFactor: 0.85
+            },
+            heat: {
+                temperature: 55, // °C
+                thermalGradient: 0.8, // °C/m
+                heatFlow: 1200 // W
+            }
+        };
+
+        function initializeParticles() {
+            const container = document.getElementById('particleContainer');
+            container.innerHTML = ''; // Clear existing particles
+            
+            // Create different types of particles based on mode
+            createDataParticles(container);
+        }
+
+        function createDataParticles(container) {
+            const mode = particleMode;
+            let particleCount, particleClass, animationType;
+            
+            switch(mode) {
+                case 'vibration':
+                    particleCount = Math.floor(particleData.vibration.frequency / 2);
+                    particleClass = 'vibration';
+                    animationType = 'vibration';
+                    break;
+                case 'power':
+                    particleCount = Math.floor(particleData.power.current / 10);
+                    particleClass = 'power';
+                    animationType = 'powerFlow';
+                    break;
+                case 'heat':
+                    particleCount = Math.floor(particleData.heat.heatFlow / 50);
+                    particleClass = 'heat';
+                    animationType = 'heatRise';
+                    break;
+                default:
+                    particleCount = 30;
+                    particleClass = 'vibration';
+                    animationType = 'float';
+            }
+            
+            for (let i = 0; i < particleCount; i++) {
+                createParticle(container, particleClass, animationType, i, particleCount);
+            }
+        }
+
+        function createParticle(container, particleClass, animationType, index, total) {
+            const particle = document.createElement('div');
+            particle.className = `particle ${particleClass}`;
+            
+            // Size based on data values
+            let size;
+            switch(particleClass) {
+                case 'vibration':
+                    size = 3 + (particleData.vibration.amplitude * 2);
+                    break;
+                case 'power':
+                    size = 4 + (particleData.power.powerFactor * 3);
+                    break;
+                case 'heat':
+                    size = 5 + (particleData.heat.temperature / 10);
+                    break;
+                default:
+                    size = 4;
+            }
+            
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            
+            // Position and animation based on data
+            if (animationType === 'powerFlow') {
+                // Power flows horizontally
+                particle.style.left = '-20px';
+                particle.style.top = (20 + (index / total) * 60) + '%';
+                particle.style.animation = `powerFlow ${3 + (particleData.power.current / 50)}s infinite linear`;
+                particle.style.animationDelay = (index * 0.1) + 's';
+            } else if (animationType === 'heatRise') {
+                // Heat rises vertically
+                particle.style.left = (10 + (index / total) * 80) + '%';
+                particle.style.bottom = '-20px';
+                particle.style.animation = `heatRise ${4 + (particleData.heat.temperature / 15)}s infinite ease-out`;
+                particle.style.animationDelay = (index * 0.2) + 's';
+            } else {
+                // Vibration particles oscillate in place
+                particle.style.left = (10 + (index / total) * 80) + '%';
+                particle.style.top = (20 + (index / total) * 60) + '%';
+                particle.style.animation = `vibration ${0.5 + (particleData.vibration.frequency / 100)}s infinite ease-in-out`;
+                particle.style.animationDelay = (index * 0.05) + 's';
+            }
+            
+            container.appendChild(particle);
+        }
+
+        function toggleParticles() {
+            const particles = document.querySelectorAll('.particle');
+            particles.forEach(particle => {
+                if (particle.style.animationPlayState === 'paused') {
+                    particle.style.animationPlayState = 'running';
+                } else {
+                    particle.style.animationPlayState = 'paused';
+                }
+            });
+        }
+
+        function changeParticleSpeed() {
+            const particles = document.querySelectorAll('.particle');
+            particles.forEach(particle => {
+                const currentDuration = parseFloat(particle.style.animationDuration);
+                particle.style.animationDuration = (currentDuration * 0.8) + 's';
+            });
+        }
+
+        function changeParticleMode() {
+            const modes = ['vibration', 'power', 'heat'];
+            const currentIndex = modes.indexOf(particleMode);
+            const nextIndex = (currentIndex + 1) % modes.length;
+            particleMode = modes[nextIndex];
+            
+            // Update the chart title
+            const chartTitle = document.querySelector('.graph-card:nth-child(7) .graph-title');
+            if (chartTitle) {
+                const titles = {
+                    'vibration': 'Vibration Pattern Visualization',
+                    'power': 'Power Flow Visualization',
+                    'heat': 'Thermal Distribution Visualization'
+                };
+                chartTitle.textContent = titles[particleMode];
+            }
+            
+            // Update description
+            const description = document.querySelector('.graph-card:nth-child(7) .graph-description');
+            if (description) {
+                const descriptions = {
+                    'vibration': `Dynamic particle-based data representation showing motor vibration patterns at ${particleData.vibration.frequency}Hz with ${particleData.vibration.amplitude}mm/s amplitude`,
+                    'power': `Dynamic particle-based data representation showing power flow patterns at ${particleData.power.current}A, ${particleData.power.voltage}V with ${(particleData.power.powerFactor * 100).toFixed(0)}% power factor`,
+                    'heat': `Dynamic particle-based data representation showing thermal distribution at ${particleData.heat.temperature}°C with ${particleData.heat.heatFlow}W heat flow`
+                };
+                description.textContent = descriptions[particleMode];
+            }
+            
+            // Regenerate particles with new mode
+            initializeParticles();
+        }
+
+        function updateParticleData() {
+            // Simulate live data updates for particles
+            if (particleMode === 'vibration') {
+                particleData.vibration.frequency = Math.max(30, Math.min(120, 
+                    particleData.vibration.frequency + (Math.random() - 0.5) * 10));
+                particleData.vibration.amplitude = Math.max(1.0, Math.min(5.0, 
+                    particleData.vibration.amplitude + (Math.random() - 0.5) * 0.5));
+            } else if (particleMode === 'power') {
+                particleData.power.current = Math.max(100, Math.min(200, 
+                    particleData.power.current + (Math.random() - 0.5) * 20));
+                particleData.power.powerFactor = Math.max(0.7, Math.min(0.95, 
+                    particleData.power.powerFactor + (Math.random() - 0.5) * 0.05));
+            } else if (particleMode === 'heat') {
+                particleData.heat.temperature = Math.max(40, Math.min(70, 
+                    particleData.heat.temperature + (Math.random() - 0.5) * 3));
+                particleData.heat.heatFlow = Math.max(800, Math.min(1600, 
+                    particleData.heat.heatFlow + (Math.random() - 0.5) * 200));
+            }
+            
+            // Regenerate particles with updated data
+            initializeParticles();
+        }
+
+        // Live data update functions
+        function startLiveDataUpdates() {
+            // Motor data updates
+            liveDataIntervals.motor = setInterval(() => {
+                if (isLiveDataActive.motor && motorChart) {
+                    updateMotorData('normal');
+                }
+            }, 3000);
+
+            // Power data updates
+            liveDataIntervals.power = setInterval(() => {
+                if (isLiveDataActive.power && powerChart) {
+                    updatePowerData('daily');
+                }
+            }, 2000);
+
+            // Temperature data updates
+            liveDataIntervals.temp = setInterval(() => {
+                if (isLiveDataActive.temp && tempChart) {
+                    updateTempData('motor');
+                }
+            }, 4000);
+
+            // Vibration data updates
+            liveDataIntervals.vibration = setInterval(() => {
+                if (isLiveDataActive.vibration && vibrationChart) {
+                    updateVibrationData('normal');
+                }
+            }, 2500);
+
+            // 3D Chart data updates
+            liveDataIntervals.threeD = setInterval(() => {
+                if (isLiveDataActive.threeD) {
+                    update3DLiveData();
+                }
+            }, 4000);
+
+            // Particle System data updates
+            liveDataIntervals.particles = setInterval(() => {
+                if (isLiveDataActive.particles) {
+                    updateParticleData();
+                }
+            }, 5000);
+        }
+
+        function updateMotorData(loadType) {
+            if (!motorChart) return;
+            
+            const baseData = [120, 115, 110, 105, 100, 95, 90];
+            const efficiencyData = [85, 87, 89, 91, 93, 95, 97];
+            
+            let newTorqueData, newEfficiencyData;
+            
+            switch(loadType) {
+                case 'high':
+                    newTorqueData = baseData.map(val => val * 1.2 + Math.random() * 5);
+                    newEfficiencyData = efficiencyData.map(val => val * 0.9 + Math.random() * 3);
+                    break;
+                case 'low':
+                    newTorqueData = baseData.map(val => val * 0.8 + Math.random() * 3);
+                    newEfficiencyData = efficiencyData.map(val => val * 1.05 + Math.random() * 2);
+                    break;
+                default:
+                    newTorqueData = baseData.map(val => val + Math.random() * 4 - 2);
+                    newEfficiencyData = efficiencyData.map(val => val + Math.random() * 2 - 1);
+            }
+            
+            motorChart.data.datasets[0].data = newTorqueData;
+            motorChart.data.datasets[1].data = newEfficiencyData;
+            motorChart.update('none');
+        }
+
+        function updatePowerData(timeframe) {
+            if (!powerChart) return;
+            
+            let newData;
+            switch(timeframe) {
+                case 'weekly':
+                    newData = [45, 42, 78, 95, 88, 65, 48, 52, 67, 89, 91, 76, 58, 44];
+                    powerChart.data.labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                    break;
+                case 'monthly':
+                    newData = [45, 42, 78, 95, 88, 65, 48, 52, 67, 89, 91, 76, 58, 44, 55, 72, 83, 79, 61, 47, 53, 68, 87, 92, 77, 59, 43, 51, 66, 88];
+                    powerChart.data.labels = Array.from({length: 30}, (_, i) => `Day ${i+1}`);
+                    break;
+                default: // daily
+                    newData = [45, 42, 78, 95, 88, 65, 48];
+                    powerChart.data.labels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'];
+            }
+            
+            powerChart.data.datasets[0].data = newData.map(val => val + Math.random() * 10 - 5);
+            powerChart.update('none');
+        }
+
+        function updateTempData(component) {
+            if (!tempChart) return;
+            
+            let newData;
+            switch(component) {
+                case 'transformer':
+                    newData = [
+                        {x: 30, y: 92}, {x: 35, y: 89}, {x: 40, y: 86},
+                        {x: 45, y: 83}, {x: 50, y: 79}, {x: 55, y: 75}
+                    ];
+                    break;
+                case 'electronics':
+                    newData = [
+                        {x: 20, y: 98}, {x: 25, y: 96}, {x: 30, y: 93},
+                        {x: 35, y: 89}, {x: 40, y: 85}, {x: 45, y: 80}
+                    ];
+                    break;
+                default: // motor
+                    newData = [
+                        {x: 25, y: 95}, {x: 30, y: 93}, {x: 35, y: 90},
+                        {x: 40, y: 87}, {x: 45, y: 84}, {x: 50, y: 80}
+                    ];
+            }
+            
+            // Add some random variation
+            newData = newData.map(point => ({
+                x: point.x + Math.random() * 2 - 1,
+                y: point.y + Math.random() * 3 - 1.5
+            }));
+            
+            tempChart.data.datasets[0].data = newData;
+            tempChart.update('none');
+        }
+
+        function updateVibrationData(condition) {
+            if (!vibrationChart) return;
+            
+            let newData;
+            switch(condition) {
+                case 'fault':
+                    newData = [0.8, 2.1, 3.5, 2.8, 1.5, 0.6];
+                    break;
+                case 'maintenance':
+                    newData = [0.3, 0.8, 1.4, 1.1, 0.6, 0.2];
+                    break;
+                default: // normal
+                    newData = [0.5, 1.2, 2.1, 1.8, 0.9, 0.3];
+            }
+            
+            // Add some random variation
+            newData = newData.map(val => val + Math.random() * 0.2 - 0.1);
+            
+            vibrationChart.data.datasets[0].data = newData;
+            vibrationChart.update('none');
+        }
+
+        function toggleLiveData(chartType) {
+            if (isLiveDataActive[chartType] !== undefined) {
+                isLiveDataActive[chartType] = !isLiveDataActive[chartType];
+                const button = event.target;
+                if (isLiveDataActive[chartType]) {
+                    button.textContent = 'PAUSE';
+                    button.classList.remove('paused');
+                } else {
+                    button.textContent = 'RESUME';
+                    button.classList.add('paused');
+                }
+            }
+        }
+
+        function toggle3DLiveData() {
+            toggleLiveData('threeD');
+        }
+
+        function toggleParticleLiveData() {
+            toggleLiveData('particles');
+        }
+
+        // Window resize handler
+        window.addEventListener('resize', function() {
+            if (advancedChart) {
+                advancedChart.resize();
+            }
+        });
+    </script>
+</body>
+</html>
