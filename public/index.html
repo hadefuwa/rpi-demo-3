@@ -795,7 +795,7 @@
       #screen-home .grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr); /* 4-column layout for better card size */
-        grid-template-rows: repeat(auto-fit, minmax(60px, 1fr)); /* Auto-fit rows based on content */
+        grid-template-rows: repeat(auto-fit, minmax(80px, 1fr)); /* Fixed minimum row height for uniformity */
         gap: clamp(6px, 1.5vw, 15px); /* Smaller gap for more space */
         max-width: 95vw; /* Use more viewport width */
         width: 100%;
@@ -805,6 +805,9 @@
         padding: 10px;
         box-sizing: border-box;
         align-content: start; /* Align grid items to start */
+        /* Ensure uniform grid item sizing */
+        grid-auto-rows: 1fr;
+        align-items: stretch;
       }
       
       #screen-home .card {
@@ -817,8 +820,8 @@
         transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         position: relative;
         overflow: hidden;
-        min-height: clamp(70px, 12vh, 120px); /* Responsive minimum height */
-        height: auto; /* Let height be determined by content */
+        min-height: clamp(80px, 12vh, 120px); /* Uniform minimum height */
+        height: 100%; /* Force all cards to same height */
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -835,6 +838,13 @@
           0 clamp(2px, 1vw, 5px) clamp(8px, 2vw, 15px) rgba(0, 0, 0, 0.4),
           0 0 0 1px rgba(255, 255, 255, 0.2),
           inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+        /* Ensure uniform sizing */
+        box-sizing: border-box;
+        flex-shrink: 0;
+        /* Force uniform dimensions */
+        aspect-ratio: 1;
+        width: 100%;
+        height: 100%;
       }
       
       /* Add a glossy reflection effect */
@@ -1786,16 +1796,23 @@
         
         #screen-home .grid {
           grid-template-columns: repeat(4, 1fr);
-          grid-template-rows: repeat(4, 1fr);
+          grid-template-rows: repeat(4, 1fr); /* Fixed 4 rows for 5-inch screen */
           gap: 4px;
           padding: 4px;
           height: calc(100vh - 80px); /* Account for smaller topbar */
+          /* Ensure perfect square grid cells */
+          grid-auto-rows: 1fr;
+          align-items: stretch;
         }
         
         #screen-home .card {
           padding: 4px 2px;
           min-height: 65px;
+          height: 100%; /* Force uniform height */
           border-radius: 6px;
+          /* Ensure perfect uniformity on 5-inch screen */
+          aspect-ratio: 1;
+          width: 100%;
         }
         
         #screen-home .card .label {
@@ -1831,6 +1848,7 @@
         #screen-home .card {
           padding: 10px 6px;
           min-height: clamp(60px, 10vh, 90px);
+          height: 100%; /* Force uniform height */
         }
         
         #screen-home .card .label {
@@ -1861,6 +1879,7 @@
         #screen-home .card {
           padding: 8px 4px;
           min-height: clamp(55px, 8vh, 80px);
+          height: 100%; /* Force uniform height */
         }
         
         #screen-home .card .label {
@@ -1902,6 +1921,7 @@
         #screen-home .card {
           padding: 6px 3px;
           min-height: clamp(50px, 7vh, 70px);
+          height: 100%; /* Force uniform height */
           border-width: 1px;
         }
         
@@ -1942,6 +1962,7 @@
         
         #screen-home .card {
           min-height: clamp(45px, 6vh, 60px);
+          height: 100%; /* Force uniform height */
           padding: 4px 2px;
         }
       }

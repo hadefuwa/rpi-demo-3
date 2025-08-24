@@ -9,3 +9,5 @@ please do not run any server, this is for my pi not my pc. dont run tests, i wil
 
 
 the page also has some issues with responsiveness. it needs to be100% responsive, both vertically and horizontally, so no window scroll bars show.
+
+can you remove the mouse cursor on this page when on the 5inch touchscreen but not when on the large display like a desktop or web server
