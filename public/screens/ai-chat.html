@@ -18,7 +18,7 @@
       <div class="messages" id="messages">
         <div class="message ai-message">
           <div class="message-content">
-            Hello! I'm Gemma 3, your AI assistant. How can I help you today?
+            Hello! I'm Gemma 3 1B, your AI assistant. How can I help you today?
           </div>
         </div>
       </div>
@@ -800,13 +800,13 @@
         if (response.ok) {
           const data = await response.json();
           const hasGemma = data.models && data.models.some(model => 
-            model.name && model.name.includes('gemma3:270m')
+            model.name && model.name.includes('gemma3:1b')
           );
           
           if (hasGemma) {
             setConnected(true);
           } else {
-            setConnected(false, 'Gemma 3 not found');
+            setConnected(false, 'Gemma 3 1B not found');
           }
         } else {
           setConnected(false, 'Ollama not running');
@@ -850,7 +850,7 @@
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            model: 'gemma3:270m',
+            model: 'gemma3:1b',
             prompt: message,
             stream: false
           })
@@ -909,7 +909,7 @@
     }
     
     function clearChat() {
-      messages.innerHTML = '<div class="message ai-message"><div class="message-content">Hello! I\'m Gemma 3, your AI assistant. How can I help you today?</div></div>';
+      messages.innerHTML = '<div class="message ai-message"><div class="message-content">Hello! I\'m Gemma 3 1B, your AI assistant. How can I help you today?</div></div>';
       chatHistory = [];
       saveChatHistory();
     }
