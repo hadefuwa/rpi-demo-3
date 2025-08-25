@@ -3,142 +3,639 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emoji Test - RPI Showcase</title>
+    <title>Emoji Animation Studio - RPI Showcase</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --card-border: rgba(255, 255, 255, 0.2);
+            --text: #ffffff;
+            --accent: #ffd700;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --error: #f87171;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #000;
-            color: #fff;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
+        }
+
+        .header {
             text-align: center;
+            margin-bottom: 40px;
         }
-        
-        .emoji-test {
-            font-size: 48px;
-            margin: 20px;
-            padding: 20px;
-            border: 2px solid #333;
-            border-radius: 10px;
-            background: #111;
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 2s ease-in-out infinite alternate;
         }
-        
-        .test-button {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px;
-            font-size: 16px;
+
+        @keyframes titleGlow {
+            from { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.5)); }
+            to { filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.8)); }
         }
-        
-        .test-button:hover {
-            background: #0056b3;
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
         }
-        
-        .result {
-            margin: 20px;
+
+        .controls-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.8;
+        }
+
+        .emoji-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .emoji-option {
+            font-size: 2rem;
             padding: 15px;
-            border-radius: 5px;
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .emoji-option:hover {
+            transform: scale(1.1);
+            border-color: var(--accent);
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .emoji-option.selected {
+            border-color: var(--accent);
+            background: rgba(255, 215, 0, 0.2);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .skin-tone-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .skin-tone {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .skin-tone:hover {
+            transform: scale(1.2);
+            border-color: var(--accent);
+        }
+
+        .skin-tone.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .skin-tone::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
             font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
-        
-        .success {
-            background: #28a745;
-            color: white;
+
+        .skin-tone.selected::after {
+            opacity: 1;
         }
-        
-        .warning {
-            background: #ffc107;
-            color: black;
+
+        .animation-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
-        
-        .error {
-            background: #dc3545;
-            color: white;
+
+        .btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text);
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn.primary {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+            border: none;
+        }
+
+        .btn.primary:hover {
+            background: linear-gradient(45deg, #ffed4e, #ffd700);
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        .animation-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .emoji-display {
+            font-size: 8rem;
+            transition: all 0.5s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .emoji-display:hover {
+            transform: scale(1.1);
+        }
+
+        /* Animation Classes */
+        .bounce {
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        .spin {
+            animation: spin 2s linear infinite;
+        }
+
+        .wiggle {
+            animation: wiggle 0.5s ease-in-out infinite;
+        }
+
+        .pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out infinite;
+        }
+
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .rainbow {
+            animation: rainbow 2s linear infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-30px); }
+            60% { transform: translateY(-15px); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes wiggle {
+            0%, 7% { transform: rotateZ(0); }
+            15% { transform: rotateZ(-15deg); }
+            20% { transform: rotateZ(10deg); }
+            25% { transform: rotateZ(-10deg); }
+            30% { transform: rotateZ(6deg); }
+            35% { transform: rotateZ(-4deg); }
+            40%, 100% { transform: rotateZ(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes rainbow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: var(--accent);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFloat 3s ease-out forwards;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) scale(0);
+            }
+        }
+
+        .home-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text);
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .emoji-display {
+                font-size: 5rem;
+            }
+            
+            .emoji-option {
+                font-size: 1.5rem;
+                padding: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>🎮 Emoji Test Page</h1>
-    <p>Testing emoji rendering and fallback systems</p>
+    <a href="index.html" class="home-btn">🏠 Home</a>
     
-    <div class="emoji-test">
-        <h2>Test Emojis:</h2>
-        <p>🖨️ 📚 🤖 🎮 🔮 🎈 📷 ⚙️ 📜 ⚙️ 📊 👆 🎬 🎨 🌪️ 🔘</p>
-        <p>These should display as colored emojis if working properly</p>
+    <div class="container">
+        <div class="header">
+            <h1>🎭 Emoji Animation Studio</h1>
+            <p>Create, customize, and animate your favorite emojis!</p>
+        </div>
+
+        <div class="controls-section">
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label>Choose Emoji</label>
+                    <div class="emoji-selector" id="emojiSelector">
+                        <div class="emoji-option" data-emoji="😀">😀</div>
+                        <div class="emoji-option" data-emoji="😍">😍</div>
+                        <div class="emoji-option" data-emoji="🤖">🤖</div>
+                        <div class="emoji-option" data-emoji="🎮">🎮</div>
+                        <div class="emoji-option" data-emoji="🌟">🌟</div>
+                        <div class="emoji-option" data-emoji="🎨">🎨</div>
+                        <div class="emoji-option" data-emoji="🚀">🚀</div>
+                        <div class="emoji-option" data-emoji="💎">💎</div>
+                        <div class="emoji-option" data-emoji="🎪">🎪</div>
+                        <div class="emoji-option" data-emoji="🌈">🌈</div>
+                        <div class="emoji-option" data-emoji="🎭">🎭</div>
+                        <div class="emoji-option" data-emoji="✨">✨</div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Skin Tone</label>
+                    <div class="skin-tone-selector" id="skinToneSelector">
+                        <div class="skin-tone" style="background: #ffdbac;" data-tone=""></div>
+                        <div class="skin-tone" style="background: #f1c27d;" data-tone="🏻"></div>
+                        <div class="skin-tone" style="background: #e0ac69;" data-tone="🏼"></div>
+                        <div class="skin-tone" style="background: #c68642;" data-tone="🏽"></div>
+                        <div class="skin-tone" style="background: #8d5524;" data-tone="🏾"></div>
+                        <div class="skin-tone" style="background: #5c3836;" data-tone="🏿"></div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Animation Style</label>
+                    <div class="animation-controls">
+                        <button class="btn" data-animation="bounce">🦘 Bounce</button>
+                        <button class="btn" data-animation="spin">🌀 Spin</button>
+                        <button class="btn" data-animation="wiggle">🐛 Wiggle</button>
+                        <button class="btn" data-animation="pulse">💓 Pulse</button>
+                        <button class="btn" data-animation="shake">📱 Shake</button>
+                        <button class="btn" data-animation="float">🪂 Float</button>
+                        <button class="btn" data-animation="rainbow">🌈 Rainbow</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn primary" id="randomBtn">🎲 Random Combo</button>
+                <button class="btn" id="stopBtn">⏹️ Stop</button>
+                <button class="btn" id="particleBtn">✨ Particle Burst</button>
+            </div>
+        </div>
+
+        <div class="animation-section">
+            <div class="particles" id="particles"></div>
+            <div class="emoji-display" id="emojiDisplay">😀</div>
+        </div>
     </div>
-    
-    <button class="test-button" onclick="testEmojiRendering()">Test Emoji Rendering</button>
-    <button class="test-button" onclick="testEmojiFonts()">Test Emoji Fonts</button>
-    <button class="test-button" onclick="window.location.href='index.html'">Back to Homepage</button>
-    
-    <div id="result"></div>
-    
+
     <script>
-        function testEmojiRendering() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 50;
-            canvas.height = 50;
-            
-            // Test with emoji
-            ctx.font = '32px Arial';
-            ctx.fillText('😀', 0, 32);
-            
-            const imageData = ctx.getImageData(0, 0, 50, 50);
-            const data = imageData.data;
-            
-            let hasColor = false;
-            for (let i = 0; i < data.length; i += 4) {
-                if (data[i] > 0 || data[i + 1] > 0 || data[i + 2] > 0) {
-                    hasColor = true;
-                    break;
+        class EmojiStudio {
+            constructor() {
+                this.currentEmoji = '😀';
+                this.currentSkinTone = '';
+                this.currentAnimation = '';
+                this.isAnimating = false;
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.setupSkinTones();
+            }
+
+            initializeElements() {
+                this.emojiDisplay = document.getElementById('emojiDisplay');
+                this.emojiSelector = document.getElementById('emojiSelector');
+                this.skinToneSelector = document.getElementById('skinToneSelector');
+                this.particles = document.getElementById('particles');
+                
+                this.randomBtn = document.getElementById('randomBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.particleBtn = document.getElementById('particleBtn');
+            }
+
+            bindEvents() {
+                // Emoji selection
+                this.emojiSelector.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('emoji-option')) {
+                        this.selectEmoji(e.target);
+                    }
+                });
+
+                // Skin tone selection
+                this.skinToneSelector.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('skin-tone')) {
+                        this.selectSkinTone(e.target);
+                    }
+                });
+
+                // Animation buttons
+                document.querySelectorAll('[data-animation]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.playAnimation(e.target.dataset.animation);
+                    });
+                });
+
+                // Control buttons
+                this.randomBtn.addEventListener('click', () => this.randomCombo());
+                this.stopBtn.addEventListener('click', () => this.stopAnimation());
+                this.particleBtn.addEventListener('click', () => this.createParticleBurst());
+
+                // Click emoji to randomize
+                this.emojiDisplay.addEventListener('click', () => this.randomCombo());
+            }
+
+            setupSkinTones() {
+                // Set default skin tone
+                this.skinToneSelector.children[0].classList.add('selected');
+            }
+
+            selectEmoji(emojiElement) {
+                // Remove previous selection
+                this.emojiSelector.querySelectorAll('.emoji-option').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                
+                // Add selection to clicked element
+                emojiElement.classList.add('selected');
+                
+                // Update emoji
+                this.currentEmoji = emojiElement.dataset.emoji;
+                this.updateEmojiDisplay();
+            }
+
+            selectSkinTone(skinToneElement) {
+                // Remove previous selection
+                this.skinToneSelector.querySelectorAll('.skin-tone').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                
+                // Add selection to clicked element
+                skinToneElement.classList.add('selected');
+                
+                // Update skin tone
+                this.currentSkinTone = skinToneElement.dataset.tone;
+                this.updateEmojiDisplay();
+            }
+
+            updateEmojiDisplay() {
+                // Combine emoji with skin tone modifier
+                const combinedEmoji = this.currentEmoji + this.currentSkinTone;
+                this.emojiDisplay.textContent = combinedEmoji;
+                
+                // Add a subtle entrance animation
+                this.emojiDisplay.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    this.emojiDisplay.style.transform = 'scale(1)';
+                }, 100);
+            }
+
+            playAnimation(animationType) {
+                // Stop current animation
+                this.stopAnimation();
+                
+                // Apply new animation
+                this.currentAnimation = animationType;
+                this.emojiDisplay.classList.add(animationType);
+                this.isAnimating = true;
+                
+                // Update button states
+                document.querySelectorAll('[data-animation]').forEach(btn => {
+                    btn.classList.remove('primary');
+                });
+                event.target.classList.add('primary');
+            }
+
+            stopAnimation() {
+                // Remove all animation classes
+                this.emojiDisplay.className = 'emoji-display';
+                this.currentAnimation = '';
+                this.isAnimating = false;
+                
+                // Reset button states
+                document.querySelectorAll('[data-animation]').forEach(btn => {
+                    btn.classList.remove('primary');
+                });
+            }
+
+            randomCombo() {
+                // Random emoji
+                const emojis = Array.from(this.emojiSelector.children).map(el => el.dataset.emoji);
+                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                
+                // Random skin tone
+                const skinTones = Array.from(this.skinToneSelector.children).map(el => el.dataset.tone);
+                const randomSkinTone = skinTones[Math.floor(Math.random() * skinTones.length)];
+                
+                // Random animation
+                const animations = ['bounce', 'spin', 'wiggle', 'pulse', 'shake', 'float', 'rainbow'];
+                const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
+                
+                // Apply random selections
+                this.currentEmoji = randomEmoji;
+                this.currentSkinTone = randomSkinTone;
+                
+                // Update UI
+                this.updateEmojiDisplay();
+                this.selectEmoji(this.emojiSelector.querySelector(`[data-emoji="${randomEmoji}"]`));
+                this.selectSkinTone(this.skinToneSelector.querySelector(`[data-tone="${randomSkinTone}"]`));
+                
+                // Play random animation
+                this.playAnimation(randomAnimation);
+                
+                // Create particle burst
+                this.createParticleBurst();
+            }
+
+            createParticleBurst() {
+                // Clear existing particles
+                this.particles.innerHTML = '';
+                
+                // Create new particles
+                for (let i = 0; i < 20; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    
+                    // Random properties
+                    const size = Math.random() * 8 + 4;
+                    const startX = Math.random() * 100;
+                    const startY = Math.random() * 100;
+                    const delay = Math.random() * 0.5;
+                    const duration = Math.random() * 2 + 2;
+                    
+                    particle.style.cssText = `
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${startX}%;
+                        top: ${startY}%;
+                        animation-delay: ${delay}s;
+                        animation-duration: ${duration}s;
+                    `;
+                    
+                    this.particles.appendChild(particle);
                 }
-            }
-            
-            const result = document.getElementById('result');
-            if (hasColor) {
-                result.className = 'result success';
-                result.textContent = '✅ Emojis are rendering with color!';
-            } else {
-                result.className = 'result warning';
-                result.textContent = '⚠️ Emojis may not be rendering properly';
+                
+                // Remove particles after animation
+                setTimeout(() => {
+                    this.particles.innerHTML = '';
+                }, 5000);
             }
         }
-        
-        function testEmojiFonts() {
-            const testEmoji = '😀';
-            const span = document.createElement('span');
-            span.textContent = testEmoji;
-            span.style.fontSize = '32px';
-            span.style.fontFamily = 'NotoColorEmoji, TwemojiMozilla, Apple Color Emoji, Segoe UI Emoji';
-            
-            document.body.appendChild(span);
-            
-            // Check if the emoji rendered differently than default
-            const defaultSpan = document.createElement('span');
-            defaultSpan.textContent = testEmoji;
-            defaultSpan.style.fontSize = '32px';
-            defaultSpan.style.fontFamily = 'Arial';
-            
-            document.body.appendChild(defaultSpan);
-            
-            const result = document.getElementById('result');
-            result.className = 'result success';
-            result.textContent = '✅ Emoji font test completed. Check if emojis look different above.';
-            
-            // Clean up test elements
-            setTimeout(() => {
-                span.remove();
-                defaultSpan.remove();
-            }, 3000);
-        }
-        
-        // Auto-test on page load
-        window.addEventListener('load', () => {
-            setTimeout(testEmojiRendering, 1000);
+
+        // Initialize the emoji studio when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new EmojiStudio();
         });
     </script>
 </body>

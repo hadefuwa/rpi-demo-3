@@ -1,18 +1,18 @@
 <section id="screen-ai-chat" class="screen">
   <div class="panel">
+    <!-- Header -->
     <div class="header">
       <h2>AI Chat</h2>
-      <button class="home-btn" onclick="goHome()">HOME</button>
-    </div>
-    
-    <!-- Connection Status -->
-    <div class="status-bar">
-      <div class="status-indicator" id="statusIndicator">
-        <span class="status-dot"></span>
-        <span class="status-text">Connecting...</span>
+      <div class="header-right">
+        <!-- Connection Status -->
+        <div class="status-indicator" id="statusIndicator">
+          <span class="status-dot"></span>
+          <span class="status-text">Connecting...</span>
+        </div>
+        <button class="home-btn" onclick="goHome()">HOME</button>
       </div>
     </div>
-
+    
     <!-- Chat Messages Area -->
     <div class="chat-container">
       <div class="messages" id="messages">
@@ -142,12 +142,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Toolbar -->
-    <div class="toolbar">
-      <button id="btnHome" class="chip">Home</button>
-      <button id="clearChat" class="chip">Clear Chat</button>
-    </div>
   </div>
 </section>
 
@@ -177,6 +171,8 @@
     gap: 12px;
     padding: 14px;
     box-sizing: border-box;
+    min-height: 0; /* Allow panel to shrink */
+    overflow: hidden; /* Prevent overflow */
   }
 
   /* Header */
@@ -185,6 +181,12 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
+  }
+
+  #screen-ai-chat .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   #screen-ai-chat h2 {
@@ -218,13 +220,7 @@
     transform: scale(0.95);
   }
 
-  /* Status Bar */
-  #screen-ai-chat .status-bar {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 8px;
-  }
-
+  /* Status Indicator (now in header) */
   #screen-ai-chat .status-indicator {
     display: flex;
     align-items: center;
@@ -262,6 +258,7 @@
     display: flex;
     flex-direction: column;
     margin-bottom: 8px; /* Add some space below */
+    flex-shrink: 0; /* Don't allow chat container to shrink */
   }
 
   #screen-ai-chat .messages {
@@ -332,6 +329,7 @@
   /* Input Area */
   #screen-ai-chat .input-area {
     margin-bottom: 8px;
+    flex-shrink: 0; /* Don't allow input area to shrink */
   }
 
   #screen-ai-chat .input-container {
@@ -384,37 +382,44 @@
   #screen-ai-chat .keyboard-container {
     background: rgba(255,255,255,0.05);
     border-radius: 12px;
-    padding: 12px;
+    padding: 8px; /* Reduced from 12px */
     border: 1px solid rgba(255,255,255,0.1);
+    max-height: 40vh; /* Ensure keyboard doesn't exceed 40% of viewport height */
+    overflow: hidden; /* Prevent overflow */
+    flex-shrink: 1; /* Allow keyboard to shrink if needed */
+    min-height: 0; /* Allow keyboard to shrink to minimum */
+    position: relative; /* Ensure proper positioning */
   }
 
   #screen-ai-chat .keyboard {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px; /* Reduced from 8px */
+    transform: scale(0.8); /* Make keyboard 20% smaller */
+    transform-origin: top center;
   }
 
   #screen-ai-chat .keyboard-layout {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px; /* Reduced from 8px */
   }
 
   #screen-ai-chat .keyboard-row {
     display: flex;
-    gap: 6px;
+    gap: 4px; /* Reduced from 6px */
     justify-content: center;
   }
 
   #screen-ai-chat .key {
     flex: 1;
-    min-width: 40px;
-    height: 60px;
+    min-width: 32px; /* Reduced from 40px */
+    height: 48px; /* Reduced from 60px */
     border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 12px;
+    border-radius: 10px; /* Reduced from 12px */
     background: rgba(255,255,255,0.08);
     color: #fff;
-    font-size: 18px;
+    font-size: 14px; /* Reduced from 18px */
     font-weight: 500;
     cursor: pointer;
     transition: all 0.1s ease;
@@ -451,43 +456,37 @@
     color: #fff;
   }
 
-  /* Toolbar */
-  #screen-ai-chat .toolbar {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-  }
-
-  #screen-ai-chat .chip {
-    padding: 8px 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.18);
-    background: rgba(255,255,255,0.08);
-    color: #fff;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.1s ease;
-    font-size: 14px;
-  }
-
-  #screen-ai-chat .chip:hover {
-    background: rgba(255,255,255,0.14);
-    transform: translateY(-1px);
-  }
-
-  #screen-ai-chat .chip:active {
-    transform: translateY(0);
-  }
-
   /* Responsive adjustments */
   @media (max-width: 480px) {
     #screen-ai-chat .chat-container {
       height: 50px; /* Keep small height on mobile */
     }
     
+    #screen-ai-chat .header {
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    
+    #screen-ai-chat .header-right {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    #screen-ai-chat .keyboard-container {
+      max-height: 35vh; /* Further reduce height on small screens */
+      padding: 6px;
+    }
+    
+    #screen-ai-chat .keyboard {
+      transform: scale(0.7); /* Make even smaller on mobile */
+      gap: 4px;
+    }
+    
     #screen-ai-chat .key {
-      min-width: 32px;
-      height: 50px;
-      font-size: 16px;
+      min-width: 28px;
+      height: 42px;
+      font-size: 12px;
     }
     
     #screen-ai-chat .message-content {
@@ -505,19 +504,111 @@
     #screen-ai-chat .chat-container {
       height: 50px; /* Keep small height for very small screens */
     }
+    
+    #screen-ai-chat .header {
+      margin-bottom: 6px;
+    }
+    
+    #screen-ai-chat .keyboard-container {
+      max-height: 30vh; /* Very small height for small screens */
+      padding: 4px;
+    }
+    
+    #screen-ai-chat .keyboard {
+      transform: scale(0.65); /* Even smaller scale for very small screens */
+      gap: 3px;
+    }
+    
+    #screen-ai-chat .key {
+      min-width: 24px;
+      height: 36px;
+      font-size: 11px;
+    }
+  }
+
+  /* For extremely small screens (like 5-inch displays) */
+  @media (max-width: 400px) and (max-height: 500px) {
+    #screen-ai-chat .header {
+      margin-bottom: 4px;
+    }
+    
+    #screen-ai-chat .header-right {
+      gap: 8px;
+    }
+    
+    #screen-ai-chat .status-indicator {
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+    
+    #screen-ai-chat .home-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    
+    #screen-ai-chat .keyboard-container {
+      max-height: 25vh;
+      padding: 3px;
+    }
+    
+    #screen-ai-chat .keyboard {
+      transform: scale(0.6);
+      gap: 2px;
+    }
+    
+    #screen-ai-chat .key {
+      min-width: 20px;
+      height: 32px;
+      font-size: 10px;
+    }
+    
+    #screen-ai-chat .panel {
+      padding: 10px;
+      gap: 8px;
+    }
   }
 
   /* Tablet-specific optimizations */
   @media (min-width: 768px) {
+    #screen-ai-chat .keyboard-container {
+      max-height: 45vh;
+      padding: 10px;
+    }
+    
+    #screen-ai-chat .keyboard {
+      transform: scale(0.85); /* Slightly larger on tablets */
+      gap: 8px;
+    }
+    
+    #screen-ai-chat .key {
+      min-width: 45px;
+      height: 65px;
+      font-size: 18px;
+      border-radius: 14px;
+    }
+    
+    #screen-ai-chat .keyboard-row {
+      gap: 6px;
+    }
+  }
+
+  /* Large screen optimizations */
+  @media (min-width: 1200px) {
+    #screen-ai-chat .keyboard-container {
+      max-height: 50vh;
+      padding: 12px;
+    }
+    
+    #screen-ai-chat .keyboard {
+      transform: scale(0.9); /* Larger scale on big screens */
+      gap: 10px;
+    }
+    
     #screen-ai-chat .key {
       min-width: 50px;
       height: 70px;
       font-size: 20px;
       border-radius: 16px;
-    }
-    
-    #screen-ai-chat .keyboard {
-      gap: 10px;
     }
     
     #screen-ai-chat .keyboard-row {
@@ -607,18 +698,6 @@
       
       // Keyboard keys
       keyboard.addEventListener('click', handleKeyPress);
-      
-      // Home button
-      const homeButton = document.querySelector('#btnHome');
-      if (homeButton) {
-        homeButton.addEventListener('click', goHome);
-      }
-      
-      // Clear chat button
-      const clearButton = document.querySelector('#clearChat');
-      if (clearButton) {
-        clearButton.addEventListener('click', clearChat);
-      }
       
       // Input focus to show keyboard
       messageInput.addEventListener('focus', () => {
