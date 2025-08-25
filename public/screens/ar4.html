@@ -25,13 +25,74 @@
             border-radius: 5px;
             font-size: 12px;
         }
+        .touch-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            height: 150px;
+            display: none;
+            pointer-events: none;
+        }
+        .joystick {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: auto;
+        }
+        .joystick-knob {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .look-area {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        @media (max-width: 768px) {
+            .touch-controls {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
     <div class="controls">
-        <div>WASD: Move</div>
+        <div>WASD: Move (Desktop)</div>
         <div>Mouse: Look around (click first)</div>
+        <div>Touch: Use virtual controls (Mobile)</div>
+    </div>
+    <div class="touch-controls">
+        <div class="joystick" id="joystick">
+            <div class="joystick-knob" id="joystick-knob"></div>
+        </div>
+        <div class="look-area" id="look-area">
+            Drag to look
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -174,6 +235,12 @@
         // Simple controls
         const keys = {};
         const moveSpeed = 0.1;
+        
+        // Touch controls variables
+        const touchMovement = { x: 0, y: 0 };
+        const touchLook = { x: 0, y: 0 };
+        let joystickActive = false;
+        let lookActive = false;
 
         document.addEventListener('keydown', (event) => {
             keys[event.code] = true;
@@ -204,6 +271,119 @@
             }
         });
 
+        // Touch controls for mobile
+        const joystick = document.getElementById('joystick');
+        const joystickKnob = document.getElementById('joystick-knob');
+        const lookArea = document.getElementById('look-area');
+
+        // Virtual joystick for movement
+        function handleJoystickStart(e) {
+            joystickActive = true;
+            e.preventDefault();
+        }
+
+        function handleJoystickMove(e) {
+            if (!joystickActive) return;
+            e.preventDefault();
+            
+            const rect = joystick.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const touch = e.touches ? e.touches[0] : e;
+            const deltaX = touch.clientX - centerX;
+            const deltaY = touch.clientY - centerY;
+            
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            const maxDistance = rect.width / 2;
+            
+            if (distance <= maxDistance) {
+                touchMovement.x = deltaX / maxDistance;
+                touchMovement.y = deltaY / maxDistance;
+                joystickKnob.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
+            } else {
+                const angle = Math.atan2(deltaY, deltaX);
+                touchMovement.x = Math.cos(angle);
+                touchMovement.y = Math.sin(angle);
+                const clampedX = Math.cos(angle) * maxDistance;
+                const clampedY = Math.sin(angle) * maxDistance;
+                joystickKnob.style.transform = `translate(calc(-50% + ${clampedX}px), calc(-50% + ${clampedY}px))`;
+            }
+        }
+
+        function handleJoystickEnd(e) {
+            joystickActive = false;
+            touchMovement.x = 0;
+            touchMovement.y = 0;
+            joystickKnob.style.transform = 'translate(-50%, -50%)';
+            e.preventDefault();
+        }
+
+        // Look area for camera rotation
+        let lastTouchX = 0;
+        let lastTouchY = 0;
+
+        function handleLookStart(e) {
+            lookActive = true;
+            const touch = e.touches ? e.touches[0] : e;
+            lastTouchX = touch.clientX;
+            lastTouchY = touch.clientY;
+            e.preventDefault();
+        }
+
+        function handleLookMove(e) {
+            if (!lookActive) return;
+            e.preventDefault();
+            
+            const touch = e.touches ? e.touches[0] : e;
+            const deltaX = touch.clientX - lastTouchX;
+            const deltaY = touch.clientY - lastTouchY;
+            
+            const sensitivity = 0.005;
+            camera.rotation.y -= deltaX * sensitivity;
+            camera.rotation.x -= deltaY * sensitivity;
+            camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.rotation.x));
+            
+            lastTouchX = touch.clientX;
+            lastTouchY = touch.clientY;
+        }
+
+        function handleLookEnd(e) {
+            lookActive = false;
+            e.preventDefault();
+        }
+
+        // Touch event listeners
+        joystick.addEventListener('touchstart', handleJoystickStart);
+        joystick.addEventListener('touchmove', handleJoystickMove);
+        joystick.addEventListener('touchend', handleJoystickEnd);
+        
+        lookArea.addEventListener('touchstart', handleLookStart);
+        lookArea.addEventListener('touchmove', handleLookMove);
+        lookArea.addEventListener('touchend', handleLookEnd);
+
+        // Mouse events for joystick (for testing on desktop)
+        joystick.addEventListener('mousedown', handleJoystickStart);
+        document.addEventListener('mousemove', (e) => {
+            if (joystickActive) handleJoystickMove(e);
+        });
+        document.addEventListener('mouseup', handleJoystickEnd);
+
+        // Mouse events for look area (for testing on desktop)
+        lookArea.addEventListener('mousedown', handleLookStart);
+        document.addEventListener('mousemove', (e) => {
+            if (lookActive) handleLookMove(e);
+        });
+
+        // Auto-show touch controls on touch devices
+        function checkTouchDevice() {
+            const touchControls = document.querySelector('.touch-controls');
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                touchControls.style.display = 'block';
+            }
+        }
+        checkTouchDevice();
+
         // Handle window resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -215,12 +395,13 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // Movement
+            // Movement (keyboard + touch)
             const direction = new THREE.Vector3();
             camera.getWorldDirection(direction);
             const right = new THREE.Vector3();
             right.crossVectors(direction, camera.up).normalize();
 
+            // Keyboard movement
             if (keys['KeyW']) {
                 camera.position.add(direction.multiplyScalar(moveSpeed));
             }
@@ -232,6 +413,12 @@
             }
             if (keys['KeyD']) {
                 camera.position.add(right.multiplyScalar(moveSpeed));
+            }
+
+            // Touch movement
+            if (touchMovement.x !== 0 || touchMovement.y !== 0) {
+                camera.position.add(right.multiplyScalar(touchMovement.x * moveSpeed));
+                camera.position.add(direction.multiplyScalar(-touchMovement.y * moveSpeed));
             }
 
             renderer.render(scene, camera);
