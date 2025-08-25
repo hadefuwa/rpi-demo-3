@@ -330,6 +330,26 @@
   #screen-ai-chat .ai-message .message-content {
     background: rgba(255,255,255,0.1);
     color: #e4e6f1;
+    position: relative; /* For cursor positioning */
+  }
+
+  /* Blinking cursor for AI messages being generated */
+  #screen-ai-chat .ai-message .message-content::after {
+    content: '|';
+    color: #3a6df0;
+    animation: blink 1s infinite;
+    margin-left: 2px;
+    font-weight: bold;
+  }
+
+  /* Hide cursor when message is complete */
+  #screen-ai-chat .ai-message .message-content.complete::after {
+    display: none;
+  }
+
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
   }
 
   /* Input Area */
@@ -835,7 +855,7 @@
       if (!message || !isConnected || isTyping) return;
       
       // Add user message to chat
-      addMessage(message, 'user');
+      const userMessageDiv = addMessage(message, 'user');
       messageInput.value = '';
       sendButton.disabled = true;
       
@@ -852,17 +872,58 @@
           body: JSON.stringify({
             model: 'gemma3:1b',
             prompt: message,
-            stream: false
+            stream: true // Enable streaming
           })
         });
         
         if (response.ok) {
-          const data = await response.json();
-          const aiResponse = data.response || 'Sorry, I couldn\'t generate a response.';
-          
-          // Remove typing indicator and add AI response
+          // Remove typing indicator and add AI response container
           removeTypingIndicator(typingIndicator);
-          addMessage(aiResponse, 'ai');
+          const aiMessageDiv = addMessage('', 'ai');
+          const contentDiv = aiMessageDiv.querySelector('.message-content');
+          
+          // Read the streaming response
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let fullResponse = '';
+          
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              
+              const chunk = decoder.decode(value);
+              const lines = chunk.split('\n');
+              
+              for (const line of lines) {
+                if (line.trim() === '') continue;
+                
+                try {
+                  const data = JSON.parse(line);
+                  if (data.response) {
+                    fullResponse += data.response;
+                    // Update the message content in real-time
+                    contentDiv.textContent = fullResponse;
+                    // Scroll to bottom to show new content
+                    messages.scrollTop = messages.scrollHeight;
+                  }
+                } catch (e) {
+                  // Skip invalid JSON lines
+                  continue;
+                }
+              }
+            }
+          } finally {
+            reader.releaseLock();
+          }
+          
+          // Remove the blinking cursor by adding a class
+          contentDiv.classList.add('complete');
+          
+          // Save the complete response to chat history
+          chatHistory.push({ text: fullResponse, sender: 'ai', timestamp: Date.now() });
+          saveChatHistory();
+          
         } else {
           throw new Error('Failed to get response');
         }
@@ -888,9 +949,13 @@
       // Scroll to bottom
       messages.scrollTop = messages.scrollHeight;
       
-      // Save to history
-      chatHistory.push({ text, sender, timestamp: Date.now() });
-      saveChatHistory();
+      // Save to history (only for user messages or complete AI messages)
+      if (sender === 'user' || text.trim() !== '') {
+        chatHistory.push({ text, sender, timestamp: Date.now() });
+        saveChatHistory();
+      }
+      
+      return messageDiv; // Return the message element for real-time updates
     }
     
     function addTypingIndicator() {
