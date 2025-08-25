@@ -27,7 +27,7 @@
     <!-- Input Area -->
     <div class="input-area">
       <div class="input-container">
-        <input type="text" id="messageInput" placeholder="Type your message..." readonly>
+        <input type="text" id="messageInput" placeholder="Type your message...">
         <button id="sendButton" class="send-btn" disabled>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -330,26 +330,6 @@
   #screen-ai-chat .ai-message .message-content {
     background: rgba(255,255,255,0.1);
     color: #e4e6f1;
-    position: relative; /* For cursor positioning */
-  }
-
-  /* Blinking cursor for AI messages being generated */
-  #screen-ai-chat .ai-message .message-content::after {
-    content: '|';
-    color: #3a6df0;
-    animation: blink 1s infinite;
-    margin-left: 2px;
-    font-weight: bold;
-  }
-
-  /* Hide cursor when message is complete */
-  #screen-ai-chat .ai-message .message-content.complete::after {
-    display: none;
-  }
-
-  @keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
   }
 
   /* Input Area */
@@ -703,6 +683,7 @@
     let isTyping = false;
     let chatHistory = [];
     let isNumbersMode = false;
+    let currentRequest = null; // Track current request for cancellation
     
     // DOM elements
     let messageInput, sendButton, messages, statusIndicator, statusDot, statusText;
@@ -743,18 +724,30 @@
       // Keyboard keys
       keyboard.addEventListener('click', handleKeyPress);
       
-      // Input focus to show keyboard
+      // Physical keyboard input
+      messageInput.addEventListener('input', handlePhysicalKeyboardInput);
+      messageInput.addEventListener('keydown', handlePhysicalKeyboardKeydown);
+      
+      // Input focus to show keyboard (only on touch devices)
       messageInput.addEventListener('focus', () => {
-        keyboardContainer.style.display = 'block';
-        // Scroll to bottom when keyboard appears
-        setTimeout(() => {
-          messages.scrollTop = messages.scrollHeight;
-        }, 100);
+        // Only show on-screen keyboard on touch devices
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+          keyboardContainer.style.display = 'block';
+          // Scroll to bottom when keyboard appears
+          setTimeout(() => {
+            messages.scrollTop = messages.scrollHeight;
+          }, 100);
+        }
       });
       
-      // Prevent default input behavior
-      messageInput.addEventListener('keydown', (e) => {
-        e.preventDefault();
+      // Hide on-screen keyboard when input loses focus
+      messageInput.addEventListener('blur', () => {
+        // Small delay to allow button clicks on the on-screen keyboard
+        setTimeout(() => {
+          if (!messageInput.matches(':focus')) {
+            keyboardContainer.style.display = 'none';
+          }
+        }, 200);
       });
     }
     
@@ -775,8 +768,8 @@
           messageInput.value += key;
         }
         
-        // Enable/disable send button based on input
-        sendButton.disabled = messageInput.value.trim().length === 0;
+        // Update send button state
+        updateSendButtonState();
         
         // Visual feedback
         e.target.style.background = '#3a6df0';
@@ -842,7 +835,8 @@
       if (connected) {
         statusDot.classList.add('connected');
         statusText.textContent = 'Connected';
-        sendButton.disabled = messageInput.value.trim().length === 0;
+        // Update send button state
+        updateSendButtonState();
       } else {
         statusDot.classList.remove('connected');
         statusText.textContent = message || 'Disconnected';
@@ -852,16 +846,31 @@
     
     async function sendMessage() {
       const message = messageInput.value.trim();
-      if (!message || !isConnected || isTyping) return;
+      if (!message || !isConnected) return;
+      
+      // If there's a current request, cancel it first
+      if (currentRequest) {
+        currentRequest.abort();
+        currentRequest = null;
+        isTyping = false;
+        updateSendButtonState();
+        return;
+      }
       
       // Add user message to chat
       const userMessageDiv = addMessage(message, 'user');
       messageInput.value = '';
-      sendButton.disabled = true;
       
       // Show typing indicator
       isTyping = true;
       const typingIndicator = addTypingIndicator();
+      
+      // Create abort controller for this request
+      const abortController = new AbortController();
+      currentRequest = abortController;
+      
+      // Update send button to show cancel
+      updateSendButtonState();
       
       try {
         const response = await fetch('http://localhost:11434/api/generate', {
@@ -873,7 +882,8 @@
             model: 'gemma3:1b',
             prompt: message,
             stream: true // Enable streaming
-          })
+          }),
+          signal: abortController.signal
         });
         
         if (response.ok) {
@@ -917,9 +927,6 @@
             reader.releaseLock();
           }
           
-          // Remove the blinking cursor by adding a class
-          contentDiv.classList.add('complete');
-          
           // Save the complete response to chat history
           chatHistory.push({ text: fullResponse, sender: 'ai', timestamp: Date.now() });
           saveChatHistory();
@@ -928,11 +935,23 @@
           throw new Error('Failed to get response');
         }
       } catch (error) {
-        removeTypingIndicator(typingIndicator);
-        addMessage('Sorry, there was an error connecting to the AI. Please check if Ollama is running.', 'ai');
+        if (error.name === 'AbortError') {
+          // Request was cancelled, remove the AI message if it was empty
+          const aiMessages = document.querySelectorAll('.ai-message');
+          const lastAiMessage = aiMessages[aiMessages.length - 1];
+          if (lastAiMessage && lastAiMessage.querySelector('.message-content').textContent.trim() === '') {
+            lastAiMessage.remove();
+          }
+        } else {
+          removeTypingIndicator(typingIndicator);
+          addMessage('Sorry, there was an error connecting to the AI. Please check if Ollama is running.', 'ai');
+        }
+      } finally {
+        // Clean up
+        currentRequest = null;
+        isTyping = false;
+        updateSendButtonState();
       }
-      
-      isTyping = false;
     }
     
     function addMessage(text, sender) {
@@ -1004,6 +1023,36 @@
       }
     }
     
+    function handlePhysicalKeyboardInput(e) {
+      // Update send button state based on input
+      updateSendButtonState();
+    }
+    
+    function handlePhysicalKeyboardKeydown(e) {
+      // Send message on Enter key
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (!sendButton.disabled) {
+          sendMessage();
+        }
+      }
+    }
+    
+    function updateSendButtonState() {
+      const hasText = messageInput.value.trim().length > 0;
+      const isConnectedAndReady = isConnected && !currentRequest;
+      
+      if (hasText && isConnectedAndReady) {
+        sendButton.disabled = false;
+        sendButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22,2 15,22 11,13 2,9"></polygon></svg>';
+      } else if (hasText && currentRequest) {
+        sendButton.disabled = false;
+        sendButton.innerHTML = 'Cancel';
+      } else {
+        sendButton.disabled = true;
+      }
+    }
+    
     // Prevent browser zoom (pinch, ctrl+wheel, double tap) within this screen only
     function setupNoZoom() {
       const root = document.querySelector('#screen-ai-chat');
@@ -1046,9 +1095,19 @@
         checkConnection();
       },
       deactivate: function() {
-        // Save state if needed
+        // Cancel any current request when deactivating
+        if (currentRequest) {
+          currentRequest.abort();
+          currentRequest = null;
+          isTyping = false;
+        }
       },
       cleanup: function() {
+        // Cancel any current request
+        if (currentRequest) {
+          currentRequest.abort();
+          currentRequest = null;
+        }
         while (cleanupFns.length) { 
           try { cleanupFns.pop()(); } catch (_) {} 
         }
