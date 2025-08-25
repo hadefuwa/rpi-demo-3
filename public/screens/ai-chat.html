@@ -168,7 +168,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px; /* Reduced from 12px to save space */
     padding: 14px;
     box-sizing: border-box;
     min-height: 0; /* Allow panel to shrink */
@@ -250,14 +250,14 @@
 
   /* Chat Container */
   #screen-ai-chat .chat-container {
-    height: 60px; /* Much smaller height - just 1 line */
+    height: 120px; /* Increased from 60px to show more messages */
     background: rgba(255,255,255,0.05);
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.1);
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    margin-bottom: 8px; /* Add some space below */
+    margin-bottom: 4px; /* Reduced from 8px to save space */
     flex-shrink: 0; /* Don't allow chat container to shrink */
   }
 
@@ -267,7 +267,7 @@
     padding: 8px 12px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px; /* Increased from 6px for better message separation */
     /* Ensure scrollbar is always visible */
     scrollbar-width: thin;
     scrollbar-color: rgba(255,255,255,0.3) transparent;
@@ -308,12 +308,18 @@
     padding: 8px 12px;
     border-radius: 18px;
     font-size: 13px;
-    line-height: 1.2;
+    line-height: 1.4; /* Improved line height for readability */
     word-wrap: break-word;
-    max-height: 40px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    /* Remove single-line constraints */
+    /* max-height: 40px; */
+    /* overflow: hidden; */
+    /* text-overflow: ellipsis; */
+    /* white-space: nowrap; */
+    
+    /* Add multi-line support */
+    white-space: pre-wrap; /* Preserve line breaks and wrap text */
+    overflow-wrap: break-word; /* Better word breaking */
+    hyphens: auto; /* Automatic hyphenation for long words */
   }
 
   #screen-ai-chat .user-message .message-content {
@@ -328,7 +334,7 @@
 
   /* Input Area */
   #screen-ai-chat .input-area {
-    margin-bottom: 8px;
+    margin-bottom: 4px; /* Reduced from 8px to save space */
     flex-shrink: 0; /* Don't allow input area to shrink */
   }
 
@@ -459,7 +465,7 @@
   /* Responsive adjustments */
   @media (max-width: 480px) {
     #screen-ai-chat .chat-container {
-      height: 50px; /* Keep small height on mobile */
+      height: 100px; /* Increased from 50px to show more content on mobile */
     }
     
     #screen-ai-chat .header {
@@ -501,17 +507,26 @@
 
   /* For very small screens */
   @media (max-height: 600px) {
+    #screen-ai-chat .panel {
+      gap: 6px; /* Reduced from 8px */
+    }
+    
     #screen-ai-chat .chat-container {
-      height: 50px; /* Keep small height for very small screens */
+      height: 80px; /* Increased from 50px for very small screens */
+      margin-bottom: 3px; /* Reduced from 4px */
+    }
+    
+    #screen-ai-chat .input-area {
+      margin-bottom: 3px; /* Reduced from 4px */
     }
     
     #screen-ai-chat .header {
-      margin-bottom: 6px;
+      margin-bottom: 4px; /* Reduced from 6px */
     }
     
     #screen-ai-chat .keyboard-container {
       max-height: 30vh; /* Very small height for small screens */
-      padding: 4px;
+      padding: 3px; /* Reduced from 4px */
     }
     
     #screen-ai-chat .keyboard {
@@ -528,8 +543,22 @@
 
   /* For extremely small screens (like 5-inch displays) */
   @media (max-width: 400px) and (max-height: 500px) {
+    #screen-ai-chat .panel {
+      padding: 8px; /* Reduced from 14px */
+      gap: 4px; /* Reduced from 8px */
+    }
+    
     #screen-ai-chat .header {
-      margin-bottom: 4px;
+      margin-bottom: 2px; /* Reduced from 4px */
+    }
+    
+    #screen-ai-chat .chat-container {
+      height: 70px; /* Increased from default for extremely small screens */
+      margin-bottom: 2px; /* Reduced from 4px */
+    }
+    
+    #screen-ai-chat .input-area {
+      margin-bottom: 2px; /* Reduced from 4px */
     }
     
     #screen-ai-chat .header-right {
@@ -548,7 +577,7 @@
     
     #screen-ai-chat .keyboard-container {
       max-height: 25vh;
-      padding: 3px;
+      padding: 2px; /* Reduced from 3px */
     }
     
     #screen-ai-chat .keyboard {
@@ -560,11 +589,6 @@
       min-width: 20px;
       height: 32px;
       font-size: 10px;
-    }
-    
-    #screen-ai-chat .panel {
-      padding: 10px;
-      gap: 8px;
     }
   }
 
