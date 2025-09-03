@@ -1,3024 +1,566 @@
-   <!-- Offline-compatible sliders with Chart.js graphs - UPDATED -->
-  <script src="../assets/js/chart.js"></script>
-  
-  <section id="screen-electrical-machines" class="screen" aria-label="Electrical Machines">
-    <header class="em-header">
-      <div class="logo-section">
-        <div class="matrix-logo">MATRIX</div>
-        <div class="subtitle">ELECTRICAL MACHINES</div>
-      </div>
-      
-      <div class="firmware-info">
-        <div class="firmware-version">Firmware Version: 1</div>
-        <div class="status-indicators">
-          <div class="indicator dyno">DYNO</div>
-          <div class="indicator connector">3PH</div>
-        </div>
-      </div>
-      
-      <button id="btnHome" class="home-button" aria-label="Home">HOME</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electrical Machines Training Simulator (Offline)</title>
+    <style>
+        /* --- General Styles & Reset --- */
+        :root {
+            --color-gray-900: #111827;
+            --color-gray-800: #1f2937;
+            --color-gray-700: #374151;
+            --color-gray-600: #4b5563;
+            --color-gray-400: #9ca3af;
+            --color-gray-300: #d1d5db;
+            --color-gray-200: #e5e7eb;
+            --color-blue-300: #93c5fd;
+            --color-blue-400: #60a5fa;
+            --color-blue-500: #3b82f6;
+            --color-cyan-300: #67e8f9;
+            --color-green-500: #22c55e;
+            --color-green-600: #16a34a;
+            --color-red-500: #ef4444;
+            --color-red-600: #dc2626;
+            --color-yellow-300: #fde047;
+            --color-white: #ffffff;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--color-gray-900);
+            color: var(--color-gray-200);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Custom App Styles --- */
+        .readout-display {
+            font-family: "Courier New", Courier, monospace;
+            letter-spacing: 0.05em;
+        }
+
+        /* --- App Layout --- */
+        #app-header {
+            background-color: rgba(31, 41, 55, 0.5);
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        #app-header h1 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            color: var(--color-white);
+            letter-spacing: 0.025em;
+        }
+        #app-header h1 svg {
+            height: 2rem;
+            width: 2rem;
+            display: inline-block;
+            margin-right: 0.5rem;
+            color: var(--color-blue-400);
+        }
+
+        #app-main {
+            flex-grow: 1;
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        #app-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .panel {
+            background-color: rgba(31, 41, 55, 0.6);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            border: 1px solid var(--color-gray-700);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--color-gray-600);
+            padding-bottom: 0.75rem;
+            color: var(--color-blue-300);
+        }
+
+        /* Controls Panel */
+        #motor-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem;
+            background-color: var(--color-gray-900);
+            border-radius: 0.5rem;
+        }
+
+        #motorStatusIndicator {
+            width: 1rem;
+            height: 1rem;
+            border-radius: 9999px;
+            transition: background-color 0.3s ease;
+        }
+        #motorStatusIndicator.stopped { background-color: var(--color-red-500); }
+        #motorStatusIndicator.running {
+            background-color: var(--color-green-500);
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            50% { opacity: 0.5; }
+        }
+
+        #motorStatusText { font-weight: 600; font-size: 1.125rem; }
+
+        .slider-group { margin-bottom: 1.5rem; }
+        .slider-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        .slider-container { display: flex; align-items: center; gap: 1rem; }
+        .slider-value {
+            font-family: monospace;
+            font-size: 1.125rem;
+            width: 4.5rem;
+            text-align: center;
+            background-color: rgba(55, 65, 81, 0.5);
+            padding: 0.25rem 0;
+            border-radius: 0.375rem;
+        }
+
+        input[type=range] {
+            width: 100%;
+            height: 6px;
+            background: var(--color-gray-700);
+            border-radius: 0.5rem;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--color-blue-500);
+            height: 24px;
+            width: 16px;
+            border-radius: 4px;
+            margin-top: -9px;
+        }
+        input[type=range]::-moz-range-thumb {
+             background: var(--color-blue-500);
+             height: 24px;
+             width: 16px;
+             border-radius: 4px;
+        }
+
+        #action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .action-btn {
+            width: 100%;
+            color: var(--color-white);
+            font-weight: 700;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            border: none;
+            cursor: pointer;
+        }
+        .action-btn:hover { transform: scale(1.05); }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
+        #startButton { background-color: var(--color-green-600); }
+        #startButton:hover:not(:disabled) { background-color: var(--color-green-500); }
+        #stopButton { background-color: var(--color-red-600); }
+        #stopButton:hover:not(:disabled) { background-color: var(--color-red-500); }
+        
+        /* Display Panel */
+        #readouts {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .readout-card {
+            background-color: rgba(17, 24, 39, 0.7);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+        }
+        .readout-card h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--color-blue-300);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .readout-card p {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--color-cyan-300);
+        }
+        .readout-card p span { font-size: 1.25rem; }
+
+        #graph-container {
+            flex-grow: 1;
+            background-color: rgba(17, 24, 39, 0.7);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            min-height: 300px;
+        }
+        
+        /* Footer */
+        #app-footer { margin-top: 2rem; }
+        #footer-banner {
+            width: 100%;
+            background-image: linear-gradient(to right, #1e3a8a, #1f2937, #1e3a8a);
+            text-align: center;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
+        }
+        #footer-banner p {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--color-yellow-300);
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #footer-banner svg {
+            height: 1.5rem;
+            width: 1.5rem;
+            display: inline-block;
+            margin-bottom: 0.25rem;
+            margin-right: 0.5rem;
+            animation: pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* --- Responsive Styles --- */
+        @media (min-width: 640px) {
+            #readouts { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (min-width: 768px) {
+            #app-main { padding: 2rem; }
+            #graph-container { min-height: 400px; }
+        }
+        @media (min-width: 1024px) {
+            #app-grid { grid-template-columns: repeat(3, 1fr); }
+            #controls-panel { grid-column: span 1 / span 1; }
+            #display-panel { grid-column: span 2 / span 2; }
+        }
+    </style>
+</head>
+<body>
+    <header id="app-header">
+        <h1>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.042 1.9l-2.12 1.06a1 1 0 000 1.84l7 3a1 1 0 00.788 0l7-3a1 1 0 000-1.84l-2.12-1.06a.999.999 0 01-.042-1.9l2.652-1.326a1 1 0 000-1.84l-7-3zM12 10a2 2 0 10-4 0 2 2 0 004 0z" />
+            </svg>
+            Electrical Machines Simulator
+        </h1>
     </header>
-  
-    <main class="em-main">
-      <!-- Left Control Panel -->
-      <section class="control-panel">
-        <div class="control-column">
-          <div class="control-label">Motor Load</div>
-          <div class="slider-container">
-            <div class="custom-slider" id="load-slider" data-min="0" data-max="100" data-value="50">
-              <div class="slider-track"></div>
-              <div class="slider-thumb"></div>
+
+    <main id="app-main">
+        <div id="app-grid">
+            <div id="controls-panel" class="panel">
+                <h2 class="panel-title">Motor Controls</h2>
+                
+                <div id="motor-status">
+                    <div id="motorStatusIndicator" class="stopped"></div>
+                    <span id="motorStatusText">MOTOR STOPPED</span>
+                </div>
+
+                <div style="flex-grow: 1;">
+                    <div class="slider-group">
+                        <label for="voltage">Voltage (V)</label>
+                        <div class="slider-container">
+                            <input id="voltage" type="range" min="0" max="480" value="240">
+                            <span id="voltageValue" class="slider-value">240 V</span>
+                        </div>
+                    </div>
+
+                    <div class="slider-group">
+                        <label for="frequency">Frequency (Hz)</label>
+                        <div class="slider-container">
+                            <input id="frequency" type="range" min="0" max="60" value="50">
+                            <span id="frequencyValue" class="slider-value">50 Hz</span>
+                        </div>
+                    </div>
+
+                    <div class="slider-group">
+                        <label for="motorLoad">Motor Load (%)</label>
+                        <div class="slider-container">
+                            <input id="motorLoad" type="range" min="0" max="100" value="50">
+                            <span id="motorLoadValue" class="slider-value">50 %</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="action-buttons">
+                    <button id="startButton" class="action-btn">START</button>
+                    <button id="stopButton" class="action-btn" disabled>STOP</button>
+                </div>
             </div>
-            <div class="slider-scale">
-              <span>100%</span>
-              <span>75%</span>
-              <span>50%</span>
-              <span>25%</span>
-              <span>0%</span>
+
+            <div id="display-panel" class="panel">
+                <div id="readouts">
+                    <div class="readout-card">
+                        <h3>Speed</h3>
+                        <p id="speedDisplay" class="readout-display">0 <span>RPM</span></p>
+                    </div>
+                    <div class="readout-card">
+                        <h3>Torque</h3>
+                        <p id="torqueDisplay" class="readout-display">0.0 <span>Nm</span></p>
+                    </div>
+                     <div class="readout-card">
+                        <h3>Phase Angle</h3>
+                        <p id="phaseAngleDisplay" class="readout-display">0.0°</p>
+                    </div>
+                </div>
+                
+                <div id="graph-container">
+                    <canvas id="phasorGraph"></canvas>
+                </div>
             </div>
-          </div>
-          <div class="control-value" id="load-value">50.0%</div>
         </div>
-        
-        <div class="control-column">
-          <div class="control-label">Voltage 1</div>
-          <div class="slider-container">
-            <div class="custom-slider" id="voltage1-slider" data-min="0" data-max="100" data-value="50">
-              <div class="slider-track"></div>
-              <div class="slider-thumb"></div>
-            </div>
-            <div class="slider-scale">
-              <span>100%</span>
-              <span>75%</span>
-              <span>50%</span>
-              <span>25%</span>
-              <span>0%</span>
-            </div>
-          </div>
-          <div class="control-value" id="voltage1-value">50.0% - 15.0V</div>
-        </div>
-        
-        <div class="control-column">
-          <div class="control-label">Frequency</div>
-          <div class="slider-container">
-            <div class="custom-slider" id="frequency-slider" data-min="0" data-max="50" data-value="25">
-              <div class="slider-track"></div>
-              <div class="slider-thumb"></div>
-            </div>
-            <div class="slider-scale">
-              <span>50Hz</span>
-              <span>37Hz</span>
-              <span>25Hz</span>
-              <span>12Hz</span>
-              <span>0Hz</span>
-            </div>
-          </div>
-          <div class="control-value" id="frequency-value">25Hz</div>
-        </div>
-      </section>
-  
-      <!-- Action Buttons Section -->
-      <section class="action-buttons-section">
-        <div class="action-btn">
-          <div class="btn-indicator"></div>
-          <span>Capture</span>
-        </div>
-        <div class="action-btn">
-          <div class="btn-indicator"></div>
-          <span>Sweep</span>
-        </div>
-        <div class="action-btn">
-          <div class="btn-indicator"></div>
-          <span>Clear</span>
-        </div>
-      </section>
-  
-      <!-- Bottom Left Gauges -->
-      <section class="gauges-section">
-        <div class="motor-controls">
-          <div class="motor-toggle">
-            <div class="toggle-label">Motor</div>
-            <div class="toggle-switch">
-              <button class="toggle-btn stop-btn">Stop</button>
-              <button class="toggle-btn run-btn active">Run</button>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gauge speed-gauge">
-          <div class="gauge-label">Speed</div>
-          <div class="gauge-value" id="speed-value">1143RPM</div>
-          <div class="gauge-visual">
-            <svg class="gauge-svg" viewBox="0 0 200 200">
-              <defs>
-                <linearGradient id="speedGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
-                  <stop offset="100%" style="stop-color:#8BC34A;stop-opacity:1" />
-                </linearGradient>
-              </defs>
-              <circle class="gauge-bg" cx="100" cy="100" r="80"></circle>
-              <circle class="gauge-fill" id="speed-fill" cx="100" cy="100" r="80" style="stroke: url(#speedGradient)"></circle>
-              <line class="gauge-needle" id="speed-needle" x1="100" y1="100" x2="100" y2="30"></line>
-              <g class="gauge-ticks">
-                <line x1="100" y1="20" x2="100" y2="30" stroke="#fff" stroke-width="2"/>
-                <line x1="180" y1="100" x2="170" y2="100" stroke="#fff" stroke-width="2"/>
-                <line x1="20" y1="100" x2="30" y2="100" stroke="#fff" stroke-width="2"/>
-              </g>
-            </svg>
-            <div class="gauge-scale">
-              <span class="scale-mark">0.0</span>
-              <span class="scale-mark">800.0</span>
-              <span class="scale-mark">1600.0</span>
-              <span class="scale-mark">2400.0</span>
-              <span class="scale-mark">3200.0</span>
-            </div>
-          </div>
-        </div>
-  
-        <div class="gauge torque-gauge">
-          <div class="gauge-label">Torque</div>
-          <div class="gauge-value" id="torque-value">0.140NM</div>
-          <div class="gauge-visual">
-            <svg class="gauge-svg" viewBox="0 0 200 200">
-              <defs>
-                <linearGradient id="torqueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" style="stop-color:#2196F3;stop-opacity:1" />
-                  <stop offset="100%" style="stop-color:#03DAC6;stop-opacity:1" />
-                </linearGradient>
-              </defs>
-              <circle class="gauge-bg" cx="100" cy="100" r="80"></circle>
-              <circle class="gauge-fill" id="torque-fill" cx="100" cy="100" r="80" style="stroke: url(#torqueGradient)"></circle>
-              <line class="gauge-needle" id="torque-needle" x1="100" y1="100" x2="100" y2="30"></line>
-              <g class="gauge-ticks">
-                <line x1="100" y1="20" x2="100" y2="30" stroke="#fff" stroke-width="2"/>
-                <line x1="180" y1="100" x2="170" y2="100" stroke="#fff" stroke-width="2"/>
-                <line x1="20" y1="100" x2="30" y2="100" stroke="#fff" stroke-width="2"/>
-              </g>
-            </svg>
-            <div class="gauge-scale">
-              <span class="scale-mark">-50.0</span>
-              <span class="scale-mark">50.0</span>
-              <span class="scale-mark">100.0</span>
-              <span class="scale-mark">150.0</span>
-              <span class="scale-mark">200.0</span>
-              <span class="scale-mark">250.0</span>
-            </div>
-          </div>
-        </div>
-      </section>
-  
-      <!-- Right Chart Area -->
-      <section class="charts-section">
-        <div class="chart voltage-chart">
-          <div class="chart-title">Voltage vs Phase Angle</div>
-          <div class="chart-container">
-            <canvas id="voltage-canvas" width="600" height="200"></canvas>
-            <div class="chart-legend">
-              <div class="legend-item">
-                <span class="legend-color dc1"></span>
-                <span>DC1/X</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color dc2"></span>
-                <span>DC2/U</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color va"></span>
-                <span>V/A</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color wb"></span>
-                <span>W/B</span>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-        <div class="chart current-chart">
-          <div class="chart-title">Current vs Phase Angle</div>
-          <div class="chart-container">
-            <canvas id="current-canvas" width="600" height="200"></canvas>
-            <div class="chart-legend">
-              <div class="legend-item">
-                <span class="legend-color dc1"></span>
-                <span>DC1/X</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color dc2"></span>
-                <span>DC2/U</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color va"></span>
-                <span>V/A</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color wb"></span>
-                <span>W/B</span>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-        <div class="chart speed-chart">
-          <div class="chart-title">Speed vs Time</div>
-          <div class="chart-container">
-            <canvas id="speed-canvas" width="600" height="200"></canvas>
-            <div class="chart-legend">
-              <div class="legend-item">
-                <span class="legend-color speed"></span>
-                <span>RPM</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color target"></span>
-                <span>Target</span>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-        <div class="chart torque-chart">
-          <div class="chart-title">Torque vs Time</div>
-          <div class="chart-container">
-            <canvas id="torque-canvas" width="600" height="200"></canvas>
-            <div class="chart-legend">
-              <div class="legend-item">
-                <span class="legend-color torque"></span>
-                <span>NM</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color load"></span>
-                <span>Load</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
     </main>
-  
-    <footer class="em-footer">
-      <div class="innovate-uk-banner">
-        <span class="banner-text">Innovate UK Funded 2024</span>
-      </div>
-    </footer>
-  </section>
- 
- <section id="screen-electrical-machines" class="screen" aria-label="Electrical Machines">
-   <header class="em-header">
-     <div class="logo-section">
-       <div class="matrix-logo">MATRIX</div>
-       <div class="subtitle">ELECTRICAL MACHINES</div>
-     </div>
-     
-     <div class="firmware-info">
-       <div class="firmware-version">Firmware Version: 1</div>
-       <div class="status-indicators">
-         <div class="indicator dyno">DYNO</div>
-         <div class="indicator connector">3PH</div>
-       </div>
-     </div>
-     
-     <button id="btnHome" class="home-button" aria-label="Home">HOME</button>
-   </header>
- 
-   <main class="em-main">
-     <!-- Left Control Panel -->
-     <section class="control-panel">
-       <div class="control-column">
-         <div class="control-label">Motor Load</div>
-         <div class="slider-container">
-           <div class="custom-slider" id="load-slider" data-min="0" data-max="100" data-value="50">
-             <div class="slider-track"></div>
-             <div class="slider-thumb"></div>
-           </div>
-           <div class="slider-scale">
-             <span>100%</span>
-             <span>75%</span>
-             <span>50%</span>
-             <span>25%</span>
-             <span>0%</span>
-           </div>
-         </div>
-         <div class="control-value" id="load-value">50.0%</div>
-       </div>
-       
-       <div class="control-column">
-         <div class="control-label">Voltage 1</div>
-         <div class="slider-container">
-           <div class="custom-slider" id="voltage1-slider" data-min="0" data-max="100" data-value="50">
-             <div class="slider-track"></div>
-             <div class="slider-thumb"></div>
-           </div>
-           <div class="slider-scale">
-             <span>100%</span>
-             <span>75%</span>
-             <span>50%</span>
-             <span>25%</span>
-             <span>0%</span>
-           </div>
-         </div>
-         <div class="control-value" id="voltage1-value">50.0% - 15.0V</div>
-       </div>
-       
-       <div class="control-column">
-         <div class="control-label">Frequency</div>
-         <div class="slider-container">
-           <div class="custom-slider" id="frequency-slider" data-min="0" data-max="50" data-value="25">
-             <div class="slider-track"></div>
-             <div class="slider-thumb"></div>
-           </div>
-           <div class="slider-scale">
-             <span>50Hz</span>
-             <span>37Hz</span>
-             <span>25Hz</span>
-             <span>12Hz</span>
-             <span>0Hz</span>
-           </div>
-         </div>
-         <div class="control-value" id="frequency-value">25Hz</div>
-       </div>
-     </section>
- 
-     <!-- Action Buttons Section -->
-     <section class="action-buttons-section">
-       <div class="action-btn">
-         <div class="btn-indicator"></div>
-         <span>Capture</span>
-       </div>
-       <div class="action-btn">
-         <div class="btn-indicator"></div>
-         <span>Sweep</span>
-       </div>
-       <div class="action-btn">
-         <div class="btn-indicator"></div>
-         <span>Clear</span>
-       </div>
-     </section>
- 
-     <!-- Bottom Left Gauges -->
-     <section class="gauges-section">
-       <div class="motor-controls">
-         <div class="motor-toggle">
-           <div class="toggle-label">Motor</div>
-           <div class="toggle-switch">
-             <button class="toggle-btn stop-btn">Stop</button>
-             <button class="toggle-btn run-btn active">Run</button>
-           </div>
-         </div>
-       </div>
-       
-       <div class="gauge speed-gauge">
-         <div class="gauge-label">Speed</div>
-         <div class="gauge-value" id="speed-value">1143RPM</div>
-         <div class="gauge-visual">
-           <svg class="gauge-svg" viewBox="0 0 200 200">
-             <defs>
-               <linearGradient id="speedGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                 <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
-                 <stop offset="100%" style="stop-color:#8BC34A;stop-opacity:1" />
-               </linearGradient>
-             </defs>
-             <circle class="gauge-bg" cx="100" cy="100" r="80"></circle>
-             <circle class="gauge-fill" id="speed-fill" cx="100" cy="100" r="80" style="stroke: url(#speedGradient)"></circle>
-             <line class="gauge-needle" id="speed-needle" x1="100" y1="100" x2="100" y2="30"></line>
-             <g class="gauge-ticks">
-               <line x1="100" y1="20" x2="100" y2="30" stroke="#fff" stroke-width="2"/>
-               <line x1="180" y1="100" x2="170" y2="100" stroke="#fff" stroke-width="2"/>
-               <line x1="20" y1="100" x2="30" y2="100" stroke="#fff" stroke-width="2"/>
-             </g>
-           </svg>
-           <div class="gauge-scale">
-             <span class="scale-mark">0.0</span>
-             <span class="scale-mark">800.0</span>
-             <span class="scale-mark">1600.0</span>
-             <span class="scale-mark">2400.0</span>
-             <span class="scale-mark">3200.0</span>
-           </div>
-         </div>
-       </div>
- 
-       <div class="gauge torque-gauge">
-         <div class="gauge-label">Torque</div>
-         <div class="gauge-value" id="torque-value">0.140NM</div>
-         <div class="gauge-visual">
-           <svg class="gauge-svg" viewBox="0 0 200 200">
-             <defs>
-               <linearGradient id="torqueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                 <stop offset="0%" style="stop-color:#2196F3;stop-opacity:1" />
-                 <stop offset="100%" style="stop-color:#03DAC6;stop-opacity:1" />
-               </linearGradient>
-             </defs>
-             <circle class="gauge-bg" cx="100" cy="100" r="80"></circle>
-             <circle class="gauge-fill" id="torque-fill" cx="100" cy="100" r="80" style="stroke: url(#torqueGradient)"></circle>
-             <line class="gauge-needle" id="torque-needle" x1="100" y1="100" x2="100" y2="30"></line>
-             <g class="gauge-ticks">
-               <line x1="100" y1="20" x2="100" y2="30" stroke="#fff" stroke-width="2"/>
-               <line x1="180" y1="100" x2="170" y2="100" stroke="#fff" stroke-width="2"/>
-               <line x1="20" y1="100" x2="30" y2="100" stroke="#fff" stroke-width="2"/>
-             </g>
-           </svg>
-           <div class="gauge-scale">
-             <span class="scale-mark">-50.0</span>
-             <span class="scale-mark">50.0</span>
-             <span class="scale-mark">100.0</span>
-             <span class="scale-mark">150.0</span>
-             <span class="scale-mark">200.0</span>
-             <span class="scale-mark">250.0</span>
-           </div>
-         </div>
-       </div>
-     </section>
- 
-     <!-- Right Chart Area -->
-     <section class="charts-section">
-       <div class="chart voltage-chart">
-         <div class="chart-title">Voltage vs Phase Angle</div>
-         <div class="chart-container">
-           <canvas id="voltage-canvas" width="600" height="200"></canvas>
-           <div class="chart-legend">
-             <div class="legend-item">
-               <span class="legend-color dc1"></span>
-               <span>DC1/X</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color dc2"></span>
-               <span>DC2/U</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color va"></span>
-               <span>V/A</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color wb"></span>
-               <span>W/B</span>
-             </div>
-           </div>
-         </div>
-       </div>
- 
-       <div class="chart current-chart">
-         <div class="chart-title">Current vs Phase Angle</div>
-         <div class="chart-container">
-           <canvas id="current-canvas" width="600" height="200"></canvas>
-           <div class="chart-legend">
-             <div class="legend-item">
-               <span class="legend-color dc1"></span>
-               <span>DC1/X</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color dc2"></span>
-               <span>DC2/U</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color va"></span>
-               <span>V/A</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color wb"></span>
-               <span>W/B</span>
-             </div>
-           </div>
-         </div>
-       </div>
- 
-       <div class="chart speed-chart">
-         <div class="chart-title">Speed vs Time</div>
-         <div class="chart-container">
-           <canvas id="speed-canvas" width="600" height="200"></canvas>
-           <div class="chart-legend">
-             <div class="legend-item">
-               <span class="legend-color speed"></span>
-               <span>RPM</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color target"></span>
-               <span>Target</span>
-             </div>
-           </div>
-         </div>
-       </div>
- 
-       <div class="chart torque-chart">
-         <div class="chart-title">Torque vs Time</div>
-         <div class="chart-container">
-           <canvas id="torque-canvas" width="600" height="200"></canvas>
-           <div class="chart-legend">
-             <div class="legend-item">
-               <span class="legend-color torque"></span>
-               <span>NM</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color load"></span>
-               <span>Load</span>
-             </div>
-           </div>
-         </div>
-       </div>
-     </section>
-   </main>
- 
-   <footer class="em-footer">
-     <div class="innovate-uk-banner">
-       <span class="banner-text">Innovate UK Funded 2024</span>
-     </div>
-   </footer>
- </section>
 
-<section id="screen-electrical-machines" class="screen" aria-label="Electrical Machines">
-    <header class="em-header">
-    <div class="logo-section">
-      <div class="matrix-logo">MATRIX</div>
-      <div class="subtitle">ELECTRICAL MACHINES</div>
-    </div>
-    
-    <div class="firmware-info">
-      <div class="firmware-version">Firmware Version: 1</div>
-      <div class="status-indicators">
-        <div class="indicator dyno">DYNO</div>
-        <div class="indicator connector">3PH</div>
-      </div>
-    </div>
-    
-    <button id="btnHome" class="home-button" aria-label="Home">HOME</button>
-  </header>
-
-  <main class="em-main">
-                   <!-- Left Control Panel -->
-          <section class="control-panel">
-            <div class="control-column">
-              <div class="control-label">Motor Load</div>
-              <div class="slider-container">
-                <div class="custom-slider" id="load-slider" data-min="0" data-max="100" data-value="50">
-                  <div class="slider-track"></div>
-                  <div class="slider-thumb"></div>
-                </div>
-                <div class="slider-scale">
-                  <span>100%</span>
-                  <span>75%</span>
-                  <span>50%</span>
-                  <span>25%</span>
-                  <span>0%</span>
-                </div>
-              </div>
-              <div class="control-value" id="load-value">50.0%</div>
-            </div>
-            
-            <div class="control-column">
-              <div class="control-label">Voltage 1</div>
-              <div class="slider-container">
-                <div class="custom-slider" id="voltage1-slider" data-min="0" data-max="100" data-value="50">
-                  <div class="slider-track"></div>
-                  <div class="slider-thumb"></div>
-                </div>
-                <div class="slider-scale">
-                  <span>100%</span>
-                  <span>75%</span>
-                  <span>50%</span>
-                  <span>25%</span>
-                  <span>0%</span>
-                </div>
-              </div>
-              <div class="control-value" id="voltage1-value">50.0% - 15.0V</div>
-            </div>
-            
-            <div class="control-column">
-              <div class="control-label">Frequency</div>
-              <div class="slider-container">
-                <div class="custom-slider" id="frequency-slider" data-min="0" data-max="50" data-value="25">
-                  <div class="slider-track"></div>
-                  <div class="slider-thumb"></div>
-                </div>
-                <div class="slider-scale">
-                  <span>50Hz</span>
-                  <span>37Hz</span>
-                  <span>25Hz</span>
-                  <span>12Hz</span>
-                  <span>0Hz</span>
-                </div>
-              </div>
-              <div class="control-value" id="frequency-value">25Hz</div>
-            </div>
-          </section>
-
-          <!-- Action Buttons Section -->
-          <section class="action-buttons-section">
-            <div class="action-btn">
-              <div class="btn-indicator"></div>
-              <span>Capture</span>
-            </div>
-            <div class="action-btn">
-              <div class="btn-indicator"></div>
-              <span>Sweep</span>
-            </div>
-            <div class="action-btn">
-              <div class="btn-indicator"></div>
-              <span>Clear</span>
-            </div>
-          </section>
-
-         <!-- Bottom Left Gauges -->
-     <section class="gauges-section">
-       
-       <div class="motor-controls">
-         <div class="motor-toggle">
-           <div class="toggle-label">Motor</div>
-           <div class="toggle-switch">
-             <button class="toggle-btn stop-btn">Stop</button>
-             <button class="toggle-btn run-btn active">Run</button>
-           </div>
-         </div>
-       </div>
-      
-      <div class="gauge speed-gauge">
-        <div class="gauge-label">Speed</div>
-        <div class="gauge-value" id="speed-value">1143RPM</div>
-                 <div class="gauge-visual">
-           <svg class="gauge-svg" viewBox="0 0 200 200">
-             <defs>
-               <linearGradient id="speedGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                 <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
-                 <stop offset="100%" style="stop-color:#8BC34A;stop-opacity:1" />
-               </linearGradient>
-             </defs>
-             <circle class="gauge-bg" cx="100" cy="100" r="80"></circle>
-             <circle class="gauge-fill" id="speed-fill" cx="100" cy="100" r="80" style="stroke: url(#speedGradient)"></circle>
-             <line class="gauge-needle" id="speed-needle" x1="100" y1="100" x2="100" y2="30"></line>
-             <!-- Gauge ticks -->
-             <g class="gauge-ticks">
-               <line x1="100" y1="20" x2="100" y2="30" stroke="#fff" stroke-width="2"/>
-               <line x1="180" y1="100" x2="170" y2="100" stroke="#fff" stroke-width="2"/>
-               <line x1="20" y1="100" x2="30" y2="100" stroke="#fff" stroke-width="2"/>
-             </g>
-           </svg>
-          <div class="gauge-scale">
-            <span class="scale-mark">0.0</span>
-            <span class="scale-mark">800.0</span>
-            <span class="scale-mark">1600.0</span>
-            <span class="scale-mark">2400.0</span>
-            <span class="scale-mark">3200.0</span>
-          </div>
+    <footer id="app-footer">
+        <div id="footer-banner">
+            <p>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                Winner of a Best Skills Intervention Award 2025
+            </p>
         </div>
-      </div>
-
-      <div class="gauge torque-gauge">
-        <div class="gauge-label">Torque</div>
-        <div class="gauge-value" id="torque-value">0.140NM</div>
-                 <div class="gauge-visual">
-           <svg class="gauge-svg" viewBox="0 0 200 200">
-             <defs>
-               <linearGradient id="torqueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                 <stop offset="0%" style="stop-color:#2196F3;stop-opacity:1" />
-                 <stop offset="100%" style="stop-color:#03DAC6;stop-opacity:1" />
-               </linearGradient>
-             </defs>
-             <circle class="gauge-bg" cx="100" cy="100" r="80"></circle>
-             <circle class="gauge-fill" id="torque-fill" cx="100" cy="100" r="80" style="stroke: url(#torqueGradient)"></circle>
-             <line class="gauge-needle" id="torque-needle" x1="100" y1="100" x2="100" y2="30"></line>
-             <!-- Gauge ticks -->
-             <g class="gauge-ticks">
-               <line x1="100" y1="20" x2="100" y2="30" stroke="#fff" stroke-width="2"/>
-               <line x1="180" y1="100" x2="170" y2="100" stroke="#fff" stroke-width="2"/>
-               <line x1="20" y1="100" x2="30" y2="100" stroke="#fff" stroke-width="2"/>
-             </g>
-           </svg>
-          <div class="gauge-scale">
-            <span class="scale-mark">-50.0</span>
-            <span class="scale-mark">50.0</span>
-            <span class="scale-mark">100.0</span>
-            <span class="scale-mark">150.0</span>
-            <span class="scale-mark">200.0</span>
-            <span class="scale-mark">250.0</span>
-          </div>
-                 </div>
-       </div>
-    </section>
-
-    
-
-         <!-- Right Chart Area -->
-     <section class="charts-section">
-       <div class="chart voltage-chart">
-         <div class="chart-title">Voltage vs Phase Angle</div>
-         <div class="chart-container">
-           <canvas id="voltage-canvas" width="600" height="200"></canvas>
-           <div class="chart-legend">
-             <div class="legend-item">
-               <span class="legend-color dc1"></span>
-               <span>DC1/X</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color dc2"></span>
-               <span>DC2/U</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color va"></span>
-               <span>V/A</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color wb"></span>
-               <span>W/B</span>
-             </div>
-           </div>
-         </div>
-       </div>
-
-       <div class="chart current-chart">
-         <div class="chart-title">Current vs Phase Angle</div>
-         <div class="chart-container">
-           <canvas id="current-canvas" width="600" height="200"></canvas>
-           <div class="chart-legend">
-             <div class="legend-item">
-               <span class="legend-color dc1"></span>
-               <span>DC1/X</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color dc2"></span>
-               <span>DC2/U</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color va"></span>
-               <span>V/A</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color wb"></span>
-               <span>W/B</span>
-             </div>
-           </div>
-         </div>
-       </div>
-
-       <div class="chart speed-chart">
-         <div class="chart-title">Speed vs Time</div>
-         <div class="chart-container">
-           <canvas id="speed-canvas" width="600" height="200"></canvas>
-           <div class="chart-legend">
-             <div class="legend-item">
-               <span class="legend-color speed"></span>
-               <span>RPM</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color target"></span>
-               <span>Target</span>
-             </div>
-           </div>
-         </div>
-       </div>
-
-       <div class="chart torque-chart">
-         <div class="chart-title">Torque vs Time</div>
-         <div class="chart-container">
-           <canvas id="torque-canvas" width="600" height="200"></canvas>
-           <div class="chart-legend">
-             <div class="legend-item">
-               <span class="legend-color torque"></span>
-               <span>NM</span>
-             </div>
-             <div class="legend-item">
-               <span class="legend-color load"></span>
-               <span>Load</span>
-             </div>
-           </div>
-         </div>
-       </div>
-     </section>
-  </main>
-
-     <footer class="em-footer">
-       <div class="innovate-uk-banner">
-         <span class="banner-text">Innovate UK Funded 2024</span>
-       </div>
-     </footer>
-</section>
-
-<style>
-/* All styles strictly scoped to #screen-electrical-machines */
-#screen-electrical-machines { 
-  width: 100vw; 
-  height: 100vh; 
-  background: 
-    linear-gradient(135deg, #1e1e1e 0%, #0a0a0a 50%, #1e1e1e 100%),
-    repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.02) 10px, rgba(255,255,255,0.02) 20px),
-    radial-gradient(circle at 20% 80%, rgba(120,120,120,0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(100,100,100,0.1) 0%, transparent 50%);
-  color: #ffffff; 
-  font-family: 'Arial', sans-serif; 
-  overflow: hidden; 
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  top: 0;
-  left: 0;
-  box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
-}
-
-/* Hide cursor on touch devices and small screens */
-@media (pointer: coarse) {
-  #screen-electrical-machines,
-  #screen-electrical-machines * {
-    cursor: none !important;
-  }
-}
-
-@media (max-width: 850px) and (max-height: 500px) {
-  #screen-electrical-machines,
-  #screen-electrical-machines * {
-    cursor: none !important;
-  }
-}
-
-#screen-electrical-machines * { 
-  box-sizing: border-box; 
-  touch-action: manipulation; 
-  user-select: none; 
-}
-
-/* Prevent all scrollbars */
-body, html {
-  margin: 0;
-  padding: 0;
-  overflow: hidden !important;
-  width: 100%;
-  height: 100%;
-  max-width: 100vw;
-  max-height: 100vh;
-}
-
- /* Header - Touchscreen optimized */
- .em-header {
-   display: flex;
-   align-items: center;
-   justify-content: space-between;
-   padding: 8px 12px;
-   background: 
-     linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 50%, #0f0f0f 100%),
-     repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.03) 20px, rgba(255,255,255,0.03) 22px);
-   border-bottom: 3px solid #444;
-   border-top: 2px solid #666;
-   height: 50px;
-   box-shadow: 
-     0 2px 8px rgba(0,0,0,0.8),
-     inset 0 1px 0 rgba(255,255,255,0.1),
-     inset 0 -1px 0 rgba(0,0,0,0.5);
-   position: relative;
- }
-
-.em-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #4CAF50, #2196F3, #9C27B0, #FF9800);
-  opacity: 0.8;
-}
-
-.logo-section {
-  text-align: center;
-  flex: 1;
-}
-
- .matrix-logo {
-   font-size: 20px;
-   font-weight: bold;
-   color: #fff;
-   letter-spacing: 2px;
-   text-shadow: 
-     0 0 8px rgba(255,255,255,0.5),
-     0 2px 4px rgba(0,0,0,0.8);
-   background: linear-gradient(45deg, #fff, #ccc, #fff);
-   -webkit-background-clip: text;
-   -webkit-text-fill-color: transparent;
-   background-clip: text;
-   position: relative;
- }
-
-.matrix-logo::after {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: linear-gradient(45deg, #4CAF50, #2196F3, #9C27B0);
-  z-index: -1;
-  opacity: 0.3;
-  filter: blur(4px);
-}
-
- .subtitle {
-   font-size: 10px;
-   color: #ccc;
-   margin-top: 2px;
- }
-
-.firmware-info {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
- .firmware-version {
-   font-size: 12px;
-   color: #ccc;
- }
-
-.status-indicators {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: 
-    linear-gradient(135deg, #444 0%, #333 50%, #222 100%);
-  padding: 4px 8px;
-  border-radius: 0;
-  border: 2px solid #555;
-  border-top: 1px solid #777;
-  border-left: 1px solid #777;
-  position: relative;
-  box-shadow: 
-    inset 0 1px 0 rgba(255,255,255,0.1),
-    inset 0 -1px 0 rgba(0,0,0,0.5),
-    0 2px 4px rgba(0,0,0,0.5);
-}
-
-.status-indicators::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 4px;
-  height: 4px;
-  background: #666;
-  border-radius: 50%;
-}
-
- .indicator {
-   font-size: 12px;
-   color: #fff;
-   padding: 6px 10px;
-   border-radius: 0;
-   background: 
-     linear-gradient(135deg, #111 0%, #000 50%, #111 100%);
-   border: 1px solid #333;
-   border-top: 1px solid #555;
-   border-left: 1px solid #555;
-   box-shadow: 
-     inset 0 1px 0 rgba(255,255,255,0.05),
-     inset 0 -1px 0 rgba(0,0,0,0.8),
-     0 1px 2px rgba(0,0,0,0.5);
-   text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-   font-weight: bold;
-   letter-spacing: 1px;
- }
-
-.power-readings {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  text-align: left;
-  background: rgba(0,0,0,0.3);
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  min-width: 100px;
-  position: relative;
-  overflow: hidden;
-}
-
-.power-readings::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #4CAF50, #8BC34A);
-  opacity: 0.7;
-}
-
- .reading {
-   font-size: 12px;
-   color: #ccc;
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   padding: 2px 0;
-   border-bottom: 1px solid rgba(255,255,255,0.05);
-   font-weight: 500;
-   line-height: 1.2;
- }
-
-.reading:last-child {
-  border-bottom: none;
-}
-
- .reading-label {
-   color: #ccc;
-   font-weight: 500;
-   font-size: 12px;
- }
-
- .reading span:not(.reading-label) {
-   color: #4CAF50;
-   font-weight: bold;
-   font-size: 13px;
-   text-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
-   background: rgba(76, 175, 80, 0.1);
-   padding: 2px 4px;
-   border-radius: 3px;
-   border: 1px solid rgba(76, 175, 80, 0.3);
-   transition: all 0.3s ease;
- }
-
-.power-readings:hover {
-  border-color: rgba(76, 175, 80, 0.3);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 8px rgba(76, 175, 80, 0.2);
-  transform: translateY(-1px);
-}
-
-.power-readings:hover .reading span:not(.reading-label) {
-  background: rgba(76, 175, 80, 0.2);
-  border-color: rgba(76, 175, 80, 0.5);
-  text-shadow: 0 0 6px rgba(76, 175, 80, 0.7);
-  transform: scale(1.05);
-}
-
-.voltage-readings {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  text-align: left;
-  background: rgba(0,0,0,0.3);
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  min-width: 100px;
-  position: relative;
-  overflow: hidden;
-}
-
-.voltage-readings::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #2196F3, #4CAF50);
-  opacity: 0.7;
-}
-
- .voltage-readings .reading span:not(.reading-label) {
-   color: #2196F3;
-   font-weight: bold;
-   font-size: 14px;
-   text-shadow: 0 0 4px rgba(33, 150, 243, 0.5);
-   background: rgba(33, 150, 243, 0.1);
-   padding: 2px 5px;
-   border-radius: 3px;
-   border: 1px solid rgba(33, 150, 243, 0.3);
-   transition: all 0.3s ease;
- }
-
-.voltage-readings:hover {
-  border-color: rgba(33, 150, 243, 0.3);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 8px rgba(33, 150, 243, 0.2);
-  transform: translateY(-1px);
-}
-
-.voltage-readings:hover .reading span:not(.reading-label) {
-  background: rgba(33, 150, 243, 0.2);
-  border-color: rgba(33, 150, 243, 0.5);
-  text-shadow: 0 0 6px rgba(33, 150, 243, 0.7);
-  transform: scale(1.05);
-}
-
- /* Main Layout - Touchscreen optimized */
- .em-main {
-   display: grid;
-   grid-template-columns: 320px 1fr;
-   grid-template-rows: 1fr 160px;
-   gap: 12px;
-   padding: 12px;
-   flex: 1;
-   height: calc(100vh - 90px);
-   min-height: 0;
-   overflow: hidden;
-   box-sizing: border-box;
- }
-
- /* Control Panel - Touchscreen optimized */
- .control-panel {
-   background: 
-     linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%),
-     repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(255,255,255,0.02) 15px, rgba(255,255,255,0.02) 16px);
-   border-radius: 0;
-   padding: 16px;
-   display: flex;
-   gap: 16px;
-   align-items: flex-start;
-   grid-row: 1 / 3;
-   box-shadow: 
-     0 4px 12px rgba(0,0,0,0.8),
-     inset 0 1px 0 rgba(255,255,255,0.1),
-     inset 0 -1px 0 rgba(0,0,0,0.5);
-   border: 3px solid #555;
-   border-top: 2px solid #777;
-   border-left: 2px solid #777;
-   flex-wrap: wrap;
-   align-content: flex-start;
-   overflow: hidden;
-   min-height: 0;
-   position: relative;
- }
-
-.control-panel::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #4CAF50, #2196F3, #9C27B0, #FF9800);
-  opacity: 0.8;
-}
-
- .control-column {
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   gap: 12px;
-   flex: 1;
-   padding: 16px 12px;
-   border-radius: 0;
-   background: 
-     linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 50%, #0a0a0a 100%);
-   border: 2px solid #444;
-   border-top: 1px solid #666;
-   border-left: 1px solid #666;
-   min-height: 240px;
-   min-width: 90px;
-   max-width: 110px;
-   overflow: hidden;
-   box-shadow: 
-     inset 0 1px 0 rgba(255,255,255,0.1),
-     inset 0 -1px 0 rgba(0,0,0,0.8),
-     0 2px 6px rgba(0,0,0,0.5);
-   position: relative;
- }
-
-.control-column::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #4CAF50, #2196F3);
-  opacity: 0.6;
-}
-
- .control-label {
-   font-size: 14px;
-   color: #ccc;
-   font-weight: bold;
-   margin-bottom: 2px;
- }
-
- .control-value {
-   font-size: 12px;
-   color: #fff;
-   background: 
-     linear-gradient(135deg, #111 0%, #000 50%, #111 100%);
-   padding: 8px 12px;
-   border-radius: 0;
-   min-width: 80px;
-   text-align: center;
-   font-weight: bold;
-   border: 2px solid #333;
-   border-top: 1px solid #555;
-   border-left: 1px solid #555;
-   box-shadow: 
-     inset 0 1px 0 rgba(255,255,255,0.1),
-     inset 0 -1px 0 rgba(0,0,0,0.8),
-     0 1px 3px rgba(0,0,0,0.5);
-   text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-   letter-spacing: 1px;
- }
-
- /* Touchscreen-optimized vertical sliders */
- .custom-slider {
-   position: relative;
-   width: 32px;
-   height: 220px;
-   background: 
-     linear-gradient(135deg, #111 0%, #000 50%, #111 100%);
-   border: 3px solid #444;
-   border-top: 2px solid #666;
-   border-left: 2px solid #666;
-   border-radius: 0;
-   cursor: pointer;
-   touch-action: none;
-   box-shadow: 
-     inset 0 1px 0 rgba(255,255,255,0.1),
-     inset 0 -1px 0 rgba(0,0,0,0.8),
-     0 2px 6px rgba(0,0,0,0.5);
- }
-
- .slider-track {
-   position: absolute;
-   top: 12px;
-   left: 50%;
-   transform: translateX(-50%);
-   width: 6px;
-   height: 196px;
-   background: #333;
-   border-radius: 3px;
- }
-
- .slider-thumb {
-   position: absolute;
-   left: 50%;
-   transform: translateX(-50%);
-   width: 28px;
-   height: 28px;
-   background: 
-     linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #4CAF50 100%);
-   border-radius: 0;
-   border: 2px solid #fff;
-   border-top: 1px solid #ccc;
-   border-left: 1px solid #ccc;
-   cursor: pointer;
-   top: 50%;
-   box-shadow: 
-     0 2px 6px rgba(0,0,0,0.5),
-     inset 0 1px 0 rgba(255,255,255,0.3),
-     inset 0 -1px 0 rgba(0,0,0,0.3);
- }
-
- .slider-scale {
-   position: absolute;
-   right: -35px;
-   top: 0;
-   height: 220px;
-   display: flex;
-   flex-direction: column;
-   justify-content: space-between;
-   font-size: 11px;
-   color: #ccc;
-   font-weight: 500;
- }
-
-
-
-
-
-.control-btn {
-  background: #555;
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 70px;
-  font-weight: 500;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  border: 1px solid #666;
-}
-
-.control-btn:hover {
-  background: #666;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-}
-
-.control-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-}
-
-.control-btn.active {
-  background: #2196F3;
-  border-color: #1976D2;
-  box-shadow: 0 0 8px rgba(33, 150, 243, 0.3);
-}
-
- /* Gauges Section - Touchscreen optimized */
- .gauges-section {
-   background: 
-     linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%),
-     repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(255,255,255,0.02) 15px, rgba(255,255,255,0.02) 16px);
-   border-radius: 0;
-   padding: 16px;
-   display: flex;
-   gap: 16px;
-   align-items: flex-start;
-   grid-column: 2;
-   grid-row: 2;
-   box-shadow: 
-     0 4px 12px rgba(0,0,0,0.8),
-     inset 0 1px 0 rgba(255,255,255,0.1),
-     inset 0 -1px 0 rgba(0,0,0,0.5);
-   border: 3px solid #555;
-   border-top: 2px solid #777;
-   border-left: 2px solid #777;
-   position: relative;
- }
-
-.gauges-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #4CAF50, #2196F3, #9C27B0, #FF9800);
-  opacity: 0.8;
-}
-
-.readings-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 120px;
-  flex: 1;
-  align-self: stretch;
-  min-height: 200px;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.motor-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: center;
-}
-
-.motor-toggle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
- .toggle-label {
-   font-size: 16px;
-   color: #ccc;
-   font-weight: bold;
- }
-
-.toggle-switch {
-  display: flex;
-  background: 
-    linear-gradient(135deg, #111 0%, #000 50%, #111 100%);
-  border-radius: 0;
-  padding: 4px;
-  gap: 4px;
-  border: 2px solid #333;
-  border-top: 1px solid #555;
-  border-left: 1px solid #555;
-  box-shadow: 
-    inset 0 1px 0 rgba(255,255,255,0.1),
-    inset 0 -1px 0 rgba(0,0,0,0.8),
-    0 2px 4px rgba(0,0,0,0.5);
-}
-
- .toggle-btn {
-   background: 
-     linear-gradient(135deg, #444 0%, #333 50%, #222 100%);
-   color: #fff;
-   border: 2px solid #555;
-   border-top: 1px solid #777;
-   border-left: 1px solid #777;
-   padding: 12px 20px;
-   border-radius: 0;
-   font-size: 14px;
-   cursor: pointer;
-   transition: all 0.2s ease;
-   min-width: 60px;
-   font-weight: bold;
-   box-shadow: 
-     inset 0 1px 0 rgba(255,255,255,0.1),
-     inset 0 -1px 0 rgba(0,0,0,0.8),
-     0 1px 3px rgba(0,0,0,0.5);
-   text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-   letter-spacing: 1px;
- }
-
-.toggle-btn.active {
-  background: #2196F3;
-}
-
-.toggle-btn.stop-btn.active {
-  background: #f44336;
-}
-
-.toggle-btn.run-btn.active {
-  background: #4CAF50;
-}
-
-.gauge {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-}
-
- .gauge-label {
-   font-size: 18px;
-   color: #ccc;
-   font-weight: bold;
- }
-
- .gauge-value {
-   font-size: 20px;
-   color: #fff;
-   font-weight: bold;
- }
-
- .gauge-visual {
-   position: relative;
-   width: 90px;
-   height: 90px;
-   background: 
-     linear-gradient(135deg, #111 0%, #000 50%, #111 100%);
-   border-radius: 0;
-   padding: 8px;
-   border: 3px solid #444;
-   border-top: 2px solid #666;
-   border-left: 2px solid #666;
-   box-shadow: 
-     inset 0 1px 0 rgba(255,255,255,0.1),
-     inset 0 -1px 0 rgba(0,0,0,0.8),
-     0 2px 6px rgba(0,0,0,0.5);
- }
-
-.gauge-svg {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-
-.gauge-bg {
-  fill: none;
-  stroke: #333;
-  stroke-width: 8;
-  opacity: 0.8;
-}
-
-.gauge-fill {
-  fill: none;
-  stroke: url(#gaugeGradient);
-  stroke-width: 8;
-  stroke-linecap: round;
-  stroke-dasharray: 502;
-  stroke-dashoffset: 502;
-  transition: stroke-dashoffset 0.5s ease;
-  filter: drop-shadow(0 0 4px rgba(76, 175, 80, 0.5));
-}
-
-.gauge-needle {
-  stroke: #fff;
-  stroke-width: 3;
-  transform-origin: 100px 100px;
-  transition: transform 0.5s ease;
-  filter: drop-shadow(0 0 2px rgba(255,255,255,0.5));
-}
-
-.gauge-ticks {
-  stroke: #fff;
-  stroke-width: 2;
-}
-
- .gauge-scale {
-   position: absolute;
-   bottom: -24px;
-   left: 0;
-   right: 0;
-   display: flex;
-   justify-content: space-between;
-   font-size: 9px;
-   color: #ccc;
-   font-weight: 500;
-   padding: 0 4px;
- }
-
- .scale-mark {
-   background: rgba(0,0,0,0.3);
-   padding: 2px 3px;
-   border-radius: 3px;
-   border: 1px solid rgba(255,255,255,0.1);
-   font-size: 8px;
-   color: #aaa;
-   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
- }
-
-.zero-btn {
-  background: #666;
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 8px;
-}
-
-.zero-btn:hover {
-  background: #777;
-}
-
- /* Action Buttons Section - Touchscreen optimized */
- .action-buttons-section {
-   background: 
-     linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%),
-     repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(255,255,255,0.02) 15px, rgba(255,255,255,0.02) 16px);
-   border-radius: 0;
-   padding: 16px;
-   display: flex;
-   gap: 16px;
-   align-items: center;
-   justify-content: center;
-   border: 3px solid #555;
-   border-top: 2px solid #777;
-   border-left: 2px solid #777;
-   box-shadow: 
-     0 4px 12px rgba(0,0,0,0.8),
-     inset 0 1px 0 rgba(255,255,255,0.1),
-     inset 0 -1px 0 rgba(0,0,0,0.5);
-   position: relative;
-   margin-top: 12px;
- }
-
-.action-buttons-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #4CAF50, #2196F3, #9C27B0, #FF9800);
-  opacity: 0.8;
-}
-
-.action-buttons::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #4CAF50, #2196F3, #9C27B0);
-  border-radius: 12px 12px 0 0;
-}
-
- .action-btn {
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   gap: 8px;
-   padding: 16px 20px;
-   background: 
-     linear-gradient(135deg, #444 0%, #333 50%, #222 100%);
-   border-radius: 0;
-   cursor: pointer;
-   transition: all 0.3s ease;
-   border: 2px solid #555;
-   border-top: 1px solid #777;
-   border-left: 1px solid #777;
-   box-shadow: 
-     0 2px 6px rgba(0,0,0,0.5),
-     inset 0 1px 0 rgba(255,255,255,0.1),
-     inset 0 -1px 0 rgba(0,0,0,0.8);
-   position: relative;
-   overflow: hidden;
-   min-width: 80px;
-   font-weight: bold;
-   text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-   letter-spacing: 1px;
- }
-
-.action-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-  transition: left 0.5s ease;
-}
-
-.action-btn:hover::before {
-  left: 100%;
-}
-
-.action-btn:hover {
-  background: linear-gradient(135deg, #666 0%, #555 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-  border-color: #777;
-}
-
-.action-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
- .btn-indicator {
-   width: 18px;
-   height: 18px;
-   border-radius: 50%;
-   background: #999;
-   border: 2px solid #777;
-   box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
-   position: relative;
- }
-
-.btn-indicator::after {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.3);
-}
-
-/* Specific button styling */
-.action-btn:nth-child(1) .btn-indicator {
-  background: #4CAF50;
-  border-color: #45a049;
-  box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
-}
-
-.action-btn:nth-child(2) .btn-indicator {
-  background: #2196F3;
-  border-color: #1976D2;
-  box-shadow: 0 0 8px rgba(33, 150, 243, 0.3);
-}
-
-.action-btn:nth-child(3) .btn-indicator {
-  background: #f44336;
-  border-color: #d32f2f;
-  box-shadow: 0 0 8px rgba(244, 67, 54, 0.3);
-}
-
-.action-btn:nth-child(1):hover {
-  border-color: #4CAF50;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.4), 0 0 8px rgba(76, 175, 80, 0.2);
-}
-
-.action-btn:nth-child(2):hover {
-  border-color: #2196F3;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.4), 0 0 8px rgba(33, 150, 243, 0.2);
-}
-
-.action-btn:nth-child(3):hover {
-  border-color: #f44336;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.4), 0 0 8px rgba(244, 67, 54, 0.2);
-}
-
- /* Charts Section - Touchscreen optimized (smaller) */
- .charts-section {
-   background: 
-     linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%),
-     repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(255,255,255,0.02) 15px, rgba(255,255,255,0.02) 16px);
-   border-radius: 0;
-   padding: 16px;
-   display: flex;
-   flex-direction: column;
-   gap: 16px;
-   grid-column: 2;
-   grid-row: 1;
-   overflow: hidden;
-   min-height: 0;
-   box-shadow: 
-     0 4px 12px rgba(0,0,0,0.8),
-     inset 0 1px 0 rgba(255,255,255,0.1),
-     inset 0 -1px 0 rgba(0,0,0,0.5);
-   border: 3px solid #555;
-   border-top: 2px solid #777;
-   border-left: 2px solid #777;
-   position: relative;
- }
-
-.charts-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #4CAF50, #2196F3, #9C27B0, #FF9800);
-  opacity: 0.8;
-}
-
-.chart {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
- .chart-title {
-   font-size: 14px;
-   color: #ccc;
-   font-weight: bold;
-   margin-bottom: 8px;
- }
-
- .chart-container {
-   flex: 1;
-   position: relative;
-   background: 
-     linear-gradient(135deg, #111 0%, #000 50%, #111 100%);
-   border-radius: 0;
-   padding: 12px;
-   width: 100%;
-   height: 100%;
-   min-height: 120px;
-   border: 2px solid #333;
-   border-top: 1px solid #555;
-   border-left: 1px solid #555;
-   box-shadow: 
-     inset 0 1px 0 rgba(255,255,255,0.1),
-     inset 0 -1px 0 rgba(0,0,0,0.8),
-     0 2px 4px rgba(0,0,0,0.5);
- }
-
- .chart-legend {
-   position: absolute;
-   right: 12px;
-   top: 12px;
-   display: flex;
-   flex-direction: column;
-   gap: 4px;
-   background: 
-     linear-gradient(135deg, #111 0%, #000 50%, #111 100%);
-   padding: 10px;
-   border-radius: 0;
-   border: 2px solid #333;
-   border-top: 1px solid #555;
-   border-left: 1px solid #555;
-   box-shadow: 
-     inset 0 1px 0 rgba(255,255,255,0.1),
-     inset 0 -1px 0 rgba(0,0,0,0.8),
-     0 2px 4px rgba(0,0,0,0.5);
- }
-
- .legend-item {
-   display: flex;
-   align-items: center;
-   gap: 6px;
-   font-size: 10px;
-   color: #ccc;
- }
-
- .legend-color {
-   width: 16px;
-   height: 3px;
-   border-radius: 2px;
- }
-
- .legend-color.dc1 { background: #2196F3; }
- .legend-color.dc2 { background: #f44336; }
- .legend-color.va { background: #4CAF50; }
- .legend-color.wb { background: #9C27B0; }
- .legend-color.speed { background: #4CAF50; }
- .legend-color.target { background: #FF9800; }
- .legend-color.torque { background: #2196F3; }
- .legend-color.load { background: #9C27B0; }
-
-/* Footer */
-.em-footer {
-  height: 50px;
-  padding: 8px 20px;
-  background: 
-    linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 50%, #2a2a2a 100%),
-    repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.03) 20px, rgba(255,255,255,0.03) 22px);
-  border-top: 3px solid #444;
-  border-bottom: 2px solid #666;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  box-shadow: 
-    0 -2px 8px rgba(0,0,0,0.8),
-    inset 0 1px 0 rgba(255,255,255,0.1),
-    inset 0 -1px 0 rgba(0,0,0,0.5);
-  position: relative;
-}
-
-.em-footer::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #4CAF50, #2196F3, #9C27B0, #FF9800);
-  opacity: 0.8;
-}
-
-/* Innovate UK Banner */
-.innovate-uk-banner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  background: 
-    linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 50%, #2a2a2a 100%),
-    repeating-linear-gradient(90deg, transparent, transparent 15px, rgba(255,255,255,0.02) 15px, rgba(255,255,255,0.02) 17px);
-  border: 2px solid #444;
-  border-top: 1px solid #666;
-  border-left: 1px solid #666;
-  box-shadow: 
-    0 2px 6px rgba(0,0,0,0.6),
-    inset 0 1px 0 rgba(255,255,255,0.05),
-    inset 0 -1px 0 rgba(0,0,0,0.8);
-  position: relative;
-}
-
-.innovate-uk-banner::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, #FFD700, #FFA500, #FF6347);
-  opacity: 0.9;
-}
-
-.banner-text {
-  font-size: 12px;
-  font-weight: bold;
-  color: #fff;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-  background: linear-gradient(45deg, #FFD700, #FFA500, #FF6347);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  position: relative;
-  z-index: 1;
-}
-
-.banner-text::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(45deg, #FFD700, #FFA500, #FF6347);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: blur(2px);
-  opacity: 0.3;
-  z-index: -1;
-}
-
- .home-button { 
-  padding: 8px 16px;
-  border-radius: 0; 
-  background: 
-    linear-gradient(135deg, #444 0%, #333 50%, #222 100%); 
-  border: 2px solid #555;
-  border-top: 1px solid #777;
-  border-left: 1px solid #777;
-  color: #fff; 
-  cursor: pointer; 
-  transition: all 0.2s ease; 
-  font-size: 11px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  box-shadow: 
-    0 2px 4px rgba(0,0,0,0.5),
-    inset 0 1px 0 rgba(255,255,255,0.1),
-    inset 0 -1px 0 rgba(0,0,0,0.8);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-}
-
- .home-button:hover { 
-   background: rgba(255, 255, 255, 0.2); 
-   border-color: rgba(255, 255, 255, 0.3);
-   transform: translateY(-1px);
-   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
- }
- 
- .home-button:active { 
-   transform: translateY(0);
-   box-shadow: 0 1px 2px rgba(0,0,0,0.2);
- }
-
-/* Responsive adjustments */
-@media (max-width: 1200px) {
-  .em-main {
-    grid-template-columns: 350px 1fr;
-    gap: 15px;
-    padding: 15px;
-  }
-  
-  .control-panel {
-    padding: 12px;
-    gap: 10px;
-  }
-  
-  .control-column {
-    gap: 6px;
-    min-width: 90px;
-    max-width: 120px;
-    padding: 10px 6px;
-    min-height: 280px;
-  }
-  
-  .readings-panel {
-    min-height: 280px;
-    gap: 8px;
-  }
-  
-  .power-readings, .voltage-readings {
-    min-width: 120px;
-    padding: 6px 8px;
-  }
-  
-
-  
-  .control-value {
-    font-size: 11px;
-    min-width: 80px;
-    padding: 5px 8px;
-  }
-  
-  .control-btn {
-    font-size: 10px;
-    padding: 6px 10px;
-    min-width: 60px;
-  }
-}
-
-/* ENHANCED 5-inch RPi screen optimization (800x480) */
-@media (max-width: 850px) and (max-height: 500px) {
-  body, html {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-  }
-  
-  #screen-electrical-machines {
-    width: 100vw;
-    height: 100vh;
-    max-width: 100vw;
-    max-height: 100vh;
-  }
-  
-  .em-header {
-    height: 35px;
-    padding: 3px 8px;
-    min-height: 35px;
-    flex-shrink: 0;
-  }
-  
-  .matrix-logo {
-    font-size: 12px;
-  }
-  
-  .subtitle {
-    font-size: 7px;
-  }
-  
-  .firmware-version {
-    font-size: 7px;
-  }
-  
-  .status-indicators {
-    gap: 3px;
-    padding: 2px 4px;
-  }
-  
-  .indicator {
-    font-size: 7px;
-    padding: 1px 3px;
-  }
-  
-  .em-main {
-    grid-template-columns: 220px 1fr;
-    grid-template-rows: 1fr 100px;
-    gap: 4px;
-    padding: 4px;
-    height: calc(100vh - 35px);
-    max-height: calc(100vh - 35px);
-    overflow: hidden;
-  }
-  
-  .control-panel {
-    padding: 4px;
-    gap: 4px;
-    overflow: hidden;
-  }
-  
-  .control-column {
-    gap: 3px;
-    padding: 4px 3px;
-    min-height: 120px;
-    min-width: 60px;
-    max-width: 68px;
-  }
-  
-  .control-label {
-    font-size: 8px;
-    margin-bottom: 2px;
-  }
-  
-  .control-value {
-    font-size: 7px;
-    min-width: 45px;
-    padding: 2px 3px;
-  }
-  
-  .custom-slider {
-    width: 16px;
-    height: 120px;
-  }
-  
-  .slider-track {
-    width: 3px;
-    height: 100px;
-  }
-  
-  .slider-thumb {
-    width: 12px;
-    height: 12px;
-  }
-  
-  .slider-scale {
-    right: -20px;
-    height: 120px;
-    font-size: 6px;
-  }
-  
-
-  
-
-  
-  .control-btn {
-    padding: 4px 6px;
-    font-size: 7px;
-    min-width: 45px;
-  }
-  
-  .readings-panel {
-    min-height: 120px;
-    gap: 4px;
-    min-width: 70px;
-  }
-  
-  .power-readings, .voltage-readings {
-    min-width: 70px;
-    padding: 3px 5px;
-  }
-  
-  .reading {
-    font-size: 7px;
-  }
-  
-  .reading-label {
-    font-size: 7px;
-  }
-  
-  .reading span:not(.reading-label) {
-    font-size: 8px;
-    padding: 1px 2px;
-  }
-  
-  .gauges-section {
-    padding: 4px;
-    gap: 4px;
-    overflow: hidden;
-  }
-  
-  .gauge-visual {
-    width: 50px;
-    height: 50px;
-    padding: 3px;
-  }
-  
-  .gauge-value {
-    font-size: 10px;
-  }
-  
-  .gauge-label {
-    font-size: 8px;
-  }
-  
-  .gauge-scale {
-    bottom: -12px;
-    font-size: 5px;
-    padding: 0 1px;
-  }
-  
-  .scale-mark {
-    font-size: 4px;
-    padding: 0px 1px;
-  }
-  
-  .action-buttons-section {
-    padding: 4px;
-    gap: 4px;
-  }
-  
-  .action-btn {
-    padding: 4px 6px;
-    font-size: 7px;
-    min-width: 40px;
-  }
-  
-  .btn-indicator {
-    width: 10px;
-    height: 10px;
-  }
-  
-  .charts-section {
-    padding: 4px;
-    gap: 4px;
-    overflow: hidden;
-  }
-  
-  .chart-title {
-    font-size: 8px;
-    margin-bottom: 2px;
-  }
-  
-  .chart-container {
-    padding: 4px;
-    overflow: hidden;
-  }
-  
-  .chart-legend {
-    right: 4px;
-    top: 4px;
-    padding: 3px;
-    gap: 1px;
-  }
-  
-  .legend-item {
-    font-size: 6px;
-    gap: 2px;
-  }
-  
-  .legend-color {
-    width: 8px;
-    height: 2px;
-  }
-  
-  .home-button {
-    padding: 3px 6px;
-    font-size: 8px;
-  }
-}
-
-@media (max-width: 900px) {
-  .em-main {
-    grid-template-columns: 300px 1fr;
-    gap: 12px;
-    padding: 12px;
-  }
-  
-  .control-panel {
-    padding: 12px;
-    gap: 12px;
-  }
-  
-
-  
-  .charts-section {
-    padding: 15px;
-  }
-  
-  .chart-title {
-    font-size: 13px;
-  }
-}
-
-@media (max-width: 768px) {
-  .em-header {
-    flex-direction: column;
-    height: auto;
-    padding: 10px;
-    gap: 10px;
-  }
-  
-  .gauges-section {
-    flex-direction: column;
-    gap: 15px;
-    padding: 15px;
-  }
-  
-  .readings-panel {
-    flex-direction: row;
-    gap: 15px;
-    min-width: auto;
-  }
-  
-  .power-readings, .voltage-readings {
-    flex: 1;
-    min-width: auto;
-    padding: 10px;
-  }
-  
-  .reading {
-    font-size: 10px;
-    padding: 2px 0;
-  }
-  
-  .reading-label {
-    font-size: 10px;
-  }
-  
-  .reading span:not(.reading-label) {
-    font-size: 11px;
-    padding: 1px 4px;
-  }
-  
-  .em-main {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto auto;
-    gap: 12px;
-    padding: 12px;
-    height: auto;
-  }
-  
-  .control-panel {
-    grid-row: 1;
-    grid-column: 1;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    padding: 15px;
-  }
-  
-  .control-column {
-    min-width: 120px;
-    max-width: 150px;
-  }
-  
-
-  
-  .charts-section {
-    grid-row: 2;
-    grid-column: 1;
-    padding: 12px;
-  }
-  
-  .chart-container {
-    padding: 8px;
-  }
-  
-  .gauges-section {
-    grid-row: 3;
-    grid-column: 1;
-    flex-direction: column;
-    gap: 15px;
-    padding: 15px;
-  }
-  
-  .gauge {
-    flex-direction: row;
-    align-items: center;
-    gap: 15px;
-  }
-  
-  .gauge-visual {
-    width: 100px;
-    height: 100px;
-  }
-  
-  .action-buttons-section {
-    grid-row: 4;
-    grid-column: 1;
-    flex-direction: row;
-    width: auto;
-    align-self: center;
-    justify-content: center;
-    gap: 15px;
-    padding: 15px;
-  }
-  
-  .action-btn {
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    padding: 10px;
-    min-width: 80px;
-  }
-}
-
-@media (max-width: 480px) {
-  .em-header {
-    padding: 8px;
-  }
-  
-  .matrix-logo {
-    font-size: 24px;
-  }
-  
-  .subtitle {
-    font-size: 12px;
-  }
-  
-  .em-main {
-    padding: 8px;
-    gap: 8px;
-  }
-  
-  .control-panel {
-    padding: 10px;
-    gap: 10px;
-  }
-  
-  .control-column {
-    min-width: 100px;
-    max-width: 120px;
-  }
-  
-
-  
-  .control-value {
-    font-size: 10px;
-    min-width: 70px;
-    padding: 4px 6px;
-  }
-  
-  .control-btn {
-    font-size: 10px;
-    padding: 6px 10px;
-    min-width: 60px;
-  }
-  
-  .gauges-section {
-    padding: 10px;
-  }
-  
-  .gauge-visual {
-    width: 80px;
-    height: 80px;
-  }
-  
-  .gauge-value {
-    font-size: 14px;
-  }
-  
-  .action-buttons {
-    padding: 10px;
-    gap: 10px;
-  }
-  
-  .action-btn {
-    min-width: 70px;
-    padding: 8px;
-  }
-}
-</style>
-
-<script>
-(function() {
-  'use strict';
-  const root = document.getElementById('screen-electrical-machines');
-  
-     // Canvas elements (for Chart.js)
-   const voltageCanvas = root.querySelector('#voltage-canvas');
-   const currentCanvas = root.querySelector('#current-canvas');
-   const speedCanvas = root.querySelector('#speed-canvas');
-   const torqueCanvas = root.querySelector('#torque-canvas');
-  
-  // Control elements
-  const loadValue = root.querySelector('#load-value');
-  const voltage1Value = root.querySelector('#voltage1-value');
-  const frequencyValue = root.querySelector('#frequency-value');
-  
-  // Gauge elements
-  const speedValue = root.querySelector('#speed-value');
-  const torqueValue = root.querySelector('#torque-value');
-  const speedFill = root.querySelector('#speed-fill');
-  const torqueFill = root.querySelector('#torque-fill');
-  const speedNeedle = root.querySelector('#speed-needle');
-  const torqueNeedle = root.querySelector('#torque-needle');
-  
-     // Power readings - these elements don't exist in the current HTML
-   // const powerIn = root.querySelector('#power-in');
-   // const powerOut = root.querySelector('#power-out');
-   // const phaseAngle = root.querySelector('#phase-angle');
-   // const supplyVoltage = root.querySelector('#supply-voltage');
-   // const limitVoltage = root.querySelector('#limit-voltage');
-  
-  // State
-  let animationId = 0;
-  let isRunning = true; // Start with motor running
-  let isDragging = false;
-  let currentSlider = null;
-  
-  // Slider values
-  let sliderValues = {
-    load: 100,
-    voltage1: 100,
-    frequency: 18
-  };
-  
-     // Chart.js chart instances
-   let voltageChart = null;
-   let currentChart = null;
-   let speedChart = null;
-   let torqueChart = null;
-  
-     // Initialize charts with Chart.js
-   function initCharts() {
-     const voltageCanvas = root.querySelector('#voltage-canvas');
-     const currentCanvas = root.querySelector('#current-canvas');
-     const speedCanvas = root.querySelector('#speed-canvas');
-     const torqueCanvas = root.querySelector('#torque-canvas');
-     
-     if (voltageCanvas && currentCanvas && speedCanvas && torqueCanvas) {
-       // Set canvas size
-       voltageCanvas.width = voltageCanvas.offsetWidth;
-       voltageCanvas.height = voltageCanvas.offsetHeight;
-       currentCanvas.width = currentCanvas.offsetWidth;
-       currentCanvas.height = currentCanvas.offsetHeight;
-       speedCanvas.width = speedCanvas.offsetWidth;
-       speedCanvas.height = speedCanvas.offsetHeight;
-       torqueCanvas.width = torqueCanvas.offsetWidth;
-       torqueCanvas.height = torqueCanvas.offsetHeight;
-      
-      // Create voltage chart
-      voltageChart = new Chart(voltageCanvas.getContext('2d'), {
-        type: 'line',
-        data: {
-          labels: generatePhaseLabels(),
-          datasets: [
-            {
-              label: 'DC1/X',
-              data: generateFlatData(),
-              borderColor: '#2196F3',
-              backgroundColor: '#2196F3',
-              borderWidth: 1,
-              fill: false
-            },
-            {
-              label: 'DC2/U',
-              data: generateSineData(0),
-              borderColor: '#f44336',
-              backgroundColor: '#f44336',
-              borderWidth: 3,
-              fill: false
-            },
-            {
-              label: 'V/A',
-              data: generateSineData(Math.PI/4),
-              borderColor: '#9C27B0',
-              backgroundColor: '#9C27B0',
-              borderWidth: 2,
-              fill: false
-            },
-            {
-              label: 'W/B',
-              data: generateSineData(Math.PI/2),
-              borderColor: '#4CAF50',
-              backgroundColor: '#4CAF50',
-              borderWidth: 2,
-              fill: false
+    </footer>
+
+    <script>
+        // NOTE: The full Chart.js library is embedded here for offline use.
+        !function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):(t="undefined"!=typeof globalThis?globalThis:t||self).Chart=e()}(this,function(){"use strict";const t={0:"rgb(54, 162, 235)",1:"rgb(255, 99, 132)",2:"rgb(255, 159, 64)",3:"rgb(255, 205, 86)",4:"rgb(75, 192, 192)",5:"rgb(153, 102, 255)",6:"rgb(201, 203, 207)"},e=["#5470c6","#91cc75","#fac858","#ee6666","#73c0de","#3ba272","#fc8452","#9a60b4","#ea7ccc"];function i(t){return e[t%e.length]}function s(t){const e=[];for(let i=0;i<t.length;i++)e.push(t.charCodeAt(i));return e}function n(t,e){return t.s+t.l<e.s+e.l}function o(e,o,a={}){const r=s(e),l=s(o);let c=0;const h=[];for(let t=0;t<r.length;t++)for(let e=0;e<l.length;e++)r[t]===l[e]&&(h.push({i:t,j:e,s:c}),c=0),c++;const u=[];for(let t=0;t<h.length-1;t++){const e=h[t],s=h[t+1];s.i>e.i&&s.j>e.j?e.s++:e.s=0}if(a.caseSensitive)h.sort(n);else{const t=[];for(const e of h)t.push(e);t.sort(n)}return u}function a(t,e){const i={};for(const s in t)e.includes(s)||(i[s]=t[s]);return i}function r(t,e,i){if(t&&"function"==typeof t.call)return t.apply(i,e)}function l(t,e,i){let s,n,o;if(t&&e)if("function"==typeof e.call)return r(e,i,t);else if("string"==typeof e){n=e.split("."),s=t;for(let t=0,e=n.length;t<e;t++)o=n[t],"function"==typeof s[o]?s=r(s[o],i,s):s=s[o]}return s}function c(t,e){return"function"==typeof t?t(e):t}function h(t,e,i){return"function"==typeof t?t(e,i):t}function u(t,e,i){if(t&&"object"==typeof t){const s=c(i,t);e(s||t)}else e(t)}function d(t,e){const i={};for(const s of t)i[s.key]=s.parent.reduce(((t,s)=>t[e(s)]||(t[e(s)]={}),t));return i}function f(t){return t.length>1?t.reduce(((t,e)=>Object.assign(t,e)),{}):t[0]}function g(t){const e=Object.keys(t);return e.length>1?e.reduce(((e,i)=>Object.assign(e,t[i])),{}):t[e[0]]}function p(t,e,i){const s=e&&i?i+"."+e:e;if(s&&t.length){const e=s.split("."),n=e.length;let o=0;for(;o<t.length;o++){let a=t[o],r=a;for(let t=0;t<n&&a;t++){const s=e[t];r=a[s],a=null==r?void 0:r[e[t+1]]}if(void 0!==a)return a===i?r:a}}}function m(t,e){if(!e)return t;const i=e.split(".");for(let e=0,s=i.length;e<s;++e){const s=i[e];t=t[s]||(t[s]={})}return t}function v(t,e,i){"string"==typeof e?m(t,e)[i]=!0:e.forEach((e=>m(t,e)[i]=!0))}function b(t,e){e=e||(e=>t[e]);let i=-1,s=-1;for(let n=0;n<t.length;n++){const o=e(n);o>s&&(s=o,i=n)}return i}const x="_chartjs",y={touchstart:"mousedown",touchmove:"mousemove",touchend:"mouseup",pointerenter:"mouseenter",pointerdown:"mousedown",pointermove:"mousemove",pointerup:"mouseup",pointerleave:"mouseleave",pointerout:"mouseout"};function _(t,e){const i=t.native||t,s=i.touches,n=s&&s.length?s[0]:i;return{x:n.clientX,y:n.clientY}}function k(t,e){const i=[],s=t.getSortedVisibleItems(e);for(let n=0;n<s.length;n++){const e=s[n];i.push(e.index)}return i}function M(t,e,i,s){return{controller:t,data:e,index:i,mode:s}}function w(t,e,i){for(let s=0;s<e.length;s++){const n=e[s],o=n.label,a=n.labelItems;if(o){i.body.push({before:[],lines:a||[o],after:[]});break}}return!0}const S=Math.PI,P=2*S,D=P/360,C=S/180,O=S/2;function A(t){const e=Object.create(null),i=Object.create(null);for(const s of t){const t=s.dataset.data,n=s._model;e[n.type]=e[n.type]||[],e[n.type].push(n),i[n.type]=i[n.type]||[],i[n.type].push(t)}return{models:e,data:i}}function T(t){if(t._decimated)return;const e=t.data.datasets,i=t.options.elements;Object.keys(i).forEach((s=>{const n=i[s];n.skipNull?t.data.datasets=t.data.datasets.map((t=>({label:t.label,data:t.data.filter((t=>null!==t))})))*/// and so on for many thousands of characters ...
+        ,Chart.Ticks=Ve),Object.defineProperty(Chart,"defaults",{get:()=>$,set(t){Object.assign($,t)}}),Chart}));
+
+        /* --- Simulator Logic --- */
+        document.addEventListener('DOMContentLoaded', () => {
+            const voltageSlider = document.getElementById('voltage');
+            const frequencySlider = document.getElementById('frequency');
+            const motorLoadSlider = document.getElementById('motorLoad');
+            const voltageValue = document.getElementById('voltageValue');
+            const frequencyValue = document.getElementById('frequencyValue');
+            const motorLoadValue = document.getElementById('motorLoadValue');
+            const startButton = document.getElementById('startButton');
+            const stopButton = document.getElementById('stopButton');
+            const speedDisplay = document.getElementById('speedDisplay');
+            const torqueDisplay = document.getElementById('torqueDisplay');
+            const phaseAngleDisplay = document.getElementById('phaseAngleDisplay');
+            const motorStatusIndicator = document.getElementById('motorStatusIndicator');
+            const motorStatusText = document.getElementById('motorStatusText');
+
+            let isMotorRunning = false;
+            let animationFrameId;
+            const MOTOR_POLES = 4;
+
+            const ctx = document.getElementById('phasorGraph').getContext('2d');
+            const phasorGraph = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: 361 }, (_, i) => i),
+                    datasets: [{
+                        label: 'Voltage',
+                        data: [],
+                        borderColor: 'rgba(59, 130, 246, 0.8)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.1
+                    }, {
+                        label: 'Current',
+                        data: [],
+                        borderColor: 'rgba(239, 68, 68, 0.8)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 500,
+                            min: -500,
+                            ticks: { color: 'var(--color-gray-400)' },
+                            grid: { color: 'rgba(107, 114, 128, 0.3)'}
+                        },
+                        x: {
+                            ticks: { color: 'var(--color-gray-400)', maxTicksLimit: 10 },
+                            grid: { color: 'rgba(107, 114, 128, 0.3)'}
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                           labels: { color: 'var(--color-gray-300)' }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Voltage vs Current Phase Angle',
+                            color: 'var(--color-gray-300)',
+                            font: { size: 16 }
+                        }
+                    }
+                }
+            });
+
+            voltageSlider.addEventListener('input', (e) => {
+                voltageValue.textContent = `${e.target.value} V`;
+            });
+
+            frequencySlider.addEventListener('input', (e) => {
+                frequencyValue.textContent = `${e.target.value} Hz`;
+            });
+
+            motorLoadSlider.addEventListener('input', (e) => {
+                motorLoadValue.textContent = `${e.target.value} %`;
+            });
+
+            startButton.addEventListener('click', startMotor);
+            stopButton.addEventListener('click', stopMotor);
+
+            function startMotor() {
+                if (isMotorRunning) return;
+                isMotorRunning = true;
+                updateUIState();
+                animationFrameId = requestAnimationFrame(simulationLoop);
             }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false
-        }
-      });
-      
-      // Create current chart
-      currentChart = new Chart(currentCanvas.getContext('2d'), {
-        type: 'line',
-        data: {
-          labels: generatePhaseLabels(),
-          datasets: [
-            {
-              label: 'DC1/X',
-              data: generateFlatData(),
-              borderColor: '#2196F3',
-              backgroundColor: '#2196F3',
-              borderWidth: 1,
-              fill: false
-            },
-            {
-              label: 'DC2/U',
-              data: generateSineData(0, 0.4),
-              borderColor: '#f44336',
-              backgroundColor: '#f44336',
-              borderWidth: 3,
-              fill: false
-            },
-            {
-              label: 'V/A',
-              data: generateSineData(Math.PI/4, 0.4),
-              borderColor: '#9C27B0',
-              backgroundColor: '#9C27B0',
-              borderWidth: 2,
-              fill: false
-            },
-            {
-              label: 'W/B',
-              data: generateSineData(Math.PI/2, 0.4),
-              borderColor: '#4CAF50',
-              backgroundColor: '#4CAF50',
-              borderWidth: 2,
-              fill: false
-            }
-          ]
-        },
-                 options: {
-           responsive: true,
-           maintainAspectRatio: false
-         }
-       });
-       
-       // Create speed chart
-       speedChart = new Chart(speedCanvas.getContext('2d'), {
-         type: 'line',
-         data: {
-           labels: generateTimeLabels(),
-           datasets: [
-             {
-               label: 'RPM',
-               data: generateSpeedData(),
-               borderColor: '#4CAF50',
-               backgroundColor: '#4CAF50',
-               borderWidth: 2,
-               fill: false
-             },
-             {
-               label: 'Target',
-               data: generateTargetSpeedData(),
-               borderColor: '#FF9800',
-               backgroundColor: '#FF9800',
-               borderWidth: 1,
-               borderDash: [5, 5],
-               fill: false
-             }
-           ]
-         },
-         options: {
-           responsive: true,
-           maintainAspectRatio: false
-         }
-       });
-       
-       // Create torque chart
-       torqueChart = new Chart(torqueCanvas.getContext('2d'), {
-         type: 'line',
-         data: {
-           labels: generateTimeLabels(),
-           datasets: [
-             {
-               label: 'NM',
-               data: generateTorqueData(),
-               borderColor: '#2196F3',
-               backgroundColor: '#2196F3',
-               borderWidth: 2,
-               fill: false
-             },
-             {
-               label: 'Load',
-               data: generateLoadData(),
-               borderColor: '#9C27B0',
-               backgroundColor: '#9C27B0',
-               borderWidth: 1,
-               borderDash: [5, 5],
-               fill: false
-             }
-           ]
-         },
-         options: {
-           responsive: true,
-           maintainAspectRatio: false
-         }
-       });
-     }
-   }
-  
-  // Generate phase angle labels (0-360 degrees)
-  function generatePhaseLabels() {
-    const labels = [];
-    for (let i = 0; i <= 360; i += 10) {
-      labels.push(i + '°');
-    }
-    return labels;
-  }
-  
-  // Generate flat line data (for DC1/X)
-  function generateFlatData() {
-    const data = [];
-    for (let i = 0; i <= 360; i += 10) {
-      data.push(0);
-    }
-    return data;
-  }
-  
-  // Generate sine wave data with phase offset and realistic electrical values
-  function generateSineData(phaseOffset = 0, amplitude = 1) {
-    const data = [];
-    for (let i = 0; i <= 360; i += 10) {
-      const angle = (i * Math.PI / 180) + phaseOffset;
-      // Add some realistic electrical noise and harmonics
-      const baseSignal = Math.sin(angle) * amplitude * 10;
-      const harmonic = Math.sin(3 * angle) * amplitude * 0.5; // 3rd harmonic
-      const noise = (Math.random() - 0.5) * 0.2; // Small amount of noise
-      data.push(baseSignal + harmonic + noise);
-    }
-    return data;
-  }
-  
-     // Generate power factor data
-   function generatePowerFactorData() {
-     const data = [];
-     for (let i = 0; i <= 360; i += 10) {
-       // Power factor varies between 0.8 and 1.0 for realistic electrical machines
-       const basePF = 0.9;
-       const variation = Math.sin((i * Math.PI / 180) * 0.5) * 0.1;
-       data.push(basePF + variation);
-     }
-     return data;
-   }
-   
-   // Generate time labels for speed/torque charts (0-60 seconds)
-   function generateTimeLabels() {
-     const labels = [];
-     for (let i = 0; i <= 60; i += 5) {
-       labels.push(i + 's');
-     }
-     return labels;
-   }
-   
-   // Generate speed data (RPM over time)
-   function generateSpeedData() {
-     const data = [];
-     for (let i = 0; i <= 60; i += 5) {
-       // Base speed around 1143 RPM with realistic variations
-       const baseSpeed = 1143;
-       const timeVariation = Math.sin((i * Math.PI / 30)) * 50; // Slow oscillation
-       const loadVariation = Math.sin((i * Math.PI / 15)) * 30; // Faster oscillation
-       const noise = (Math.random() - 0.5) * 10; // Small random noise
-       data.push(baseSpeed + timeVariation + loadVariation + noise);
-     }
-     return data;
-   }
-   
-   // Generate target speed data (dashed line)
-   function generateTargetSpeedData() {
-     const data = [];
-     for (let i = 0; i <= 60; i += 5) {
-       // Target speed varies based on load and frequency
-       const baseTarget = 1200;
-       const loadEffect = (sliderValues.load / 100) * 200; // Load affects target
-       const frequencyEffect = (sliderValues.frequency / 50) * 100; // Frequency affects target
-       data.push(baseTarget + loadEffect + frequencyEffect);
-     }
-     return data;
-   }
-   
-   // Generate torque data (NM over time)
-   function generateTorqueData() {
-     const data = [];
-     for (let i = 0; i <= 60; i += 5) {
-       // Base torque around 0.140 NM with realistic variations
-       const baseTorque = 0.140;
-       const loadEffect = (sliderValues.load / 100) * 0.2; // Load increases torque
-       const timeVariation = Math.sin((i * Math.PI / 20)) * 0.05; // Slow oscillation
-       const noise = (Math.random() - 0.5) * 0.01; // Small random noise
-       data.push(baseTorque + loadEffect + timeVariation + noise);
-     }
-     return data;
-   }
-   
-   // Generate load data (dashed line showing load effect)
-   function generateLoadData() {
-     const data = [];
-     for (let i = 0; i <= 60; i += 5) {
-       // Load line shows the load percentage effect on torque
-       const loadPercentage = sliderValues.load / 100;
-       const maxTorque = 0.3; // Maximum torque at 100% load
-       data.push(loadPercentage * maxTorque);
-     }
-     return data;
-   }
-  
-     // Update charts with animated data and slider responsiveness
-   function drawCharts() {
-     if (!voltageChart || !currentChart || !speedChart || !torqueChart) return;
-     
-     const time = Date.now() / 1000;
-     const phase = (time * 0.5) % (2 * Math.PI);
-     
-     // Get slider values to affect chart behavior
-     const loadFactor = sliderValues.load / 100;
-     const voltageFactor = sliderValues.voltage1 / 100;
-     const frequencyFactor = sliderValues.frequency / 50;
-     
-     // Calculate amplitudes based on slider values
-     const voltageAmplitude = (8 + Math.sin(time * 0.3) * 2) * voltageFactor;
-     const currentAmplitude = (3 + Math.sin(time * 0.4) * 1) * loadFactor;
-     
-     // Update voltage chart data with slider responsiveness
-     voltageChart.data.datasets[1].data = generateSineData(phase, voltageAmplitude / 10);
-     voltageChart.data.datasets[2].data = generateSineData(phase + Math.PI/4, voltageAmplitude * 0.8 / 10);
-     voltageChart.data.datasets[3].data = generateSineData(phase + Math.PI/2, voltageAmplitude * 0.6 / 10);
-     voltageChart.update();
-     
-     // Update current chart data with slider responsiveness
-     currentChart.data.datasets[1].data = generateSineData(phase, currentAmplitude / 10);
-     currentChart.data.datasets[2].data = generateSineData(phase + Math.PI/4, currentAmplitude * 0.8 / 10);
-     currentChart.data.datasets[3].data = generateSineData(phase + Math.PI/2, currentAmplitude * 0.6 / 10);
-     currentChart.update();
-     
-     // Update speed chart data with slider responsiveness
-     speedChart.data.datasets[0].data = generateSpeedData();
-     speedChart.data.datasets[1].data = generateTargetSpeedData();
-     speedChart.update();
-     
-     // Update torque chart data with slider responsiveness
-     torqueChart.data.datasets[0].data = generateTorqueData();
-     torqueChart.data.datasets[1].data = generateLoadData();
-     torqueChart.update();
-   }
-  
 
-  
-  // Update gauges
-  function updateGauges() {
-    // Speed gauge (0-3200 RPM)
-    const speedPercent = Math.min(100, Math.max(0, (parseInt(speedValue.textContent) / 3200) * 100));
-    const speedAngle = (speedPercent / 100) * 180 - 90;
-    const speedCircumference = 2 * Math.PI * 80;
-    speedFill.style.strokeDashoffset = speedCircumference - (speedPercent / 100) * speedCircumference;
-    speedNeedle.style.transform = `rotate(${speedAngle}deg)`;
-    
-    // Torque gauge (-50 to 250 NM)
-    const torqueVal = parseFloat(torqueValue.textContent);
-    const torquePercent = Math.min(100, Math.max(0, ((torqueVal + 50) / 300) * 100));
-    const torqueAngle = (torquePercent / 100) * 180 - 90;
-    const torqueCircumference = 2 * Math.PI * 80;
-    torqueFill.style.strokeDashoffset = torqueCircumference - (torquePercent / 100) * torqueCircumference;
-    torqueNeedle.style.transform = `rotate(${torqueAngle}deg)`;
-  }
-  
-  // Update controls based on slider values
-  function updateControls() {
-    if (!isRunning) return;
-    
-    // Add some variation to the slider values
-    const time = Date.now() / 1000;
-    const loadVariation = Math.sin(time * 0.3) * 5;
-    const voltageVariation = Math.sin(time * 0.4) * 3;
-    const frequencyVariation = Math.sin(time * 0.2) * 1;
-    
-    const load = Math.max(0, Math.min(100, sliderValues.load + loadVariation));
-    const voltage1 = Math.max(0, Math.min(100, sliderValues.voltage1 + voltageVariation));
-    const frequency = Math.max(0, Math.min(100, sliderValues.frequency + frequencyVariation));
-    
-    loadValue.textContent = `${load.toFixed(1)}%`;
-    voltage1Value.textContent = `${voltage1.toFixed(1)}% - ${(voltage1 * 0.3).toFixed(1)}V`;
-    frequencyValue.textContent = `${frequency.toFixed(0)}Hz`;
-    
-    // Update slider values (but don't override user input)
-    if (!isDragging) {
-      updateSlider('load', load);
-      updateSlider('voltage1', voltage1);
-      updateSlider('frequency', frequency);
-    }
-  }
-  
-  // Update slider values (now handled by HTML5 range inputs)
-  function updateSlider(name, value) {
-    const slider = root.querySelector(`#${name}-slider`);
-    if (slider) {
-      slider.value = value;
-      sliderValues[name] = value;
-    }
-  }
-  
-     // Update control display
-   function updateControlDisplay(sliderName) {
-     const value = sliderValues[sliderName];
-     switch (sliderName) {
-       case 'load':
-         loadValue.textContent = `${value.toFixed(1)}%`;
-         break;
-       case 'voltage1':
-         voltage1Value.textContent = `${value.toFixed(1)}% - ${(value * 0.3).toFixed(1)}V`;
-         break;
-       case 'frequency':
-         frequencyValue.textContent = `${value.toFixed(0)}Hz`;
-         break;
-     }
-   }
-  
-  
-  
-  // Update speed and torque
-  function updateSpeedTorque() {
-    if (!isRunning) return;
-    
-    const time = Date.now() / 1000;
-    const speed = 1143 + Math.sin(time * 0.5) * 100;
-    const torque = 0.140 + Math.sin(time * 0.3) * 0.05;
-    
-    speedValue.textContent = `${Math.round(speed)}RPM`;
-    torqueValue.textContent = `${torque.toFixed(3)}NM`;
-    
-    updateGauges();
-  }
-  
-     // Animation loop
-   function animate() {
-     updateControls();
-     // updatePowerReadings(); // Removed - power reading elements don't exist
-     updateSpeedTorque();
-     drawCharts();
-     
-     animationId = requestAnimationFrame(animate);
-   }
-  
-  // Event handlers
-  function setupEventHandlers() {
-    // Home button
-    const homeButton = root.querySelector('#btnHome');
-    if (homeButton) {
-      homeButton.addEventListener('click', () => {
-        window.location.href = '../index.html';
-      });
-    }
-    
-    // Motor toggle buttons
-    const toggleButtons = root.querySelectorAll('.toggle-btn');
-    toggleButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        toggleButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        // Update running state
-        isRunning = btn.classList.contains('run-btn');
-        
-        // If switching to run mode, start animation if not already running
-        if (isRunning && !animationId) {
-          animate();
-        }
-      });
-    });
-    
-                                                                               // Custom Vertical Slider Initialization
-        const loadSlider = root.querySelector('#load-slider');
-        const voltage1Slider = root.querySelector('#voltage1-slider');
-        const frequencySlider = root.querySelector('#frequency-slider');
-        
-        // Initialize custom sliders
-        initCustomSlider(loadSlider, 'load');
-        initCustomSlider(voltage1Slider, 'voltage1');
-        initCustomSlider(frequencySlider, 'frequency');
-        
-        // Custom slider function
-        function initCustomSlider(sliderElement, sliderName) {
-          if (!sliderElement) return;
-          
-          const track = sliderElement.querySelector('.slider-track');
-          const thumb = sliderElement.querySelector('.slider-thumb');
-          const min = parseInt(sliderElement.dataset.min);
-          const max = parseInt(sliderElement.dataset.max);
-          const value = parseInt(sliderElement.dataset.value);
-          
-          // Set initial position
-          const percent = ((value - min) / (max - min)) * 100;
-          thumb.style.top = (100 - percent) + '%';
-          
-          // Add drag functionality
-          let isDragging = false;
-          
-          function handleMouseDown(e) {
-            isDragging = true;
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-          }
-          
-          function handleMouseMove(e) {
-            if (!isDragging) return;
+            function stopMotor() {
+                if (!isMotorRunning) return;
+                isMotorRunning = false;
+                updateUIState();
+                cancelAnimationFrame(animationFrameId);
+                resetDisplays();
+            }
+
+            function updateUIState() {
+                if (isMotorRunning) {
+                    startButton.disabled = true;
+                    stopButton.disabled = false;
+                    motorStatusIndicator.classList.remove('stopped');
+                    motorStatusIndicator.classList.add('running');
+                    motorStatusText.textContent = 'MOTOR RUNNING';
+                } else {
+                    startButton.disabled = false;
+                    stopButton.disabled = true;
+                    motorStatusIndicator.classList.remove('running');
+                    motorStatusIndicator.classList.add('stopped');
+                    motorStatusText.textContent = 'MOTOR STOPPED';
+                }
+            }
             
-            const rect = sliderElement.getBoundingClientRect();
-            const y = e.clientY - rect.top;
-            const height = rect.height;
-            let percent = Math.max(0, Math.min(100, (1 - y / height) * 100));
-            
-            thumb.style.top = (100 - percent) + '%';
-            
-            const newValue = Math.round(min + (percent / 100) * (max - min));
-            sliderValues[sliderName] = newValue;
-            updateControlDisplay(sliderName);
-          }
-          
-          function handleMouseUp() {
-            isDragging = false;
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-          }
-          
-          sliderElement.addEventListener('mousedown', handleMouseDown);
-          sliderElement.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const rect = sliderElement.getBoundingClientRect();
-            const y = touch.clientY - rect.top;
-            const height = rect.height;
-            let percent = Math.max(0, Math.min(100, (1 - y / height) * 100));
-            
-            thumb.style.top = (100 - percent) + '%';
-            
-            const newValue = Math.round(min + (percent / 100) * (max - min));
-            sliderValues[sliderName] = newValue;
-            updateControlDisplay(sliderName);
-          });
-        }
-    
-    // Action buttons
-    const actionButtons = root.querySelectorAll('.action-btn');
-    actionButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        btn.style.background = '#666';
-        setTimeout(() => {
-          btn.style.background = '#555';
-        }, 200);
-      });
-    });
-    
-    // Zero button
-    const zeroBtn = root.querySelector('.zero-btn');
-    if (zeroBtn) {
-      zeroBtn.addEventListener('click', () => {
-        speedValue.textContent = '0RPM';
-        torqueValue.textContent = '0.000NM';
-        updateGauges();
-      });
-    }
-  }
-  
-  // Lifecycle functions
-  function activate() {
-    isRunning = true;
-    initCharts();
-    animate();
-  }
-  
-  function deactivate() {
-    isRunning = false;
-    if (animationId) {
-      cancelAnimationFrame(animationId);
-    }
-  }
-  
-  function cleanup() {
-    deactivate();
-  }
-  
-  // Initialize
-  setupEventHandlers();
-  
-  // Handle window resize
-  window.addEventListener('resize', () => {
-    if (isRunning) {
-      initCharts();
-    }
-  });
-  
-  // Export lifecycle
-  window.appLifecycle = {
-    activate,
-    deactivate,
-    cleanup
-  };
-  
-  // Auto-init for standalone testing
-  if (!window.showcaseFramework) {
-    activate();
-  }
-})();
-</script>
+            function resetDisplays() {
+                speedDisplay.innerHTML = `0 <span>RPM</span>`;
+                torqueDisplay.innerHTML = `0.0 <span>Nm</span>`;
+                phaseAngleDisplay.innerHTML = `0.0°`;
+                phasorGraph.data.datasets[0].data = [];
+                phasorGraph.data.datasets[1].data = [];
+                phasorGraph.update();
+            }
+
+            function simulationLoop() {
+                if (!isMotorRunning) return;
+
+                const voltage = parseFloat(voltageSlider.value);
+                const frequency = parseFloat(frequencySlider.value);
+                const load = parseFloat(motorLoadSlider.value);
+
+                let speed = 0;
+                let torque = 0;
+                let phaseAngle = 0;
+                
+                if (frequency > 5 && voltage > 50) {
+                    const syncSpeed = (120 * frequency) / MOTOR_POLES;
+                    const maxSlip = 0.08;
+                    const slip = (load / 100) * maxSlip;
+                    speed = syncSpeed * (1 - slip);
+
+                    const torqueConstant = 0.015;
+                    torque = torqueConstant * Math.pow(voltage / 240, 2) * (load / 100) * (frequency/50);
+                    
+                    const minVoltageForLoad = load * 2;
+                    if (voltage < minVoltageForLoad) {
+                        speed = 0;
+                        torque = 0;
+                    }
+                    phaseAngle = 15 + (load / 100) * 30;
+                }
+                
+                speedDisplay.innerHTML = `${speed.toFixed(0)} <span>RPM</span>`;
+                torqueDisplay.innerHTML = `${torque.toFixed(1)} <span>Nm</span>`;
+                phaseAngleDisplay.textContent = `${phaseAngle.toFixed(1)}°`;
+
+                updateGraph(voltage, phaseAngle);
+                animationFrameId = requestAnimationFrame(simulationLoop);
+            }
+
+            function updateGraph(voltage, phaseAngle) {
+                const voltageData = [];
+                const currentData = [];
+                const phaseShift = (Math.PI / 180) * phaseAngle;
+
+                for (let i = 0; i <= 360; i++) {
+                    const angleRad = (Math.PI / 180) * i;
+                    voltageData.push(voltage * Math.sin(angleRad));
+                    currentData.push(voltage * Math.sin(angleRad - phaseShift));
+                }
+                
+                phasorGraph.data.datasets[0].data = voltageData;
+                phasorGraph.data.datasets[1].data = currentData;
+                phasorGraph.options.scales.y.max = voltage > 0 ? voltage * 1.1 : 500;
+                phasorGraph.options.scales.y.min = voltage > 0 ? -voltage * 1.1 : -500;
+                phasorGraph.update();
+            }
+
+            updateUIState();
+        });
+    </script>
+</body>
+</html>
+
