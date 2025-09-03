@@ -5,8 +5,7 @@
 
 cd ~/rpi-demo-3
 git add .
-git commit -m "fdgfdg"
-git commit -a "fdgfdg"
+git commit -m "electrical machines fix"
 git push origin main
 
 git pull origin main
@@ -127,8 +126,8 @@ git push origin main --tags
 
 #When ready for the next release
 git add -A
-git commit -m "Prepare for Rev 4.1 release"
-git tag -a rev4.1 -m "Rev 4.1 released"
+git commit -m "Prepare for Rev 4.3 release"
+git tag -a rev4.1 -m "Rev 4.3 released"
 git push origin main --tags
 
 
