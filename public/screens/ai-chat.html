@@ -803,7 +803,8 @@
     
     async function checkConnection() {
       try {
-        const response = await fetch('http://localhost:11434/api/tags', {
+        const ollamaUrl = `${window.location.protocol}//${window.location.hostname}:11434`;
+        const response = await fetch(`${ollamaUrl}/api/tags`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'
@@ -873,7 +874,8 @@
       updateSendButtonState();
       
       try {
-        const response = await fetch('http://localhost:11434/api/generate', {
+        const ollamaUrl = `${window.location.protocol}//${window.location.hostname}:11434`;
+        const response = await fetch(`${ollamaUrl}/api/generate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
