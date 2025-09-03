@@ -1,5 +1,15 @@
 {
   "permissions": {
+    "allow": [
+      "Bash(sudo systemctl status:*)",
+      "Bash(ssh:*)",
+      "Bash(netsh wlan show profiles:*)",
+      "Bash(netsh wlan show:*)",
+      "Bash(ping:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ],
     "additionalDirectories": [
       "C:\\etc\\systemd"
     ]

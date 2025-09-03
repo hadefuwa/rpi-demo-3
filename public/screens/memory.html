@@ -3,76 +3,57 @@
   <button id="btnHome" class="home-button">🏠</button>
   
   <div class="game-container">
-    <h1 class="game-title">Memory Match</h1>
+    <h1 class="game-title">Flappy Bird</h1>
     <div class="status-bar">
-      <span id="status">Click to start!</span>
+      <span id="score">Score: 0</span>
+      <span id="status">Press SPACE or Click to start!</span>
     </div>
-    <div id="game-board" class="game-board"></div>
-    <button id="new-game" class="new-game-btn">New Game</button>
+    <canvas id="game-canvas" width="500" height="600"></canvas>
+    <button id="restart-btn" class="restart-btn" style="display: none;">Play Again</button>
+    <div class="instructions">
+      <p>🐦 Tap or press SPACE to flap</p>
+      <p>🚫 Avoid the pipes</p>
+    </div>
   </div>
 </section>
 
 <style>
-  /* Memory Game - Complete Rewrite */
+  /* Flappy Bird Game Styles */
   #screen-memory {
-    /* Avoid 100vw horizontal overflow; prefer percentage width */
     width: 100%;
-    /* Use dynamic viewport height to avoid mobile browser UI causing scroll */
     height: 100vh;
-    height: 100dvh; /* modern browsers */
+    height: 100dvh;
     margin: 0;
     padding: 20px;
     box-sizing: border-box;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    background-size: 200% 200%;
-    animation: gradientShift 28s ease-in-out infinite;
+    background: linear-gradient(180deg, #87CEEB 0%, #98FB98 50%, #90EE90 100%);
     color: white;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* ensure no window scrollbars from this screen */
+    overflow: hidden;
     position: relative;
   }
-  /* Animated background gradient */
-  @keyframes gradientShift {
-    0% { background-position: 0% 0%; }
-    50% { background-position: 100% 100%; }
-    100% { background-position: 0% 0%; }
-  }
   
-  /* Soft drifting glow layers */
+  /* Floating clouds animation */
   #screen-memory::before {
     content: "";
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(520px 520px at 20% 30%, rgba(255,255,255,0.08), transparent 60%),
-      radial-gradient(460px 460px at 80% 70%, rgba(255,255,255,0.06), transparent 60%);
-    filter: blur(8px);
-    opacity: 0.8;
-    animation: glowDrift 40s ease-in-out infinite;
+      radial-gradient(ellipse 120px 60px at 20% 20%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(ellipse 80px 40px at 70% 30%, rgba(255,255,255,0.3), transparent),
+      radial-gradient(ellipse 100px 50px at 50% 15%, rgba(255,255,255,0.3), transparent);
+    animation: cloudDrift 30s ease-in-out infinite;
     pointer-events: none;
     z-index: 0;
   }
-  @keyframes glowDrift {
-    0% { background-position: 20% 30%, 80% 70%; }
-    50% { background-position: 32% 62%, 62% 42%; }
-    100% { background-position: 20% 30%, 80% 70%; }
-  }
   
-  /* Subtle dotted grid overlay */
-  #screen-memory::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 1px);
-    background-size: 22px 22px;
-    opacity: 0.18;
-    pointer-events: none;
-    z-index: 1;
+  @keyframes cloudDrift {
+    0% { transform: translateX(-10%); }
+    50% { transform: translateX(10%); }
+    100% { transform: translateX(-10%); }
   }
-  /* Ensure all children respect the container's size */
-  #screen-memory * { box-sizing: border-box; max-width: 100%; }
   
   /* Logo and Home Button */
   #screen-memory .matrix-logo {
@@ -93,8 +74,8 @@
     height: 45px;
     border: none;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
+    background: rgba(255, 255, 255, 0.3);
+    color: #333;
     font-size: 20px;
     cursor: pointer;
     display: flex;
@@ -105,7 +86,7 @@
   }
   
   #screen-memory .home-button:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.5);
     transform: scale(1.1);
   }
   
@@ -116,95 +97,51 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: clamp(12px, 2.5vmin, 20px);
-    max-width: 600px;
+    gap: 15px;
+    max-width: 500px;
     margin: 0 auto;
-    padding-top: 60px; /* create safe space for logo/home */
-    min-height: 0; /* allow proper flex shrinking to prevent overflow */
+    padding-top: 60px;
+    min-height: 0;
     position: relative;
-    z-index: 2; /* keep content above decorative layers */
+    z-index: 2;
   }
   
   #screen-memory .game-title {
-    font-size: clamp(24px, 4vw, 32px);
+    font-size: clamp(24px, 4vw, 36px);
     margin: 0;
     text-align: center;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    overflow-wrap: anywhere;
+    color: #2E8B57;
+    font-weight: bold;
   }
   
   #screen-memory .status-bar {
-    background: rgba(255, 255, 255, 0.15);
-    padding: 12px 24px;
-    border-radius: 25px;
-    font-size: clamp(14px, 2.5vw, 18px);
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: clamp(14px, 2.5vw, 16px);
     font-weight: 600;
     text-align: center;
-    min-width: 0;
-    max-width: 100%;
-  }
-  
-  /* Game Board */
-  #screen-memory .game-board {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: clamp(8px, 2vmin, 12px);
-    /* Bound the board to available viewport space; maintain square via aspect-ratio */
-    height: min(70vmin, calc(100dvh - 220px), 90vw, 400px);
-    width: auto;
-    max-width: 90vw;
-    aspect-ratio: 1;
-  }
-  
-  /* Cards */
-  #screen-memory .card {
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 12px;
+    color: #2E8B57;
     display: flex;
+    gap: 20px;
     align-items: center;
-    justify-content: center;
-    font-size: clamp(24px, 5vw, 36px);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    user-select: none;
-    aspect-ratio: 1;
-    position: relative;
   }
   
-  #screen-memory .card:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
+  /* Game Canvas */
+  #screen-memory #game-canvas {
+    border: 3px solid #2E8B57;
+    border-radius: 15px;
+    background: linear-gradient(180deg, #87CEEB 0%, #98FB98 100%);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    max-width: 95vw;
+    height: auto;
   }
   
-  #screen-memory .card.flipped {
-    background: rgba(255, 255, 255, 0.9);
-    color: #333;
-    border-color: rgba(255, 255, 255, 0.8);
-  }
-  
-  #screen-memory .card.matched {
-    background: rgba(76, 175, 80, 0.8);
-    border-color: rgba(76, 175, 80, 1);
-    color: white;
-    animation: matchPulse 0.5s ease-in-out;
-  }
-  
-  #screen-memory .card.disabled {
-    pointer-events: none;
-    opacity: 0.7;
-  }
-  
-  @keyframes matchPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-  }
-  
-  /* New Game Button */
-  #screen-memory .new-game-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.4);
+  /* Restart Button */
+  #screen-memory .restart-btn {
+    background: #FF6347;
+    border: none;
     color: white;
     padding: 12px 24px;
     border-radius: 25px;
@@ -212,12 +149,25 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    max-width: 100%;
+    box-shadow: 0 4px 15px rgba(255, 99, 71, 0.3);
   }
   
-  #screen-memory .new-game-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+  #screen-memory .restart-btn:hover {
+    background: #FF4500;
     transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 99, 71, 0.4);
+  }
+  
+  /* Instructions */
+  #screen-memory .instructions {
+    text-align: center;
+    color: #2E8B57;
+    font-size: clamp(12px, 2vw, 14px);
+    font-weight: 500;
+  }
+  
+  #screen-memory .instructions p {
+    margin: 4px 0;
   }
   
   /* Responsive Design */
@@ -227,30 +177,37 @@
     }
     
     #screen-memory .game-container {
-      gap: clamp(10px, 2.5vmin, 15px);
-      padding-top: 64px;
+      gap: 12px;
+      padding-top: 55px;
+    }
+    
+    #screen-memory #game-canvas {
+      width: 375px;
+      height: 450px;
     }
   }
   
-  @media (max-height: 600px) {
+  @media (max-height: 700px) {
     #screen-memory .game-container {
       gap: 10px;
       padding-top: 50px;
     }
     
-    #screen-memory .game-board {
-      height: min(62vmin, calc(100dvh - 200px), 90vw, 360px);
+    #screen-memory #game-canvas {
+      width: 400px;
+      height: 400px;
     }
   }
   
-  @media (max-height: 480px) {
+  @media (max-height: 600px) {
     #screen-memory .game-container {
       gap: 8px;
-      padding-top: 46px;
+      padding-top: 45px;
     }
     
-    #screen-memory .game-board {
-      height: min(56vmin, calc(100dvh - 180px), 90vw, 320px);
+    #screen-memory #game-canvas {
+      width: 350px;
+      height: 350px;
     }
   }
 </style>
@@ -259,144 +216,260 @@
 (function() {
   'use strict';
   
-  // Game state
-  let gameBoard = null;
+  // Game elements
+  let canvas = null;
+  let ctx = null;
+  let scoreEl = null;
   let statusEl = null;
-  let cards = [];
-  let flippedCards = [];
-  let matchedPairs = 0;
-  let isGameActive = false;
-  let canFlip = true;
+  let restartBtn = null;
   
-  // Game symbols (short one-word foods, ASCII-safe)
-  const symbols = ['Apple', 'Pear', 'Plum', 'Kiwi', 'Grape', 'Bread', 'Taco', 'Sushi'];
+  // Game state
+  let gameState = 'waiting'; // 'waiting', 'playing', 'gameOver'
+  let score = 0;
+  let gameSpeed = 2;
+  
+  // Bird properties
+  let bird = {
+    x: 80,
+    y: 200,
+    width: 25,
+    height: 25,
+    velocity: 0,
+    gravity: 0.3,
+    jumpForce: -6,
+    color: '#FFD700'
+  };
+  
+  // Pipes array
+  let pipes = [];
+  let pipeWidth = 60;
+  let pipeGap = 150;
+  let pipeSpacing = 200;
+  
+  // Animation frame
+  let animationId = null;
   
   // Initialize the game
   function init() {
-    gameBoard = document.getElementById('game-board');
+    canvas = document.getElementById('game-canvas');
+    ctx = canvas.getContext('2d');
+    scoreEl = document.getElementById('score');
     statusEl = document.getElementById('status');
+    restartBtn = document.getElementById('restart-btn');
     
     // Event listeners
-    document.getElementById('new-game').addEventListener('click', startNewGame);
+    canvas.addEventListener('click', handleInput);
+    document.addEventListener('keydown', handleKeyDown);
+    restartBtn.addEventListener('click', resetGame);
     document.getElementById('btnHome').addEventListener('click', goHome);
     
-    // Start first game
-    startNewGame();
+    // Start the game loop
+    resetGame();
+    gameLoop();
   }
   
-  function startNewGame() {
-    // Reset game state
-    cards = [];
-    flippedCards = [];
-    matchedPairs = 0;
-    isGameActive = true;
-    canFlip = true;
+  function handleInput() {
+    if (gameState === 'waiting') {
+      startGame();
+    } else if (gameState === 'playing') {
+      bird.velocity = bird.jumpForce;
+    }
+  }
+  
+  function handleKeyDown(e) {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      handleInput();
+    }
+  }
+  
+  function startGame() {
+    gameState = 'playing';
+    bird.velocity = bird.jumpForce;
+    statusEl.textContent = 'Fly little bird!';
+    generatePipes();
+  }
+  
+  function resetGame() {
+    gameState = 'waiting';
+    score = 0;
+    gameSpeed = 2;
     
-    // Create shuffled card pairs
-    const cardData = [...symbols, ...symbols];
-    shuffleArray(cardData);
+    // Reset bird
+    bird.x = 80;
+    bird.y = canvas.height / 2;
+    bird.velocity = 0;
     
-    // Clear board
-    gameBoard.innerHTML = '';
+    // Clear pipes
+    pipes = [];
     
-    // Create card elements
-    cardData.forEach((symbol, index) => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.dataset.symbol = symbol;
-      card.dataset.index = index;
-      card.textContent = '?';
-      card.addEventListener('click', () => flipCard(card));
-      
-      gameBoard.appendChild(card);
-      cards.push(card);
+    // Update UI
+    updateScore();
+    statusEl.textContent = 'Press SPACE or Click to start!';
+    restartBtn.style.display = 'none';
+  }
+  
+  function generatePipes() {
+    pipes = [];
+    for (let i = 0; i < 4; i++) {
+      createPipe(canvas.width + i * pipeSpacing);
+    }
+  }
+  
+  function createPipe(x) {
+    let gapY = Math.random() * (canvas.height - pipeGap - 100) + 50;
+    pipes.push({
+      x: x,
+      topHeight: gapY,
+      bottomY: gapY + pipeGap,
+      bottomHeight: canvas.height - (gapY + pipeGap),
+      passed: false
     });
-    
-    updateStatus('Find all matching pairs!');
   }
   
-  function flipCard(card) {
-    // Check if we can flip this card
-    if (!canFlip || !isGameActive || 
-        card.classList.contains('flipped') || 
-        card.classList.contains('matched') ||
-        flippedCards.length >= 2) {
-      return;
-    }
+  function updateBird() {
+    if (gameState !== 'playing') return;
     
-    // Flip the card
-    card.classList.add('flipped');
-    card.textContent = card.dataset.symbol;
-    flippedCards.push(card);
+    // Apply gravity
+    bird.velocity += bird.gravity;
+    bird.y += bird.velocity;
     
-    // Check what to do next
-    if (flippedCards.length === 1) {
-      updateStatus('Pick another card!');
-    } else if (flippedCards.length === 2) {
-      canFlip = false; // Prevent more flips
-      checkForMatch();
+    // Check bounds
+    if (bird.y < 0 || bird.y + bird.height > canvas.height) {
+      gameOver();
     }
   }
   
-  function checkForMatch() {
-    const [card1, card2] = flippedCards;
+  function updatePipes() {
+    if (gameState !== 'playing') return;
     
-    if (card1.dataset.symbol === card2.dataset.symbol) {
-      // Match found!
-      setTimeout(() => {
-        card1.classList.add('matched');
-        card2.classList.add('matched');
-        card1.classList.remove('flipped');
-        card2.classList.remove('flipped');
+    pipes.forEach((pipe, index) => {
+      // Move pipe
+      pipe.x -= gameSpeed;
+      
+      // Check if bird passed pipe for scoring
+      if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
+        pipe.passed = true;
+        score++;
+        updateScore();
         
-        matchedPairs++;
-        flippedCards = [];
-        canFlip = true;
-        
-        if (matchedPairs === symbols.length) {
-          endGame();
-        } else {
-          updateStatus(`Great! ${matchedPairs} pairs found!`);
+        // Increase speed slightly
+        if (score % 5 === 0) {
+          gameSpeed += 0.2;
         }
-      }, 500);
-    } else {
-      // No match
-      setTimeout(() => {
-        card1.classList.remove('flipped');
-        card2.classList.remove('flipped');
-        card1.textContent = '?';
-        card2.textContent = '?';
-        
-        flippedCards = [];
-        canFlip = true;
-        updateStatus('Try again!');
-      }, 1000);
-    }
-  }
-  
-  function endGame() {
-    isGameActive = false;
-    updateStatus('🎉 You won! Great memory!');
-    
-    setTimeout(() => {
-      if (confirm('Congratulations! Play again?')) {
-        startNewGame();
       }
-    }, 1000);
+      
+      // Remove pipes that are off screen and add new ones
+      if (pipe.x + pipeWidth < 0) {
+        pipes.splice(index, 1);
+        createPipe(pipes[pipes.length - 1].x + pipeSpacing);
+      }
+      
+      // Check collision
+      if (checkCollision(bird, pipe)) {
+        gameOver();
+      }
+    });
   }
   
-  function updateStatus(message) {
-    statusEl.textContent = message;
-  }
-  
-  function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+  function checkCollision(bird, pipe) {
+    // Check if bird is within pipe's x bounds
+    if (bird.x < pipe.x + pipeWidth && bird.x + bird.width > pipe.x) {
+      // Check if bird hits top or bottom pipe
+      if (bird.y < pipe.topHeight || bird.y + bird.height > pipe.bottomY) {
+        return true;
+      }
     }
+    return false;
+  }
+  
+  function drawBird() {
+    ctx.fillStyle = bird.color;
+    ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+    
+    // Simple bird face
+    ctx.fillStyle = '#FF4500';
+    ctx.fillRect(bird.x + 20, bird.y + 8, 8, 6); // beak
+    ctx.fillStyle = '#000';
+    ctx.fillRect(bird.x + 5, bird.y + 5, 3, 3); // eye
+  }
+  
+  function drawPipes() {
+    ctx.fillStyle = '#228B22';
+    pipes.forEach(pipe => {
+      // Top pipe
+      ctx.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight);
+      // Bottom pipe  
+      ctx.fillRect(pipe.x, pipe.bottomY, pipeWidth, pipe.bottomHeight);
+      
+      // Pipe caps
+      ctx.fillStyle = '#32CD32';
+      ctx.fillRect(pipe.x - 5, pipe.topHeight - 20, pipeWidth + 10, 20);
+      ctx.fillRect(pipe.x - 5, pipe.bottomY, pipeWidth + 10, 20);
+      ctx.fillStyle = '#228B22';
+    });
+  }
+  
+  function drawBackground() {
+    // Sky gradient
+    let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#87CEEB');
+    gradient.addColorStop(1, '#98FB98');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Simple clouds
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.beginPath();
+    ctx.arc(100, 80, 20, 0, Math.PI * 2);
+    ctx.arc(120, 80, 25, 0, Math.PI * 2);
+    ctx.arc(140, 80, 20, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.arc(300, 120, 15, 0, Math.PI * 2);
+    ctx.arc(315, 120, 20, 0, Math.PI * 2);
+    ctx.arc(330, 120, 15, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  function render() {
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw game elements
+    drawBackground();
+    drawPipes();
+    drawBird();
+  }
+  
+  function gameLoop() {
+    updateBird();
+    updatePipes();
+    render();
+    
+    animationId = requestAnimationFrame(gameLoop);
+  }
+  
+  function gameOver() {
+    gameState = 'gameOver';
+    statusEl.textContent = '💥 Game Over!';
+    restartBtn.style.display = 'block';
+    
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+    }
+  }
+  
+  function updateScore() {
+    scoreEl.textContent = `Score: ${score}`;
   }
   
   function goHome() {
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+    }
+    
     if (window.showcaseFramework && window.showcaseFramework.goHome) {
       window.showcaseFramework.goHome();
     } else {
@@ -404,20 +477,28 @@
     }
   }
   
-  // Lifecycle management for the showcase framework
+  // Lifecycle management
   window.appLifecycle = {
     activate: function() {
-      console.log('Memory game activated');
+      console.log('Flappy Bird activated');
+      if (!animationId) {
+        gameLoop();
+      }
     },
     
     deactivate: function() {
-      console.log('Memory game deactivated');
+      console.log('Flappy Bird deactivated');
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
     },
     
     cleanup: function() {
-      console.log('Memory game cleanup');
-      if (isGameActive) {
-        startNewGame();
+      console.log('Flappy Bird cleanup');
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
       }
     }
   };

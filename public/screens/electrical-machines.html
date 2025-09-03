@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Electrical Machines Training Simulator (Offline)</title>
+    <title>Electrical Machines Training</title>
     <style>
         /* --- General Styles & Reset --- */
         :root {
@@ -58,6 +58,19 @@
             position: sticky;
             top: 0;
             z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            flex: 0 0 auto;
+        }
+
+        .matrix-logo {
+            height: 3rem;
+            width: auto;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
         #app-header h1 {
@@ -69,6 +82,8 @@
             text-align: center;
             color: var(--color-white);
             letter-spacing: 0.025em;
+            flex: 1;
+            margin: 0 1rem;
         }
         #app-header h1 svg {
             height: 2rem;
@@ -76,6 +91,36 @@
             display: inline-block;
             margin-right: 0.5rem;
             color: var(--color-blue-400);
+        }
+
+        .header-right {
+            flex: 0 0 auto;
+        }
+
+        .home-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--color-blue-600);
+            color: var(--color-white);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .home-button:hover {
+            background-color: var(--color-blue-500);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .home-button svg {
+            height: 1.25rem;
+            width: 1.25rem;
         }
 
         #app-main {
@@ -302,16 +347,69 @@
             #controls-panel { grid-column: span 1 / span 1; }
             #display-panel { grid-column: span 2 / span 2; }
         }
+        
+        /* Mobile-first responsive order and cursor hiding */
+        @media (max-width: 1023px) {
+            #app-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            #display-panel {
+                order: -1; /* Move display panel (with graph) above controls */
+            }
+            
+            #controls-panel {
+                order: 1; /* Move controls panel below display */
+            }
+            
+            #graph-container {
+                min-height: 250px; /* Smaller height on mobile */
+            }
+            
+            /* Hide mouse cursor on mobile/touch devices */
+            body {
+                cursor: none;
+            }
+            
+            /* Keep cursor visible for interactive elements on mobile */
+            button, input[type="range"], a {
+                cursor: none;
+            }
+        }
+        
+        /* Keep cursor visible on larger screens */
+        @media (min-width: 1024px) {
+            body {
+                cursor: auto;
+            }
+            
+            button, input[type="range"], a {
+                cursor: pointer;
+            }
+        }
     </style>
 </head>
 <body>
     <header id="app-header">
+        <div class="header-left">
+            <img src="../assets/Matrix.png" alt="Matrix Logo" class="matrix-logo">
+        </div>
         <h1>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.042 1.9l-2.12 1.06a1 1 0 000 1.84l7 3a1 1 0 00.788 0l7-3a1 1 0 000-1.84l-2.12-1.06a.999.999 0 01-.042-1.9l2.652-1.326a1 1 0 000-1.84l-7-3zM12 10a2 2 0 10-4 0 2 2 0 004 0z" />
             </svg>
-            Electrical Machines Simulator
+            Electrical Machines
         </h1>
+        <div class="header-right">
+            <a href="../index.html" class="home-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                </svg>
+                HOME
+            </a>
+        </div>
     </header>
 
     <main id="app-main">
@@ -357,26 +455,26 @@
             </div>
 
             <div id="display-panel" class="panel">
+                <div id="graph-container">
+                    <canvas id="phasorGraph"></canvas>
+                </div>
+                
                 <div id="readouts">
                     <div class="readout-card">
                         <h3>Speed</h3>
                         <p id="speedDisplay" class="readout-display">0 <span>RPM</span></p>
                     </div>
-                                         <div class="readout-card">
-                         <h3>Torque</h3>
-                         <p id="torqueDisplay" class="readout-display">0.0 <span>Nm</span></p>
-                         <div class="torque-bar">
-                             <div class="torque-fill" id="torqueBar"></div>
-                         </div>
-                     </div>
-                     <div class="readout-card">
+                    <div class="readout-card">
+                        <h3>Torque</h3>
+                        <p id="torqueDisplay" class="readout-display">0.0 <span>Nm</span></p>
+                        <div class="torque-bar">
+                            <div class="torque-fill" id="torqueBar"></div>
+                        </div>
+                    </div>
+                    <div class="readout-card">
                         <h3>Phase Angle</h3>
                         <p id="phaseAngleDisplay" class="readout-display">0.0°</p>
                     </div>
-                </div>
-                
-                <div id="graph-container">
-                    <canvas id="phasorGraph"></canvas>
                 </div>
             </div>
         </div>

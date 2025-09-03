@@ -54,10 +54,10 @@
     width: 100%;
     height: 100%;
     background: 
-      conic-gradient(from 180deg at 50% 50%, rgba(0, 122, 255, 0.1) 0deg, transparent 60deg, rgba(48, 209, 88, 0.1) 120deg, transparent 180deg, rgba(255, 159, 10, 0.1) 240deg, transparent 300deg, rgba(0, 122, 255, 0.1) 360deg),
+      conic-gradient(from 180deg at 50% 50%, rgba(0, 122, 255, 0.25) 0deg, transparent 40deg, rgba(48, 209, 88, 0.2) 80deg, transparent 120deg, rgba(255, 159, 10, 0.25) 160deg, transparent 200deg, rgba(191, 90, 242, 0.2) 240deg, transparent 280deg, rgba(255, 69, 58, 0.15) 320deg, transparent 360deg),
       var(--bg);
     z-index: -1;
-    animation: rotate 60s linear infinite;
+    animation: rotate 40s linear infinite;
   }
   
   @keyframes rotate {
@@ -99,17 +99,17 @@
   }
   .grid{
     display: grid;
-    grid-template-columns: 320px 420px 1fr;
+    grid-template-columns: 450px 520px 1fr;
     gap: 24px;
     padding: 24px;
-    max-width: 1600px;
+    max-width: 1800px;
     margin: 0 auto;
   }
   @media (max-width:1400px){
-    .grid{grid-template-columns: 300px 380px 1fr; gap: 20px;}
+    .grid{grid-template-columns: 400px 480px 1fr; gap: 20px;}
   }
   @media (max-width:1200px){
-    .grid{grid-template-columns: 280px 340px 1fr; gap: 16px;}
+    .grid{grid-template-columns: 360px 420px 1fr; gap: 16px;}
   }
   @media (max-width:980px){
     .grid{grid-template-columns: 1fr; gap: 20px;}
@@ -154,9 +154,9 @@
   }
   .controls .row{
     display: grid;
-    grid-template-columns: 100px 1fr 90px;
+    grid-template-columns: 100px 4fr 90px;
     align-items: center;
-    gap: 16px;
+    gap: 24px;
     margin: 20px 0;
     min-height: 56px;
   }
@@ -339,7 +339,8 @@
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, 1fr);
     gap: 20px;
-    height: 420px;
+    min-height: 380px;
+    height: auto;
   }
   .gauge{
     background: var(--panel-dark);
@@ -375,16 +376,18 @@
   }
   .gauge-chart {
     width: 100%;
-    height: 120px;
-    margin: 10px 0;
+    height: 100px;
+    margin: 8px 0;
     flex-shrink: 0;
+    max-height: 100px;
   }
   .g-header{
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
+    flex-direction: column;
+    gap: 8px;
     margin-bottom: 20px;
     flex-shrink: 0;
+    text-align: center;
   }
   .g-name{
     font-size: 14px;
@@ -394,7 +397,7 @@
     letter-spacing: 1px;
   }
   .g-val{
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 800;
     color: var(--text);
     background: linear-gradient(135deg, #ffffff, #a0a0ab);
@@ -402,7 +405,18 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    line-height: 1;
+    word-break: break-all;
+    transition: font-size 0.3s ease;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
+  .g-val.large { font-size: 36px; }
+  .g-val.medium { font-size: 28px; }
+  .g-val.small { font-size: 22px; }
+  .g-val.tiny { font-size: 18px; }
   .units{
     font-size: 12px;
     color: var(--text-muted);
@@ -411,6 +425,7 @@
     text-transform: uppercase;
     letter-spacing: 0.8px;
     margin-top: 4px;
+    text-align: center;
   }
   output{
     font-size: 20px;
@@ -797,11 +812,26 @@
   }
 
   function renderGauges() {
-    // Display values with appropriate precision
-    liftVal.textContent = Math.abs(state.lift) < 10 ? fmt(state.lift,3) : fmt(state.lift,1);
-    dragVal.textContent = Math.abs(state.drag) < 10 ? fmt(state.drag,3) : fmt(state.drag,1);
-    pressVal.textContent = Math.abs(state.pressure) < 10 ? fmt(state.pressure,2) : fmt(state.pressure,1);
-    spdVal.textContent = fmt(state.airspeed,1);
+    // Display values with 2 decimal places and dynamic font sizing
+    const liftText = fmt(state.lift,2);
+    const dragText = fmt(state.drag,2);
+    const pressText = fmt(state.pressure,2);
+    const spdText = fmt(state.airspeed,2);
+    
+    liftVal.textContent = liftText;
+    dragVal.textContent = dragText;
+    pressVal.textContent = pressText;
+    spdVal.textContent = spdText;
+    
+    // Apply dynamic font sizing based on character count
+    [liftVal, dragVal, pressVal, spdVal].forEach(el => {
+      const len = el.textContent.length;
+      el.className = 'g-val ' + (
+        len <= 5 ? 'large' :
+        len <= 7 ? 'medium' :
+        len <= 9 ? 'small' : 'tiny'
+      );
+    });
 
     // Dynamic scaling based on actual ranges
     const maxLift = 8000;
@@ -843,30 +873,54 @@
 
   function drawAxes(yMax, xMax = 100, xLabel = 'Fan Speed [%]', yLabel = 'Pressure [Pa]') {
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    const pad = 48;
+    const pad = 60;
     const w = canvas.width - 2*pad;
     const h = canvas.height - 2*pad;
     
-    // Grid lines
-    ctx.strokeStyle = '#1a1f28';
+    // Background gradient
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    bgGradient.addColorStop(0, 'rgba(15, 15, 35, 0.8)');
+    bgGradient.addColorStop(1, 'rgba(10, 10, 26, 0.9)');
+    ctx.fillStyle = bgGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Grid lines with subtle gradient
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    // Vertical grid lines (every 20%)
-    for(let i = 0; i <= 5; i++) {
-      const x = pad + (i/5) * w;
+    // Vertical grid lines
+    for(let i = 0; i <= 10; i++) {
+      const x = pad + (i/10) * w;
       ctx.moveTo(x, pad);
       ctx.lineTo(x, canvas.height - pad);
     }
     // Horizontal grid lines
-    for(let i = 0; i <= 5; i++) {
-      const y = canvas.height - pad - (i/5) * h;
+    for(let i = 0; i <= 10; i++) {
+      const y = canvas.height - pad - (i/10) * h;
       ctx.moveTo(pad, y);
       ctx.lineTo(canvas.width - pad, y);
     }
     ctx.stroke();
     
-    // Main axes
-    ctx.strokeStyle = '#2f3540';
+    // Major grid lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for(let i = 0; i <= 5; i++) {
+      const x = pad + (i/5) * w;
+      const y = canvas.height - pad - (i/5) * h;
+      ctx.moveTo(x, pad);
+      ctx.lineTo(x, canvas.height - pad);
+      ctx.moveTo(pad, y);
+      ctx.lineTo(canvas.width - pad, y);
+    }
+    ctx.stroke();
+    
+    // Main axes with gradient
+    const axisGradient = ctx.createLinearGradient(pad, pad, canvas.width - pad, canvas.height - pad);
+    axisGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+    axisGradient.addColorStop(1, 'rgba(255, 255, 255, 0.15)');
+    ctx.strokeStyle = axisGradient;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(pad, pad);
@@ -874,21 +928,23 @@
     ctx.lineTo(canvas.width - pad, canvas.height - pad);
     ctx.stroke();
 
-    // Axis labels and tick marks
-    ctx.fillStyle = '#9cb2cb';
-    ctx.font = '12px system-ui';
+    // Axis labels with better typography
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '600 14px system-ui';
     ctx.textAlign = 'left';
-    ctx.fillText(yLabel, 10, 16);
+    ctx.fillText(yLabel, 12, 20);
     ctx.textAlign = 'center';
-    ctx.fillText(xLabel, canvas.width/2, canvas.height - 10);
+    ctx.fillText(xLabel, canvas.width/2, canvas.height - 12);
     
-    // Y-axis tick labels (adaptive to data range)
+    // Y-axis tick labels with better styling
+    ctx.fillStyle = '#a0a0ab';
+    ctx.font = '500 12px system-ui';
     ctx.textAlign = 'right';
     const yStep = yMax / 5;
     for(let i = 0; i <= 5; i++) {
       const y = canvas.height - pad - (i/5) * h;
       const val = Math.round(i * yStep);
-      ctx.fillText(val.toString(), pad - 8, y + 4);
+      ctx.fillText(val.toString(), pad - 12, y + 4);
     }
     
     // X-axis tick labels
@@ -902,29 +958,74 @@
       } else {
         val = Math.round(i * xStep);
       }
-      ctx.fillText(val.toString(), x, canvas.height - pad + 16);
+      ctx.fillText(val.toString(), x, canvas.height - pad + 20);
     }
   }
 
   function drawPoints(yMax, xMax = 100) {
-    const pad = 48;
+    const pad = 60;
     const w = canvas.width - 2*pad;
     const h = canvas.height - 2*pad;
 
-    // Color based on experiment - modern theme
+    // Enhanced vibrant colors with gradients
     const colors = {
       'lift-curve': '#007aff',
       'drag-polar': '#30d158', 
       'pressure-speed': '#ff9f0a',
       'baseline': '#bf5af2'
     };
-    ctx.fillStyle = colors[state.experiment] || '#007aff';
+    const baseColor = colors[state.experiment] || '#007aff';
+    
+    // Create rainbow gradient for connecting lines
+    const lineGradient = ctx.createLinearGradient(pad, pad, canvas.width - pad, canvas.height - pad);
+    lineGradient.addColorStop(0, '#007aff');
+    lineGradient.addColorStop(0.25, '#30d158');
+    lineGradient.addColorStop(0.5, '#ff9f0a');
+    lineGradient.addColorStop(0.75, '#bf5af2');
+    lineGradient.addColorStop(1, '#ff453a');
+    
+    // Draw connecting line if we have multiple points
+    if(state.dataPoints.length > 1) {
+      ctx.strokeStyle = lineGradient;
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.shadowColor = baseColor;
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      
+      let firstPoint = true;
+      for(const p of state.dataPoints){
+        let x, y;
+        
+        if(state.experiment === 'lift-curve') {
+          x = pad + ((p.x + 20) / 40) * w;
+          y = canvas.height - pad - (clamp(Math.abs(p.y), 0, yMax) / yMax) * h;
+        } else if(state.experiment === 'drag-polar') {
+          x = pad + (clamp(p.x, 0, xMax) / xMax) * w;
+          y = canvas.height - pad - (clamp(p.y, 0, yMax) / yMax) * h;
+        } else {
+          x = pad + (p.x / xMax) * w;
+          y = canvas.height - pad - (clamp(p.y, 0, yMax) / yMax) * h;
+        }
+        
+        if(firstPoint) {
+          ctx.moveTo(x, y);
+          firstPoint = false;
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0; // Reset shadow
+    }
 
-    for(const p of state.dataPoints){
+    // Draw points with colorful glow effect
+    for(let i = 0; i < state.dataPoints.length; i++){
+      const p = state.dataPoints[i];
       let x, y;
       
       if(state.experiment === 'lift-curve') {
-        // Map angle -20 to +20 to canvas width
         x = pad + ((p.x + 20) / 40) * w;
         y = canvas.height - pad - (clamp(Math.abs(p.y), 0, yMax) / yMax) * h;
       } else if(state.experiment === 'drag-polar') {
@@ -935,9 +1036,48 @@
         y = canvas.height - pad - (clamp(p.y, 0, yMax) / yMax) * h;
       }
       
+      // Color cycling based on point index for rainbow effect
+      const hue = (i * 25) % 360;
+      const pointColor = `hsl(${hue}, 80%, 60%)`;
+      const glowColor = `hsl(${hue}, 90%, 70%)`;
+      
+      // Glow effect for all points with individual colors
+      const glowGradient = ctx.createRadialGradient(x, y, 0, x, y, 12);
+      glowGradient.addColorStop(0, glowColor + 'ff');
+      glowGradient.addColorStop(0.4, glowColor + 'aa');
+      glowGradient.addColorStop(0.8, glowColor + '44');
+      glowGradient.addColorStop(1, glowColor + '00');
+      ctx.fillStyle = glowGradient;
       ctx.beginPath();
-      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.arc(x, y, 12, 0, Math.PI * 2);
       ctx.fill();
+      
+      // Recent points get extra prominence
+      const isRecent = i >= state.dataPoints.length - 3;
+      if(isRecent) {
+        ctx.shadowColor = glowColor;
+        ctx.shadowBlur = 15;
+      }
+      
+      // Main point with vibrant gradient
+      const pointGradient = ctx.createRadialGradient(x-2, y-2, 0, x, y, 6);
+      pointGradient.addColorStop(0, '#ffffff');
+      pointGradient.addColorStop(0.2, pointColor);
+      pointGradient.addColorStop(0.8, pointColor + 'dd');
+      pointGradient.addColorStop(1, pointColor + '88');
+      ctx.fillStyle = pointGradient;
+      ctx.beginPath();
+      ctx.arc(x, y, isRecent ? 6 : 5, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Bright border for contrast
+      ctx.strokeStyle = isRecent ? '#ffffff' : 'rgba(255, 255, 255, 0.8)';
+      ctx.lineWidth = isRecent ? 2 : 1;
+      ctx.beginPath();
+      ctx.arc(x, y, isRecent ? 6 : 5, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      ctx.shadowBlur = 0; // Reset shadow
     }
   }
 
