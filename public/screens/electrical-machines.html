@@ -234,9 +234,27 @@
             font-weight: 700;
             color: var(--color-cyan-300);
         }
-        .readout-card p span { font-size: 1.25rem; }
+                 .readout-card p span { font-size: 1.25rem; }
 
-        #graph-container {
+         /* Torque Bar Styles */
+         .torque-bar {
+             width: 100%;
+             height: 8px;
+             background-color: rgba(55, 65, 81, 0.5);
+             border-radius: 4px;
+             margin-top: 0.5rem;
+             overflow: hidden;
+         }
+         
+         .torque-fill {
+             height: 100%;
+             background: linear-gradient(90deg, #22c55e, #fde047, #ef4444);
+             border-radius: 4px;
+             width: 0%;
+             transition: width 0.3s ease, background 0.3s ease;
+         }
+
+         #graph-container {
             flex-grow: 1;
             background-color: rgba(17, 24, 39, 0.7);
             padding: 1rem;
@@ -344,10 +362,13 @@
                         <h3>Speed</h3>
                         <p id="speedDisplay" class="readout-display">0 <span>RPM</span></p>
                     </div>
-                    <div class="readout-card">
-                        <h3>Torque</h3>
-                        <p id="torqueDisplay" class="readout-display">0.0 <span>Nm</span></p>
-                    </div>
+                                         <div class="readout-card">
+                         <h3>Torque</h3>
+                         <p id="torqueDisplay" class="readout-display">0.0 <span>Nm</span></p>
+                         <div class="torque-bar">
+                             <div class="torque-fill" id="torqueBar"></div>
+                         </div>
+                     </div>
                      <div class="readout-card">
                         <h3>Phase Angle</h3>
                         <p id="phaseAngleDisplay" class="readout-display">0.0°</p>
@@ -372,11 +393,9 @@
         </div>
     </footer>
 
-    <script>
-        // NOTE: The full Chart.js library is embedded here for offline use.
-        !function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):(t="undefined"!=typeof globalThis?globalThis:t||self).Chart=e()}(this,function(){"use strict";const t={0:"rgb(54, 162, 235)",1:"rgb(255, 99, 132)",2:"rgb(255, 159, 64)",3:"rgb(255, 205, 86)",4:"rgb(75, 192, 192)",5:"rgb(153, 102, 255)",6:"rgb(201, 203, 207)"},e=["#5470c6","#91cc75","#fac858","#ee6666","#73c0de","#3ba272","#fc8452","#9a60b4","#ea7ccc"];function i(t){return e[t%e.length]}function s(t){const e=[];for(let i=0;i<t.length;i++)e.push(t.charCodeAt(i));return e}function n(t,e){return t.s+t.l<e.s+e.l}function o(e,o,a={}){const r=s(e),l=s(o);let c=0;const h=[];for(let t=0;t<r.length;t++)for(let e=0;e<l.length;e++)r[t]===l[e]&&(h.push({i:t,j:e,s:c}),c=0),c++;const u=[];for(let t=0;t<h.length-1;t++){const e=h[t],s=h[t+1];s.i>e.i&&s.j>e.j?e.s++:e.s=0}if(a.caseSensitive)h.sort(n);else{const t=[];for(const e of h)t.push(e);t.sort(n)}return u}function a(t,e){const i={};for(const s in t)e.includes(s)||(i[s]=t[s]);return i}function r(t,e,i){if(t&&"function"==typeof t.call)return t.apply(i,e)}function l(t,e,i){let s,n,o;if(t&&e)if("function"==typeof e.call)return r(e,i,t);else if("string"==typeof e){n=e.split("."),s=t;for(let t=0,e=n.length;t<e;t++)o=n[t],"function"==typeof s[o]?s=r(s[o],i,s):s=s[o]}return s}function c(t,e){return"function"==typeof t?t(e):t}function h(t,e,i){return"function"==typeof t?t(e,i):t}function u(t,e,i){if(t&&"object"==typeof t){const s=c(i,t);e(s||t)}else e(t)}function d(t,e){const i={};for(const s of t)i[s.key]=s.parent.reduce(((t,s)=>t[e(s)]||(t[e(s)]={}),t));return i}function f(t){return t.length>1?t.reduce(((t,e)=>Object.assign(t,e)),{}):t[0]}function g(t){const e=Object.keys(t);return e.length>1?e.reduce(((e,i)=>Object.assign(e,t[i])),{}):t[e[0]]}function p(t,e,i){const s=e&&i?i+"."+e:e;if(s&&t.length){const e=s.split("."),n=e.length;let o=0;for(;o<t.length;o++){let a=t[o],r=a;for(let t=0;t<n&&a;t++){const s=e[t];r=a[s],a=null==r?void 0:r[e[t+1]]}if(void 0!==a)return a===i?r:a}}}function m(t,e){if(!e)return t;const i=e.split(".");for(let e=0,s=i.length;e<s;++e){const s=i[e];t=t[s]||(t[s]={})}return t}function v(t,e,i){"string"==typeof e?m(t,e)[i]=!0:e.forEach((e=>m(t,e)[i]=!0))}function b(t,e){e=e||(e=>t[e]);let i=-1,s=-1;for(let n=0;n<t.length;n++){const o=e(n);o>s&&(s=o,i=n)}return i}const x="_chartjs",y={touchstart:"mousedown",touchmove:"mousemove",touchend:"mouseup",pointerenter:"mouseenter",pointerdown:"mousedown",pointermove:"mousemove",pointerup:"mouseup",pointerleave:"mouseleave",pointerout:"mouseout"};function _(t,e){const i=t.native||t,s=i.touches,n=s&&s.length?s[0]:i;return{x:n.clientX,y:n.clientY}}function k(t,e){const i=[],s=t.getSortedVisibleItems(e);for(let n=0;n<s.length;n++){const e=s[n];i.push(e.index)}return i}function M(t,e,i,s){return{controller:t,data:e,index:i,mode:s}}function w(t,e,i){for(let s=0;s<e.length;s++){const n=e[s],o=n.label,a=n.labelItems;if(o){i.body.push({before:[],lines:a||[o],after:[]});break}}return!0}const S=Math.PI,P=2*S,D=P/360,C=S/180,O=S/2;function A(t){const e=Object.create(null),i=Object.create(null);for(const s of t){const t=s.dataset.data,n=s._model;e[n.type]=e[n.type]||[],e[n.type].push(n),i[n.type]=i[n.type]||[],i[n.type].push(t)}return{models:e,data:i}}function T(t){if(t._decimated)return;const e=t.data.datasets,i=t.options.elements;Object.keys(i).forEach((s=>{const n=i[s];n.skipNull?t.data.datasets=t.data.datasets.map((t=>({label:t.label,data:t.data.filter((t=>null!==t))})))*/// and so on for many thousands of characters ...
-        ,Chart.Ticks=Ve),Object.defineProperty(Chart,"defaults",{get:()=>$,set(t){Object.assign($,t)}}),Chart}));
+    <script src="../js/chart.umd.min.js"></script>
 
+    <script>
         /* --- Simulator Logic --- */
         document.addEventListener('DOMContentLoaded', () => {
             const voltageSlider = document.getElementById('voltage');
@@ -405,45 +424,110 @@
                     datasets: [{
                         label: 'Voltage',
                         data: [],
-                        borderColor: 'rgba(59, 130, 246, 0.8)',
-                        borderWidth: 2,
+                        borderColor: '#22c55e',
+                        borderWidth: 3,
                         pointRadius: 0,
-                        tension: 0.1
+                        tension: 0.4,
+                        fill: false,
+                        backgroundColor: 'rgba(34, 197, 94, 0.15)',
+                        // Add glow effect
+                        shadowColor: 'rgba(34, 197, 94, 0.5)',
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowOffsetY: 0
                     }, {
                         label: 'Current',
                         data: [],
-                        borderColor: 'rgba(239, 68, 68, 0.8)',
-                        borderWidth: 2,
+                        borderColor: '#ef4444',
+                        borderWidth: 3,
                         pointRadius: 0,
-                        tension: 0.1
+                        tension: 0.4,
+                        fill: false,
+                        backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                        // Add glow effect
+                        shadowColor: 'rgba(239, 68, 68, 0.5)',
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowOffsetY: 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    animation: false,
+                    animation: {
+                        duration: 0, // Disable built-in animations for smoother updates
+                        easing: 'linear'
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
                             max: 500,
                             min: -500,
-                            ticks: { color: 'var(--color-gray-400)' },
-                            grid: { color: 'rgba(107, 114, 128, 0.3)'}
+                            ticks: { 
+                                color: '#d1d5db',
+                                callback: function(value) {
+                                    return Math.round(value) + 'V';
+                                }
+                            },
+                            grid: { 
+                                color: 'rgba(156, 163, 175, 0.2)',
+                                lineWidth: 1
+                            },
+                            border: {
+                                color: 'rgba(156, 163, 175, 0.3)',
+                                width: 1
+                            }
                         },
                         x: {
-                            ticks: { color: 'var(--color-gray-400)', maxTicksLimit: 10 },
-                            grid: { color: 'rgba(107, 114, 128, 0.3)'}
+                            ticks: { 
+                                color: '#d1d5db', 
+                                maxTicksLimit: 12,
+                                callback: function(value) {
+                                    return value + '°';
+                                }
+                            },
+                            grid: { 
+                                color: 'rgba(156, 163, 175, 0.2)',
+                                lineWidth: 1
+                            },
+                            border: {
+                                color: 'rgba(156, 163, 175, 0.3)',
+                                width: 1
+                            }
                         }
                     },
                     plugins: {
                         legend: {
-                           labels: { color: 'var(--color-gray-300)' }
+                           labels: { 
+                               color: '#e5e7eb',
+                               usePointStyle: true,
+                               padding: 20
+                           }
                         },
                         title: {
                             display: true,
-                            text: 'Voltage vs Current Phase Angle',
-                            color: 'var(--color-gray-300)',
-                            font: { size: 16 }
+                            text: 'Live Voltage vs Current Phase Angle',
+                            color: '#e5e7eb',
+                            font: { size: 18, weight: 'bold' }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                            titleColor: '#e5e7eb',
+                            bodyColor: '#e5e7eb',
+                            borderColor: 'rgba(75, 85, 99, 1)',
+                            borderWidth: 1
+                        }
+                    },
+                    elements: {
+                        point: {
+                            hoverRadius: 6,
+                            hoverBorderWidth: 2
                         }
                     }
                 }
@@ -451,15 +535,40 @@
 
             voltageSlider.addEventListener('input', (e) => {
                 voltageValue.textContent = `${e.target.value} V`;
+                updateRealTimeTorque();
             });
 
             frequencySlider.addEventListener('input', (e) => {
                 frequencyValue.textContent = `${e.target.value} Hz`;
+                updateRealTimeTorque();
             });
 
             motorLoadSlider.addEventListener('input', (e) => {
                 motorLoadValue.textContent = `${e.target.value} %`;
+                updateRealTimeTorque();
             });
+
+            function updateRealTimeTorque() {
+                if (!isMotorRunning) {
+                    const voltage = parseFloat(voltageSlider.value);
+                    const frequency = parseFloat(frequencySlider.value);
+                    const load = parseFloat(motorLoadSlider.value);
+                    
+                    let torque = 0;
+                    if (frequency > 5 && voltage > 50) {
+                        const baseTorque = 2.5;
+                        const voltageFactor = Math.pow(voltage / 240, 1.5);
+                        const frequencyFactor = frequency / 50;
+                        const loadFactor = load / 100;
+                        const efficiency = 0.85 + (load / 100) * 0.1;
+                        
+                        torque = baseTorque * voltageFactor * frequencyFactor * loadFactor * efficiency;
+                    }
+                    
+                    torqueDisplay.innerHTML = `${torque.toFixed(1)} <span>Nm</span>`;
+                    updateTorqueBar(torque);
+                }
+            }
 
             startButton.addEventListener('click', startMotor);
             stopButton.addEventListener('click', stopMotor);
@@ -477,6 +586,25 @@
                 updateUIState();
                 cancelAnimationFrame(animationFrameId);
                 resetDisplays();
+                // Start idle animation when stopped
+                startIdleAnimation();
+            }
+
+            function startIdleAnimation() {
+                if (isMotorRunning) return;
+                
+                const voltage = parseFloat(voltageSlider.value);
+                const frequency = parseFloat(frequencySlider.value);
+                const load = parseFloat(motorLoadSlider.value);
+                
+                // Create gentle idle animation
+                const idlePhaseAngle = 15 + (load / 100) * 30;
+                updateGraph(voltage * 0.3, idlePhaseAngle); // Reduced amplitude for idle
+                
+                // Continue idle animation
+                if (!isMotorRunning) {
+                    requestAnimationFrame(startIdleAnimation);
+                }
             }
 
             function updateUIState() {
@@ -499,9 +627,28 @@
                 speedDisplay.innerHTML = `0 <span>RPM</span>`;
                 torqueDisplay.innerHTML = `0.0 <span>Nm</span>`;
                 phaseAngleDisplay.innerHTML = `0.0°`;
+                updateTorqueBar(0);
                 phasorGraph.data.datasets[0].data = [];
                 phasorGraph.data.datasets[1].data = [];
                 phasorGraph.update();
+            }
+
+            function updateTorqueBar(torque) {
+                const torqueBar = document.getElementById('torqueBar');
+                const maxTorque = 10; // Maximum torque for scaling (10 Nm)
+                const percentage = Math.min((torque / maxTorque) * 100, 100);
+                
+                // Update the bar width
+                torqueBar.style.width = `${percentage}%`;
+                
+                // Update color based on torque level
+                if (torque < 2) {
+                    torqueBar.style.background = 'linear-gradient(90deg, #22c55e, #16a34a)'; // Green
+                } else if (torque < 6) {
+                    torqueBar.style.background = 'linear-gradient(90deg, #fde047, #eab308)'; // Yellow
+                } else {
+                    torqueBar.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)'; // Red
+                }
             }
 
             function simulationLoop() {
@@ -521,8 +668,18 @@
                     const slip = (load / 100) * maxSlip;
                     speed = syncSpeed * (1 - slip);
 
-                    const torqueConstant = 0.015;
-                    torque = torqueConstant * Math.pow(voltage / 240, 2) * (load / 100) * (frequency/50);
+                    // Enhanced torque calculation for more realistic values
+                    const baseTorque = 2.5; // Base torque in Nm
+                    const voltageFactor = Math.pow(voltage / 240, 1.5); // Voltage effect
+                    const frequencyFactor = frequency / 50; // Frequency effect
+                    const loadFactor = load / 100; // Load effect
+                    
+                    // Calculate torque with more realistic scaling
+                    torque = baseTorque * voltageFactor * frequencyFactor * loadFactor;
+                    
+                    // Add some variation based on motor characteristics
+                    const efficiency = 0.85 + (load / 100) * 0.1; // Efficiency varies with load
+                    torque *= efficiency;
                     
                     const minVoltageForLoad = load * 2;
                     if (voltage < minVoltageForLoad) {
@@ -536,29 +693,64 @@
                 torqueDisplay.innerHTML = `${torque.toFixed(1)} <span>Nm</span>`;
                 phaseAngleDisplay.textContent = `${phaseAngle.toFixed(1)}°`;
 
+                // Update torque bar visualization
+                updateTorqueBar(torque);
+
+                // Update graph more frequently for smoother animation
                 updateGraph(voltage, phaseAngle);
+                
+                // Continue the loop
                 animationFrameId = requestAnimationFrame(simulationLoop);
             }
 
             function updateGraph(voltage, phaseAngle) {
+                // Create smooth, animated wave data
                 const voltageData = [];
                 const currentData = [];
                 const phaseShift = (Math.PI / 180) * phaseAngle;
-
+                const time = Date.now() * 0.001; // Current time in seconds
+                
                 for (let i = 0; i <= 360; i++) {
                     const angleRad = (Math.PI / 180) * i;
-                    voltageData.push(voltage * Math.sin(angleRad));
-                    currentData.push(voltage * Math.sin(angleRad - phaseShift));
+                    // Add subtle animation with time-based offset
+                    const animatedOffset = Math.sin(time * 2 + angleRad * 0.1) * 0.05;
+                    
+                    // Base sine wave with voltage amplitude
+                    const baseVoltage = voltage * Math.sin(angleRad);
+                    const baseCurrent = voltage * Math.sin(angleRad - phaseShift);
+                    
+                    // Add some realistic noise and harmonics for more dynamic look
+                    const harmonic1 = voltage * 0.1 * Math.sin(angleRad * 3) * Math.sin(time);
+                    const harmonic2 = voltage * 0.05 * Math.sin(angleRad * 5) * Math.cos(time * 1.5);
+                    
+                    voltageData.push(baseVoltage + harmonic1 + animatedOffset);
+                    currentData.push(baseCurrent + harmonic2 + animatedOffset);
                 }
                 
+                // Smoothly update the data
                 phasorGraph.data.datasets[0].data = voltageData;
                 phasorGraph.data.datasets[1].data = currentData;
-                phasorGraph.options.scales.y.max = voltage > 0 ? voltage * 1.1 : 500;
-                phasorGraph.options.scales.y.min = voltage > 0 ? -voltage * 1.1 : -500;
-                phasorGraph.update();
+                
+                // Dynamic Y-axis scaling based on voltage
+                const maxVoltage = voltage > 0 ? voltage * 1.2 : 500;
+                const minVoltage = voltage > 0 ? -voltage * 1.2 : -500;
+                
+                // Smoothly animate the scale changes
+                if (Math.abs(phasorGraph.options.scales.y.max - maxVoltage) > 10) {
+                    phasorGraph.options.scales.y.max = maxVoltage;
+                }
+                if (Math.abs(phasorGraph.options.scales.y.min - minVoltage) > 10) {
+                    phasorGraph.options.scales.y.min = minVoltage;
+                }
+                
+                // Update with animation
+                phasorGraph.update('none'); // Use 'none' for smoother performance
             }
 
             updateUIState();
+            
+            // Start idle animation immediately for live graph
+            startIdleAnimation();
         });
     </script>
 </body>

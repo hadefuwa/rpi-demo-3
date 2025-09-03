@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "rpi-5inch-showcase": "file:",
-    "three": "^0.179.1"
+    "three": "^0.179.1",
+    "chart.js": "^4.4.0"
   }
 }
