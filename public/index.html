@@ -1101,10 +1101,44 @@
          0%, 100% { opacity: 1; transform: scale(1); }
          50% { opacity: 0.7; transform: scale(1.1); }
        }
+
+       /* Enhanced emoji hover effects */
+       #screen-home .card:hover .icon::before {
+         animation-play-state: paused !important;
+         transform: scale(1.2);
+         filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
+         transition: all 0.3s ease-out;
+       }
+
+       /* Individual card hover enhancements */
+       #screen-home .card:nth-child(1):hover .icon::before {
+         filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.8));
+       }
+
+       #screen-home .card:nth-child(2):hover .icon::before {
+         filter: drop-shadow(0 0 15px rgba(34, 197, 94, 0.8));
+       }
+
+       #screen-home .card:nth-child(3):hover .icon::before {
+         filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+       }
+
+       #screen-home .card:nth-child(4):hover .icon::before {
+         filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.8));
+       }
+
+       #screen-home .card:nth-child(5):hover .icon::before {
+         filter: drop-shadow(0 0 15px rgba(255, 165, 0, 0.8));
+       }
+
+       #screen-home .card:nth-child(6):hover .icon::before {
+         filter: drop-shadow(0 0 15px rgba(139, 69, 19, 0.8));
+       }
       
       /* 3D Model Card - 1st position */
       #screen-home .card:nth-child(1) .icon::before {
-        content: "🔲";
+        content: "🧊";
+        animation: rotate3d 4s ease-in-out infinite;
       }
       
       #screen-home .card:nth-child(1) .icon::after {
@@ -1182,12 +1216,13 @@
         }
       }
       
-      /* 3D Printer Demo Card - 2nd position */
+      /* AI Chat Card - 2nd position */
       #screen-home .card:nth-child(2) .icon::before {
-        content: "🖨️";
+        content: "🤖";
+        animation: pulse 2.5s ease-in-out infinite;
       }
       #screen-home .card:nth-child(2) .icon::after {
-        content: "PRINT";
+        content: "AI";
         position: absolute;
         top: 50%;
         left: 50%;
@@ -1199,46 +1234,49 @@
         font-family: Arial, sans-serif;
       }
       
-      /* About Card - 3rd position */
+      /* Games Hub Card - 3rd position */
       #screen-home .card:nth-child(3) .icon::before {
-        content: "ℹ️";
+        content: "🎮";
+        animation: bounce 2s ease-in-out infinite;
       }
       #screen-home .card:nth-child(3) .icon::after {
-        content: "INFO";
+        content: "GAMES";
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        font-size: 8px;
+        font-size: 7px;
         font-weight: bold;
         color: rgba(255,255,255,0.8);
         display: none;
         font-family: Arial, sans-serif;
       }
       
-             /* AI Chat Card - 4th position */
+             /* Demos Card - 4th position */
        #screen-home .card:nth-child(4) .icon::before {
-         content: "🤖";
+         content: "🚀";
+         animation: wobble 3s ease-in-out infinite;
        }
        #screen-home .card:nth-child(4) .icon::after {
-         content: "AI";
+         content: "DEMOS";
          position: absolute;
          top: 50%;
          left: 50%;
          transform: translate(-50%, -50%);
-         font-size: 8px;
+         font-size: 7px;
          font-weight: bold;
          color: rgba(255,255,255,0.8);
          display: none;
          font-family: Arial, sans-serif;
        }
        
-       /* Curriculum Card - 5th position */
+       /* Features Card - 5th position */
        #screen-home .card:nth-child(5) .icon::before {
-         content: "📚";
+         content: "⭐";
+         animation: glow 2.5s ease-in-out infinite;
        }
        #screen-home .card:nth-child(5) .icon::after {
-         content: "CURR";
+         content: "FEAT";
          position: absolute;
          top: 50%;
          left: 50%;
@@ -1250,9 +1288,10 @@
          font-family: Arial, sans-serif;
        }
       
-             /* AR Demo Card - 6th position */
+             /* AR Hub Card - 6th position */
        #screen-home .card:nth-child(6) .icon::before {
-         content: "🔮";
+         content: "🥽";
+         animation: flip 4s ease-in-out infinite;
        }
        #screen-home .card:nth-child(6) .icon::after {
          content: "AR";
