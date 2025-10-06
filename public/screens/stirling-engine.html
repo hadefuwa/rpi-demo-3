@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stirling Engine Dashboard</title>
+    
+    <!-- Chart.js and plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
+    
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap');
+        
+        :root {
+            /* Modern Factory Color Palette */
+            --primary-blue: #2563eb;
+            --primary-blue-dark: #1d4ed8;
+            --primary-blue-light: #3b82f6;
+            --accent-orange: #f59e0b;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --warning-yellow: #f59e0b;
+            
+            /* Neutral Grays */
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Surface Colors */
+            --surface-primary: #ffffff;
+            --surface-secondary: #f8fafc;
+            --surface-tertiary: #f1f5f9;
+            --surface-dark: #0f172a;
+            
+            /* Border Colors */
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --border-dark: #334155;
+            
+            /* Text Colors */
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --text-on-dark: #ffffff;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--surface-secondary) 0%, var(--gray-50) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--surface-primary);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-light);
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .app-title h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            letter-spacing: -0.025em;
+        }
+        
+        .app-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 4px;
+        }
+        
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border: 1px solid var(--border-medium);
+            border-radius: 6px;
+            background: var(--surface-secondary);
+            transition: all 0.2s;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-link:hover {
+            background: var(--surface-tertiary);
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--surface-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .status-label {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-right: 8px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-red);
+            flex-shrink: 0;
+        }
+        
+        .status-dot.connected {
+            background: var(--accent-green);
+        }
+        
+        .status-text {
+            font-weight: 500;
+        }
+        
+        .status-text.connected {
+            color: var(--accent-green);
+        }
+        
+        .controls-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .port-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .control-panel {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        /* Form Elements */
+        select {
+            padding: 10px 12px;
+            border: 1px solid var(--border-medium);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: var(--surface-primary);
+            color: var(--text-primary);
+            min-width: 200px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: 1px solid var(--border-medium);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 40px;
+            background: var(--surface-primary);
+            color: var(--text-primary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        button:hover {
+            background: var(--surface-secondary);
+            border-color: var(--border-dark);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .btn-primary {
+            background: var(--primary-blue);
+            border-color: var(--primary-blue);
+            color: var(--text-on-dark);
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-blue-dark);
+            border-color: var(--primary-blue-dark);
+        }
+        
+        .btn-success {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+            color: var(--text-on-dark);
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+            border-color: #059669;
+        }
+        
+        .btn-danger {
+            background: var(--accent-red);
+            border-color: var(--accent-red);
+            color: var(--text-on-dark);
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+        }
+        
+        .btn-info {
+            background: var(--gray-600);
+            border-color: var(--gray-600);
+            color: var(--text-on-dark);
+        }
+        
+        .btn-info:hover {
+            background: var(--gray-700);
+            border-color: var(--gray-700);
+        }
+        
+        .btn-warning {
+            background: var(--accent-orange);
+            border-color: var(--accent-orange);
+            color: var(--text-on-dark);
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+            border-color: #d97706;
+        }
+        
+        /* Main Dashboard Grid */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 400px 300px auto;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        /* Widget Cards */
+        .widget {
+            background: var(--surface-primary);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow 0.2s;
+        }
+        
+        .widget:hover {
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .widget-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .widget-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            min-height: 32px;
+            background: var(--surface-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .btn-sm:hover {
+            background: var(--surface-tertiary);
+            color: var(--text-primary);
+            border-color: var(--border-medium);
+        }
+        
+        .chart-container {
+            flex: 1;
+            position: relative;
+            min-height: 250px;
+        }
+        
+        /* Full Width Widgets */
+        .widget.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        /* Log Display */
+        .log-display {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            background: var(--gray-900);
+            border-radius: 6px;
+            padding: 16px;
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border-light);
+            color: var(--gray-100);
+        }
+        
+        /* Settings Panel */
+        .settings-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+        
+        .settings-group h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-medium);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: var(--surface-primary);
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .tooltip {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: 350px 350px 300px auto;
+            }
+            
+            .widget:nth-child(3) {
+                grid-column: 1 / -1;
+                max-height: 350px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header-top {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+            
+            .controls-row {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .port-controls, .control-panel {
+                flex-direction: column;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(5, auto);
+                gap: 16px;
+            }
+            
+            .widget {
+                padding: 16px;
+                min-height: 300px;
+            }
+            
+            .settings-panel {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .app-title h1 {
+                font-size: 1.5rem;
+            }
+            
+            button, select {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .widget-controls {
+                flex-direction: column;
+            }
+            
+            .btn-sm {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-top">
+                <div class="app-title">
+                    <h1>Stirling Engine Monitor</h1>
+                    <div class="app-subtitle">Real-time pressure and volume analysis</div>
+                    <a href="../index.html" class="back-link">← Back to Dashboard</a>
+                </div>
+                <div class="status-indicator" id="connectionStatus">
+                    <span class="status-label">Connection</span>
+                    <span class="status-dot"></span>
+                    <span class="status-text">Offline</span>
+                </div>
+            </div>
+            
+            <div class="controls-row">
+                <div class="port-controls">
+                    <select id="portList">
+                        <option value="">Select Serial Port</option>
+                    </select>
+                    <button class="btn-primary" onclick="connectToPort()">Connect</button>
+                </div>
+                
+                <div class="control-panel">
+                    <button class="btn-success" onclick="sendCommand('heaterOn')">Enable Heater</button>
+                    <button class="btn-info" onclick="sendCommand('heaterOff')">Disable Heater</button>
+                    <button class="btn-warning" onclick="sendCommand('startLogging')">Start Logging</button>
+                    <button class="btn-danger" onclick="sendCommand('stopLogging')">Stop Logging</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dashboard Grid -->
+        <div class="dashboard">
+            <!-- PV Diagram -->
+            <div class="widget">
+                <div class="widget-header">
+                    <h3 class="widget-title">Pressure-Volume Diagram</h3>
+                    <div class="widget-controls">
+                        <button class="btn-sm" onclick="togglePause('pv')">Pause</button>
+                        <button class="btn-sm" onclick="resetZoom('pv')">Reset Zoom</button>
+                        <button class="btn-sm" onclick="clearData('pv')">Clear Data</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="pvChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Pressure vs Time -->
+            <div class="widget">
+                <div class="widget-header">
+                    <h3 class="widget-title">Pressure Over Time</h3>
+                    <div class="widget-controls">
+                        <button class="btn-sm" onclick="togglePause('pressure')">Pause</button>
+                        <button class="btn-sm" onclick="resetZoom('pressure')">Reset Zoom</button>
+                        <button class="btn-sm" onclick="clearData('pressure')">Clear Data</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="pressureChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Volume vs Time -->
+            <div class="widget">
+                <div class="widget-header">
+                    <h3 class="widget-title">Volume Over Time</h3>
+                    <div class="widget-controls">
+                        <button class="btn-sm" onclick="togglePause('volume')">Pause</button>
+                        <button class="btn-sm" onclick="resetZoom('volume')">Reset Zoom</button>
+                        <button class="btn-sm" onclick="clearData('volume')">Clear Data</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="volumeChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Serial Communication Log -->
+            <div class="widget full-width">
+                <div class="widget-header">
+                    <h3 class="widget-title">Communication Log</h3>
+                </div>
+                <div class="log-display" id="dataDisplay"></div>
+            </div>
+            
+            <!-- Data Settings -->
+            <div class="widget full-width">
+                <div class="widget-header">
+                    <h3 class="widget-title">Settings</h3>
+                    <div class="widget-controls">
+                        <button class="btn-sm" onclick="saveSettings()">Save Settings</button>
+                        <button class="btn-sm" onclick="resetDefaultSettings()">Reset to Defaults</button>
+                    </div>
+                </div>
+                
+                <div class="settings-panel">
+                    <div class="settings-group">
+                        <h3>Data Collection</h3>
+                        
+                        <div class="form-group">
+                            <label for="maxLogEntries">Max Log Entries</label>
+                            <input type="number" id="maxLogEntries" min="10" max="1000" value="100">
+                            <div class="tooltip">Maximum number of log entries to keep in history</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="maxDataPoints">Max Data Points</label>
+                            <input type="number" id="maxDataPoints" min="10" max="1000" value="100">
+                            <div class="tooltip">Maximum number of points to show in PV diagram</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="maxTimePoints">Max Time Points</label>
+                            <input type="number" id="maxTimePoints" min="10" max="1000" value="100">
+                            <div class="tooltip">Maximum number of points in time-based charts</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="sampleCount">Samples per Packet</label>
+                            <input type="number" id="sampleCount" min="1" max="10" value="1">
+                            <div class="tooltip">Number of samples to process from each packet</div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-group">
+                        <h3>Data Filtering</h3>
+                        
+                        <div class="form-group">
+                            <label for="pressureMin">Pressure Min</label>
+                            <input type="number" id="pressureMin" value="0">
+                            <div class="tooltip">Minimum pressure value to display</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="pressureMax">Pressure Max</label>
+                            <input type="number" id="pressureMax" value="20000">
+                            <div class="tooltip">Maximum pressure value to display</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="volumeMin">Volume Min</label>
+                            <input type="number" id="volumeMin" value="46000">
+                            <div class="tooltip">Minimum volume value to display</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="volumeMax">Volume Max</label>
+                            <input type="number" id="volumeMax" value="47000">
+                            <div class="tooltip">Maximum volume value to display</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PWA Serial Communication for Stirling Engine
+        // Converted from Electron to Web Serial API
+        
+        // Constants
+        let MAX_LOG_ENTRIES = 100;
+        let MAX_DATA_POINTS = 100;
+        let MAX_TIME_POINTS = 100;
+        let SAMPLE_RATE = 1;
+        
+        // Settings object
+        let settings = {
+            maxLogEntries: MAX_LOG_ENTRIES,
+            maxDataPoints: MAX_DATA_POINTS,
+            maxTimePoints: MAX_TIME_POINTS,
+            sampleRate: SAMPLE_RATE,
+            pressureMin: 0,
+            pressureMax: 20000,
+            volumeMin: 46000,
+            volumeMax: 47000,
+            sampleCount: 1
+        };
+        
+        // Serial port variables
+        let serialPort = null;
+        let reader = null;
+        let writer = null;
+        let dataBuffer = new Uint8Array(0);
+        let packets = [];
+        
+        // Chart variables
+        let dataPoints = [];
+        let pvChart, pressureChart, volumeChart;
+        let timeData = [];
+        let isPaused = {
+            pv: false,
+            pressure: false,
+            volume: false
+        };
+        
+        // Command mapping
+        const COMMANDS = {
+            heaterOn: ':B1;\n',
+            heaterOff: ':B0;\n',
+            startLogging: ':C1;\n',
+            stopLogging: ':C0;\n'
+        };
+        
+        // Check for Web Serial API support
+        function checkSerialSupport() {
+            if (!('serial' in navigator)) {
+                logMessage('ERROR', 'Web Serial API not supported. Please use Chrome/Edge 89+ with experimental features enabled.');
+                return false;
+            }
+            return true;
+        }
+        
+        // Parse packet samples (from main.js)
+        function parseSamples(packet) {
+            const samples = [];
+            
+            // Start from byte 2 and process 10 samples
+            for (let i = 0; i < 10; i++) {
+                const baseIndex = 2 + (i * 6);
+                
+                const pressureByte1 = packet[baseIndex];
+                const pressureByte2 = packet[baseIndex + 1];
+                const pressure = pressureByte2 + (pressureByte1 * 256.0);
+                
+                const volumeByte1 = packet[baseIndex + 2];
+                const volumeByte2 = packet[baseIndex + 3];
+                const volumeByte3 = packet[baseIndex + 4];
+                const volumeByte4 = packet[baseIndex + 5];
+                
+                const volumeRx = volumeByte1 + 
+                                (volumeByte2 * 0x100) + 
+                                (volumeByte3 * 0x10000) + 
+                                (volumeByte4 * 0x1000000);
+                
+                const volume = volumeRx / 1000;
+                
+                samples.push({
+                    sampleNumber: i + 1,
+                    pressureByte1,
+                    pressureByte2,
+                    pressure: pressure.toFixed(2),
+                    volumeBytes: [volumeByte1, volumeByte2, volumeByte3, volumeByte4],
+                    volume: volume.toFixed(3)
+                });
+            }
+            
+            return samples;
+        }
+        
+        // Utility function to concatenate Uint8Arrays
+        function concatUint8Arrays(a, b) {
+            const result = new Uint8Array(a.length + b.length);
+            result.set(a);
+            result.set(b, a.length);
+            return result;
+        }
+        
+        // List available ports using Web Serial API
+        async function listPorts() {
+            if (!checkSerialSupport()) return [];
+            
+            try {
+                const ports = await navigator.serial.getPorts();
+                return ports;
+            } catch (error) {
+                logMessage('ERROR', `Failed to list ports: ${error.message}`);
+                return [];
+            }
+        }
+        
+        // Initialize connection
+        async function initializeConnection() {
+            if (!checkSerialSupport()) return;
+            
+            const ports = await listPorts();
+            const portList = document.getElementById('portList');
+            
+            // Clear existing options
+            portList.innerHTML = '<option value="">Select Serial Port</option>';
+            
+            if (ports.length === 0) {
+                const option = document.createElement('option');
+                option.value = 'request';
+                option.textContent = 'Request Serial Port Access';
+                portList.appendChild(option);
+            } else {
+                ports.forEach((port, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `Serial Port ${index + 1}`;
+                    portList.appendChild(option);
+                });
+            }
+            
+            logMessage('SYSTEM', `Found ${ports.length} serial ports`);
+        }
+        
+        // Connect to selected port
+        async function connectToPort() {
+            if (!checkSerialSupport()) return;
+            
+            const portList = document.getElementById('portList');
+            const selectedValue = portList.value;
+            
+            if (!selectedValue) {
+                logMessage('ERROR', 'No port selected');
+                return;
+            }
+            
+            try {
+                if (selectedValue === 'request') {
+                    // Request new port
+                    serialPort = await navigator.serial.requestPort();
+                } else {
+                    // Use existing port
+                    const ports = await navigator.serial.getPorts();
+                    serialPort = ports[parseInt(selectedValue)];
+                }
+                
+                // Open the port
+                await serialPort.open({ baudRate: 921600 });
+                
+                // Get streams
+                reader = serialPort.readable.getReader();
+                writer = serialPort.writable.getWriter();
+                
+                // Update UI
+                updateConnectionStatus(true);
+                logMessage('SYSTEM', 'Connected to serial port');
+                
+                // Send initial command
+                await sendCommand('startLogging');
+                
+                // Start reading data
+                readSerialData();
+                
+            } catch (error) {
+                logMessage('ERROR', `Connection failed: ${error.message}`);
+                updateConnectionStatus(false);
+            }
+        }
+        
+        // Read serial data
+        async function readSerialData() {
+            try {
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    
+                    // Process data
+                    processSerialData(value);
+                }
+            } catch (error) {
+                if (error.name !== 'NotReadableError') {
+                    logMessage('ERROR', `Read error: ${error.message}`);
+                }
+            }
+        }
+        
+        // Process incoming serial data
+        function processSerialData(data) {
+            // Clear old data if buffer gets too large
+            if (dataBuffer.length > 128) {
+                dataBuffer = new Uint8Array(0);
+            }
+            
+            dataBuffer = concatUint8Arrays(dataBuffer, data);
+            
+            while (dataBuffer.length >= 64) {
+                let startIndex = -1;
+                for (let i = 0; i < dataBuffer.length - 1; i++) {
+                    if (dataBuffer[i] === 0x55 && dataBuffer[i + 1] === 0x55) {
+                        startIndex = i;
+                        break;
+                    }
+                }
+                
+                if (startIndex === -1 || startIndex + 64 > dataBuffer.length) {
+                    dataBuffer = new Uint8Array(0);
+                    break;
+                }
+                
+                const packet = dataBuffer.slice(startIndex, startIndex + 64);
+                
+                if (packet[62] === 0xAA && packet[63] === 0xAA) {
+                    const hexData = Array.from(packet).map(b => b.toString(16).padStart(2, '0')).join(' ');
+                    const samples = parseSamples(packet);
+                    
+                    // Keep only the last 10 packets
+                    packets.push(packet);
+                    if (packets.length > 10) packets.shift();
+                    
+                    // Process the data
+                    handleSerialData({
+                        timestamp: Date.now(),
+                        fullPacket: hexData,
+                        startBytes: Array.from(packet.slice(0, 2)).map(b => b.toString(16).padStart(2, '0')).join(''),
+                        endBytes: Array.from(packet.slice(62, 64)).map(b => b.toString(16).padStart(2, '0')).join(''),
+                        samples: samples,
+                        packetNumber: packets.length
+                    });
+                }
+                
+                dataBuffer = dataBuffer.slice(startIndex + 64);
+            }
+        }
+        
+        // Send command function
+        async function sendCommand(commandType) {
+            if (!COMMANDS[commandType]) {
+                logMessage('ERROR', 'Invalid command type');
+                return;
+            }
+            
+            if (!writer) {
+                logMessage('ERROR', 'Port not connected');
+                return;
+            }
+            
+            try {
+                const command = COMMANDS[commandType];
+                const encoder = new TextEncoder();
+                await writer.write(encoder.encode(command));
+                logMessage('SENT', command.trim());
+            } catch (error) {
+                logMessage('ERROR', `Failed to send command: ${error.message}`);
+            }
+        }
+        
+        // Update connection status UI
+        function updateConnectionStatus(connected) {
+            const statusDot = document.querySelector('.status-dot');
+            const statusText = document.querySelector('.status-text');
+            
+            if (connected) {
+                statusDot.classList.add('connected');
+                statusText.textContent = 'Online';
+                statusText.classList.add('connected');
+            } else {
+                statusDot.classList.remove('connected');
+                statusText.textContent = 'Offline';
+                statusText.classList.remove('connected');
+            }
+        }
+        
+        // Format timestamp
+        function getTimestamp() {
+            return new Date().toLocaleTimeString('en-US', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                fractionalSecondDigits: 3
+            });
+        }
+        
+        // Log message to display
+        function logMessage(type, message) {
+            const dataDisplay = document.getElementById('dataDisplay');
+            const timestamp = getTimestamp();
+            const entry = document.createElement('div');
+            
+            let color = '#333';
+            switch(type) {
+                case 'RECEIVED':
+                    color = '#28a745';
+                    break;
+                case 'SENT':
+                    color = '#007bff';
+                    break;
+                case 'ERROR':
+                    color = '#dc3545';
+                    break;
+                case 'SYSTEM':
+                    color = '#6f42c1';
+                    break;
+            }
+            
+            entry.innerHTML = `
+                <span style="color: #666;">[${timestamp}]</span> 
+                <span style="color: ${color}; font-weight: 600;">[${type}]</span> 
+                <span>${message}</span>
+            `;
+            entry.style.marginBottom = '4px';
+            dataDisplay.appendChild(entry);
+            
+            // Keep log size manageable
+            while (dataDisplay.children.length > settings.maxLogEntries) {
+                dataDisplay.removeChild(dataDisplay.firstChild);
+            }
+            
+            // Auto-scroll to bottom
+            dataDisplay.scrollTop = dataDisplay.scrollHeight;
+        }
+        
+        // Chart control functions
+        function togglePause(chartType) {
+            isPaused[chartType] = !isPaused[chartType];
+            const button = event.target;
+            button.textContent = isPaused[chartType] ? 'Resume' : 'Pause';
+        }
+        
+        function resetZoom(chartType) {
+            let chart;
+            switch(chartType) {
+                case 'pv': chart = pvChart; break;
+                case 'pressure': chart = pressureChart; break;
+                case 'volume': chart = volumeChart; break;
+            }
+            if (chart) {
+                chart.resetZoom();
+            }
+        }
+        
+        function clearData(chartType) {
+            switch(chartType) {
+                case 'pv':
+                    if (pvChart) {
+                        pvChart.data.datasets[0].data = [];
+                        pvChart.update('none');
+                    }
+                    dataPoints = [];
+                    break;
+                case 'pressure':
+                    if (pressureChart) {
+                        pressureChart.data.datasets[0].data = Array(1000).fill(null);
+                        pressureChart.update('none');
+                    }
+                    break;
+                case 'volume':
+                    if (volumeChart) {
+                        volumeChart.data.datasets[0].data = Array(1000).fill(null);
+                        volumeChart.update('none');
+                    }
+                    break;
+            }
+            timeData = [];
+        }
+        
+        // Initialize charts
+        function initializeCharts() {
+            // Common chart options
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 0
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'nearest'
+                },
+                elements: {
+                    point: {
+                        radius: 0,
+                        hitRadius: 4
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: 'xy'
+                        },
+                        zoom: {
+                            wheel: {
+                                enabled: true
+                            },
+                            pinch: {
+                                enabled: true
+                            },
+                            mode: 'xy'
+                        }
+                    }
+                }
+            };
+            
+            // Initialize PV Chart
+            const pvCtx = document.getElementById('pvChart').getContext('2d');
+            pvChart = new Chart(pvCtx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'PV Diagram',
+                        data: [],
+                        showLine: true,
+                        fill: false,
+                        borderColor: '#667eea',
+                        backgroundColor: '#667eea',
+                        pointRadius: 2,
+                        borderWidth: 2,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            min: 46000,
+                            max: 47000,
+                            title: {
+                                display: true,
+                                text: 'Volume',
+                                color: '#666'
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            min: 0,
+                            max: 15000,
+                            title: {
+                                display: true,
+                                text: 'Pressure',
+                                color: '#666'
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Initialize Pressure Chart
+            const pressureCtx = document.getElementById('pressureChart').getContext('2d');
+            pressureChart = new Chart(pressureCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: 1000 }, (_, i) => ''),
+                    datasets: [{
+                        label: 'Pressure',
+                        data: Array(1000).fill(null),
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.3,
+                        pointRadius: 0,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 20000,
+                            title: {
+                                display: true,
+                                text: 'Pressure',
+                                color: '#666'
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        },
+                        x: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            
+            // Initialize Volume Chart
+            const volumeCtx = document.getElementById('volumeChart').getContext('2d');
+            volumeChart = new Chart(volumeCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: 1000 }, (_, i) => ''),
+                    datasets: [{
+                        label: 'Volume',
+                        data: Array(1000).fill(null),
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        tension: 0.3,
+                        pointRadius: 0,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        y: {
+                            min: 46000,
+                            max: 47000,
+                            title: {
+                                display: true,
+                                text: 'Volume',
+                                color: '#666'
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        },
+                        x: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Handle serial data
+        function handleSerialData(data) {
+            // Log the received data
+            const sampleInfo = `Packet ${data.packetNumber}: ${data.samples.length} samples`;
+            logMessage('RECEIVED', sampleInfo);
+            
+            // Process samples for charts
+            data.samples.forEach(sample => {
+                const pressure = parseFloat(sample.pressure);
+                const volume = parseFloat(sample.volume);
+                
+                // Filter data based on settings
+                if (pressure >= settings.pressureMin && pressure <= settings.pressureMax &&
+                    volume >= settings.volumeMin && volume <= settings.volumeMax) {
+                    
+                    // Update PV chart
+                    if (!isPaused.pv && pvChart) {
+                        dataPoints.push({ x: volume, y: pressure });
+                        if (dataPoints.length > settings.maxDataPoints) {
+                            dataPoints.shift();
+                        }
+                        pvChart.data.datasets[0].data = dataPoints;
+                        pvChart.update('none');
+                    }
+                    
+                    // Update time-based charts
+                    timeData.push({ pressure, volume, timestamp: Date.now() });
+                    if (timeData.length > settings.maxTimePoints) {
+                        timeData.shift();
+                    }
+                    
+                    // Update pressure chart
+                    if (!isPaused.pressure && pressureChart) {
+                        const pressureData = pressureChart.data.datasets[0].data;
+                        pressureData.shift();
+                        pressureData.push(pressure);
+                        pressureChart.update('none');
+                    }
+                    
+                    // Update volume chart
+                    if (!isPaused.volume && volumeChart) {
+                        const volumeData = volumeChart.data.datasets[0].data;
+                        volumeData.shift();
+                        volumeData.push(volume);
+                        volumeChart.update('none');
+                    }
+                }
+            });
+        }
+        
+        // Settings functions
+        function loadSettings() {
+            document.getElementById('maxLogEntries').value = settings.maxLogEntries;
+            document.getElementById('maxDataPoints').value = settings.maxDataPoints;
+            document.getElementById('maxTimePoints').value = settings.maxTimePoints;
+            document.getElementById('sampleCount').value = settings.sampleCount;
+            document.getElementById('pressureMin').value = settings.pressureMin;
+            document.getElementById('pressureMax').value = settings.pressureMax;
+            document.getElementById('volumeMin').value = settings.volumeMin;
+            document.getElementById('volumeMax').value = settings.volumeMax;
+        }
+        
+        function saveSettings() {
+            settings.maxLogEntries = parseInt(document.getElementById('maxLogEntries').value) || MAX_LOG_ENTRIES;
+            settings.maxDataPoints = parseInt(document.getElementById('maxDataPoints').value) || MAX_DATA_POINTS;
+            settings.maxTimePoints = parseInt(document.getElementById('maxTimePoints').value) || MAX_TIME_POINTS;
+            settings.sampleCount = parseInt(document.getElementById('sampleCount').value) || 1;
+            settings.pressureMin = parseFloat(document.getElementById('pressureMin').value) || 0;
+            settings.pressureMax = parseFloat(document.getElementById('pressureMax').value) || 20000;
+            settings.volumeMin = parseFloat(document.getElementById('volumeMin').value) || 46000;
+            settings.volumeMax = parseFloat(document.getElementById('volumeMax').value) || 47000;
+            
+            localStorage.setItem('stirlingEngineSettings', JSON.stringify(settings));
+            logMessage('SYSTEM', 'Settings saved');
+        }
+        
+        function resetDefaultSettings() {
+            settings = {
+                maxLogEntries: MAX_LOG_ENTRIES,
+                maxDataPoints: MAX_DATA_POINTS,
+                maxTimePoints: MAX_TIME_POINTS,
+                sampleRate: SAMPLE_RATE,
+                pressureMin: 0,
+                pressureMax: 20000,
+                volumeMin: 46000,
+                volumeMax: 47000,
+                sampleCount: 1
+            };
+            loadSettings();
+            logMessage('SYSTEM', 'Settings reset to defaults');
+        }
+        
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved settings
+            const savedSettings = localStorage.getItem('stirlingEngineSettings');
+            if (savedSettings) {
+                settings = { ...settings, ...JSON.parse(savedSettings) };
+            }
+            
+            // Initialize UI
+            loadSettings();
+            
+            // Initialize charts
+            initializeCharts();
+            
+            // Initialize serial connection
+            initializeConnection();
+            
+            // Update connection status
+            updateConnectionStatus(false);
+            
+            logMessage('SYSTEM', 'Stirling Engine Monitor initialized');
+            logMessage('SYSTEM', 'Ready for data acquisition');
+        });
+        
+        // Handle page unload
+        window.addEventListener('beforeunload', async function() {
+            if (reader) {
+                await reader.cancel();
+            }
+            if (writer) {
+                await writer.close();
+            }
+            if (serialPort) {
+                await serialPort.close();
+            }
+        });
+        
+        // Handle window resize for charts
+        window.addEventListener('resize', function() {
+            setTimeout(() => {
+                if (pvChart) pvChart.resize();
+                if (pressureChart) pressureChart.resize();
+                if (volumeChart) volumeChart.resize();
+            }, 100);
+        });
+    </script>
+</body>
+</html>

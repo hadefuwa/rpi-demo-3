@@ -5,8 +5,10 @@
 
 cd ~/rpi-demo-3
 git add .
-git commit -m "electrical machines fix 3"
+git commit -m "???"
 git push origin main
+
+
 
 git pull origin main
 git add .

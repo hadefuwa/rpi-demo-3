@@ -8,7 +8,8 @@
       "Bash(ping:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(winget:*)"
     ],
     "additionalDirectories": [
       "C:\\etc\\systemd"
