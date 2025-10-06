@@ -109,7 +109,10 @@
       <!-- Card 3: Camera -->
       <section class="card cam-card" aria-label="Camera">
         <div class="cam-wrap">
-          <img id="cam" alt="Camera preview" />
+          <video id="cam" autoplay muted loop playsinline>
+            <source src="../assets/3d.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
           <div class="cam-status" id="cam-status">Camera offline</div>
         </div>
         <button class="btn btn-small" id="cam-fullscreen">Full screen</button>
@@ -702,9 +705,9 @@
       z-index: 1000;
       border: 2px solid rgba(255, 255, 255, 0.3);
     }
-    #screen-printer .cam-wrap img { 
-      width:100%; 
-      height:100%; 
+    #screen-printer .cam-wrap video {
+      width:100%;
+      height:100%;
       object-fit:contain; /* Changed from cover to contain to preserve aspect ratio */
       image-rendering: auto; /* Ensure smooth rendering */
     }
@@ -1281,17 +1284,25 @@
       netDot.classList.toggle('online', online);
     }
   
-    function setCamera(url, isOnline) {
+    function setCamera(url, isOnline, speedMultiplier = 100) {
       camStatus.textContent = isOnline ? 'Live' : 'Camera offline';
       if (isOnline && url) {
-        // Only set once to avoid restarting the GIF on each state update
+        // Only set once to avoid restarting the video on each state update
         if (currentCamUrl !== url) {
           cam.src = url;
           currentCamUrl = url;
         }
         // Set attributes once (idempotent)
-        if (!cam.hasAttribute('loading')) cam.setAttribute('loading', 'eager');
-        if (!cam.hasAttribute('decoding')) cam.setAttribute('decoding', 'sync');
+        if (!cam.hasAttribute('autoplay')) cam.setAttribute('autoplay', '');
+        if (!cam.hasAttribute('loop')) cam.setAttribute('loop', '');
+        if (!cam.hasAttribute('muted')) cam.setAttribute('muted', '');
+        if (!cam.hasAttribute('playsinline')) cam.setAttribute('playsinline', '');
+
+        // Control playback speed based on printer speed
+        const playbackRate = speedMultiplier / 100;
+        if (cam.playbackRate !== playbackRate) {
+          cam.playbackRate = Math.max(0.25, Math.min(4, playbackRate)); // Clamp between 0.25x and 4x
+        }
       } else {
         if (currentCamUrl) {
           cam.removeAttribute('src');
@@ -1355,7 +1366,7 @@
           applyAMS(s.materials.slots);
           setNetworkDot(window.navigator.onLine);
           // Camera demo: if on LAN, set your stream URL here; otherwise offline
-          setCamera('../assets/3d.gif', true);
+          setCamera('../assets/3d.mp4', true, s.speed.multiplier);
 
 
         } else if (e.data && e.data.banner) {
