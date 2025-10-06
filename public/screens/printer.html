@@ -1422,9 +1422,25 @@
       const t = e.target;
       if (!(t instanceof Element)) return;
       const action = t.getAttribute('data-action');
-      if (action === 'pause') worker && worker.postMessage({ type: 'cmd', data: 'pause' });
-      else if (action === 'resume') worker && worker.postMessage({ type: 'cmd', data: 'resume' });
-      else if (action === 'cancel') worker && worker.postMessage({ type: 'cmd', data: 'cancel' });
+      if (action === 'pause') {
+        worker && worker.postMessage({ type: 'cmd', data: 'pause' });
+        // Pause the video
+        if (cam && cam.pause) {
+          cam.pause();
+          console.log('Video paused');
+        }
+      }
+      else if (action === 'resume') {
+        worker && worker.postMessage({ type: 'cmd', data: 'resume' });
+        // Resume the video
+        if (cam && cam.play) {
+          cam.play().catch(e => console.log('Video resume failed:', e));
+          console.log('Video resumed');
+        }
+      }
+      else if (action === 'cancel') {
+        worker && worker.postMessage({ type: 'cmd', data: 'cancel' });
+      }
       // Demo injections
       const demo = t.getAttribute('data-demo');
       if (demo === 'filament-out') worker && worker.postMessage({ type: 'cmd', data: 'filament-out' });
