@@ -1,0 +1,5 @@
+To set up passwordless SSH, run this command once (it will ask for password one time):
+
+echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDbIjjOuWPD+BLBfAv45FFwq94hrHjAdB0TXjYmoxw+yR3g2yGfo8HKR+LVGEfxFK+rK/ViafJzGmboSp30/vvaZQ1nfeoQh0tGKnd3iFbookfm08BhQCM2UEV3u1VLyDAf3HYDXSVkdbkm0Fk8lNRryq2PCHTQlkJ9DmiezEupIDy1BNlX5fblENz7VkbajDitSLpGXiTSRVnALZg5RKdhOtR3/L1g/S7OsuuAuQ6rXx9QpjljjKBR9JmUv43yW7x2kTjf/b8U83zUkeeF+2I8UnoP9hzsv3YoLencJ4VBtGadWO6rua4LSA7y4GNP7XgybA4AqvF+mAYgpIaROXZH" | ssh pi@rpi "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys"
+
+After running this once, all future SSH connections will be passwordless.
