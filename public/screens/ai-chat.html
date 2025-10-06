@@ -9,6 +9,7 @@
           <span class="status-dot"></span>
           <span class="status-text">Connecting...</span>
         </div>
+        <button class="example-questions-btn" id="exampleQuestionsBtn" onclick="toggleExampleQuestions()">EXAMPLE QUESTIONS</button>
         <button class="home-btn" onclick="goHome()">HOME</button>
       </div>
     </div>
@@ -140,6 +141,26 @@
             <button class="key" data-key=" " style="flex: 1;">Space</button>
           </div>
         </div>
+
+        <!-- Example Questions Layout (hidden by default) -->
+        <div class="keyboard-layout example-questions-layout" id="exampleQuestionsLayout" style="display: none;">
+          <!-- Row 1: Engineering Questions -->
+          <div class="keyboard-row">
+            <button class="key question-key" data-question="Do I really care about lift on an F1 car?">Wind Tunnel: F1 Lift</button>
+            <button class="key question-key" data-question="What's the difference between torque and power in engines?">Torque vs Power</button>
+          </div>
+
+          <!-- Row 2: More Engineering Questions -->
+          <div class="keyboard-row">
+            <button class="key question-key" data-question="How does regenerative braking work in electric vehicles?">Regenerative Braking</button>
+            <button class="key question-key" data-question="Why do stirling engines have better efficiency than combustion engines?">Stirling Efficiency</button>
+          </div>
+
+          <!-- Row 3: Back to Keyboard -->
+          <div class="keyboard-row">
+            <button class="key toggle-key" data-action="back-to-keyboard" id="backToKeyboardBtn">Back to Keyboard</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -195,7 +216,8 @@
     color: #fff;
   }
 
-  #screen-ai-chat .home-btn {
+  #screen-ai-chat .home-btn,
+  #screen-ai-chat .example-questions-btn {
     background: rgba(255,255,255,0.1);
     backdrop-filter: blur(20px);
     padding: 8px 16px;
@@ -210,13 +232,30 @@
     letter-spacing: 0.5px;
   }
 
-  #screen-ai-chat .home-btn:hover {
+  #screen-ai-chat .example-questions-btn {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+
+  #screen-ai-chat .example-questions-btn.active {
+    background: rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.5);
+  }
+
+  #screen-ai-chat .home-btn:hover,
+  #screen-ai-chat .example-questions-btn:hover {
     background: rgba(255,255,255,0.2);
     transform: scale(1.05);
     border-color: rgba(255,255,255,0.4);
   }
 
-  #screen-ai-chat .home-btn:active {
+  #screen-ai-chat .example-questions-btn:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.4);
+  }
+
+  #screen-ai-chat .home-btn:active,
+  #screen-ai-chat .example-questions-btn:active {
     transform: scale(0.95);
   }
 
@@ -462,6 +501,31 @@
     color: #fff;
   }
 
+  /* Question Keys */
+  #screen-ai-chat .key.question-key {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.3);
+    height: 60px;
+    font-size: 12px;
+    text-align: center;
+    line-height: 1.2;
+    padding: 8px;
+    word-wrap: break-word;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #screen-ai-chat .key.question-key:hover {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.5);
+  }
+
+  #screen-ai-chat .key.question-key:active {
+    background: rgba(34, 197, 94, 0.3);
+    transform: scale(0.95);
+  }
+
   /* Responsive adjustments */
   @media (max-width: 480px) {
     #screen-ai-chat .chat-container {
@@ -683,11 +747,13 @@
     let isTyping = false;
     let chatHistory = [];
     let isNumbersMode = false;
+    let isExampleQuestionsMode = false;
     let currentRequest = null; // Track current request for cancellation
     
     // DOM elements
     let messageInput, sendButton, messages, statusIndicator, statusDot, statusText;
     let keyboard, keyboardContainer, toggleKey, toggleKeyNumbers, numbersLayout, lettersLayout;
+    let exampleQuestionsBtn, exampleQuestionsLayout, backToKeyboardBtn;
     
     function initApp() {
       setupDOM();
@@ -715,6 +781,9 @@
       toggleKeyNumbers = document.querySelector('#toggleKeyNumbers');
       numbersLayout = document.querySelector('#numbersLayout');
       lettersLayout = document.querySelector('#lettersLayout');
+      exampleQuestionsBtn = document.querySelector('#exampleQuestionsBtn');
+      exampleQuestionsLayout = document.querySelector('#exampleQuestionsLayout');
+      backToKeyboardBtn = document.querySelector('#backToKeyboardBtn');
     }
     
     function setupUI() {
@@ -754,23 +823,41 @@
     function handleKeyPress(e) {
       if (e.target.classList.contains('key')) {
         const action = e.target.dataset.action;
-        
+        const question = e.target.dataset.question;
+
         if (action === 'toggle') {
           toggleKeyboardMode();
           return;
         }
-        
+
+        if (action === 'back-to-keyboard') {
+          toggleExampleQuestions();
+          return;
+        }
+
+        if (question) {
+          // Handle example question
+          messageInput.value = question;
+          updateSendButtonState();
+          // Visual feedback
+          e.target.style.background = '#22c55e';
+          setTimeout(() => {
+            e.target.style.background = '';
+          }, 200);
+          return;
+        }
+
         const key = e.target.dataset.key;
-        
+
         if (key === 'backspace') {
           messageInput.value = messageInput.value.slice(0, -1);
         } else {
           messageInput.value += key;
         }
-        
+
         // Update send button state
         updateSendButtonState();
-        
+
         // Visual feedback
         e.target.style.background = '#3a6df0';
         setTimeout(() => {
@@ -780,8 +867,10 @@
     }
     
     function toggleKeyboardMode() {
+      if (isExampleQuestionsMode) return; // Don't toggle when in example questions mode
+
       isNumbersMode = !isNumbersMode;
-      
+
       if (isNumbersMode) {
         // Switch to numbers layout
         numbersLayout.style.display = 'flex';
@@ -798,6 +887,29 @@
         toggleKey.classList.remove('active');
         toggleKeyNumbers.textContent = '123';
         toggleKeyNumbers.classList.remove('active');
+      }
+    }
+
+    function toggleExampleQuestions() {
+      isExampleQuestionsMode = !isExampleQuestionsMode;
+
+      if (isExampleQuestionsMode) {
+        // Switch to example questions layout
+        lettersLayout.style.display = 'none';
+        numbersLayout.style.display = 'none';
+        exampleQuestionsLayout.style.display = 'flex';
+        exampleQuestionsBtn.classList.add('active');
+        keyboardContainer.style.display = 'flex'; // Show keyboard if hidden
+      } else {
+        // Switch back to previous layout
+        exampleQuestionsLayout.style.display = 'none';
+        exampleQuestionsBtn.classList.remove('active');
+
+        if (isNumbersMode) {
+          numbersLayout.style.display = 'flex';
+        } else {
+          lettersLayout.style.display = 'flex';
+        }
       }
     }
     
@@ -1087,8 +1199,9 @@
       }
     }
     
-    // Make goHome globally accessible for inline onclick
+    // Make functions globally accessible for inline onclick
     window.goHome = goHome;
+    window.toggleExampleQuestions = toggleExampleQuestions;
     
     // Lifecycle management
     const cleanupFns = [];
