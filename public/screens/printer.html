@@ -110,7 +110,6 @@
       <section class="card cam-card" aria-label="Camera">
         <div class="cam-wrap">
           <video id="cam" autoplay muted loop playsinline>
-            <source src="../assets/3d.mp4" type="video/mp4">
             Your browser does not support the video tag.
           </video>
           <div class="cam-status" id="cam-status">Camera offline</div>
@@ -1287,21 +1286,37 @@
     function setCamera(url, isOnline, speedMultiplier = 100) {
       camStatus.textContent = isOnline ? 'Live' : 'Camera offline';
       if (isOnline && url) {
-        // Only set once to avoid restarting the video on each state update
+        // Always set the source to ensure video loads properly
         if (currentCamUrl !== url) {
           cam.src = url;
           currentCamUrl = url;
+          console.log('Video source set to:', url);
+
+          // Force load the video
+          cam.load();
+
+          // Try to play the video
+          cam.play().catch(e => console.log('Video autoplay prevented:', e));
         }
-        // Set attributes once (idempotent)
-        if (!cam.hasAttribute('autoplay')) cam.setAttribute('autoplay', '');
-        if (!cam.hasAttribute('loop')) cam.setAttribute('loop', '');
-        if (!cam.hasAttribute('muted')) cam.setAttribute('muted', '');
-        if (!cam.hasAttribute('playsinline')) cam.setAttribute('playsinline', '');
 
         // Control playback speed based on printer speed
         const playbackRate = speedMultiplier / 100;
-        if (cam.playbackRate !== playbackRate) {
-          cam.playbackRate = Math.max(0.25, Math.min(4, playbackRate)); // Clamp between 0.25x and 4x
+        const clampedRate = Math.max(0.25, Math.min(4, playbackRate));
+
+        console.log('Speed multiplier:', speedMultiplier, 'Playback rate:', clampedRate);
+
+        // Wait for video to be ready before setting playback rate
+        if (cam.readyState >= 1) {
+          if (Math.abs(cam.playbackRate - clampedRate) > 0.01) {
+            cam.playbackRate = clampedRate;
+            console.log('Video playback rate set to:', cam.playbackRate);
+          }
+        } else {
+          // If video isn't ready, set rate when it loads
+          cam.addEventListener('loadedmetadata', function() {
+            cam.playbackRate = clampedRate;
+            console.log('Video playback rate set after load to:', cam.playbackRate);
+          }, { once: true });
         }
       } else {
         if (currentCamUrl) {
@@ -1590,6 +1605,17 @@
       cleanup
     };
   
+    // Video debugging
+    const videoEl = root.querySelector('#cam');
+    if (videoEl) {
+      videoEl.addEventListener('loadstart', () => console.log('Video: Load started'));
+      videoEl.addEventListener('loadeddata', () => console.log('Video: Data loaded'));
+      videoEl.addEventListener('canplay', () => console.log('Video: Can play'));
+      videoEl.addEventListener('playing', () => console.log('Video: Playing'));
+      videoEl.addEventListener('error', (e) => console.error('Video error:', e));
+      videoEl.addEventListener('ratechange', () => console.log('Video: Rate changed to', videoEl.playbackRate));
+    }
+
     // Auto-init: start UI and immediately begin job simulation
     // If your framework calls activate/deactivate, remove this auto-activation.
     // For standalone testing:
