@@ -192,7 +192,10 @@
     
     <!-- Enhanced Emoji Font Support for Raspberry Pi -->
     <style>
-      /* Multiple emoji font sources for better compatibility */
+      /* External fonts disabled for offline support */
+      /* When internet is available, browsers will use their built-in emoji fonts */
+      
+      /* 
       @font-face {
         font-family: 'NotoColorEmoji';
         src: url('https://fonts.gstatic.com/s/notocoloremoji/v25/Yq6P-KqIXTD0t4D9z1ESnKM3-HpFabsE4tq3luCC7p-aXxcn.woff2') format('woff2');
@@ -204,10 +207,11 @@
         src: url('https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/fonts/TwemojiMozilla.ttf') format('truetype');
         font-display: swap;
       }
+      */
       
-      /* Comprehensive emoji font stack for Raspberry Pi */
+      /* Emoji font stack using system fonts only (works offline) */
       .emoji-text {
-        font-family: 'NotoColorEmoji', 'TwemojiMozilla', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', 'EmojiOne Mozilla', 'Segoe UI Symbol', sans-serif;
+        font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', 'EmojiOne Mozilla', 'Segoe UI Symbol', sans-serif;
         font-variant-emoji: emoji;
         text-rendering: optimizeSpeed;
         -webkit-font-feature-settings: "liga" 1, "dlig" 1;
@@ -267,9 +271,8 @@
     <meta name="msapplication-TileColor" content="#000000" />
     <meta name="msapplication-config" content="none" />
     
-    <!-- Preload emoji fonts for better performance -->
-    <link rel="preload" href="https://fonts.gstatic.com/s/notocoloremoji/v25/Yq6P-KqIXTD0t4D9z1ESnKM3-HpFabsE4tq3luCC7p-aXxcn.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/fonts/TwemojiMozilla.ttf" as="font" type="font/ttf" crossorigin>
+    <!-- Preload emoji fonts disabled for offline support -->
+    <!-- The app now works without internet connection -->
     
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="./assets/Matrix.png" />

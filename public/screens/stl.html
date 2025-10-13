@@ -331,13 +331,13 @@
       });
     }
     
-    // Load dependencies with simple fallback
+    // Load dependencies from local files (offline support)
     async function loadDependencies() {
       try {
-        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
-        await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js');
-        await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js');
-        console.log('Three.js loaded successfully');
+        await loadScript('../js/three/three.standalone.js');
+        await loadScript('../js/three/STLLoader.js');
+        await loadScript('../js/three/OrbitControls.js');
+        console.log('Three.js loaded successfully from local files');
         initApp();
       } catch (error) {
         console.error('Failed to load Three.js:', error);
