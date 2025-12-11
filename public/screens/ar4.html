@@ -95,10 +95,44 @@
         </div>
     </div>
 
-    <script src="../js/three/three.standalone.js"></script>
     <script>
-        // Scene setup
-        const scene = new THREE.Scene();
+        // Load THREE.js - handle Node.js exports syntax
+        (function() {
+            // Define exports in global scope BEFORE loading three.standalone.js
+            window.exports = {};
+            
+            // Load three.standalone.js - it will populate window.exports
+            const threeScript = document.createElement('script');
+            threeScript.src = '../js/three/three.standalone.js';
+            
+            threeScript.onload = function() {
+                // Wait a moment for exports to be populated
+                setTimeout(() => {
+                    // Convert exports to window.THREE
+                    if (window.exports && Object.keys(window.exports).length > 0) {
+                        window.THREE = window.exports;
+                        // Clean up
+                        delete window.exports;
+                        console.log('Three.js loaded and attached to window.THREE');
+                        // Initialize the scene after THREE is loaded
+                        initScene();
+                    } else {
+                        console.error('THREE.js exports not populated');
+                    }
+                }, 200);
+            };
+            
+            threeScript.onerror = function() {
+                console.error('Failed to load three.standalone.js');
+            };
+            
+            document.head.appendChild(threeScript);
+        })();
+        
+        // Scene setup function - called after THREE.js loads
+        function initScene() {
+            // Scene setup
+            const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas') });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -424,7 +458,8 @@
             renderer.render(scene, camera);
         }
 
-        animate();
+            animate();
+        } // End of initScene function
     </script>
 </body>
 </html>
