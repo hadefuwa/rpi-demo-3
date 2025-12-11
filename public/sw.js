@@ -113,6 +113,33 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
+  // Handle favicon.ico requests - serve Matrix.png instead
+  if (url.pathname === '/favicon.ico') {
+    event.respondWith(
+      caches.match('/assets/Matrix.png')
+        .then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          return fetch('/assets/Matrix.png')
+            .then((response) => {
+              if (response.ok) {
+                const responseToCache = response.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                  cache.put('/assets/Matrix.png', responseToCache);
+                });
+              }
+              return response;
+            })
+            .catch(() => {
+              // Return a simple 1x1 transparent PNG if all else fails
+              return new Response('', { status: 404 });
+            });
+        })
+    );
+    return;
+  }
+  
   // CACHE-FIRST strategy for all local resources (critical for offline support)
   event.respondWith(
     caches.match(event.request)
