@@ -3005,16 +3005,28 @@
       })();
     </script>
     
-    <!-- Service Worker Registration -->
+    <!-- Service Worker Registration - Works offline -->
     <script>
-      // Only register service worker in production
-      if ('serviceWorker' in navigator && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      // Register service worker in all environments for offline support
+      if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
           try {
-            const registration = await navigator.serviceWorker.register('/sw.js');
+            // Register service worker - this works even offline if already installed
+            const registration = await navigator.serviceWorker.register('/sw.js', {
+              scope: '/'
+            });
             console.log('✅ Service Worker registered:', registration);
             
-            // Handle updates
+            // Wait for service worker to be ready
+            if (registration.installing) {
+              console.log('📦 Service Worker installing...');
+            } else if (registration.waiting) {
+              console.log('⏳ Service Worker waiting...');
+            } else if (registration.active) {
+              console.log('✅ Service Worker active');
+            }
+            
+            // Handle updates (only reload if online and update available)
             registration.addEventListener('updatefound', () => {
               const newWorker = registration.installing;
               console.log('🔄 Service Worker update found');
@@ -3022,8 +3034,10 @@
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   console.log('🆕 New service worker available');
-                  // Auto-reload for updates
-                  window.location.reload();
+                  // Only auto-reload if online (don't interrupt offline usage)
+                  if (navigator.onLine) {
+                    window.location.reload();
+                  }
                 }
               });
             });
@@ -3031,16 +3045,20 @@
             // Handle controller change
             navigator.serviceWorker.addEventListener('controllerchange', () => {
               console.log('🎮 Service Worker controller changed');
-              // Reload page to get fresh content
-              window.location.reload();
+              // Only reload if online
+              if (navigator.onLine) {
+                window.location.reload();
+              }
             });
             
           } catch (error) {
             console.error('❌ Service Worker registration failed:', error);
+            // Don't block app loading if service worker fails
+            console.log('⚠️ App will continue without offline support');
           }
         });
       } else {
-        console.log('🚫 Service Worker disabled in development mode');
+        console.log('⚠️ Service Worker not supported in this browser');
       }
     </script>
   </body>
