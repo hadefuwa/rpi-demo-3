@@ -356,28 +356,104 @@
       });
     }
     
-    // Simple script loading
-    function loadScript(src) {
+    // Load THREE.js - handle Node.js exports syntax by defining exports globally
+    function loadThreeJS() {
       return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = src;
-        script.onload = resolve;
-        script.onerror = () => reject(new Error(`Failed to load ${src}`));
-        document.head.appendChild(script);
+        // Define exports in global scope BEFORE loading three.standalone.js
+        // This allows three.standalone.js to populate it
+        window.exports = {};
+        
+        // Load three.standalone.js - it will populate window.exports
+        const threeScript = document.createElement('script');
+        threeScript.src = '../js/three/three.standalone.js';
+        
+        threeScript.onload = function() {
+          // Wait a moment for exports to be populated
+          setTimeout(() => {
+            // Convert exports to window.THREE
+            if (window.exports && Object.keys(window.exports).length > 0) {
+              window.THREE = window.exports;
+              // Clean up
+              delete window.exports;
+              console.log('Three.js loaded and attached to window.THREE');
+              resolve();
+            } else {
+              reject(new Error('THREE.js exports not populated'));
+            }
+          }, 200);
+        };
+        
+        threeScript.onerror = () => reject(new Error('Failed to load three.standalone.js'));
+        document.head.appendChild(threeScript);
       });
     }
     
     // Load dependencies from local files (offline support)
     async function loadDependencies() {
       try {
-        await loadScript('../js/three/three.standalone.js');
-        await loadScript('../js/three/GLTFLoader.js');
-        await loadScript('../js/three/OrbitControls.js');
+        // Load THREE.js first with exports wrapper
+        await loadThreeJS();
+        console.log('Three.js core loaded');
+        
+        // Verify THREE is available
+        if (typeof THREE === 'undefined' || !window.THREE) {
+          throw new Error('THREE is not defined after loading three.standalone.js');
+        }
+        
+        // Create a module loader script that imports the ES6 modules
+        // and attaches them to the global THREE object
+        const moduleLoaderScript = document.createElement('script');
+        moduleLoaderScript.type = 'module';
+        moduleLoaderScript.textContent = `
+          // Import the modules
+          import { GLTFLoader } from '../js/three/GLTFLoader.js';
+          import { OrbitControls } from '../js/three/OrbitControls.js';
+          
+          // Attach to global THREE object
+          window.THREE.GLTFLoader = GLTFLoader;
+          window.THREE.OrbitControls = OrbitControls;
+          
+          // Dispatch event to signal modules are loaded
+          window.dispatchEvent(new Event('threeModulesLoaded'));
+        `;
+        
+        // Wait for modules to load
+        await new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error('Modules failed to load within timeout'));
+          }, 10000);
+          
+          window.addEventListener('threeModulesLoaded', () => {
+            clearTimeout(timeout);
+            resolve();
+          }, { once: true });
+          
+          moduleLoaderScript.onerror = () => {
+            clearTimeout(timeout);
+            reject(new Error('Failed to load ES6 modules'));
+          };
+          
+          document.head.appendChild(moduleLoaderScript);
+        });
+        
+        console.log('GLTFLoader and OrbitControls loaded');
+        
+        // Verify classes are available
+        if (!window.THREE.GLTFLoader) {
+          throw new Error('GLTFLoader not attached to THREE');
+        }
+        if (!window.THREE.OrbitControls) {
+          throw new Error('OrbitControls not attached to THREE');
+        }
+        
         console.log('Three.js loaded successfully from local files');
         initApp();
       } catch (error) {
         console.error('Failed to load Three.js:', error);
-        document.getElementById('loadingIndicator').textContent = 'Failed to load 3D libraries. Please refresh.';
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        if (loadingIndicator) {
+          loadingIndicator.textContent = 'Failed to load 3D libraries: ' + error.message;
+        }
       }
     }
     
