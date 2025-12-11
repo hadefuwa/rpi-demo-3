@@ -696,15 +696,15 @@
            
            // Scale the model to fit in view (with validation to prevent division by zero)
            const maxDim = Math.max(size.x, size.y, size.z);
+           let scale = 1; // Default scale
            if (maxDim > 0) {
-             const scale = 2 / maxDim;
+             scale = 2 / maxDim;
              currentModel.scale.setScalar(scale);
+             console.log(`Model scaled by: ${scale}`);
            } else {
              console.warn('Model has zero dimensions, using default scale');
-             currentModel.scale.setScalar(1);
+             currentModel.scale.setScalar(scale);
            }
-           
-           console.log(`Model scaled by: ${scale}`);
            
            // GLB models often come with proper orientation, so we don't need to rotate
            // But if needed, you can add rotation here
